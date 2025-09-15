@@ -1,0 +1,28 @@
+{
+  "apps": [
+    {
+      "name": "Chat Uno",
+      "url": "./apps/chat/index.html",
+      "allow": "autoplay; clipboard-read; clipboard-write",
+      "sandbox": "allow-scripts allow-forms"
+    },
+    {
+      "name": "Editor Dual",
+      "url": "./apps/editor/index.html",
+      "allow": "autoplay",
+      "sandbox": "allow-scripts"
+    },
+    {
+      "name": "Dual",
+      "url": "./apps/dual/index.html",
+      "allow": "autoplay",
+      "sandbox": "allow-scripts"
+    },
+    {
+      "name": "Player Trinity",
+      "url": "./apps/player/index.html",
+      "allow": "autoplay; microphone",
+      "sandbox": "allow-scripts allow-pointer-lock"
+    }
+  ]
+}
