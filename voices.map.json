@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "archetypes": {
+    "Nova": {
+      "files": [
+        "voices/Nova/nova_pad.wav",
+        "voices/Nova/nova_accent.wav"
+      ]
+    },
+    "Kaion": {
+      "files": [
+        "voices/Kaion/kaion_pad.wav",
+        "voices/Kaion/kaion_accent.wav"
+      ]
+    },
+    "Elysha": {
+      "files": [
+        "voices/Elysha/elysha_pad.wav",
+        "voices/Elysha/elysha_accent.wav"
+      ]
+    },
+    "Genus": {
+      "files": [
+        "voices/Genus/genus_pad.wav",
+        "voices/Genus/genus_accent.wav"
+      ]
+    }
+  }
+}
