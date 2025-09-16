@@ -3,15 +3,9 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Dual — UNIFIED v1.0 (UNO)</title>
+<title>Dual Mobile Mockup v0.3 — UNO → DUAL → TRINITY</title>
 <meta name="theme-color" content="#0b0f17" />
 <link rel="icon" href="assets/icons/app.svg">
-  <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0b0f17">
-<link rel="apple-touch-icon" href="assets/icons/icon-192.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<script>window.addEventListener('load',()=>navigator.serviceWorker?.register('./sw.js'))</script>
 <style>
   :root{
     --bg:#0b0f17;--panel:#0f1522;--glass:rgba(255,255,255,.06);--line:rgba(255,255,255,.14);
@@ -23,94 +17,86 @@
   body{margin:0;background:radial-gradient(1200px 800px at 20% -10%, rgba(41,211,255,.14), transparent 60%),
        radial-gradient(900px 600px at 110% 20%, rgba(255,90,244,.10), transparent 60%),
        linear-gradient(0deg, #0a0d14, #0b0f17);
-       color:var(--ink);font:500 15px/1.35 system-ui, -apple-system, Segoe UI, Roboto, Inter, sans-serif; max-width:100vw; overflow-x:hidden}
-  .app{position:fixed;inset:0;display:grid;grid-template-rows:auto 1fr auto;min-width:0}
-  header{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px env(safe-area-inset-right) 6px env(safe-area-inset-left);}
-  .logo{width:30px;height:30px;border-radius:50%;background:conic-gradient(from 0deg, var(--accent), var(--accent2), var(--accent));
-        box-shadow:0 0 20px rgba(41,211,255,.4);animation:spin 9s linear infinite}
+       color:var(--ink);font:500 15px/1.35 system-ui, -apple-system, Segoe UI, Roboto, Inter, sans-serif}
+  .app{position:fixed;inset:0;display:grid;grid-template-rows:auto 1fr auto;}
+  header{display:flex;gap:10px;align-items:center;padding:12px env(safe-area-inset-right) 10px env(safe-area-inset-left);}
+  .logo{width:36px;height:36px;border-radius:50%;background:conic-gradient(from 0deg, var(--accent), var(--accent2), var(--accent));
+        box-shadow:0 0 24px rgba(41,211,255,.4);animation:spin 9s linear infinite}
   @keyframes spin{to{transform:rotate(1turn)}}
   .title{font-weight:800;letter-spacing:.4px}
   .sub{color:var(--muted);font-size:12px}
-  .row{display:flex;gap:10px;align-items:center;min-width:0;flex-wrap:wrap}
-  .grow{flex:1 1 auto;min-width:0}
+
+  .row{display:flex;gap:10px;align-items:center}
+  .grow{flex:1}
   .btn{appearance:none;border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--ink);
        padding:10px 12px;border-radius:14px;font-weight:700;letter-spacing:.3px;box-shadow:var(--shadow);
        display:inline-flex;align-items:center;gap:8px}
   .btn:active{transform:translateY(1px);opacity:.9}
   .chip{font-size:12px;border-radius:999px;border:1px solid var(--line);padding:6px 10px;background:rgba(255,255,255,.04);color:var(--muted)}
-  select{appearance:none;background:rgba(255,255,255,.06);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:8px 10px;max-width:52vw}
-  .water{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  select{appearance:none;background:rgba(255,255,255,.06);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+
+  /* Water-cost badge */
+  .water{margin-left:10px;display:flex;gap:8px;align-items:center; flex-wrap:wrap}
   .badge{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:rgba(255,255,255,.04);
-         padding:6px 8px;border-radius:10px;font-size:11px;color:var(--muted);white-space:nowrap}
-  /* Center circle container */
-  .center{position:relative;display:grid;place-items:center;margin:6px}
-  .circle{position:relative;width:min(68vw,520px);aspect-ratio:1/1;border-radius:50%;
-    border:1px solid var(--line);background:radial-gradient(60% 60% at 50% 50%, rgba(41,211,255,.1), rgba(255,255,255,.02));
-    box-shadow:var(--shadow);overflow:hidden}
-  .circle iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:transparent}
-  .hint{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-size:11px;color:var(--muted)}
-  /* Collapsible sections */
-  .toggle-btn{ position:relative; padding-left:36px; }
-  .toggle-btn::before{
-    content:''; position:absolute; left:12px; top:50%; width:10px; height:10px; border-right:2px solid currentColor; border-bottom:2px solid currentColor;
-    transform: translateY(-60%) rotate(45deg); opacity:.9; transition: transform .18s ease;
-  }
-  .toggle-btn[aria-expanded="false"]::before{ transform: translateY(-10%) rotate(-45deg); }
+         padding:6px 8px;border-radius:10px;font-size:11px;color:var(--muted)}
+  .ok{color:var(--ok)}.warn{color:var(--warn)}.err{color:var(--err)}
+
+  /* Canvas stage */
+  .stage{position:relative;overflow:hidden;margin:6px; border:1px solid var(--line); border-radius:24px; 
+         background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.00));
+         box-shadow:var(--shadow)}
+  canvas{position:absolute;inset:0;width:100%;height:100%}
+  .overlay-gestures{position:absolute;inset:0;pointer-events:none;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted)}
+
+  /* Cards / panels */
   .card{background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-        border:1px solid var(--line);border-radius:var(--rad);padding:var(--pad);box-shadow:var(--shadow); margin:8px}
-  .apps .appItem{display:flex;align-items:center;gap:10px;min-width:0}
-  .apps .meta{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:42vw}
-  .sandboxWrap{margin:8px;border:1px solid var(--line);border-radius:16px;overflow:hidden}
-  iframe.sandbox{display:block;width:100%;height:360px;background:#0a0d14;border:0}
-  /* FAB */
-  #btnInfodose{ position:fixed; right:1rem; bottom:1rem; z-index:1000; width:56px; height:56px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-    backdrop-filter: blur(8px); border:1px solid rgba(255,255,255,.18); box-shadow:0 10px 30px rgba(0,0,0,.3); }
-  /* Portrait safety */
-  @media (orientation: portrait){
-    header{ gap:8px; padding:8px }
-    .circle{ width:min(78vw,520px) }
-    iframe.sandbox{ height:320px }
-  }
+        border:1px solid var(--line);border-radius:var(--rad);padding:var(--pad);box-shadow:var(--shadow)}
 
-/* Archetype switcher overlay */
-.switcher{position:absolute; top:10px; left:50%; transform:translateX(-50%); display:flex; gap:6px; align-items:center; background:rgba(11,15,23,.7); border:1px solid var(--line); border-radius:999px; padding:6px 10px; backdrop-filter:blur(8px)}
-.switcher select{appearance:none;background:rgba(255,255,255,.06);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:6px 10px; max-width:60vw}
-.switcher .btn{padding:8px 10px; border-radius:999px}
+  /* Apps list & iframe sandbox */
+  .apps{padding:10px;display:grid;gap:10px}
+  .appItem{display:flex;align-items:center;gap:10px}
+  .appItem .meta{font-size:12px;color:var(--muted)}
+  .sandboxWrap{margin:10px;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+  iframe.sandbox{display:block;width:100%;height:380px;background:#0a0d14;border:0}
 
+  /* Modal */
+  dialog{border:1px solid var(--line);border-radius:16px;background:rgba(11,15,23,.9);color:var(--ink);padding:0;max-width:92vw}
+  dialog::backdrop{background:rgba(0,0,0,.5)}
+  .modalHead{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center}
+  .modalBody{padding:12px 14px}
 
-/* v1.0.2 — DFT auto‑arquetipo */
-:root{ --arch-a:#29d3ff; --arch-b:#ff5af4; }
-.center .dotlogo{
-  position:absolute; top:12px; right:12px; width:18px; height:18px; border-radius:50%;
-  background: conic-gradient(var(--arch-a), var(--arch-b), var(--arch-a));
-  box-shadow: 0 0 18px color-mix(in srgb, var(--arch-a) 60%, transparent);
+  /* Floating buttons */
+  .fab{position:fixed;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:10px}
+  .fab .btn{padding:10px 12px}
+
+  /* Mini toasts */
+  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(72px + env(safe-area-inset-bottom));
+         background:rgba(20,28,44,.9);border:1px solid var(--line);backdrop-filter:blur(10px);padding:8px 12px;border-radius:12px;font-size:12px;color:var(--ink);display:none}
+  .toast.show{display:block}
+
+  /* Responsive stage height */
+  .stage{height:calc(100vh - 280px)}
+  @media (min-height:760px){.stage{height:calc(100vh - 310px)}}
+
+/* === Mobile v0.4 patch === */
+html, body { max-width: 100vw; overflow-x: hidden; }
+.app-item{display:flex;align-items:center;gap:.6rem;min-width:0}
+.app-item .name{min-width:0}
+.app-item .name .title,
+.app-item .name .file,
+.ellip{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-inline-size:18ch}
+#btnInfodose{
+  position:fixed;bottom:1rem;right:1rem;z-index:1000;width:56px;height:56px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;border:1px solid var(--line);
+  background:radial-gradient(120% 120% at 80% 20%, var(--accent2), transparent 60%),
+             radial-gradient(120% 120% at 20% 80%, var(--accent), transparent 55%),
+             rgba(255,255,255,.06);
+  box-shadow:0 10px 30px rgba(0,0,0,.35), 0 0 24px rgba(41,211,255,.35);
+  color:var(--ink);font-weight:800;letter-spacing:.3px
 }
-#fadeCover{
-  position:absolute; inset:0; background:#0b0f17; opacity:0; pointer-events:none; transition: opacity .32s ease;
-}
-#fadeCover.show{ opacity:1; }
-
-
-/* v1.0.3 — DFT Debug + Touch Analyzer */
-#dftPanel{ display:none; margin-top:8px; }
-#dftPanel.show{ display:block; }
-.dft-grid{ display:grid; grid-template-columns: 130px 1fr; gap:6px 10px; align-items:center; }
-.bar{ height:8px; background:rgba(255,255,255,.08); border-radius:6px; overflow:hidden }
-.bar > i{ display:block; height:100%; background:linear-gradient(90deg, var(--arch-a), var(--arch-b)); width:0% }
-.score-row{ display:grid; grid-template-columns: 100px 1fr 48px; gap:6px; align-items:center }
-.score-row .bar{ height:6px }
-#touchPanel{ display:none; margin-top:8px; }
-#touchPanel.show{ display:block; }
-.touch-log{ max-height:160px; overflow:auto; font-family:ui-monospace,monospace; font-size:12px; background:rgba(255,255,255,.04); border:1px solid var(--line); border-radius:8px; padding:6px }
-#touchCanvas{ width:100%; height:140px; border:1px dashed var(--line); border-radius:10px; background:rgba(255,255,255,.03) }
-
-
-/* U10: temporal plot + event badges */
-#dftPlotWrap{ display:none; margin-top:10px }
-#dftPlotWrap.show{ display:block }
-#dftPlot{ width:100%; height:160px; border:1px solid var(--line); border-radius:10px; background:rgba(255,255,255,.03) }
-.eventBadges{ display:flex; gap:6px; align-items:center; flex-wrap:wrap; font-size:12px; color:var(--muted) }
-.eventBadges .eb{ border:1px solid var(--line); border-radius:999px; padding:4px 8px; background:rgba(255,255,255,.04) }
+#btnInfodose:active{transform:translateY(1px)}
+.ifr-wrap{width:90vw;max-height:90vh}
+@media(min-width:768px){ .ifr-wrap{width:66vw} }
 
 </style>
 </head>
@@ -119,737 +105,248 @@
   <header>
     <div class="logo"></div>
     <div>
-      <div class="title">Dual UNIFIED <span class="chip">v1.0</span></div>
-      <div class="sub">UNO · 1 botão · retrato garantido · centro vivo</div>
+      <div class="title">Dual Mobile Mockup <span class="chip">v0.3</span></div>
+      <div class="sub">Cheio de Nada · Local‑first · Ritual 3‑6‑9</div>
     </div>
     <div class="grow"></div>
-    <div class="water">
+    <div class="row">
+      <img src="assets/icons/voice.svg" alt="" width="18" height="18" />
+      <select id="voiceSelect" title="Voz/Arquétipo">
+        <option>Nova</option>
+        <option>Kaion</option>
+        <option>Elysha</option>
+        <option>Genus</option>
+        <option>Custom (packs)</option>
+      </select>
+    </div>
+    <div class="water" title="Custo d'água (CPU, MEM, LAT, FPS, LTs)">
+      <span class="badge">CPU <b id="cpu">~</b></span>
+      <span class="badge">MEM <b id="mem">~</b></span>
+      <span class="badge">LAT <b id="lat">~</b> ms</span>
       <span class="badge">FPS <b id="fps">~</b></span>
-      <span class="badge">LAT <b id="lat">~</b>ms</span>
       <span class="badge">LT <b id="lt">0</b></span>
       <span class="badge">CLS <b id="cls">0.00</b></span>
-      <span class="badge" id="compatBadge">ZIP <b id="compatVal">?</b></span>
     </div>
     <button class="btn" id="btnPlay">▶︎ Áudio</button>
   </header>
 
   <main>
-    <!-- Círculo central pronto p/ arquétipos -->
-    <section class="center">
-      <div class="circle" id="coreCircle">
-        <div id="fadeCover"></div>
-        <div class="dotlogo" title="arquétypo ativo"></div>
-
-      <div class="switcher" id="archSwitcher">
-        <button class="btn" id="prevArch" title="Anterior">◀</button>
-        <select id="archSelect" title="Escolher arquétipo"></select>
-        <button class="btn" id="nextArch" title="Próximo">▶</button>
-      </div>
-
-        <iframe id="coreFrame" title="Archetype Core" src="./archetypes/center.html" referrerpolicy="no-referrer" sandbox="allow-scripts"></iframe>
-        
-      </div>
+    <section class="stage" id="stage">
+      <canvas id="layerBack"></canvas>
+      <canvas id="layerMid"></canvas>
+      <canvas id="layerFore"></canvas>
+      <div class="overlay-gestures">double-tap = accent • long-press = 3→6→9 • 2 dedos/2s = Console</div>
     </section>
 
-    <!-- Mixer (retrátil) -->
-    <!-- Apps (retrátil) -->
+    <!-- APPS JSON + Sandbox -->
     <section class="apps card" id="appsPane">
-      <div class="row" id="appsBar">
-        <button class="btn toggle-btn" id="toggleApps" aria-expanded="false">Apps</button>
+      <div class="row">
+        <strong>Apps (Cheio de Nada)</strong>
         <div class="grow"></div>
         <button class="btn" id="btnLoadApps">Carregar apps.json</button>
-        <input type="file" id="btnImportZip" accept="application/zip" style="display:none"/>
-        <button class="btn" id="btnImportZipOpen">Importar ZIP</button>
-        <button class="btn" id="btnExport">Exportar ZIP</button>
+        <button class="btn" id="btnOpenSandbox">Abrir Sandbox</button>
       </div>
       <div id="appsList"></div>
       <div class="sandboxWrap" id="sandboxWrap" style="display:none">
-        <iframe class="sandbox" id="sandbox"></iframe>
+        <iframe class="sandbox" id="sandbox"
+          sandbox="allow-scripts allow-forms allow-popups allow-pointer-lock allow-downloads"
+          referrerpolicy="no-referrer"
+          allow="autoplay; clipboard-read; clipboard-write; fullscreen; gamepad; geolocation; microphone; camera"
+        ></iframe>
       </div>
     </section>
 
-    <!-- Console + Compat panel -->
+    <section class="card" id="packsPane" style="margin:10px">
+      <div class="row">
+        <strong>Packs (IndexedDB)</strong>
+        <div class="grow"></div>
+        <input type="file" id="fileImport" accept="application/json,audio/*" multiple />
+        <button class="btn" id="btnImport">Importar</button>
+        <button class="btn" id="btnExport">Exportar JSON</button>
+        <button class="btn" id="btnClear">Limpar</button>
+      </div>
+      <div id="packsList" style="margin-top:8px"></div>
+    </section>
+
     <div class="console card" id="console" style="display:none"></div>
-    
-<div id="dftPanel" class="card">
-  <div class="row"><strong>DFT Debug</strong><div class="grow"></div><button class="btn" id="btnScanDFT">Reescan DFT</button></div>
-  <div class="dft-grid" style="margin-top:8px">
-    <div>FPS</div><div class="bar"><i id="sig_fps"></i></div>
-    <div>LAT</div><div class="bar"><i id="sig_lat"></i></div>
-    <div>LT</div><div class="bar"><i id="sig_lt"></i></div>
-    <div>CLS</div><div class="bar"><i id="sig_cls"></i></div>
-    <div>CPU</div><div class="bar"><i id="sig_cpu"></i></div>
-    <div>MEM</div><div class="bar"><i id="sig_mem"></i></div>
-  </div>
-  <div id="scoreList" style="margin-top:10px;display:grid;gap:6px"></div>
-<div class="eventBadges" style="margin-top:8px"><span>Eventos:</span><span class="eb">accent</span><span class="eb">receive</span><span class="eb">input</span><span class="eb">error</span></div>
-<div class="row" style="margin-top:8px"><strong>Perfis DFT</strong><div class="grow"></div><button class="btn" id="btnProfileStudio">Studio</button><button class="btn" id="btnProfileLive">Live</button><button class="btn" id="btnProfileAgg">Agressivo</button></div>
-<div id="dftPlotWrap"><canvas id="dftPlot"></canvas></div>
-  <div style="margin-top:12px" class="card">
-    <div class="row"><strong>DFT Pesos (live)</strong><div class="grow"></div><button class="btn" id="btnResetW">Reset</button></div>
-    <div id="weightsGrid" class="cgrid" style="margin-top:8px"></div>
-    <div id="biasGrid" class="cgrid" style="margin-top:8px"></div>
-  </div>
-</div>
-
-<div id="touchPanel" class="card">
-  <div class="row"><strong>Touch Analyzer (UNO)</strong><div class="grow"></div><button class="btn" id="btnClearTouch">Limpar</button></div>
-  <div id="touchCanvas"></div>
-  <div class="touch-log" id="touchLog"></div>
-</div>
-
-<div id="compatPanel" class="card" style="display:none">
-      <div class="row"><strong>Compat & Sensors</strong><div class="grow"></div><button class="btn" id="btnScanCompat">Reescanear</button></div>
-      <div id="compatGrid" class="cgrid" style="margin-top:8px"></div>
-    </div>
   </main>
 
-  <!-- FAB único -->
-  <button id="btnInfodose" class="btn" title="Ação Única ⚡">
-    ⚡
-  </button>
+  <nav>
+    <button class="btn" id="btnConsole">☰ Console</button>
+    <button class="btn" id="btnHotspots">◎ Hotspots</button>
+  </nav>
 
   <div class="toast" id="toast"></div>
 </div>
 
 <script>
-/* --- Core state & helpers --- */
-const $=s=>document.querySelector(s);
-const S={rafCount:0,lastFpsT:performance.now(), lt:0, cls:0, audioReady:false, packs:[], apps:[]};
-function toast(msg){ const t=$('#toast'); t.textContent=msg; t.style.display='block'; setTimeout(()=>t.style.display='none', 1100); }
+/* --- Truth / Minus / Trinity --- */
+const truth_contract = {
+  capabilities:["hotspots_0_1","double_tap","long_press","audio_worklet","canvas_fractal","offline_pwa","apps_json_sandbox","indexeddb_packs","water_badge","voice_presets_fx","voice_selector","pack_player","perf_observer"],
+  limits:["ios_haptics_nativo","webgpu_obrigatorio","voz_neural_offline_universal"],
+  experiments:[],
+  dod:{ single_change_max_time_min:40, iterations_max:3 }
+};
+const minus={ triggers:{ low_hit:0.12, rare_path:0.05, latency_ms:160 }, actions:["merge_buttons","auto_scale_targets","hide_rare_into_longpress"] };
+const trinity369={ cycles:[3,6,9], audio_map:{3:"accent",6:"lift(+2)",9:"expand(+voices)"}, visual_map:{3:"stroke",6:"parallax+5%",9:"strobe_short"}, safety:{max_layers:3, max_rms_db:-12} };
 
-/* --- Perf (FPS/LT/CLS) --- */
-const fpsEl=$('#fps'), latEl=$('#lat');
+const S={ mode:3, consoleOpen:false, audioReady:false, lastTap:0, longPressTimer:null, phi:0, cpu:"~", mem:"~", lat:"~",
+  apps:[], packs:[], fps: "~", lt:0, cls:0.0, rafCount:0, lastFpsT: performance.now(), voice:"Nova" };
+const $=sel=>document.querySelector(sel);
+const toast=msg=>{ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),1400); };
+
+/* --- Canvas + draw loop --- */
+const cvs=[$("#layerBack"),$("#layerMid"),$("#layerFore")]; const ctx=cvs.map(c=>c.getContext("2d"));
+function resize(){ for(const c of cvs){ c.width=c.clientWidth*devicePixelRatio; c.height=c.clientHeight*devicePixelRatio; } }
+addEventListener("resize", resize, {passive:true}); resize();
 let t0=performance.now();
-function draw(now){ const dt=now-t0; t0=now; latEl.textContent=Math.max(1,Math.round(dt)); S.rafCount++; if(now-S.lastFpsT>1000){ fpsEl.textContent=S.rafCount; S.rafCount=0; S.lastFpsT=now; } requestAnimationFrame(draw); }
+function draw(now){
+  const dt=now-t0; t0=now; S.lat=Math.max(1,Math.round(dt));
+  // fps
+  S.rafCount++; if(now - S.lastFpsT > 1000){ $("#fps").textContent = S.rafCount; S.rafCount=0; S.lastFpsT=now; }
+  const w=cvs[0].width,h=cvs[0].height,cx=w/2,cy=h/2; S.phi=(S.phi+dt*0.001)%(Math.PI*2);
+
+  const b=ctx[0]; b.clearRect(0,0,w,h);
+  for(let i=0;i<6;i++){ const r=(Math.sin(S.phi*0.7+i)*0.5+0.5)*200+80; const x=cx+Math.cos(S.phi*0.5+i)*w*0.25; const y=cy+Math.sin(S.phi*0.6+i)*h*0.25; const g=b.createRadialGradient(x,y,0,x,y,r); g.addColorStop(0,`rgba(41,211,255,${0.10+i*0.02})`); g.addColorStop(1,"transparent"); b.fillStyle=g; b.beginPath(); b.arc(x,y,r,0,Math.PI*2); b.fill(); }
+  const m=ctx[1]; m.clearRect(0,0,w,h); m.lineWidth=2*devicePixelRatio; m.strokeStyle="rgba(255,255,255,0.25)";
+  for(let r=40*devicePixelRatio;r<Math.min(w,h)/2;r+=28*devicePixelRatio){ const off=Math.sin(S.phi*1.1+r*0.01)*(S.mode===6? r*0.02 : r*0.01); m.beginPath(); m.arc(cx+off, cy, r, 0, Math.PI*2); m.stroke(); }
+  const f=ctx[2]; f.clearRect(0,0,w,h); if(S.mode===9 && Math.sin(S.phi*6)>0.85){ f.fillStyle="rgba(255,90,244,0.22)"; f.fillRect(0,0,w,h); }
+
+  $("#lat").textContent=S.lat;
+  requestAnimationFrame(draw);
+}
 requestAnimationFrame(draw);
-if('PerformanceObserver' in window){ try{ new PerformanceObserver(list=>{ for(const e of list.getEntries()){ if(e.duration>50){ S.lt++; $('#lt').textContent=S.lt; }}}).observe({entryTypes:['longtask']}); }catch(e){} try{ let cls=0; new PerformanceObserver(list=>{ for(const e of list.getEntries()){ if(!e.hadRecentInput){ cls+=e.value; } } S.cls=cls; $('#cls').textContent=cls.toFixed(3); }).observe({type:'layout-shift', buffered:true}); }catch(e){} }
 
-/* --- Compat badge (DEFLATE) --- */
-(function(){ const hasDef= 'DecompressionStream' in window; const b=$('#compatBadge'), v=$('#compatVal'); if(b&&v){ b.classList.add(hasDef?'ok':'warn'); v.textContent = hasDef?'ok':'store'; }})();
-
-/* --- Audio (simple burst) --- */
-let actx,out,gain,convolver,impulse;
-async function initAudio(){ if(S.audioReady) return; actx=new (window.AudioContext||window.webkitAudioContext)(); const code=`class B extends AudioWorkletProcessor{static get parameterDescriptors(){return[{name:'on',defaultValue:0},{name:'freq',defaultValue:220}]}process(i,o,p){const out=o[0];const on=p.on[0],f=p.freq[0];for(let ch=0;ch<out.length;ch++){const b=out[ch];for(let n=0;n<b.length;n++){let s=0;if(on>0.5){s=(Math.random()*2-1)*0.18+Math.sin(2*Math.PI*(currentFrame+n)/sampleRate*f)*0.22;}b[n]=s;}}return true}}registerProcessor('b',B);`; await actx.audioWorklet.addModule(URL.createObjectURL(new Blob([code],{type:'text/javascript'}))); out=new AudioWorkletNode(actx,'b'); gain=actx.createGain(); gain.gain.value=0.0; filter=actx.createBiquadFilter(); filter.type='highpass'; filter.frequency.value=220; convolver=actx.createConvolver(); impulse=makeImpulseResponse(actx,0.22); convolver.buffer=impulse; const mix=actx.createGain(); mix.gain.value=0.25; out.connect(filter); filter.connect(gain); gain.connect(actx.destination); gain.connect(mix).connect(convolver).connect(actx.destination); S.audioReady=true; toast('Áudio pronto'); }
-function makeImpulseResponse(ctx,d){const r=ctx.sampleRate,l=r*d|0,b=ctx.createBuffer(2,l,r);for(let c=0;c<2;c++){const a=b.getChannelData(c);for(let i=0;i<l;i++){a[i]=(Math.random()*2-1)*Math.pow(1-i/l,2)}}return b}
-
-function accent(){ 
-  if(!S.audioReady) return; 
-  const preset = (window.CURRENT && ARCHS[CURRENT.idx]) ? ARCHS[CURRENT.idx].preset : {pitch:0, filter:{type:'highpass',freq:220}, shimmer:0.15};
+/* --- PerformanceObserver: Long Tasks & Layout Shifts (CLS) --- */
+if("PerformanceObserver" in window){
   try{
-    if(filter){ filter.type = preset.filter.type || 'highpass'; filter.frequency.value = preset.filter.freq || 220; }
+    const poLT = new PerformanceObserver((list)=>{ for(const e of list.getEntries()){ if(e.duration>50){ S.lt++; $("#lt").textContent=S.lt; } } });
+    poLT.observe({entryTypes:["longtask"]});
   }catch(e){}
-  const base = 220 + (preset.pitch||0)*20;
-  out.parameters.get('freq').setValueAtTime(base, actx.currentTime);
-  out.parameters.get('on').setValueAtTime(1, actx.currentTime);
-  gain.gain.cancelScheduledValues(actx.currentTime);
-  const a = 0.75 + (preset.shimmer||0)*0.6; // shimmer influencia ataque
-  gain.gain.linearRampToValueAtTime(a, actx.currentTime+0.01);
-  gain.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime+0.45);
-  setTimeout(()=> out.parameters.get('on').setValueAtTime(0, actx.currentTime), 140);
+  try{
+    let cls = 0;
+    const poLS = new PerformanceObserver((list)=>{ for(const e of list.getEntries()){ if(!e.hadRecentInput){ cls += e.value; } } S.cls = cls; $("#cls").textContent = S.cls.toFixed(3); });
+    poLS.observe({type:"layout-shift", buffered:true});
+  }catch(e){}
 }
 
-$('#btnPlay').onclick=async()=>{ await initAudio(); if(actx.state==='suspended') await actx.resume(); accent(); };
+/* --- Fake CPU/MEM sampler (placeholder; pode trocar por performance.memory quando suportado) --- */
+setInterval(()=>{ $("#cpu").textContent=(5+Math.random()*20|0)+"%"; $("#mem").textContent=(80+Math.random()*420|0)+"MB"; }, 1500);
 
-/* --- Packs IndexedDB (audio only minimal for v1.0) --- */
+/* --- Audio & Presets & Pack Player --- */
+let actx,out,gain,delay,filter,convolver,impulse,currentBuffer, currentSource=null;
+const voicePresets = {
+  Nova: { pitch:+2,  filter:{type:'highpass', freq:220}, shimmer:0.18 },
+  Kaion:{ pitch:-2,  filter:{type:'lowpass',  freq:1800}, shimmer:0.12 },
+  Elysha:{ pitch:+4, filter:{type:'bandpass', freq:900}, shimmer:0.22 },
+  Genus:{ pitch:0,   filter:{type:'notch',    freq:600}, shimmer:0.08 }
+};
+let currentVoice="Nova";
+
+async function initAudio(){ if(S.audioReady) return; actx=new (window.AudioContext||window.webkitAudioContext)();
+  const workletCode = `class Burst extends AudioWorkletProcessor{ constructor(){super(); this.on=0;} static get parameterDescriptors(){return[{name:'on',defaultValue:0},{name:'freq',defaultValue:220}]}
+  process(i,o,p){ const out=o[0]; const on=p.on[0]; const f=p.freq[0]; for(let ch=0; ch<out.length; ch++){ const b=out[ch]; for(let n=0;n<b.length;n++){ let s=0; if(on>0.5){ s=(Math.random()*2-1)*0.18 + Math.sin(2*Math.PI*(currentFrame+n)/sampleRate*f)*0.22; } b[n]=s; } } return true; } } registerProcessor('burst',Burst);`;
+  const blob = new Blob([workletCode], {type:'application/javascript'}); await actx.audioWorklet.addModule(URL.createObjectURL(blob));
+  out=new AudioWorkletNode(actx,'burst'); gain=actx.createGain(); gain.gain.value=0.0; delay=actx.createDelay(0.75); delay.delayTime.value=0.23; const fb=actx.createGain(); fb.gain.value=0.25; delay.connect(fb).connect(delay);
+  filter=actx.createBiquadFilter(); filter.type='highpass'; filter.frequency.value=220;
+  convolver=actx.createConvolver(); impulse = makeImpulseResponse(actx, 0.22); convolver.buffer=impulse; const mixVerb=actx.createGain(); mixVerb.gain.value=0.25;
+  out.connect(filter); filter.connect(gain); gain.connect(delay).connect(actx.destination); gain.connect(mixVerb).connect(convolver).connect(actx.destination);
+  S.audioReady=true; toast('Áudio pronto'); $("#btnPlay").textContent='✓ Áudio';
+}
+function makeImpulseResponse(ctx, duration){ const rate=ctx.sampleRate; const len=rate*duration|0; const buf=ctx.createBuffer(2,len,rate); for(let ch=0; ch<2; ch++){ const d=buf.getChannelData(ch); for(let i=0;i<len;i++){ d[i]=(Math.random()*2-1)*Math.pow(1-i/len, 2); } } return buf; }
+function applyPreset(name){ currentVoice=name; const p=voicePresets[name]||voicePresets.Nova; if(!filter) return; filter.type=p.filter.type; filter.frequency.value=p.filter.freq; S._pitch=p.pitch; S._shimmer=p.shimmer; }
+function accent(){ if(!S.audioReady) return; const base=220 + (S.mode===6?2:0)*40 + (S.mode===9?4:0)*40; const pitch=(S._pitch||0)*20; out.parameters.get('freq').setValueAtTime(base+pitch, actx.currentTime); out.parameters.get('on').setValueAtTime(1, actx.currentTime); if(!gain) return; gain.gain.cancelScheduledValues(actx.currentTime); const a=0.9; gain.gain.linearRampToValueAtTime(a, actx.currentTime+0.01); gain.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime+0.35); setTimeout(()=> out.parameters.get('on').setValueAtTime(0, actx.currentTime), 120); }
+
+$("#btnPlay").addEventListener("click", async ()=>{ await initAudio(); if(actx.state==='suspended') await actx.resume(); accent(); });
+$("#voiceSelect").addEventListener("change", (e)=>{ applyPreset(e.target.value.split(' ')[0]); toast('Voz: '+e.target.value); });
+
+/* --- IndexedDB Packs --- */
 const DB={ name:'dual-packs', ver:1, db:null};
-function idbOpen(){ return new Promise((res,rej)=>{ const r=indexedDB.open(DB.name, DB.ver); r.onupgradeneeded=ev=>{ const db=ev.target.result; if(!db.objectStoreNames.contains('packs')) db.createObjectStore('packs', {keyPath:'id'}); }; r.onsuccess=ev=>{ DB.db=ev.target.result; res(); }; r.onerror=()=>rej(r.error); }); }
-async function idbAll(){ await idbOpen(); return new Promise(res=>{ const tx=DB.db.transaction('packs','readonly'); const st=tx.objectStore('packs'); const rq=st.getAll(); rq.onsuccess=()=>res(rq.result||[]); }); }
+function idbOpen(){ return new Promise((res,rej)=>{ const r=indexedDB.open(DB.name, DB.ver); r.onupgradeneeded=ev=>{ const db=ev.target.result; if(!db.objectStoreNames.contains('packs')) db.createObjectStore('packs', {keyPath:'id'}); }; r.onsuccess=ev=>{ DB.db=ev.target.result; res(DB.db); }; r.onerror=()=>rej(r.error); }); }
+async function idbGetAll(){ await idbOpen(); return new Promise(res=>{ const tx=DB.db.transaction('packs','readonly'); const st=tx.objectStore('packs'); const req=st.getAll(); req.onsuccess=()=>res(req.result||[]); }); }
+async function idbPut(pack){ await idbOpen(); return new Promise(res=>{ const tx=DB.db.transaction('packs','readwrite'); tx.objectStore('packs').put(pack); tx.oncomplete=()=>res(true); }); }
+async function idbClear(){ await idbOpen(); return new Promise(res=>{ const tx=DB.db.transaction('packs','readwrite'); tx.objectStore('packs').clear(); tx.oncomplete=()=>res(true); }); }
 
-/* --- Mixer Trinity minimal (A+B+FX) --- */
-let blendChain=null;
-async function decodeById(id){ const item=(S.packs||[]).find(p=>p.id===id); if(!item) throw new Error('pack not found'); const bin=Uint8Array.from(atob(item.data),c=>c.charCodeAt(0)).buffer; return await actx.decodeAudioData(bin.slice(0)); }
-function makeSub(){ const osc=actx.createOscillator(); osc.type='sine'; osc.frequency.value=55; const g=actx.createGain(); g.gain.value=0.25; osc.connect(g); return {node:g,start:()=>osc.start(),stop:()=>{try{osc.stop()}catch{}}}; }
-function makeNoise(){ const buf=actx.createBuffer(1, actx.sampleRate*1, actx.sampleRate); const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1; const src=actx.createBufferSource(); src.buffer=buf; src.loop=true; const g=actx.createGain(); g.gain.value=0.12; src.connect(g); return {node=g,start:()=>src.start(),stop:()=>{try{src.stop()}catch{}}}; }
-async function startBlend(){ await initAudio(); if(actx.state==='suspended') await actx.resume(); stopBlend(); const ida=$('#selA').value, idb=$('#selB').value, fx=$('#selFX').value; if(!ida||!idb){ toast('Escolha Pack A e Pack B'); return; } const [bufA,bufB]=await Promise.all([decodeById(ida),decodeById(idb)]); const a=actx.createBufferSource(); a.buffer=bufA; a.loop=true; a.loopStart=0.02; a.loopEnd=Math.min(0.25, bufA.duration); a.playbackRate.value=0.98; const b=actx.createBufferSource(); b.buffer=bufB; b.loop=true; b.loopStart=0.02; b.loopEnd=Math.min(0.22, bufB.duration); b.playbackRate.value=1.03; const gA=actx.createGain(); gA.gain.value=0.6; const gB=actx.createGain(); gB.gain.value=0.6; a.connect(gA); b.connect(gB); let fxObj= fx==='sub'? makeSub(): makeNoise(); const gFX=actx.createGain(); gFX.gain.value= fx==='sub'?0.3:0.15; fxObj.node.connect(gFX); const sum=actx.createGain(); sum.gain.value=0.9; gA.connect(sum); gB.connect(sum); gFX.connect(sum); const biq=actx.createBiquadFilter(); biq.type='lowpass'; biq.frequency.value=3200; sum.connect(biq).connect(actx.destination); const vMix=actx.createGain(); vMix.gain.value=0.22; sum.connect(vMix).connect(convolver).connect(actx.destination); a.start(); b.start(); fxObj.start(); blendChain={a,b,fxObj,nodes:[gA,gB,gFX,sum,biq,vMix]}; toast('Blend ON'); }
-function stopBlend(){ if(!blendChain) return; try{ blendChain.a.stop(); }catch{} try{ blendChain.b.stop(); }catch{} try{ blendChain.fxObj.stop(); }catch{} blendChain=null; toast('Blend OFF'); }
-$('#btnBlend').onclick=startBlend; $('#btnStop').onclick=stopBlend;
-
-/* --- Apps JSON + ZIP import/export minimal --- */
-$('#btnLoadApps').onclick=async()=>{ try{ const res=await fetch('apps/apps.json'); const json=await res.json(); S.apps=json.apps||json; renderApps(); toast('apps.json carregado'); }catch(e){ toast('Falha apps.json'); } };
-function renderApps(){ const list=$('#appsList'); list.innerHTML=''; const df=document.createDocumentFragment(); (S.apps||[]).forEach((a,i)=>{ const row=document.createElement('div'); row.className='appItem'; row.innerHTML=`<span class="chip">#${i+1}</span><div style="min-width:0"><div><strong>${a.name||'App'}</strong></div><div class="meta">${a.url}</div></div><div class="grow"></div><button class="btn" data-open="${i}">Abrir</button>`; df.appendChild(row); }); list.appendChild(df); list.onclick=e=>{ const i=e.target?.dataset?.open; if(i!=null){ openSandbox(S.apps[i]); } } }
-function openSandbox(app){ const f=$('#sandbox'); $('#sandboxWrap').style.display='block'; f.src=app.url; f.setAttribute('referrerpolicy','no-referrer'); f.setAttribute('allow', app.allow||'autoplay; clipboard-read; clipboard-write'); f.setAttribute('sandbox', app.sandbox||'allow-scripts'); }
-
-/* --- Collapsible & persistence --- */
-function setCollapsed(section, btn, collapsed, key){ // hide all but first row
-  const rows=section.querySelectorAll('.row'); rows.forEach((r,i)=>{ if(i>0) r.style.display= collapsed?'none':''; });
-  Array.from(section.children).forEach(ch=>{ if(ch.classList && ch.classList.contains('row')) return; if(ch.id==='appsList'||ch.id==='sandboxWrap') return; ch.style.display=collapsed?'none':''; });
-  btn.setAttribute('aria-expanded', String(!collapsed)); if(key){ localStorage.setItem(key, String(!collapsed)); }
-}
-function initCollapsible(){ const pm=localStorage.getItem('v1.mixerOpen'); const pa=localStorage.getItem('v1.appsOpen'); setCollapsed($('#mixerPane'), $('#toggleMixer'), pm? (pm==='false') : true, 'v1.mixerOpen'); setCollapsed($('#appsPane'), $('#toggleApps'), pa? (pa==='false') : true, 'v1.appsOpen'); $('#toggleMixer').onclick=()=> setCollapsed($('#mixerPane'), $('#toggleMixer'), $('#toggleMixer').getAttribute('aria-expanded')!=='false','v1.mixerOpen'); $('#toggleApps').onclick=()=> setCollapsed($('#appsPane'), $('#toggleApps'), $('#toggleApps').getAttribute('aria-expanded')!=='false','v1.appsOpen'); }
-initCollapsible();
-
-/* --- Console & Compat panel --- */
-$('#btnScanCompat')?.addEventListener('click', scanAndRender);
-$('#btnInfodose').addEventListener('click', ()=>{ // one-button primary: archetype menu
-  const ex = $('#toggleMixer').getAttribute('aria-expanded')!=='false'; setCollapsed($('#mixerPane'), $('#toggleMixer'), ex, 'v1.mixerOpen'); toast('Mixer '+(ex?'OFF':'ON'));
-});
-
-/* --- Compat & Sensors scan (subset for v1.0) --- */
-async function detectCapabilities(){
-  const caps={};
-  caps.serviceWorker = !!('serviceWorker' in navigator);
-  caps.indexedDB = !!('indexedDB' in window);
-  caps.vibrate = !!navigator.vibrate;
-  caps.decompressionStream = !!window.DecompressionStream;
-  caps.webaudio = !!(window.AudioContext || window.webkitAudioContext);
-  caps.pwaStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-  try{ if(navigator.storage && navigator.storage.estimate){ const est=await navigator.storage.estimate(); caps.storage={quota:est.quota||0, usage:est.usage||0}; } }catch(e){}
-  return caps;
-}
-function badge(val){ if(val===true) return '<span style="color:var(--ok)">ok</span>'; if(val===false) return '<span style="color:var(--err)">no</span>'; return '<span class="chip">'+String(val)+'</span>'; }
-function renderCompatGrid(c){ const grid=$('#compatGrid'); if(!grid) return; const row=(k,v)=>`<div class="k">${k}</div><div class="v">${v}</div>`; let h=''; h+=row('ServiceWorker',badge(c.serviceWorker)); h+=row('IndexedDB',badge(c.indexedDB)); h+=row('Vibrate',badge(c.vibrate)); h+=row('DecompressionStream',badge(c.decompressionStream)); h+=row('WebAudio',badge(c.webaudio)); h+=row('PWA Standalone',badge(!!c.pwaStandalone)); if(c.storage){ h+=row('Storage', `${(c.storage.usage/1048576|0)}MB / ${(c.storage.quota/1048576|0)}MB`);} grid.innerHTML=h; }
-async function scanAndRender(){ const c=await detectCapabilities(); renderCompatGrid(c); }
-
-/* --- Dynamic sandbox height (postMessage + same-origin RO) --- */
-window.addEventListener('message', (e)=>{ const d=e.data||{}; if(d.type==='dual:height'){ const h=Math.max(120, Math.min(1200, Number(d.height)||0)); const f=$('#sandbox'); if(f) f.style.height=h+'px'; }});
-$('#sandbox')?.addEventListener('load', ()=>{ try{ const doc=$('#sandbox').contentDocument; const body=doc && doc.body; if(!body) return; const ro=new ResizeObserver(ents=>{ for(const ent of ents){ const cr=ent.contentRect||ent.target.getBoundingClientRect(); const h=Math.max(120, Math.min(1200, Math.round(cr.height))); $('#sandbox').style.height=h+'px'; } }); ro.observe(body); }catch(e){} });
-
-/* --- SW inline (cache-first) --- */
-if('serviceWorker' in navigator){ const sw=`self.addEventListener('install',e=>{e.waitUntil(caches.open('dual-v1').then(c=>c.addAll(['./','apps/apps.json','archetypes/center.html']).catch(()=>{})))});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)))})`; navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'text/javascript'}))); }
-
-/* --- Load packs (optional) --- */
-(async()=>{ try{ S.packs = await idbAll(); const selA=$('#selA'), selB=$('#selB'); S.packs.filter(p=>(p.type||'').startsWith('audio')).forEach(p=>{ const o=document.createElement('option'); o.value=p.id; o.textContent=p.name||p.id; selA.appendChild(o); selB.appendChild(o.cloneNode(true)); }); }catch(e){} })();
-
-/* Archetype loader */
-const archList = ["luxara.html", "._luxara.html", "rhea.html", "._rhea.html", "aion.html", "atlas.html", "nova.html", "._nova.html", "genus.html", "._genus.html", "lumine.html", "._lumine.html", "kaion.html", "._kaion.html", "kaos.html", "._kaos.html", "horus.html", "elysha.html", "ignyra.html"];
-(function(){ 
-  const sel = document.getElementById('archSelect');
-  const frame = document.getElementById('coreFrame');
-  function populate(){ 
-    sel.innerHTML=''; 
-    if(archList.length===0){ 
-      const o=document.createElement('option'); o.textContent='(sem arquétipos)'; sel.appendChild(o); 
-      return; 
-    }
-    archList.forEach((name,i)=>{ const o=document.createElement('option'); o.value=name; o.textContent=name; sel.appendChild(o); });
-  }
-  function setSrcByIndex(idx){ 
-    if(!archList.length) return; 
-    const n = (idx+archList.length)%archList.length;
-    sel.selectedIndex = n;
-    frame.src = './archetypes/' + archList[n];
-  }
-  populate();
-  let current = 0;
-  if(archList.length){ frame.src = './archetypes/' + archList[0]; }
-  document.getElementById('prevArch')?.addEventListener('click', ()=>{ current = (current-1+archList.length)%archList.length; setSrcByIndex(current); });
-  document.getElementById('nextArch')?.addEventListener('click', ()=>{ current = (current+1)%archList.length; setSrcByIndex(current); });
-  sel?.addEventListener('change', ()=>{ current = sel.selectedIndex; setSrcByIndex(current); });
-  // FAB tap abre/foca switcher
-  document.getElementById('btnInfodose')?.addEventListener('click', ()=>{ sel?.focus(); });
-})();
-
-
-/* --- DFT (Dual Fast Transform) — auto‑arquetipo --- */
-const ARCHS = [
-  {id:'Nova',     colorA:'#29d3ff', colorB:'#8be4ff', preset:{pitch:+2, filter:{type:'highpass',freq:220}, shimmer:0.18}},
-  {id:'Elysha',   colorA:'#ff5af4', colorB:'#ffd1ff', preset:{pitch:+4, filter:{type:'bandpass',freq:900}, shimmer:0.22}},
-  {id:'Kaion',    colorA:'#1fe29a', colorB:'#aaffd9', preset:{pitch:-2, filter:{type:'lowpass', freq:1800}, shimmer:0.12}},
-  {id:'Atlas',    colorA:'#8a5cff', colorB:'#d0c8ff', preset:{pitch:-1, filter:{type:'bandpass',freq:500}, shimmer:0.10}},
-  {id:'Artemis',  colorA:'#ff7a5c', colorB:'#ffd2c7', preset:{pitch:+3, filter:{type:'highpass',freq:260}, shimmer:0.15}},
-  {id:'Genus',    colorA:'#ffd65a', colorB:'#fff0b0', preset:{pitch:0,  filter:{type:'notch',   freq:600}, shimmer:0.08}},
-  {id:'Vitalis',  colorA:'#39ffb6', colorB:'#c6ffe7', preset:{pitch:+1, filter:{type:'peaking', freq:1200}, shimmer:0.12}},
-  {id:'Pulse',    colorA:'#29b6ff', colorB:'#a9e6ff', preset:{pitch:+2, filter:{type:'highpass',freq:180}, shimmer:0.16}},
-  {id:'Serena',   colorA:'#8bd5ff', colorB:'#e5f7ff', preset:{pitch:-3, filter:{type:'lowpass', freq:1400}, shimmer:0.10}},
-  {id:'Aion',     colorA:'#ffbd5a', colorB:'#ffe2b0', preset:{pitch:0,  filter:{type:'peaking', freq:800},  shimmer:0.09}},
-  {id:'Rhea',     colorA:'#b0ff8b', colorB:'#e7ffd5', preset:{pitch:-1, filter:{type:'lowpass', freq:900},  shimmer:0.11}},
-  {id:'Horus',    colorA:'#29d3ff', colorB:'#ff5af4', preset:{pitch:+2, filter:{type:'bandpass',freq:1000}, shimmer:0.20}}
-];
-
-(function(){
-  const sel = document.getElementById('archSelect');
-  const frame = document.getElementById('coreFrame');
-  const fade = document.getElementById('fadeCover');
-  const dot  = document.querySelector('.dotlogo');
-
-  // Map archetype id -> file by best filename match in ./archetypes
-  const fileIndex = {};
-  (archList||[]).forEach(name=>{
-    const key = name.replace(/\.[^.]+$/,'').toLowerCase();
-    fileIndex[key] = name;
+async function loadPacks(){ S.packs=await idbGetAll(); renderPacks(); }
+function renderPacks(){
+  const box=$("#packsList");
+  if(!S.packs.length){ box.innerHTML='<em>Nenhum pack armazenado.</em>'; return; }
+  box.innerHTML = "";
+  S.packs.forEach((p,i)=>{
+    const row=document.createElement('div'); row.className='row'; row.style.gap='8px';
+    const btn=document.createElement('button'); btn.className='btn'; btn.textContent='▶︎ Reproduzir';
+    btn.onclick=()=> playPack(p);
+    const meta=document.createElement('div'); meta.innerHTML = `<strong>${p.name||p.id}</strong><div class="chip">${p.type}</div>`;
+    row.appendChild(btn); row.appendChild(meta);
+    box.appendChild(row);
   });
-
-  // Metrics history (lightweight)
-  const MKEY = 'dual.metrics.log';
-  function pushMetric(sample){
-    try{
-      const arr = JSON.parse(localStorage.getItem(MKEY)||'[]');
-      arr.push(Object.assign({t:Date.now()}, sample));
-      while(arr.length>60) arr.shift();
-      localStorage.setItem(MKEY, JSON.stringify(arr));
-    }catch(e){}
+}
+async function playPack(p){
+  await initAudio(); if(actx.state==='suspended') await actx.resume();
+  if(!p || !p.data){ toast('Pack sem dados'); return; }
+  try{
+    const bin = p.type==='json' ? new TextEncoder().encode(JSON.stringify(p.data)).buffer : Uint8Array.from(atob(p.data), c=>c.charCodeAt(0)).buffer;
+    const buf = await actx.decodeAudioData(bin.slice(0)); // if not audio will throw
+    if(currentSource){ try{ currentSource.stop(); }catch(e){} }
+    currentBuffer = buf;
+    currentSource = actx.createBufferSource(); currentSource.buffer = currentBuffer; currentSource.loop = true;
+    const vol = actx.createGain(); vol.gain.value = 0.6;
+    currentSource.connect(vol).connect(filter).connect(gain); // reuse FX chain
+    currentSource.start();
+    toast('Reproduzindo pack: '+(p.name||p.id));
+  }catch(e){
+    console.warn('Decode fail (provável JSON, não áudio).', e);
+    toast('Esse pack não é áudio (JSON).');
   }
+}
+function stopPack(){ if(currentSource){ try{ currentSource.stop(); }catch(e){} currentSource=null; } }
 
-  // Read current HUD metrics
-  function readMetrics(){
-    const fps = Number(document.getElementById('fps')?.textContent||0);
-    const lat = Number(document.getElementById('lat')?.textContent||0);
-    const lt  = Number(document.getElementById('lt')?.textContent||0);
-    const cls = Number(document.getElementById('cls')?.textContent||0);
-    // allow custom "water" overrides from localStorage (cpu/mem if someone injected)
-    const water = JSON.parse(localStorage.getItem('dual.water')||'{}');
-    return { fps, lat, lt, cls, cpu: water.cpu||0, mem: water.mem||0 };
-  }
-
-  // DFT heuristic: project metrics into 12‑dim basis to choose archetype
-  function scoreFor(a, m){
-    // features normalized
-    const nfps = Math.max(0, Math.min(1, (60 - m.fps)/60)); // lower fps -> higher value
-    const nlat = Math.max(0, Math.min(1, m.lat/180));      // >180ms capped
-    const nlt  = Math.max(0, Math.min(1, m.lt/10));
-    const ncls = Math.max(0, Math.min(1, m.cls/0.5));      // CLS 0..0.5
-    const ncpu = Math.max(0, Math.min(1, (m.cpu||0)/100));
-    const nmem = Math.max(0, Math.min(1, (m.mem||0)/800)); // assume 0..800MB window
-    // weights por arquétipo (gestalt simbólica)
-    const W = {
-      Nova:     [0.2,0.2,0.1,0.05,0.25,0.2],
-      Elysha:   [0.1,0.15,0.15,0.2, 0.2, 0.2],
-      Kaion:    [0.25,0.15,0.05,0.05,0.3, 0.2],
-      Atlas:    [0.15,0.25,0.1,0.1, 0.2, 0.2],
-      Artemis:  [0.2,0.25,0.15,0.05,0.2, 0.15],
-      Genus:    [0.1,0.1, 0.25,0.25,0.15,0.15],
-      Vitalis:  [0.15,0.15,0.15,0.15,0.2, 0.2],
-      Pulse:    [0.25,0.2, 0.1, 0.05,0.2, 0.2],
-      Serena:   [0.05,0.15,0.2, 0.25,0.15,0.2],
-      Aion:     [0.15,0.2, 0.2, 0.15,0.15,0.15],
-      Rhea:     [0.15,0.15,0.15,0.2, 0.15,0.2],
-      Horus:    [0.18,0.18,0.18,0.18,0.14,0.14],
-    }[a.id] || [0.17,0.17,0.17,0.17,0.16,0.16];
-    const F=[nfps,nlat,nlt,ncls,ncpu,nmem];
-    let s=0; for(let i=0;i<F.length;i++) s += F[i]*W[i];
-    // add tiny pseudo‑random seeded by storage usage snapshot for symmetry breaks
-    const seed = (localStorage.length % 13) / 1000;
-    return s + seed;
-  }
-
-  function pickArchetype(){
-    const m = readMetrics();
-    pushMetric(m);
-    let best = 0, idx = 0;
-    for(let i=0;i<ARCHS.length;i++){
-      const sc = scoreFor(ARCHS[i], m);
-      if(sc > best){ best = sc; idx = i; }
-    }
-    return { idx, m };
-  }
-
-  function themeTo(a){
-    document.documentElement.style.setProperty('--arch-a', a.colorA);
-    document.documentElement.style.setProperty('--arch-b', a.colorB);
-  }
-
-  function fileFor(a){
-    // explicit map has priority
-    try{ if(window.DFT_MAP && window.DFT_MAP[a.id]) return window.DFT_MAP[a.id]; }catch(e){}
-    const key = a.id.toLowerCase();
-    if(fileIndex[key]) return './archetypes/'+fileIndex[key];
-    const hit = Object.keys(fileIndex).find(k=> k.includes(key));
-    if(hit) return './archetypes/'+fileIndex[hit];
-    return frame.src;
-  }
-
-  let CURRENT = { idx:-1 };
-  async function applyArchetype(idx){
-    if(idx===CURRENT.idx) return;
-    const a = ARCHS[idx] || ARCHS[0];
-    CURRENT.idx = idx;
-    themeTo(a);
-    // Fade overlay
-    fade.classList.add('show');
-    // swap frame after short delay
-    setTimeout(()=>{
-      const nextSrc = fileFor(a);
-      if(frame.src !== nextSrc) frame.src = nextSrc;
-      // update dot aura via CSS vars (already), nothing else needed
-      setTimeout(()=> fade.classList.remove('show'), 260);
-    }, 160);
-  }
-
-  // Tick evaluator
-  function tick(){
-    try{
-      const {idx} = pickArchetype();
-      applyArchetype(idx);
-    }catch(e){}
-  }
-  setInterval(tick, 4000); // reevaluate every 4s
-  // first run after populate
-  setTimeout(tick, 600);
-})();
-
-
-/* Persist archetype + coherent boot */
-(function(){
-  const LAST_KEY = 'dual.lastArchetype';
-  const last = localStorage.getItem(LAST_KEY);
-  if(last && typeof last === 'string'){
-    // try set theme early to avoid flash
-    const a = ARCHS.find(x=> x.id.toLowerCase()===last.toLowerCase());
-    if(a){
-      document.documentElement.style.setProperty('--arch-a', a.colorA);
-      document.documentElement.style.setProperty('--arch-b', a.colorB);
-      const f = document.getElementById('coreFrame');
-      try{
-        if(window.DFT_MAP && window.DFT_MAP[a.id]) f.src = window.DFT_MAP[a.id];
-      }catch(e){}
+$("#btnImport").onclick=async()=>{
+  const files=$("#fileImport").files;
+  if(!files?.length){ toast('Selecione arquivos'); return; }
+  for(const f of files){
+    if(f.type.startswith && f.type.startswith('audio/')){ // some browsers
+      const arr=await f.arrayBuffer(); const b64=btoa(String.fromCharCode(...new Uint8Array(arr)));
+      await idbPut({ id:`wav:${f.name}`, type:f.type||'audio/wav', name:f.name, data:b64 });
+    } else if(f.type.startsWith('audio/')){
+      const arr=await f.arrayBuffer(); const b64=btoa(String.fromCharCode(...new Uint8Array(arr)));
+      await idbPut({ id:`wav:${f.name}`, type:f.type||'audio/wav', name:f.name, data:b64 });
+    } else {
+      try{ const txt=await f.text(); const json=JSON.parse(txt); await idbPut({ id:`json:${f.name}`, type:'json', name:f.name, data:json }); }
+      catch(e){ console.warn('JSON inválido', e); }
     }
   }
-  // when archetype changes in DFT, save
-  const _apply = window.applyArchetype;
-  window.applyArchetype = async function(idx){
-    await _apply(idx);
-    try{ const id = ARCHS[idx]?.id; if(id) localStorage.setItem(LAST_KEY, id); }catch(e){}
-  };
-})();
+  await loadPacks(); toast('Importado');
+};
+$("#btnExport").onclick=async()=>{
+  const data=await idbGetAll(); const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='dual_packs_export.json'; a.click(); toast('Exportado');
+};
+$("#btnClear").onclick=async()=>{ await idbClear(); S.packs=[]; renderPacks(); stopPack(); toast('Packs limpos'); };
 
+/* --- Apps.json + sandbox --- */
+$("#btnLoadApps").onclick=async()=>{ try{ const res=await fetch('apps/apps.json'); const json=await res.json(); S.apps=json.apps||json; renderApps(); toast('apps.json carregado'); }catch(e){ toast('Falha ao carregar apps.json'); console.error(e); } };
+function renderApps(){ const list=$("#appsList"); list.innerHTML=''; const df=new DocumentFragment(); (S.apps||[]).forEach((a,i)=>{ const row=document.createElement('div'); row.className='appItem'; row.innerHTML=`<span class="chip">#${i+1}</span><div><div><strong>${a.name||'App'}</strong></div><div class="meta">${a.url}</div></div><div class="grow"></div><button class="btn" data-open="${i}">Abrir</button>`; df.appendChild(row); }); list.appendChild(df); list.onclick=e=>{ const i=e.target?.dataset?.open; if(i!=null){ openSandbox(S.apps[i]); } } }
+function openSandbox(app){ const f=$("#sandbox"); $("#sandboxWrap").style.display='block'; f.src = app.url; f.setAttribute('title', app.name||'sandbox'); }
+$("#btnOpenSandbox").onclick=()=>{ const el=$("#sandboxWrap"); el.style.display = (el.style.display==='none'?'block':'none'); };
+
+/* --- Console --- */
+$("#btnConsole").onclick=()=>{ S.consoleOpen=!S.consoleOpen; const c=$("#console"); c.style.display=S.consoleOpen?'block':'none'; c.innerHTML='<pre>'+JSON.stringify({truth_contract, minus, trinity369, metrics:{cpu:$("#cpu").textContent, mem:$("#mem").textContent, lat:S.lat, fps:$("#fps").textContent, lt:S.lt, cls:S.cls}, voice:S.voice, apps:S.apps.map(a=>a.name), packs:S.packs.map(p=>p.id)}, null, 2)+'</pre>'; };
+
+/* --- Hotspots (visual toggle only) --- */
+$("#btnHotspots").onclick=()=>{
+  toast('Hotspots visuais (mock)');
+};
+
+/* --- PWA SW inline --- */
+if('serviceWorker' in navigator){
+  const swCode=`self.addEventListener('install',e=>{e.waitUntil(caches.open('dual-mock-v3').then(c=>c.addAll(['./','apps/apps.json']).catch(()=>{})))});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)))})`;
+  const url=URL.createObjectURL(new Blob([swCode],{type:'text/javascript'})); navigator.serviceWorker.register(url);
+}
 </script>
 
-<script>
-(()=>{
-  // ---- DFT Debug ----
-  const dftPanel = document.getElementById('dftPanel');
-  const scoreList = document.getElementById('scoreList');
-  const bars = {
-    fps: document.getElementById('sig_fps'),
-    lat: document.getElementById('sig_lat'),
-    lt:  document.getElementById('sig_lt'),
-    cls: document.getElementById('sig_cls'),
-    cpu: document.getElementById('sig_cpu'),
-    mem: document.getElementById('sig_mem')
-  };
-
-  function clamp01(x){ return Math.max(0, Math.min(1, x)); }
-  function normalize(m){
-    return {
-      nfps: clamp01((60 - (m.fps||0))/60),
-      nlat: clamp01((m.lat||0)/180),
-      nlt:  clamp01((m.lt||0)/10),
-      ncls: clamp01((m.cls||0)/0.5),
-      ncpu: clamp01((m.cpu||0)/100),
-      nmem: clamp01((m.mem||0)/800),
-    };
-  }
-
-  function updateSignalBars(m){
-    const n = normalize(m);
-    bars.fps && (bars.fps.style.width = (n.nfps*100).toFixed(0)+'%');
-    bars.lat && (bars.lat.style.width = (n.nlat*100).toFixed(0)+'%');
-    bars.lt  && (bars.lt .style.width = (n.nlt *100).toFixed(0)+'%');
-    bars.cls && (bars.cls.style.width = (n.ncls*100).toFixed(0)+'%');
-    bars.cpu && (bars.cpu.style.width = (n.ncpu*100).toFixed(0)+'%');
-    bars.mem && (bars.mem.style.width = (n.nmem*100).toFixed(0)+'%');
-  }
-
-  function computeScores(m){
-    if(!window.ARCHS || !window.scoreFor) return [];
-    const scores = ARCHS.map(a=> ({ id:a.id, s: scoreFor(a, m) }));
-    scores.sort((a,b)=> b.s - a.s);
-    return scores;
-  }
-
-  function renderScores(m){
-    const scores = computeScores(m);
-    let h = '';
-    scores.forEach(sc=>{
-      const pct = Math.max(0, Math.min(1, sc.s)) * 100; // not exact, but good for visualization
-      h += `<div class="score-row"><div>${sc.id}</div><div class="bar"><i style="width:${pct.toFixed(0)}%"></i></div><div>${sc.s.toFixed(3)}</div></div>`;
-    });
-    scoreList.innerHTML = h;
-  }
-
-  async function scanDFT(){
-    if(!window.readMetrics){ return; }
-    const m = readMetrics();
-    updateSignalBars(m);
-    renderScores(m);
-  }
-  document.getElementById('btnScanDFT')?.addEventListener('click', scanDFT);
-
-  // show DFT panel automatically with console
-  const btnConsole = document.getElementById('btnConsole');
-  btnConsole?.addEventListener('click', ()=>{
-    setTimeout(()=>{
-      const c = document.getElementById('console');
-      const visible = c && getComputedStyle(c).display!=='none';
-      dftPanel.classList.toggle('show', !!visible);
-      if(visible) scanDFT();
-    }, 60);
-  });
-
-  // periodic refresh (aligned with DFT tick ~4s)
-  setInterval(()=>{ const c = document.getElementById('console'); if(c && getComputedStyle(c).display!=='none'){ scanDFT(); } }, 4000);
-
-  // ---- Touch Analyzer (UNO) ----
-  const touchPanel = document.getElementById('touchPanel');
-  const touchLog = document.getElementById('touchLog');
-  const touchCanvas = document.getElementById('touchCanvas');
-
-  // render a simple trail with CSS squares (no canvas API to keep dependencies zero)
-  function plot(x, y){
-    const d = document.createElement('div');
-    Object.assign(d.style, {
-      position:'absolute', left: (x*100)+'%', top:(y*100)+'%', width:'8px', height:'8px',
-      transform:'translate(-50%,-50%)', borderRadius:'4px', background:'var(--arch-a)', boxShadow:'0 0 8px var(--arch-a)'
-    });
-    touchCanvas.style.position='relative';
-    touchCanvas.appendChild(d);
-    setTimeout(()=>d.remove(), 3000);
-  }
-
-  function numerologyReduce(n){ // digital root (1..9, 0->0)
-    n = Math.abs(n|0);
-    if (n===0) return 0;
-    return 1 + ((n - 1) % 9);
-  }
-
-  function toImpulse(px, py, w, h){
-    // normalize 0..1
-    const nx = Math.max(0, Math.min(1, px / Math.max(1,w)));
-    const ny = Math.max(0, Math.min(1, py / Math.max(1,h)));
-    // convert to symbolic impulse (angle + radius) and a numerology number
-    const cx = nx - 0.5, cy = ny - 0.5;
-    const r = Math.sqrt(cx*cx + cy*cy);
-    const ang = Math.atan2(cy, cx); // -PI..PI
-    const deg = Math.round((ang * 180 / Math.PI + 360) % 360);
-    const num = numerologyReduce(Math.round(nx*9) + Math.round(ny*9));
-    return { nx, ny, r: Number(r.toFixed(3)), deg, num };
-  }
-
-  function logTouch(ev){
-    try{
-      const rect = document.body.getBoundingClientRect();
-      const x = (ev.touches? ev.touches[0].clientX : ev.clientX) - rect.left;
-      const y = (ev.touches? ev.touches[0].clientY : ev.clientY) - rect.top;
-      const imp = toImpulse(x, y, rect.width, rect.height);
-      plot(imp.nx, imp.ny);
-      // append log
-      const row = document.createElement('div');
-      row.textContent = `x:${imp.nx.toFixed(2)} y:${imp.ny.toFixed(2)} deg:${imp.deg} r:${imp.r} num:${imp.num}`;
-      touchLog.prepend(row);
-      while(touchLog.childElementCount>60) touchLog.removeChild(touchLog.lastChild);
-      // store to localStorage as a symbolic impulse train
-      const key='dual.touch.impulses';
-      const arr = JSON.parse(localStorage.getItem(key)||'[]');
-      arr.push({t:Date.now(), ...imp});
-      while(arr.length>128) arr.shift();
-      localStorage.setItem(key, JSON.stringify(arr));
-      // feed back into DFT via dual.water numerics (gentle bias)
-      const water = JSON.parse(localStorage.getItem('dual.water')||'{}');
-      water.cpu = Math.min(100, Math.round((water.cpu||0) * 0.9 + imp.num*1.1)); // playful coupling
-      water.mem = Math.min(800, Math.round((water.mem||0) * 0.9 + (imp.r*100)));
-      localStorage.setItem('dual.water', JSON.stringify(water));
-    }catch(e){}
-  }
-
-  // enable panel with console
-  const enableTouchPanel = ()=>{
-    const c = document.getElementById('console');
-    const visible = c && getComputedStyle(c).display!=='none';
-    touchPanel.classList.toggle('show', !!visible);
-  };
-  document.getElementById('btnConsole')?.addEventListener('click', ()=> setTimeout(enableTouchPanel, 60));
-
-  // global listeners
-  document.addEventListener('click', logTouch, {passive:true});
-  document.addEventListener('touchstart', logTouch, {passive:true});
-
-})();
-
-/* Persist archetype + coherent boot */
-(function(){
-  const LAST_KEY = 'dual.lastArchetype';
-  const last = localStorage.getItem(LAST_KEY);
-  if(last && typeof last === 'string'){
-    // try set theme early to avoid flash
-    const a = ARCHS.find(x=> x.id.toLowerCase()===last.toLowerCase());
-    if(a){
-      document.documentElement.style.setProperty('--arch-a', a.colorA);
-      document.documentElement.style.setProperty('--arch-b', a.colorB);
-      const f = document.getElementById('coreFrame');
-      try{
-        if(window.DFT_MAP && window.DFT_MAP[a.id]) f.src = window.DFT_MAP[a.id];
-      }catch(e){}
-    }
-  }
-  // when archetype changes in DFT, save
-  const _apply = window.applyArchetype;
-  window.applyArchetype = async function(idx){
-    await _apply(idx);
-    try{ const id = ARCHS[idx]?.id; if(id) localStorage.setItem(LAST_KEY, id); }catch(e){}
-  };
-})();
-
-</script>
-
-
-<script>
-(()=>{
-  // Live weights & bias
-  const WKEY = 'dual.dft.weights';
-  const BKEY = 'dual.dft.bias';
-  const defaultW = { nfps:0.18, nlat:0.18, nlt:0.16, ncls:0.16, ncpu:0.16, nmem:0.16 };
-  const defaultBias = {}; ARCHS.forEach(a=> defaultBias[a.id]=0);
-
-  function getW(){ try{ return Object.assign({}, defaultW, JSON.parse(localStorage.getItem(WKEY)||'{}')); }catch(e){ return {...defaultW}; } }
-  function getB(){ try{ return Object.assign({}, defaultBias, JSON.parse(localStorage.getItem(BKEY)||'{}')); }catch(e){ return {...defaultBias}; } }
-  function saveW(w){ localStorage.setItem(WKEY, JSON.stringify(w)); }
-  function saveB(b){ localStorage.setItem(BKEY, JSON.stringify(b)); }
-
-  function renderWeights(){
-    const g = document.getElementById('weightsGrid'); if(!g) return;
-    const w = getW();
-    const fields = [['nfps','FPS'],['nlat','LAT'],['nlt','LT'],['ncls','CLS'],['ncpu','CPU'],['nmem','MEM']];
-    g.innerHTML = fields.map(([k,label])=>`<div class="k">${label}</div><div class="v"><input type="range" min="0" max="1" step="0.01" value="${w[k]}" data-w="${k}"/> <span id="w_${k}">${w[k]}</span></div>`).join('');
-    g.querySelectorAll('input[type="range"]').forEach(r=>{
-      r.oninput = (e)=>{ const w=getW(); const k=e.target.dataset.w; w[k]=Number(e.target.value); saveW(w); document.getElementById('w_'+k).textContent=w[k].toFixed(2); };
-    });
-    document.getElementById('btnResetW')?.addEventListener('click', ()=>{ saveW(defaultW); renderWeights(); });
-  }
-
-  function renderBias(){
-    const g = document.getElementById('biasGrid'); if(!g) return;
-    const b = getB();
-    g.innerHTML = ARCHS.map(a=>`<div class="k">${a.id}</div><div class="v"><input type="range" min="-0.10" max="0.10" step="0.005" value="${b[a.id]||0}" data-b="${a.id}"/> <span id="b_${a.id}">${(b[a.id]||0).toFixed(3)}</span></div>`).join('');
-    g.querySelectorAll('input[type="range"]').forEach(r=>{
-      r.oninput = (e)=>{ const b=getB(); const k=e.target.dataset.b; b[k]=Number(e.target.value); saveB(b); document.getElementById('b_'+k).textContent=(b[k]).toFixed(3); };
-    });
-  }
-
-  // Patch scoring to use live weights+bias
-  const _scoreFor = window.scoreFor;
-  window.scoreFor = function(a, m){
-    const s = _scoreFor(a, m);
-    const fields = ['nfps','nlat','nlt','ncls','ncpu','nmem'];
-    // recompute projection with live weights as multiplier on final score (light touch)
-    const W = getW(); let wsum=0; fields.forEach(k=> wsum += W[k]); if(wsum<=0) wsum = 1;
-    const factor = (W.nfps + W.nlat + W.nlt + W.ncls + W.ncpu + W.nmem)/wsum; // ~1
-    const bias = getB()[a.id] || 0;
-    return s * factor + bias;
-  };
-
-  // render on console open
-  document.getElementById('btnConsole')?.addEventListener('click', ()=> setTimeout(()=>{ renderWeights(); renderBias(); }, 80));
-})();
-</script>
-
-
-<script>
-(()=>{
-  // ---- Event Sound Engine using active archetype preset ----
-  // Reuse global actx/out/gain/filter/convolver if available
-  async function ensureAudio(){ if(!S.audioReady){ await initAudio(); if(actx.state==='suspended') await actx.resume(); } }
-
-  function applyPresetToNodes(preset){
-    try{ if(filter){ filter.type = preset.filter.type || 'highpass'; filter.frequency.value = preset.filter.freq || 220; } }catch(e){}
-  }
-  function ping(freqMul=1, shimmerBoost=0, dur=0.35){
-    const base = 220 + ((ARCHS[CURRENT.idx]?.preset?.pitch||0)*20);
-    const f = base * (freqMul||1);
-    out.parameters.get('freq').setValueAtTime(f, actx.currentTime);
-    out.parameters.get('on').setValueAtTime(1, actx.currentTime);
-    gain.gain.cancelScheduledValues(actx.currentTime);
-    const a = 0.65 + ((ARCHS[CURRENT.idx]?.preset?.shimmer||0)*0.5) + (shimmerBoost||0);
-    gain.gain.linearRampToValueAtTime(a, actx.currentTime+0.01);
-    gain.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime+dur);
-    setTimeout(()=> out.parameters.get('on').setValueAtTime(0, actx.currentTime), Math.max(100, dur*1000));
-  }
-  window.soundEngine = {
-    accent: async ()=>{ await ensureAudio(); const p=ARCHS[CURRENT.idx]?.preset||{filter:{type:'highpass',freq:220}}; applyPresetToNodes(p); ping(1, 0.0, 0.35); },
-    receive: async ()=>{ await ensureAudio(); const p=ARCHS[CURRENT.idx]?.preset||{filter:{type:'bandpass',freq:900}}; applyPresetToNodes(p); ping(1.25, 0.05, 0.45); },
-    input: async ()=>{ await ensureAudio(); const p=ARCHS[CURRENT.idx]?.preset||{filter:{type:'peaking',freq:1200}}; applyPresetToNodes(p); ping(0.9, 0.02, 0.25); },
-    error: async ()=>{ await ensureAudio(); const p=ARCHS[CURRENT.idx]?.preset||{filter:{type:'lowpass',freq:600}}; applyPresetToNodes(p); ping(0.6, -0.02, 0.6); }
-  };
-
-  // ---- Temporal Plot of 6 signals + top score ----
-  const plotWrap = document.getElementById('dftPlotWrap');
-  const plot = document.getElementById('dftPlot');
-  let plotCtx = null, plotData = { t: [], fps:[], lat:[], lt:[], cls:[], cpu:[], mem:[], top:[] };
-  function pushPlot(m, topScore){
-    const now = Date.now()/1000;
-    ['fps','lat','lt','cls','cpu','mem'].forEach(k=>{
-      if(!Array.isArray(plotData[k])) plotData[k]=[];
-      plotData[k].push(Number(m[k]||0));
-      if(plotData[k].length>120) plotData[k].shift();
-    });
-    plotData.top.push(Number(topScore||0)); if(plotData.top.length>120) plotData.top.shift();
-    plotData.t.push(now); if(plotData.t.length>120) plotData.t.shift();
-  }
-  function drawPlot(){
-    if(!plotCtx) { plotCtx = plot.getContext('2d'); }
-    const ctx = plotCtx, W = plot.width = plot.clientWidth, H = plot.height = plot.clientHeight;
-    ctx.clearRect(0,0,W,H);
-    ctx.fillStyle = 'rgba(255,255,255,0.04)'; ctx.fillRect(0,0,W,H);
-    // helpers
-    function scale(arr, maxv){ if(!arr.length) return []; const m = Math.max(1, maxv||Math.max(...arr)); return arr.map(v=> (1 - (v/m)) * (H-18) + 9); }
-    function line(arr, color, maxv){
-      const y = scale(arr, maxv); ctx.beginPath(); ctx.strokeStyle=color; ctx.lineWidth=1.5;
-      y.forEach((yy,i)=>{ const x = (i/(Math.max(1,y.length-1))) * (W-10) + 5; if(i===0) ctx.moveTo(x,yy); else ctx.lineTo(x,yy); });
-      ctx.stroke();
-    }
-    // draw
-    line(plotData.fps, '#7fd3ff', 60);
-    line(plotData.lat, '#ffb86b', 250);
-    line(plotData.lt,  '#ff5a6e', 10);
-    line(plotData.cls, '#c9ff6b', 0.5);
-    line(plotData.cpu, '#29d3ff', 100);
-    line(plotData.mem, '#ff5af4', 800);
-    // top score (0..1)
-    line(plotData.top, '#ffffff', 1);
-  }
-  // show plot when console visible
-  const btnConsole = document.getElementById('btnConsole');
-  btnConsole?.addEventListener('click', ()=> setTimeout(()=>{
-    const c=document.getElementById('console'); const visible=c && getComputedStyle(c).display!=='none';
-    plotWrap.classList.toggle('show', !!visible); if(visible) drawPlot();
-  }, 80));
-  setInterval(()=>{ const c=document.getElementById('console'); if(c && getComputedStyle(c).display!=='none'){ drawPlot(); } }, 1500);
-
-  // integrate with DFT tick to push history
-  const _pickArchetype = window.pickArchetype;
-  window.pickArchetype = function(){
-    const r = _pickArchetype();
-    try{
-      const m = readMetrics();
-      const scores = computeScores(m);
-      const top = scores && scores[0] ? scores[0].s : 0;
-      pushPlot(m, top);
-    }catch(e){}
-    return r;
-  };
-
-  // ---- Profiles: Studio / Live / Agressivo ----
-  function applyProfile(name){
-    const WKEY='dual.dft.weights', BKEY='dual.dft.bias';
-    let w, b;
-    switch(name){
-      case 'Studio':
-        w={nfps:0.14,nlat:0.16,nlt:0.18,ncls:0.20,ncpu:0.16,nmem:0.16};
-        b={}; ARCHS.forEach(a=> b[a.id]=0);
-        break;
-      case 'Live':
-        w={nfps:0.22,nlat:0.20,nlt:0.14,ncls:0.12,ncpu:0.16,nmem:0.16};
-        b={}; ARCHS.forEach(a=> b[a.id]=0);
-        break;
-      case 'Agressivo':
-        w={nfps:0.26,nlat:0.22,nlt:0.20,ncls:0.10,ncpu:0.12,nmem:0.10};
-        b={}; ARCHS.forEach(a=> b[a.id]=0);
-        break;
-      default: return;
-    }
-    localStorage.setItem(WKEY, JSON.stringify(w));
-    localStorage.setItem(BKEY, JSON.stringify(b));
-    // refresh sliders if console open
-    setTimeout(()=>{
-      const eW=document.getElementById('weightsGrid'); if(eW){ eW.querySelectorAll('input[type="range"]').forEach(inp=>{ const k=inp.dataset.w; inp.value=w[k]; inp.dispatchEvent(new Event('input')); }); }
-      const eB=document.getElementById('biasGrid'); if(eB){ eB.querySelectorAll('input[type="range"]').forEach(inp=>{ inp.value=0; inp.dispatchEvent(new Event('input')); }); }
-    }, 50);
-  }
-  document.getElementById('btnProfileStudio')?.addEventListener('click', ()=>applyProfile('Studio'));
-  document.getElementById('btnProfileLive')?.addEventListener('click', ()=>applyProfile('Live'));
-  document.getElementById('btnProfileAgg')?.addEventListener('click', ()=>applyProfile('Agressivo'));
-})();
-</script>
+<!-- Botão Único (auto-injetado v0.4) -->
+<button id="btnInfodose" title="KOBLLUX — Botão Único">☰</button>
 
 </body>
 </html>
