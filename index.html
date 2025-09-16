@@ -6,6 +6,12 @@
 <title>Dual — UNIFIED v1.0 (UNO)</title>
 <meta name="theme-color" content="#0b0f17" />
 <link rel="icon" href="assets/icons/app.svg">
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b0f17">
+<link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<script>window.addEventListener('load',()=>navigator.serviceWorker?.register('./sw.js'))</script>
 <style>
   :root{
     --bg:#0b0f17;--panel:#0f1522;--glass:rgba(255,255,255,.06);--line:rgba(255,255,255,.14);
