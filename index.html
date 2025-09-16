@@ -3,14 +3,22 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Dual — UNIFIED v1.0.6 (FIX)</title>
+<title>Dual — UNIFIED v1.0.7 (U10-FIX)</title>
 <meta name="theme-color" content="#0b0f17" />
 <link rel="icon" href="assets/icons/app.svg">
 <style>
-  :root{ --bg:#0b0f17;--panel:#0f1522;--glass:rgba(255,255,255,.06);--line:rgba(255,255,255,.14);
-    --ink:#e9f6ff;--muted:#97b1c6;--accent:#29d3ff;--accent2:#ff5af4;--ok:#39ffb6;--warn:#ffb74d;--err:#ff5a6e; --rad:18px;--pad:14px;--shadow:0 12px 40px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.04) }
+  :root{
+    --bg:#0b0f17;--panel:#0f1522;--glass:rgba(255,255,255,.06);--line:rgba(255,255,255,.14);
+    --ink:#e9f6ff;--muted:#97b1c6;--accent:#29d3ff;--accent2:#ff5af4;--ok:#39ffb6;--warn:#ffb74d;--err:#ff5a6e;
+    --rad:18px;--pad:14px;--shadow:0 12px 40px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.04);
+    --arch-a:#29d3ff; --arch-b:#ff5af4;
+  }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  html,body{height:100%} body{margin:0;background:radial-gradient(1200px 800px at 20% -10%, rgba(41,211,255,.14), transparent 60%), radial-gradient(900px 600px at 110% 20%, rgba(255,90,244,.10), transparent 60%), linear-gradient(0deg, #0a0d14, #0b0f17); color:var(--ink);font:500 15px/1.35 system-ui, -apple-system, Segoe UI, Roboto, Inter, sans-serif; max-width:100vw; overflow-x:hidden}
+  html,body{height:100%}
+  body{margin:0;background:radial-gradient(1200px 800px at 20% -10%, rgba(41,211,255,.14), transparent 60%),
+       radial-gradient(900px 600px at 110% 20%, rgba(255,90,244,.10), transparent 60%),
+       linear-gradient(0deg, #0a0d14, #0b0f17);
+       color:var(--ink);font:500 15px/1.35 system-ui, -apple-system, Segoe UI, Roboto, Inter, sans-serif; max-width:100vw; overflow-x:hidden}
   .app{position:fixed;inset:0;display:grid;grid-template-rows:auto 1fr auto;min-width:0}
   header{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px env(safe-area-inset-right) 6px env(safe-area-inset-left)}
   .logo{width:30px;height:30px;border-radius:50%;background:conic-gradient(from 0deg, var(--accent), var(--accent2), var(--accent)); box-shadow:0 0 20px rgba(41,211,255,.4);animation:spin 9s linear infinite}
@@ -19,18 +27,28 @@
   .row{display:flex;gap:10px;align-items:center;min-width:0;flex-wrap:wrap} .grow{flex:1 1 auto;min-width:0}
   .btn{appearance:none;border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--ink); padding:10px 12px;border-radius:14px;font-weight:700;letter-spacing:.3px;box-shadow:var(--shadow);display:inline-flex;align-items:center;gap:8px}
   .btn:active{transform:translateY(1px);opacity:.9} .chip{font-size:12px;border-radius:999px;border:1px solid var(--line);padding:6px 10px;background:rgba(255,255,255,.04);color:var(--muted)}
+  select{appearance:none;background:rgba(255,255,255,.06);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:8px 10px;max-width:52vw}
   .water{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .badge{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:rgba(255,255,255,.04); padding:6px 8px;border-radius:10px;font-size:11px;color:var(--muted);white-space:nowrap}
   .center{position:relative;display:grid;place-items:center;margin:6px}
   .circle{position:relative;width:min(78vw,520px);aspect-ratio:1/1;border-radius:50%; border:1px solid var(--line);background:radial-gradient(60% 60% at 50% 50%, rgba(41,211,255,.1), rgba(255,255,255,.02)); box-shadow:var(--shadow);overflow:hidden}
   .circle iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:transparent}
-  .dotlogo{position:absolute; top:12px; right:12px; width:18px; height:18px; border-radius:50%; background: conic-gradient(#29d3ff,#ff5af4,#29d3ff); box-shadow:0 0 18px rgba(41,211,255,.4)}
+  .dotlogo{position:absolute; top:12px; right:12px; width:18px; height:18px; border-radius:50%; background: conic-gradient(var(--arch-a), var(--arch-b), var(--arch-a)); box-shadow:0 0 18px color-mix(in srgb, var(--arch-a) 60%, transparent)}
   .card{background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px); border:1px solid var(--line);border-radius:var(--rad);padding:var(--pad);box-shadow:var(--shadow); margin:8px}
   .apps .appItem{display:flex;align-items:center;gap:10px;min-width:0} .apps .meta{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:42vw}
   .sandboxWrap{margin:8px;border:1px solid var(--line);border-radius:16px;overflow:hidden} iframe.sandbox{display:block;width:100%;height:360px;background:#0a0d14;border:0}
   #btnInfodose{ position:fixed; right:1rem; bottom:1rem; z-index:1000; width:56px; height:56px; border-radius:50%; display:flex; align-items:center; justify-content:center; backdrop-filter: blur(8px); border:1px solid rgba(255,255,255,.18); box-shadow:0 10px 30px rgba(0,0,0,.3) }
   .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(72px + env(safe-area-inset-bottom));background:rgba(20,28,44,.9);border:1px solid var(--line);backdrop-filter:blur(10px);padding:8px 12px;border-radius:12px;font-size:12px;color:var(--ink);display:none}
   @media (orientation: portrait){ header{ gap:8px; padding:8px } iframe.sandbox{ height:320px } }
+  /* Debug panels */
+  #dftPanel,#compatPanel,#touchPanel,#dftPlotWrap{ display:none }
+  #dftPanel.show,#compatPanel.show,#touchPanel.show,#dftPlotWrap.show{ display:block }
+  .dft-grid{ display:grid; grid-template-columns: 130px 1fr; gap:6px 10px; align-items:center; }
+  .bar{ height:8px; background:rgba(255,255,255,.08); border-radius:6px; overflow:hidden }
+  .bar > i{ display:block; height:100%; background:linear-gradient(90deg, var(--arch-a), var(--arch-b)); width:0% }
+  .score-row{ display:grid; grid-template-columns: 100px 1fr 56px; gap:6px; align-items:center }
+  .score-row .bar{ height:6px }
+  #dftPlot{ width:100%; height:160px; border:1px solid var(--line); border-radius:10px; background:rgba(255,255,255,.03) }
 </style>
 </head>
 <body>
@@ -38,7 +56,7 @@
   <header>
     <div class="logo"></div>
     <div>
-      <div class="title">Dual UNIFIED <span class="chip">v1.0.6</span></div>
+      <div class="title">Dual UNIFIED <span class="chip">v1.0.7</span></div>
       <div class="sub">UNO · retrato · centro vivo</div>
     </div>
     <div class="grow"></div>
@@ -65,6 +83,8 @@
         <strong>Apps</strong>
         <div class="grow"></div>
         <button class="btn" id="btnLoadApps">Carregar apps.json</button>
+        <input type="file" id="btnUploadHTML" accept="text/html" multiple style="display:none"/>
+        <button class="btn" id="btnUploadHTMLOpen">Upload HTML</button>
         <input type="file" id="btnImportZip" accept="application/zip" style="display:none"/>
         <button class="btn" id="btnImportZipOpen">Importar ZIP</button>
         <button class="btn" id="btnExport">Exportar ZIP</button>
@@ -76,6 +96,31 @@
     </section>
 
     <div class="console card" id="console" style="display:none"></div>
+
+    <div id="dftPanel" class="card">
+      <div class="row"><strong>DFT Debug</strong><div class="grow"></div><button class="btn" id="btnScanDFT">Reescan</button></div>
+      <div class="dft-grid" style="margin-top:8px">
+        <div>FPS</div><div class="bar"><i id="sig_fps"></i></div>
+        <div>LAT</div><div class="bar"><i id="sig_lat"></i></div>
+        <div>LT</div><div class="bar"><i id="sig_lt"></i></div>
+        <div>CLS</div><div class="bar"><i id="sig_cls"></i></div>
+        <div>CPU</div><div class="bar"><i id="sig_cpu"></i></div>
+        <div>MEM</div><div class="bar"><i id="sig_mem"></i></div>
+      </div>
+      <div id="scoreList" style="margin-top:10px;display:grid;gap:6px"></div>
+      <div class="row" style="margin-top:8px"><strong>Perfis DFT</strong><div class="grow"></div>
+        <button class="btn" id="btnProfileStudio">Studio</button>
+        <button class="btn" id="btnProfileLive">Live</button>
+        <button class="btn" id="btnProfileAgg">Agressivo</button>
+      </div>
+      <div class="card" style="margin-top:8px">
+        <div class="row"><strong>Pesos (live)</strong><div class="grow"></div><button class="btn" id="btnResetW">Reset</button></div>
+        <div id="weightsGrid" class="dft-grid" style="margin-top:8px"></div>
+        <div id="biasGrid" class="dft-grid" style="margin-top:8px"></div>
+      </div>
+      <div id="dftPlotWrap" style="margin-top:8px"><canvas id="dftPlot"></canvas></div>
+    </div>
+
   </main>
 
   <button id="btnInfodose" class="btn" title="Ação Única ⚡">⚡</button>
@@ -83,32 +128,50 @@
 </div>
 
 <script>
+/* Helpers */
 const $=s=>document.querySelector(s);
 function toast(m){ const t=$('#toast'); t.textContent=m; t.style.display='block'; setTimeout(()=>t.style.display='none', 1200); }
+
+/* Perf HUD */
 let t0=performance.now(), rafCount=0, lastFpsT=performance.now();
 function loop(now){ const dt=now-t0; t0=now; $('#lat').textContent=Math.max(1,Math.round(dt)); rafCount++; if(now-lastFpsT>1000){ $('#fps').textContent=rafCount; rafCount=0; lastFpsT=now; } requestAnimationFrame(loop); }
 requestAnimationFrame(loop);
 if('PerformanceObserver' in window){ try{ new PerformanceObserver(l=>{ for(const e of l.getEntries()){ if(e.duration>50){ const v=parseInt($('#lt').textContent,10)||0; $('#lt').textContent=v+1; }}}).observe({entryTypes:['longtask']}); }catch(e){} try{ let cls=0; new PerformanceObserver(l=>{ for(const e of l.getEntries()){ if(!e.hadRecentInput){ cls+=e.value; } } $('#cls').textContent=cls.toFixed(3); }).observe({type:'layout-shift', buffered:true}); }catch(e){} }
 
+/* Audio Core */
 let actx,out,gain,filter,convolver,impulse, audioReady=false;
 async function initAudio(){ if(audioReady) return; actx=new (window.AudioContext||window.webkitAudioContext)(); const code=`class B extends AudioWorkletProcessor{static get parameterDescriptors(){return[{name:'on',defaultValue:0},{name:'freq',defaultValue:220}]}
 process(i,o,p){const out=o[0];const on=p.on[0],f=p.freq[0];for(let ch=0; ch<out.length; ch++){const b=out[ch];for(let n=0;n<b.length;n++){let s=0;if(on>0.5){s=(Math.random()*2-1)*0.18+Math.sin(2*Math.PI*(currentFrame+n)/sampleRate*f)*0.22;}b[n]=s;}}return true}}registerProcessor('b',B);`; await actx.audioWorklet.addModule(URL.createObjectURL(new Blob([code],{type:'text/javascript'}))); out=new AudioWorkletNode(actx,'b'); gain=actx.createGain(); gain.gain.value=0.0; filter=actx.createBiquadFilter(); filter.type='highpass'; filter.frequency.value=220; convolver=actx.createConvolver(); impulse=makeImp(actx,0.22); convolver.buffer=impulse; const mix=actx.createGain(); mix.gain.value=0.25; out.connect(filter); filter.connect(gain); gain.connect(actx.destination); gain.connect(mix).connect(convolver).connect(actx.destination); audioReady=true; toast('Áudio pronto'); }
 function makeImp(ctx,d){const r=ctx.sampleRate,l=r*d|0,b=ctx.createBuffer(2,l,r);for(let c=0;c<2;c++){const a=b.getChannelData(c);for(let i=0;i<l;i++){a[i]=(Math.random()*2-1)*Math.pow(1-i/l,2)}}return b}
-function accent(){ if(!audioReady) return; out.parameters.get('freq').setValueAtTime(260, actx.currentTime); out.parameters.get('on').setValueAtTime(1, actx.currentTime); gain.gain.cancelScheduledValues(actx.currentTime); gain.gain.linearRampToValueAtTime(0.9, actx.currentTime+0.01); gain.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime+0.35); setTimeout(()=> out.parameters.get('on').setValueAtTime(0, actx.currentTime), 140); }
-$('#btnPlay').onclick=async()=>{ await initAudio(); if(actx.state==='suspended') await actx.resume(); accent(); };
+function applyPreset(p){ try{ if(filter){ filter.type=p?.filter?.type||'highpass'; filter.frequency.value=p?.filter?.freq||220; } }catch(e){} }
+function ping(freqMul=1, shimmerBoost=0, dur=0.35, preset){ const base = 220 + ((preset?.pitch||0)*20); const f = base * (freqMul||1); out.parameters.get('freq').setValueAtTime(f, actx.currentTime); out.parameters.get('on').setValueAtTime(1, actx.currentTime); gain.gain.cancelScheduledValues(actx.currentTime); const a = 0.65 + ((preset?.shimmer||0)*0.5) + (shimmerBoost||0); gain.gain.linearRampToValueAtTime(a, actx.currentTime+0.01); gain.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime+dur); setTimeout(()=> out.parameters.get('on').setValueAtTime(0, actx.currentTime), Math.max(100, dur*1000)); }
+const soundEngine = { accent: async (preset)=>{ await initAudio(); applyPreset(preset); ping(1, 0.0, 0.35, preset); }, receive: async (preset)=>{ await initAudio(); applyPreset(preset); ping(1.25, 0.05, 0.45, preset); }, input: async (preset)=>{ await initAudio(); applyPreset(preset); ping(0.9, 0.02, 0.25, preset); }, error: async (preset)=>{ await initAudio(); applyPreset(preset); ping(0.6, -0.02, 0.6, preset); } };
 
-$('#btnConsole').onclick=()=>{ const c=$('#console'); const on=getComputedStyle(c).display!=='none'; c.style.display= on?'none':'block'; if(!on){ c.innerHTML='<pre>Console ativado — DFT/Compat podem ser plugados aqui.</pre>'; } };
+$('#btnPlay').onclick=async()=>{ await initAudio(); if(actx.state==='suspended') await actx.resume(); soundEngine.accent({pitch:0,filter:{type:'highpass',freq:220},shimmer:0.15}); };
 
+/* UNO: FAB abre/fecha Apps */
 $('#btnInfodose').onclick=()=>{ const p=$('#appsPane'); const vis=getComputedStyle(p).display!=='none'; p.style.display= vis?'none':'block'; toast(vis?'Apps OFF':'Apps ON'); };
 
+/* Console toggle */
+$('#btnConsole').onclick=()=>{ const c=$('#console'); const on=getComputedStyle(c).display!=='none'; c.style.display= on?'none':'block'; const show=!on; $('#dftPanel').classList.toggle('show', show); $('#dftPlotWrap').classList.toggle('show', show); };
+
+/* Apps */
 $('#btnLoadApps').onclick=async()=>{ try{ const r=await fetch('./apps/apps.json'); const j=await r.json(); renderApps(j.apps||j); toast('apps.json OK'); }catch(e){ toast('Falha no apps.json'); console.error(e); } };
 function renderApps(arr){ const list=$('#appsList'); list.innerHTML=''; const df=document.createDocumentFragment(); (arr||[]).forEach((a,i)=>{ const row=document.createElement('div'); row.className='appItem'; row.innerHTML=`<span class="chip">#${i+1}</span><div style="min-width:0"><div><strong>${a.name||'App'}</strong></div><div class="meta">${a.url}</div></div><div class="grow"></div><button class="btn" data-open="${i}">Abrir</button>`; df.appendChild(row); }); list.appendChild(df); list.onclick=e=>{ const i=e.target?.dataset?.open; if(i!=null){ openSandbox((arr||[])[i]); } } }
 function openSandbox(app){ const f=$('#sandbox'); const w=$('#sandboxWrap'); w.style.display='block'; f.setAttribute('referrerpolicy','no-referrer'); f.setAttribute('allow', app.allow||'autoplay'); f.setAttribute('sandbox', app.sandbox||'allow-scripts'); f.src = app.url; }
 
+/* Local Apps (IndexedDB) + Upload/Import/Export */
 const DB={ name:'dual-local-apps', ver:1, db:null };
 function idbOpen(){ return new Promise((res,rej)=>{ const r=indexedDB.open(DB.name, DB.ver); r.onupgradeneeded=ev=>{ const db=ev.target.result; if(!db.objectStoreNames.contains('localApps')) db.createObjectStore('localApps',{keyPath:'id'}); }; r.onsuccess=ev=>{ DB.db=ev.target.result; res(); }; r.onerror=()=>rej(r.error); }); }
 async function idbPut(rec){ await idbOpen(); return new Promise(res=>{ const tx=DB.db.transaction('localApps','readwrite'); tx.objectStore('localApps').put(rec); tx.oncomplete=()=>res(true); }); }
 async function idbAll(){ await idbOpen(); return new Promise(res=>{ const tx=DB.db.transaction('localApps','readonly'); const rq=tx.objectStore('localApps').getAll(); rq.onsuccess=()=>res(rq.result||[]); }); }
+
+$('#btnUploadHTMLOpen').onclick=()=> $('#btnUploadHTML').click();
+$('#btnUploadHTML').addEventListener('change', async (e)=>{
+  const files=[...(e.target.files||[])]; if(!files.length) return;
+  for(const f of files){ const txt=await f.text(); await idbPut({ id:'html:'+f.name, name:f.name, type:'text/html', data:btoa(txt), ts:Date.now() }); }
+  toast('HTML(s) importado(s)'); const locals=await idbAll(); injectLocalApps(locals); e.target.value='';
+});
 
 $('#btnImportZipOpen').onclick=()=> $('#btnImportZip').click();
 $('#btnImportZip').addEventListener('change', async (e)=>{
@@ -117,6 +180,7 @@ $('#btnImportZip').addEventListener('change', async (e)=>{
   for(const file of files){ if(file.name.toLowerCase().endswith('.html')){ const txt=new TextDecoder().decode(file.data); await idbPut({ id:'html:'+file.name, name:file.name, type:'text/html', data:btoa(txt), ts:Date.now() }); } }
   toast('ZIP importado'); const locals=await idbAll(); injectLocalApps(locals); e.target.value='';
 });
+
 async function injectLocalApps(locals){
   const list=$('#appsList'); if(!list) return;
   locals.forEach((app,i)=>{
@@ -126,6 +190,7 @@ async function injectLocalApps(locals){
     list.prepend(row);
   });
 }
+
 $('#btnExport').onclick=async()=>{
   const locals=await idbAll(); if(!locals.length){ toast('Sem locais'); return; }
   const files=[]; const apps=[];
@@ -133,6 +198,8 @@ $('#btnExport').onclick=async()=>{
   const appsJson=new TextEncoder().encode(JSON.stringify({apps}, null, 2)); files.push({name:'apps.json', data:appsJson});
   const zip=createZip(files); const blob=new Blob([zip], {type:'application/zip'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='localApps_export.zip'; a.click(); toast('ZIP exportado');
 };
+
+/* unzipAny (store/deflate) + zip writer */
 async function unzipAny(ab){
   const dv=new DataView(ab); const u8=new Uint8Array(ab); let eocd=-1;
   for(let i=u8.length-22;i>=0 && i>=u8.length-65557;i--){ if(dv.getUint32(i,true)===0x06054b50){ eocd=i; break; } }
@@ -168,6 +235,49 @@ function createZip(files){
   ve.setUint32(p,0x06054b50,true); p+=4; ve.setUint16(p,0,true); p+=2; ve.setUint16(p,0,true); p+=2; ve.setUint16(p,files.length,true); p+=2; ve.setUint16(p,files.length,true); p+=2; ve.setUint32(p,cdSize,true); p+=4; ve.setUint32(p,offset,true); p+=4; ve.setUint16(p,0,true); p+=2;
   const totalLen=offset+cdSize+end.length; const out=new Uint8Array(totalLen); let off=0; parts.forEach(part=>{ out.set(part,off); off+=part.length; }); cd.forEach(part=>{ out.set(part,off); off+=part.length; }); out.set(end,off); return out;
 }
+
+/* ---- DFT Core (minimal live) ---- */
+const ARCHS = [
+  {id:'Nova',   colorA:'#29d3ff', colorB:'#8be4ff', preset:{pitch:+2, filter:{type:'highpass',freq:220}, shimmer:0.18}},
+  {id:'Elysha', colorA:'#ff5af4', colorB:'#ffd1ff', preset:{pitch:+4, filter:{type:'bandpass',freq:900}, shimmer:0.22}},
+  {id:'Kaion',  colorA:'#1fe29a', colorB:'#aaffd9', preset:{pitch:-2, filter:{type:'lowpass', freq:1800}, shimmer:0.12}},
+  {id:'Genus',  colorA:'#ffd65a', colorB:'#fff0b0', preset:{pitch:0,  filter:{type:'notch',   freq:600}, shimmer:0.08}},
+  {id:'Horus',  colorA:'#29d3ff', colorB:'#ff5af4', preset:{pitch:+2, filter:{type:'bandpass',freq:1000}, shimmer:0.20}}
+];
+let CURRENT={idx:0};
+function readMetrics(){ const fps=Number($('#fps').textContent||0), lat=Number($('#lat').textContent||0), lt=Number($('#lt').textContent||0), cls=Number($('#cls').textContent||0); const water=JSON.parse(localStorage.getItem('dual.water')||'{}'); return {fps,lat,lt,cls,cpu:water.cpu||0,mem:water.mem||0}; }
+function clamp01(x){ return Math.max(0, Math.min(1, x)); }
+function scoreFor(a,m){ const nfps=clamp01((60-(m.fps||0))/60), nlat=clamp01((m.lat||0)/180), nlt=clamp01((m.lt||0)/10), ncls=clamp01((m.cls||0)/0.5), ncpu=clamp01((m.cpu||0)/100), nmem=clamp01((m.mem||0)/800); const F=[nfps,nlat,nlt,ncls,ncpu,nmem]; const W={Nova:[0.2,0.2,0.1,0.05,0.25,0.2],Elysha:[0.1,0.15,0.15,0.2,0.2,0.2],Kaion:[0.25,0.15,0.05,0.05,0.3,0.2],Genus:[0.1,0.1,0.25,0.25,0.15,0.15],Horus:[0.18,0.18,0.18,0.18,0.14,0.14]}[a.id]||[0.17,0.17,0.17,0.17,0.16,0.16]; let s=0; for(let i=0;i<F.length;i++) s+=F[i]*W[i]; return s; }
+function computeScores(m){ const S=ARCHS.map(a=>({id:a.id,s:scoreFor(a,m)})); S.sort((a,b)=>b.s-a.s); return S; }
+function applyTheme(a){ document.documentElement.style.setProperty('--arch-a', a.colorA); document.documentElement.style.setProperty('--arch-b', a.colorB); }
+function tickDFT(){ const m=readMetrics(); const scores=computeScores(m); const top=ARCHS.findIndex(a=>a.id===scores[0].id); if(top!==CURRENT.idx){ CURRENT.idx=top; applyTheme(ARCHS[CURRENT.idx]); /* voice on change (receive) */ soundEngine.receive(ARCHS[CURRENT.idx].preset); } pushPlot(m, scores[0].s); renderDFTDebug(m, scores); }
+setInterval(tickDFT, 4000); setTimeout(tickDFT, 600);
+
+/* DFT Debug panels */
+const bars={ fps:$('#sig_fps'),lat:$('#sig_lat'),lt:$('#sig_lt'),cls:$('#sig_cls'),cpu:$('#sig_cpu'),mem:$('#sig_mem') };
+function renderDFTDebug(m, scores){ function N(){ const x=readMetrics(); return {nfps:clamp01((60-(x.fps||0))/60), nlat:clamp01((x.lat||0)/180), nlt:clamp01((x.lt||0)/10), ncls:clamp01((x.cls||0)/0.5), ncpu:clamp01((x.cpu||0)/100), nmem:clamp01((x.mem||0)/800)}; } const n=N(); bars.fps.style.width=(n.nfps*100)+'%'; bars.lat.style.width=(n.nlat*100)+'%'; bars.lt.style.width=(n.nlt*100)+'%'; bars.cls.style.width=(n.ncls*100)+'%'; bars.cpu.style.width=(n.ncpu*100)+'%'; bars.mem.style.width=(n.nmem*100)+'%'; const list=$('#scoreList'); list.innerHTML=''; scores.forEach(sc=>{ const row=document.createElement('div'); row.className='score-row'; row.innerHTML=`<div>${sc.id}</div><div class="bar"><i style="width:${Math.max(0,Math.min(1,sc.s))*100}%"></i></div><div>${sc.s.toFixed(3)}</div>`; list.appendChild(row); }); }
+$('#btnScanDFT').onclick=()=>{ const m=readMetrics(); renderDFTDebug(m, computeScores(m)); drawPlot(); };
+
+/* Plot temporal */
+const plot=$('#dftPlot'); let plotCtx=null, plotData={t:[],fps:[],lat:[],lt:[],cls:[],cpu:[],mem:[],top:[]};
+function pushPlot(m, top){ const now=Date.now()/1000; ['fps','lat','lt','cls','cpu','mem'].forEach(k=>{ plotData[k].push(Number(m[k]||0)); if(plotData[k].length>120) plotData[k].shift(); }); plotData.top.push(Number(top||0)); if(plotData.top.length>120) plotData.top.shift(); plotData.t.push(now); if(plotData.t.length>120) plotData.t.shift(); }
+function drawPlot(){ if(!plotCtx){ plotCtx=plot.getContext('2d'); } const ctx=plotCtx, W=plot.width=plot.clientWidth, H=plot.height=plot.clientHeight; ctx.clearRect(0,0,W,H); ctx.fillStyle='rgba(255,255,255,0.04)'; ctx.fillRect(0,0,W,H); function scale(arr,maxv){ if(!arr.length) return []; const m=Math.max(1,maxv||Math.max(...arr)); return arr.map(v=>(1-(v/m))*(H-18)+9); } function line(arr,color,maxv){ const y=scale(arr,maxv); ctx.beginPath(); ctx.strokeStyle=color; ctx.lineWidth=1.5; y.forEach((yy,i)=>{ const x=(i/Math.max(1,y.length-1))*(W-10)+5; if(i===0) ctx.moveTo(x,yy); else ctx.lineTo(x,yy); }); ctx.stroke(); } line(plotData.fps,'#7fd3ff',60); line(plotData.lat,'#ffb86b',250); line(plotData.lt,'#ff5a6e',10); line(plotData.cls,'#c9ff6b',0.5); line(plotData.cpu,'#29d3ff',100); line(plotData.mem,'#ff5af4',800); line(plotData.top,'#ffffff',1); }
+$('#btnConsole').onclick = ( () => { const orig = $('#btnConsole').onclick; return ()=>{ const c=$('#console'); const on=getComputedStyle(c).display!=='none'; c.style.display= on?'none':'block'; const show=!on; $('#dftPanel').classList.toggle('show', show); $('#dftPlotWrap').classList.toggle('show', show); if(show) drawPlot(); }; })();
+
+/* Profiles + sliders (weights/bias minimal) */
+const WKEY='dual.dft.weights', BKEY='dual.dft.bias';
+const defaultW={nfps:0.18,nlat:0.18,nlt:0.16,ncls:0.16,ncpu:0.16,nmem:0.16}; const defaultBias={}; ARCHS.forEach(a=>defaultBias[a.id]=0);
+function getW(){ try{ return Object.assign({}, defaultW, JSON.parse(localStorage.getItem(WKEY)||'{}')); }catch(e){ return {...defaultW}; } }
+function getB(){ try{ return Object.assign({}, defaultBias, JSON.parse(localStorage.getItem(BKEY)||'{}')); }catch(e){ return {...defaultBias}; } }
+function saveW(w){ localStorage.setItem(WKEY, JSON.stringify(w)); } function saveB(b){ localStorage.setItem(BKEY, JSON.stringify(b)); }
+function renderWeights(){ const g=$('#weightsGrid'); const w=getW(); const fields=[['nfps','FPS'],['nlat','LAT'],['nlt','LT'],['ncls','CLS'],['ncpu','CPU'],['nmem','MEM']]; g.innerHTML=fields.map(([k,l])=>`<div>${l}</div><div><input type="range" min="0" max="1" step="0.01" value="${w[k]}" data-w="${k}"> <span id="w_${k}">${w[k]}</span></div>`).join(''); g.querySelectorAll('input[type="range"]').forEach(r=>{ r.oninput=(e)=>{ const w=getW(); const k=e.target.dataset.w; w[k]=Number(e.target.value); saveW(w); $('#w_'+k).textContent=w[k].toFixed(2); }; }); $('#btnResetW').onclick=()=>{ saveW(defaultW); renderWeights(); }; }
+function renderBias(){ const g=$('#biasGrid'); const b=getB(); g.innerHTML=ARCHS.map(a=>`<div>${a.id}</div><div><input type="range" min="-0.10" max="0.10" step="0.005" value="${b[a.id]||0}" data-b="${a.id}"> <span id="b_${a.id}">${(b[a.id]||0).toFixed(3)}</span></div>`).join(''); g.querySelectorAll('input[type="range"]').forEach(r=>{ r.oninput=(e)=>{ const b=getB(); const k=e.target.dataset.b; b[k]=Number(e.target.value); saveB(b); $('#b_'+k).textContent=(b[k]).toFixed(3); }; }); }
+function scoreForWeighted(a,m){ const base=scoreFor(a,m); const w=getW(); const b=getB()[a.id]||0; const factor=(w.nfps+w.nlat+w.nlt+w.ncls+w.ncpu+w.nmem)/6; return base*factor + b; }
+function computeScoresWeighted(m){ const S=ARCHS.map(a=>({id:a.id,s:scoreForWeighted(a,m)})); S.sort((a,b)=>b.s-a.s); return S; }
+document.getElementById('btnProfileStudio').onclick=()=>{ saveW({nfps:0.14,nlat:0.16,nlt:0.18,ncls:0.20,ncpu:0.16,nmem:0.16}); saveB(defaultBias); renderWeights(); renderBias(); };
+document.getElementById('btnProfileLive').onclick  =()=>{ saveW({nfps:0.22,nlat:0.20,nlt:0.14,ncls:0.12,ncpu:0.16,nmem:0.16}); saveB(defaultBias); renderWeights(); renderBias(); };
+document.getElementById('btnProfileAgg').onclick   =()=>{ saveW({nfps:0.26,nlat:0.22,nlt:0.20,ncls:0.10,ncpu:0.12,nmem:0.10}); saveB(defaultBias); renderWeights(); renderBias(); };
+$('#btnConsole').addEventListener('click', ()=> setTimeout(()=>{ renderWeights(); renderBias(); drawPlot(); }, 80));
 </script>
 </body>
 </html>
