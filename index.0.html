@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>UNO — Dual UNIFIED (mobile)</title>
+<meta name="theme-color" content="#0b0f17"/>
+<link rel="icon" href="assets/icons/app.svg"/>
+<!-- Inline CSS: uno.neon.css and component styles -->
+<style>
+/* ===== uno.neon.css ===== */
+:root{--ink:#e9f6ff;--muted:#97b1c6;--line:rgba(255,255,255,.16);--rad:18px}
+.neon{background:rgba(255,255,255,.05);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.06)}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.7rem .9rem;border-radius:13px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--ink);font-weight:700}
+.btn svg{width:18px;height:18px}
+.badge{display:inline-flex;gap:.35rem;align-items:center;padding:.35rem .6rem;border:1px solid var(--line);border-radius:10px;color:var(--muted);background:rgba(255,255,255,.04);font-size:.78rem}
+.footer-glass{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);display:flex;gap:36px;align-items:center;padding:.7rem 1.1rem;border-radius:999px;border:1px solid var(--line);backdrop-filter:blur(12px);background:linear-gradient(90deg,rgba(255,80,240,.12),rgba(0,180,255,.12))}
+.nav-icon{width:22px;height:22px;color:#d6eaff;opacity:.9}
+
+/* ===== Internal component styles ===== */
+:root{--bg:#0b0f17;--ink:#e9f6ff;--muted:#97b1c6}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{margin:0;background:#0b0f17;color:var(--ink);font:500 15px/1.35 system-ui,-apple-system,Inter,Roboto,sans-serif;overflow-x:hidden}
+
+.app{position:fixed;inset:0;display:grid;grid-template-rows:auto 1fr auto}
+/* BACKGROUND */
+#bg{position:fixed;inset:0;z-index:-2;background:url("dual_uno_assets_v1/img/bg/bg_nebula_01.png") center/cover no-repeat}
+#bg video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
+
+/* TOP HUD */
+header{display:flex;gap:8px;align-items:center;justify-content:flex-end;padding:10px 12px}
+.hud{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.hud .badge svg{width:14px;height:14px}
+
+/* CORE */
+.center{display:grid;place-items:center;padding:6px}
+.core{position:relative;width:min(86vw,520px);aspect-ratio:1/1;display:grid;place-items:center}
+.core .ring{position:absolute;inset:0;background:url("dual_uno_assets_v1/img/core/ring_glow_01.png") center/contain no-repeat;filter:saturate(1.1)}
+.core .dot{width:22px;height:22px;border-radius:50%;background:url("dual_uno_assets_v1/img/core/dot_core_01.png") center/cover no-repeat;box-shadow:0 0 24px rgba(92,255,250,.55)}
+.core .controls{position:absolute;top:10%;display:flex;gap:8px;padding:6px 8px;border-radius:14px}
+.core .controls .btn{backdrop-filter:blur(10px)}
+
+/* APPS PANEL */
+.panel{margin:10px; padding:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.apps-list{margin-top:10px;display:grid;gap:8px}
+.app-row{display:flex;gap:10px;align-items:center;padding:10px;border:1px solid rgba(255,255,255,.1);border-radius:12px}
+.grow{flex:1 1 auto;min-width:0}
+.meta{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sandboxWrap{margin-top:10px;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.12);display:none}
+.sandbox{width:100%;height:360px;border:0;background:#0a0d14}
+
+/* FOOTER NAV */
+.footer{height:64px}
+.footer .bar{position:fixed;left:50%;bottom:12px;transform:translateX(-50%);display:flex;gap:38px;align-items:center;padding:.75rem 1.1rem;border-radius:999px;border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(12px);background:linear-gradient(90deg,rgba(255,80,240,.12),rgba(0,180,255,.12))}
+.nav-btn{appearance:none;background:none;border:0;display:grid;place-items:center}
+.nav-btn svg{width:22px;height:22px;color:#d6eaff}
+.fab{position:fixed;right:16px;bottom:84px;width:58px;height:58px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(8px);box-shadow:0 10px 30px rgba(0,0,0,.3)}
+
+/* ===== Infodose: overlay + iFrame seguro + truncamento + mobile ===== */
+/* Ajustes globais mobile */
+html, body { max-width: 100vw; overflow-x: hidden; }
+
+/* Layouts flexíveis */
+.response-container, .pages-wrapper { display: flex; flex-direction: column; gap: 1rem; width: 100%; }
+
+/* Botão Único adaptado */
+#btnInfodose { position: fixed; bottom: 1rem; right: 1rem; z-index: 1000; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+/* iFrame responsivo (overlay) */
+.overlay{ position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,.55); z-index: 1000; }
+.overlay.show{ display: flex; }
+.ifr-wrap{ width: 90vw; max-height: 90vh; background: rgba(11,15,23,.96); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,.6); }
+@media(min-width:768px){ .ifr-wrap{ width:66vw; } }
+.ifr-head{ display:flex; align-items:center; justify-content:space-between; padding:.6rem .8rem; border-bottom:1px solid var(--line); background: rgba(255,255,255,.04); }
+.ifr-head .title{ font-weight:700; font-size:.95rem; }
+.ifr-head .btn{ padding:.45rem .7rem; }
+.ifr-body{ width:100%; height:min(76vh,640px); }
+
+/* Truncamento de textos longos */
+.ellip { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-inline-size: 18ch; }
+</style>
+</head>
+<body>
+<div id="bg"><video id="bgvid" muted loop playsinline></video></div>
+
+<div class="app" id="app">
+  <!-- TOP HUD -->
+  <header>
+    <div class="hud">
+      <span class="badge"><svg><use href="dual_uno_assets_v1/svg/audio.svg#x"/></svg> <button class="btn" id="btnPlay"><svg><use href="dual_uno_assets_v1/svg/play.svg#x"/></svg> Áudio</button></span>
+      <span class="badge" title="Frames por segundo">FPS <b id="fps">~</b></span>
+      <span class="badge" title="Latência do loop">LAT <b id="lat">~</b>ms</span>
+      <span class="badge" title="Long Tasks">LT <b id="lt">0</b></span>
+      <span class="badge" title="Layout Shift">CLS <b id="cls">0.00</b></span>
+    </div>
+  </header>
+
+  <!-- CORE -->
+  <main>
+    <section class="center">
+      <div class="core">
+        <div class="ring" id="ring"></div>
+        <div class="dot" id="dot"></div>
+        <div class="controls">
+          <button class="btn" id="ringPrev">◀︎</button>
+          <button class="btn" id="ringNext">▶︎</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- APPS PANEL -->
+    <section class="panel neon" id="appsPane">
+      <div class="grid2">
+        <button class="btn" id="btnLoadApps"><img src="dual_uno_assets_v1/svg/json.svg" alt="" width="18" height="18"/> Carregar apps.json</button>
+        <button class="btn" id="btnExport"><img src="dual_uno_assets_v1/svg/download.svg" alt="" width="18" height="18"/> Exportar ZIP</button>
+        <label class="btn" for="btnImportZip"><img src="dual_uno_assets_v1/svg/upload.svg" alt="" width="18" height="18"/> Importar ZIP</label>
+        <input type="file" id="btnImportZip" accept="application/zip" hidden/>
+        <button class="btn" id="btnAppsToggle"><img src="dual_uno_assets_v1/svg/grid.svg" alt="" width="18" height="18"/> Apps</button>
+        <!-- New Buttons for animation and uploads -->
+        <button class="btn" id="btnToggleAnim"><img src="dual_uno_assets_v1/svg/bolt.svg" alt="" width="18" height="18"/> Animação</button>
+        <label class="btn" for="ringUpload"><img src="dual_uno_assets_v1/svg/upload.svg" alt="" width="18" height="18"/> Upload Ring</label>
+        <input type="file" id="ringUpload" accept="image/png" hidden />
+        <label class="btn" for="bgUpload"><img src="dual_uno_assets_v1/svg/upload.svg" alt="" width="18" height="18"/> Upload Fundo</label>
+        <input type="file" id="bgUpload" accept="image/png,image/gif,video/webm,video/mp4" hidden />
+      </div>
+      <div class="apps-list" id="appsList"></div>
+      <!-- sandboxWrap legado permanece oculto -->
+      <div class="sandboxWrap" id="sandboxWrap"><iframe class="sandbox" id="sandbox"></iframe></div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="bar">
+      <button class="nav-btn" title="Início" id="navHome"><svg><use href="dual_uno_assets_v1/svg/home.svg#x"/></svg></button>
+      <button class="nav-btn" title="Apps" id="navApps"><svg><use href="dual_uno_assets_v1/svg/grid.svg#x"/></svg></button>
+      <button class="nav-btn" title="Perfil" id="navUser"><svg><use href="dual_uno_assets_v1/svg/user.svg#x"/></svg></button>
+    </div>
+  </footer>
+
+  <!-- Botão Único -->
+  <button class="fab btn" id="btnInfodose" title="Ação Única"><img src="dual_uno_assets_v1/svg/bolt.svg" width="22" height="22" alt=""/></button>
+</div>
+
+<!-- Overlay + iFrame seguro (Infodose) -->
+<div class="overlay" id="overlay" data-close>
+  <div class="ifr-wrap" role="dialog" aria-modal="true" aria-label="Sandbox">
+    <div class="ifr-head">
+      <div class="title ellip" id="ifrTitle">Sandbox</div>
+      <div class="actions">
+        <button class="btn" id="ifrMin">–</button>
+        <button class="btn" id="ifrMax">□</button>
+        <button class="btn" id="ifrClose">✕</button>
+      </div>
+    </div>
+    <iframe class="sandbox ifr-body" id="sandboxModal" referrerpolicy="no-referrer" allow="autoplay; clipboard-read; clipboard-write; fullscreen; gamepad; geolocation; microphone; camera" sandbox="allow-scripts allow-forms allow-popups allow-pointer-lock allow-downloads"></iframe>
+  </div>
+</div>
+
+<!-- Inline JavaScript -->
+<script>
+/* ===== BG: troca entre PNG e WebM ===== */
+const UNO = {
+  setBgVideo(src){ const v=document.getElementById('bgvid'); v.src=src; v.style.display='block'; v.play().catch(()=>{}); },
+  setBgImage(src){ const v=document.getElementById('bgvid'); v.pause(); v.removeAttribute('src'); v.load(); v.style.display='none'; document.getElementById('bg').style.backgroundImage = `url("${src}")`; }
+};
+window.UNO = UNO;
+
+/* ===== métricas ===== */
+let t0=performance.now(), rafCount=0, lastFpsT=performance.now();
+function loop(now){ const dt=now-t0; t0=now; document.getElementById('lat').textContent=Math.max(1,Math.round(dt)); rafCount++; if(now-lastFpsT>1000){ document.getElementById('fps').textContent=rafCount; rafCount=0; lastFpsT=now; } requestAnimationFrame(loop); }
+requestAnimationFrame(loop);
+if('PerformanceObserver' in window){
+  try{ new PerformanceObserver(l=>{ for(const e of l.getEntries()){ if(e.duration>50){ const el=document.getElementById('lt'); el.textContent=(parseInt(el.textContent,10)||0)+1; }}}).observe({entryTypes:['longtask']}); }catch(e){}
+  try{ let cls=0; new PerformanceObserver(l=>{ for(const e of l.getEntries()){ if(!e.hadRecentInput){ cls+=e.value; } } document.getElementById('cls').textContent=cls.toFixed(3); }).observe({type:'layout-shift', buffered:true}); }catch(e){}
+}
+
+/* ===== Áudio simples ===== */
+let actx,out,gain,audioReady=false;
+async function initAudio(){ if(audioReady) return; actx=new (window.AudioContext||window.webkitAudioContext)(); const code=`class B extends AudioWorkletProcessor{static get parameterDescriptors(){return[{name:'on',defaultValue:0},{name:'freq',defaultValue:220}]} process(i,o,p){const out=o[0];const on=p.on[0],f=p.freq[0];for(let ch=0; ch<out.length; ch++){const b=out[ch];for(let n=0;n<b.length;n++){let s=0;if(on>0.5){s=(Math.random()*2-1)*0.18+Math.sin(2*Math.PI*(currentFrame+n)/sampleRate*f)*0.22;}b[n]=s;}}return true}}registerProcessor('b',B);`;
+await actx.audioWorklet.addModule(URL.createObjectURL(new Blob([code],{type:'text/javascript'})));
+out=new AudioWorkletNode(actx,'b'); gain=actx.createGain(); gain.gain.value=0.0; out.connect(gain).connect(actx.destination); audioReady=true; }
+function ping(){ if(!audioReady) return; out.parameters.get('on').setValueAtTime(1, actx.currentTime); gain.gain.cancelScheduledValues(actx.currentTime); gain.gain.linearRampToValueAtTime(0.9, actx.currentTime+0.01); gain.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime+0.35); setTimeout(()=> out.parameters.get('on').setValueAtTime(0, actx.currentTime), 140); }
+document.getElementById('btnPlay').onclick=async()=>{ await initAudio(); if(actx.state==='suspended') await actx.resume(); ping(); };
+
+/* ===== Core ring troca ===== */
+let rings=[
+  "dual_uno_assets_v1/img/core/ring_glow_01.png",
+  "dual_uno_assets_v1/img/core/ring_glow_02.png",
+  "dual_uno_assets_v1/img/core/ring_glow_03.png",
+  "dual_uno_assets_v1/img/core/ring_glow_04.png"
+];
+let rIndex=0;
+const ringEl=document.getElementById('ring');
+function setRing(i){ rIndex=(i+rings.length)%rings.length; ringEl.style.backgroundImage=`url("${rings[rIndex]}")`; }
+document.getElementById('ringPrev').onclick=()=>setRing(rIndex-1);
+document.getElementById('ringNext').onclick=()=>setRing(rIndex+1);
+setRing(0);
+
+/* ===== Animação do anel ===== */
+let animRunning = true;
+let angle = 0;
+function animateRing(){ if(!animRunning) return; angle += 0.3; ringEl.style.transform = `rotate(${angle}deg)`; requestAnimationFrame(animateRing); }
+animateRing();
+document.getElementById('btnToggleAnim').onclick = () => {
+  animRunning = !animRunning;
+  if(animRunning){ animateRing(); } else { ringEl.style.transform=''; }
+};
+
+/* ===== STORAGE LAYER (IDB -> localStorage -> memória) ===== */
+const DB_NAME='dualUnoDB';
+const DB_VERSION=1;
+const Store = (()=>{
+  const hasIDB = (()=>{ try { return typeof indexedDB !== 'undefined' && !!indexedDB; } catch(e){ return false; } })();
+  const hasLS = (()=>{ try{ const k='__dualuno_probe__'; localStorage.setItem(k,'1'); localStorage.removeItem(k); return true; }catch(e){ return false; } })();
+  let db=null; const K_R='dualUno.rings', K_B='dualUno.background';
+  const mem={ rings:[], bg:null };
+  function lsGet(k){ try{ const v=localStorage.getItem(k); return v? JSON.parse(v): null; }catch(e){ return null; } }
+  function lsSet(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
+  function idbOpen(){ return new Promise((res,rej)=>{ const req=indexedDB.open(DB_NAME, DB_VERSION); req.onupgradeneeded=()=>{ db=req.result; if(!db.objectStoreNames.contains('rings')) db.createObjectStore('rings',{keyPath:'id',autoIncrement:true}); if(!db.objectStoreNames.contains('background')) db.createObjectStore('background',{keyPath:'id',autoIncrement:true}); }; req.onsuccess=()=>{ db=req.result; res(db); }; req.onerror=()=>rej(req.error); }); }
+  async function init(){ if(hasIDB && !db){ await idbOpen(); } }
+  async function saveRing(data){ if(hasIDB){ await init(); await new Promise((res,rej)=>{ const tx=db.transaction('rings','readwrite'); tx.objectStore('rings').add({data}); tx.oncomplete=res; tx.onerror=()=>rej(tx.error); }); return; }
+    if(hasLS){ const arr=lsGet(K_R)||[]; arr.push(data); lsSet(K_R,arr); return; }
+    mem.rings.push(data);
+  }
+  async function getRings(){ if(hasIDB){ await init(); return await new Promise((res,rej)=>{ const tx=db.transaction('rings','readonly'); const req=tx.objectStore('rings').getAll(); req.onsuccess=()=>res((req.result||[]).map(x=>x.data)); req.onerror=()=>rej(req.error); }); }
+    if(hasLS){ return lsGet(K_R)||[]; }
+    return mem.rings;
+  }
+  async function saveBackground(data, type){ if(hasIDB){ await init(); await new Promise((res,rej)=>{ const tx=db.transaction('background','readwrite'); const st=tx.objectStore('background'); st.clear(); st.add({data, type}); tx.oncomplete=res; tx.onerror=()=>rej(tx.error); }); return; }
+    const obj={data, type}; if(hasLS){ lsSet(K_B,obj); return; } mem.bg=obj; }
+  async function getBackground(){ if(hasIDB){ await init(); return await new Promise((res,rej)=>{ const tx=db.transaction('background','readonly'); const req=tx.objectStore('background').getAll(); req.onsuccess=()=>res((req.result||[])[0]||null); req.onerror=()=>rej(req.error); }); }
+    if(hasLS){ return lsGet(K_B); }
+    return mem.bg;
+  }
+  return { init, saveRing, getRings, saveBackground, getBackground,
+           backend: hasIDB?'indexedDB':(hasLS?'localStorage':'memory'),
+           isPersistent: hasIDB || hasLS };
+})();
+
+async function loadAssets(){ await Store.init(); try{
+  const ringData = await Store.getRings(); if(ringData && ringData.length){ rings = ringData; setRing(0); }
+  const bg = await Store.getBackground(); if(bg){ if(bg.type && bg.type.startsWith('video')){ UNO.setBgVideo(bg.data); } else { UNO.setBgImage(bg.data); } }
+} catch(err){ console.warn('Storage load error', err); }
+}
+loadAssets();
+
+/* ===== Upload handlers ===== */
+document.getElementById('ringUpload').addEventListener('change', async (e)=>{
+  const file = e.target.files?.[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async (ev)=>{
+    const dataURL = ev.target.result;
+    await Store.init();
+    await Store.saveRing(dataURL);
+    rings.push(dataURL);
+    setRing(rings.length-1);
+    toast('Anel salvo em '+Store.backend);
+  };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('bgUpload').addEventListener('change', async (e)=>{
+  const file = e.target.files?.[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async (ev)=>{
+    const dataURL = ev.target.result;
+    await Store.init();
+    const type = file.type||'';
+    await Store.saveBackground(dataURL, type);
+    if(type.startsWith('video')){ UNO.setBgVideo(dataURL); } else { UNO.setBgImage(dataURL); }
+    toast('Fundo salvo em '+Store.backend);
+  };
+  reader.readAsDataURL(file);
+});
+
+/* ===== Apps ===== */
+const $=s=>document.querySelector(s);
+$('#btnLoadApps').onclick=async()=>{ try{ const r=await fetch('./apps/apps.json'); const j=await r.json(); renderApps(j.apps||j); toast('apps.json OK'); }catch(e){ toast('Falha no apps.json'); console.error(e); } };
+function renderApps(arr){ const list=$('#appsList'); list.innerHTML=''; (arr||[]).forEach((a,i)=>{ const row=document.createElement('div'); row.className='app-row'; row.innerHTML=`<span class=\"badge\">#${i+1}</span><div class=\"grow\"><div><strong class=\"ellip\" title="${a.name||'App'}">${a.name||'App'}</strong></div><div class=\"meta ellip\" title="${a.url}">${a.url}</div></div><button class=\"btn\" data-open=\"${i}\">Abrir</button>`; list.appendChild(row); }); list.onclick=e=>{ const i=e.target?.dataset?.open; if(i!=null){ openSandbox((arr||[])[i]); } } }
+
+/* ===== Overlay iFrame seguro (ESC / backdrop) ===== */
+const overlay = document.getElementById('overlay');
+const sandboxModal = document.getElementById('sandboxModal');
+const ifrTitle = document.getElementById('ifrTitle');
+function openSandbox(app){ if(!app) return; ifrTitle.textContent = app.name||'Sandbox'; sandboxModal.src = app.url; overlay.classList.add('show'); }
+function closeOverlay(){ overlay.classList.remove('show'); sandboxModal.removeAttribute('src'); }
+document.getElementById('ifrClose').onclick = closeOverlay;
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape'){ closeOverlay(); }});
+overlay.addEventListener('click', (e)=>{ if(e.target===overlay || e.target.dataset.close!==undefined){ closeOverlay(); }});
+
+/* ===== Alterna visual do painel ===== */
+$('#btnAppsToggle').onclick=()=>{ const p=$('#appsPane'); p.classList.toggle('neon'); };
+
+$('#btnImportZip').addEventListener('change', async (e)=>{
+  alert('Import ZIP selecionado: '+ (e.target.files?.[0]?.name||''));
+});
+
+/* ===== footer ações ===== */
+document.getElementById('navApps').onclick=()=> document.getElementById('appsPane').scrollIntoView({behavior:'smooth'});
+document.getElementById('navHome').onclick=()=> window.scrollTo({top:0,behavior:'smooth'});
+document.getElementById('navUser').onclick=()=> alert('Perfil em breve');
+document.getElementById('btnInfodose').onclick=()=> alert('Ação única ⚡');
+
+/* ===== util ===== */
+function toast(m){ try{ console.log(m); }catch(_){} }
+
+/* ===== SELF-TESTS (não altere): valida fallback de storage ===== */
+(async function runSelfTests(){
+  const results=[]; const log=(n,p)=>results.push({name:n,pass:!!p});
+  log('Backend selecionado válido', ['indexedDB','localStorage','memory'].includes(Store.backend));
+  try{
+    await Store.init();
+    const dot='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z/C/HwAF/gL+3mOZ8wAAAABJRU5ErkJggg==';
+    await Store.saveRing(dot);
+    const rr = await Store.getRings();
+    log('save/load ring', Array.isArray(rr) && rr.some(x=>x===dot));
+    await Store.saveBackground(dot,'image/png');
+    const bg = await Store.getBackground();
+    log('save/load background', !!bg && bg.data===dot && bg.type==='image/png');
+  }catch(e){ log('Operações básicas não lançam erro', false); console.warn(e); }
+  const passed = results.filter(r=>r.pass).length; toast(`Self-tests: ${passed}/${results.length} passed • storage=${Store.backend}`);
+})();
+</script>
+</body>
+</html>
