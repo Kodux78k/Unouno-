@@ -113,16 +113,16 @@ html, body { max-width: 100vw; overflow-x: hidden; }
     <!-- APPS PANEL -->
     <section class="panel neon" id="appsPane">
       <div class="grid2">
-        <button class="btn" id="btnLoadApps"><img src="dual_uno_assets_v1/svg/json.svg" alt="" width="18" height="18"/> Carregar apps.json</button>
-        <button class="btn" id="btnExport"><img src="dual_uno_assets_v1/svg/download.svg" alt="" width="18" height="18"/> Exportar ZIP</button>
-        <label class="btn" for="btnImportZip"><img src="dual_uno_assets_v1/svg/upload.svg" alt="" width="18" height="18"/> Importar ZIP</label>
+        <button class="btn" id="btnLoadApps"><img src="svg/json.svg" alt="" width="18" height="18"/> Carregar apps.json</button>
+        <button class="btn" id="btnExport"><img src="svg/download.svg" alt="" width="18" height="18"/> Exportar ZIP</button>
+        <label class="btn" for="btnImportZip"><img src="svg/upload.svg" alt="" width="18" height="18"/> Importar ZIP</label>
         <input type="file" id="btnImportZip" accept="application/zip" hidden/>
-        <button class="btn" id="btnAppsToggle"><img src="dual_uno_assets_v1/svg/grid.svg" alt="" width="18" height="18"/> Apps</button>
+        <button class="btn" id="btnAppsToggle"><img src="svg/grid.svg" alt="" width="18" height="18"/> Apps</button>
         <!-- New Buttons for animation and uploads -->
-        <button class="btn" id="btnToggleAnim"><img src="dual_uno_assets_v1/svg/bolt.svg" alt="" width="18" height="18"/> Animação</button>
-        <label class="btn" for="ringUpload"><img src="dual_uno_assets_v1/svg/upload.svg" alt="" width="18" height="18"/> Upload Ring</label>
+        <button class="btn" id="btnToggleAnim"><img src="svg/bolt.svg" alt="" width="18" height="18"/> Animação</button>
+        <label class="btn" for="ringUpload"><img src="svg/upload.svg" alt="" width="18" height="18"/> Upload Ring</label>
         <input type="file" id="ringUpload" accept="image/png" hidden />
-        <label class="btn" for="bgUpload"><img src="dual_uno_assets_v1/svg/upload.svg" alt="" width="18" height="18"/> Upload Fundo</label>
+        <label class="btn" for="bgUpload"><img src="svg/upload.svg" alt="" width="18" height="18"/> Upload Fundo</label>
         <input type="file" id="bgUpload" accept="image/png,image/gif,video/webm,video/mp4" hidden />
       </div>
       <div class="apps-list" id="appsList"></div>
@@ -134,14 +134,14 @@ html, body { max-width: 100vw; overflow-x: hidden; }
   <!-- FOOTER -->
   <footer class="footer">
     <div class="bar">
-      <button class="nav-btn" title="Início" id="navHome"><svg><use href="dual_uno_assets_v1/svg/home.svg#x"/></svg></button>
-      <button class="nav-btn" title="Apps" id="navApps"><svg><use href="dual_uno_assets_v1/svg/grid.svg#x"/></svg></button>
-      <button class="nav-btn" title="Perfil" id="navUser"><svg><use href="dual_uno_assets_v1/svg/user.svg#x"/></svg></button>
+      <button class="nav-btn" title="Início" id="navHome"><svg><use href="svg/home.svg#x"/></svg></button>
+      <button class="nav-btn" title="Apps" id="navApps"><svg><use href="svg/grid.svg#x"/></svg></button>
+      <button class="nav-btn" title="Perfil" id="navUser"><svg><use href="svg/user.svg#x"/></svg></button>
     </div>
   </footer>
 
   <!-- Botão Único -->
-  <button class="fab btn" id="btnInfodose" title="Ação Única"><img src="dual_uno_assets_v1/svg/bolt.svg" width="22" height="22" alt=""/></button>
+  <button class="fab btn" id="btnInfodose" title="Ação Única"><img src="svg/bolt.svg" width="22" height="22" alt=""/></button>
 </div>
 
 <!-- Overlay + iFrame seguro (Infodose) -->
@@ -187,10 +187,10 @@ document.getElementById('btnPlay').onclick=async()=>{ await initAudio(); if(actx
 
 /* ===== Core ring troca ===== */
 let rings=[
-  "dual_uno_assets_v1/img/core/ring_glow_01.png",
-  "dual_uno_assets_v1/img/core/ring_glow_02.png",
-  "dual_uno_assets_v1/img/core/ring_glow_03.png",
-  "dual_uno_assets_v1/img/core/ring_glow_04.png"
+  "img/core/ring_glow_01.png",
+  "img/core/ring_glow_02.png",
+  "img/core/ring_glow_03.png",
+  "img/core/ring_glow_04.png"
 ];
 let rIndex=0;
 const ringEl=document.getElementById('ring');
