@@ -1,464 +1,383 @@
-<<!DOCTYPE html>
-<html lang="pt-BR" data-theme="tesseract">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
-  <title>KOBLLUX InfoDose — Glow · AppMaker v2.4.8 (Mobile‑First + Safe Storage)</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
-  <style>
-    :root{
-      --bg:#0c0f14; --text:#d7d7d7; --grad_a:#00d8d8; --grad_b:#d800d8;
-      --accent:#39FFB6; --ok:#00ffff; --warn:#FFC857; --err:#FF5C8A;
-      --radius:20px; --blur:24px; --shadow:0 8px 32px rgba(0,255,255,.25);
-      --z-ui: 40; --z-overlay: 60; --z-toast: 80; --touch: 48px;
-    }
-    html,body{height:100%;}
-    body{margin:0; font-family:'Montserrat',system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif; color:var(--text); background:#0b0e13 center/cover fixed no-repeat;}
-    .app{min-height:100%;}
-    .ellip{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .sr-only{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>UNO — Dual UNIFIED (mobile v1.2)</title>
+<meta name="theme-color" content="#0b0f17"/>
+<link rel="icon" href="assets/icons/app.svg"/>
+<style>
+/* ===== THEME ===== */
+:root{
+  --bg:#0b0f17; --ink:#e9f6ff; --muted:#97b1c6; --line:rgba(255,255,255,.16);
+  --rad:18px; --pad:12px; --glass:rgba(255,255,255,.06);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:500 15px/1.35 system-ui,-apple-system,Inter,Roboto,sans-serif;overflow-x:hidden}
 
-    /* Glow base */
-    .gradient{background:linear-gradient(135deg,var(--grad_a),var(--grad_b));}
-    .glass{backdrop-filter: blur(var(--blur)); background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); box-shadow:var(--shadow); border-radius:var(--radius);}    
-    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px; padding:10px; border-radius:16px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.06); cursor:pointer; user-select:none; transition:transform .15s ease, background .2s ease, opacity .2s ease; min-width:var(--touch); min-height:var(--touch)}
-    .btn:active{transform:scale(.98)}
-    .btn.icon{padding:10px; width:var(--touch); height:var(--touch)}
-    .btn[aria-pressed="true"], .btn.primary{background:linear-gradient(135deg, rgba(0,216,216,.25), rgba(216,0,216,.25));}
-    .pill{font-size:11px; padding:4px 8px; border-radius:50px; border:1px solid rgba(255,255,255,.12)}
+/* Safe areas iOS */
+:root{ --sa-top:env(safe-area-inset-top); --sa-bot:env(safe-area-inset-bottom) }
 
-    /* Topbar — compacto no mobile */
-    .topbar{position:sticky; top: env(safe-area-inset-top,0); z-index:var(--z-ui); display:flex; align-items:center; gap:8px; padding:10px 12px; border-radius:0 0 var(--radius) var(--radius)}
-    .title{font-weight:800; letter-spacing:.3px; font-size:14px}
-    .spacer{flex:1}
+/* BACKGROUND */
+#bg{position:fixed;inset:0;z-index:-2;background:#070b12 url("dual_uno_assets_v1/img/bg/bg_nebula_01.png") center/cover no-repeat}
+#bg video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
 
-    /* Sidebar mobile-first: off-canvas por padrão */
-    .sidebar{position:fixed; inset:0 auto 0 0; width:min(88vw,320px); padding:12px; overflow:auto; z-index:var(--z-ui); transform:translateX(-104%); transition:transform .25s ease;}
-    .sidebar.show{transform:translateX(0)}
-    .sidebar .section{margin:12px 0;}
-    .sidebar h3{margin:0 0 8px 0; font-size:12px; text-transform:uppercase; opacity:.85; letter-spacing:.08em}
+/* APP LAYOUT */
+.app{position:relative;min-height:100dvh;display:grid;grid-template-rows:auto 1fr auto}
 
-    /* Drawer de propriedades (direita) */
-    .drawer{position:fixed; inset:0 0 0 auto; width:min(90vw,360px); padding:14px; overflow:auto; z-index:var(--z-ui); transform:translateX(104%); transition:transform .25s ease;}
-    .drawer.show{transform:translateX(0)}
+/* ===== TOP HUD (compact, com margem segura) ===== */
+header{display:flex;gap:8px;align-items:center;justify-content:flex-end;padding:calc(var(--sa-top)+8px) 12px 8px}
+.hud{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.badge{display:inline-flex;gap:.35rem;align-items:center;padding:.35rem .6rem;border:1px solid var(--line);border-radius:10px;color:var(--muted);background:rgba(255,255,255,.04);font-size:.78rem}
+.badge svg{width:14px;height:14px}
 
-    /* Grid de arquivos enxuto */
-    .grid{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px}
-    .card{padding:10px; border-radius:14px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.04); display:flex; flex-direction:column; gap:8px}
-    .thumb{aspect-ratio:16/10; border-radius:10px; border:1px dashed rgba(255,255,255,.15); display:grid; place-items:center; font-size:11px; opacity:.85}
-    .row{display:flex; gap:8px; align-items:center}
-    .stack{display:flex; flex-direction:column; gap:10px}
+/* ===== CORE (anel + dot) ===== */
+.center{display:grid;place-items:center;padding:6px}
+.core{position:relative;width:min(86vw,520px);aspect-ratio:1/1;display:grid;place-items:center}
+.core .ring{position:absolute;inset:0;background:url("dual_uno_assets_v1/img/core/ring_glow_01.png") center/contain no-repeat;filter:saturate(1.1)}
+.core .dot{width:22px;height:22px;border-radius:50%;background:url("dual_uno_assets_v1/img/core/dot_core_01.png") center/cover no-repeat;box-shadow:0 0 24px rgba(92,255,250,.55)}
+.core .controls{position:absolute;top:8%;display:flex;gap:8px;padding:6px 8px;border-radius:14px;backdrop-filter:blur(10px)}
+.icon-btn{appearance:none;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:12px;display:grid;place-items:center;width:40px;height:40px}
+.icon-btn svg{width:18px;height:18px}
 
-    /* Overlay (usado por sidebar/drawer/iframe no mobile) */
-    .overlay{position:fixed; inset:0; background:rgba(0,0,0,.55); backdrop-filter: blur(3px); display:none; z-index:var(--z-overlay)}
-    .overlay.show{display:block}
+/* ===== SIDEBAR (unificação) ===== */
+.sidebar{position:fixed;top:0;right:0;height:100dvh;width:min(86vw,340px);transform:translateX(100%);transition:.28s ease;z-index:998}
+.sidebar.open{transform:translateX(0)}
+.side-card{height:100%;display:flex;flex-direction:column;gap:10px;padding:14px;border-left:1px solid var(--line);background:linear-gradient(180deg,rgba(11,15,23,.96),rgba(11,15,23,.86));backdrop-filter:blur(12px)}
+.side-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.side-head .ttl{font-weight:800}
+.side-scroller{flex:1 1 auto;overflow:auto;display:grid;gap:10px;padding-right:8px}
+.row{display:flex;align-items:center;gap:10px}
+.row .grow{flex:1 1 auto;min-width:0}
+.thumb{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:#0a0d14 center/cover no-repeat}
+input[type="file"]{display:none}
+.label-btn{display:inline-flex;align-items:center;gap:.5rem;padding:.55rem .7rem;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.04)}
+.switch{position:relative;display:inline-block;width:44px;height:26px}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;cursor:pointer;inset:0;background:#233041;border-radius:999px}
+.slider:before{content:"";position:absolute;height:20px;width:20px;left:3px;top:3px;background:#cfe9ff;border-radius:50%;transition:.2s}
+.switch input:checked+.slider{background:#294d6b}
+.switch input:checked+.slider:before{transform:translateX(18px)}
+.small{font-size:.82rem;color:var(--muted)}
 
-    /* IFrame viewer */
-    .ifr-wrap{position:fixed; inset:6vh 4vw; border-radius:18px; overflow:hidden; display:none; z-index:var(--z-overlay)}
-    .ifr-wrap.show{display:flex; flex-direction:column}
-    .ifr-head{display:flex; align-items:center; gap:8px; padding:8px}
-    .ifr-body{flex:1; background:#0b0e13}
-    .ifr{width:100%; height:100%; border:0; background:#fff}
-    .badge-reopen{position:fixed; right:16px; bottom:90px; z-index:var(--z-ui)}
+/* ===== PANEL (apps + uploads + iframe sandbox) ===== */
+.panel{margin:10px;padding:12px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.05);backdrop-filter:blur(14px)}
+.grid2{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.apps-list{margin-top:10px;display:grid;gap:8px}
+.app-row{display:flex;gap:10px;align-items:center;padding:10px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.03)}
+.meta{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-    /* FAB (Botão Único) */
-    #btnKOBLLUX{position:fixed; right:16px; bottom:16px; z-index:var(--z-ui)}
-    .fab{width:64px; height:64px; border-radius:50%; border:1px solid rgba(255,255,255,.1); background:linear-gradient(135deg, rgba(0,216,216,.25), rgba(216,0,216,.25)); display:grid; place-items:center}
-    .fab-menu{position:fixed; right:16px; bottom:92px; display:none; flex-direction:column; gap:8px}
-    .fab-menu.show{display:flex}
+/* Overlay iFrame */
+.overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55);z-index:1000}
+.overlay.show{display:flex}
+.ifr-wrap{width:90vw;max-height:90vh;background:rgba(11,15,23,.96);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.6)}
+@media(min-width:768px){.ifr-wrap{width:66vw}}
+.ifr-head{display:flex;align-items:center;justify-content:space-between;padding:.6rem .8rem;border-bottom:1px solid var(--line);background:rgba(255,255,255,.04)}
+.ifr-body{width:100%;height:min(76vh,640px);border:0;background:#0a0d14}
 
-    /* Hide-UI (foco total em background) */
-    .ui-hidden .sidebar, .ui-hidden .drawer, .ui-hidden .topbar, .ui-hidden .badge-reopen, .ui-hidden .fab-menu{display:none !important}
+/* ===== FOOTER nav (icon-only, com safe-area) ===== */
+footer{height:68px}
+.footer-bar{position:fixed;left:50%;bottom:calc(var(--sa-bot) + 12px);transform:translateX(-50%);display:flex;gap:28px;align-items:center;padding:.7rem 1.1rem;border-radius:999px;border:1px solid var(--line);backdrop-filter:blur(12px);background:linear-gradient(90deg,rgba(255,80,240,.12),rgba(0,180,255,.12));z-index:997}
+.nav-btn{appearance:none;background:none;border:0;display:grid;place-items:center;width:40px;height:40px}
+.nav-btn svg{width:22px;height:22px;color:#d6eaff}
 
-    /* ≥768px: amplia grid e mostra sidebar fixa */
-    @media (min-width: 768px){ .grid{grid-template-columns:repeat(3,minmax(0,1fr))} .sidebar{transform:translateX(0)} }
-    @media (min-width: 1024px){ .grid{grid-template-columns:repeat(4,minmax(0,1fr))} }
-  </style>
+/* FAB (Botão Único) */
+.fab{position:fixed;right:16px;bottom:calc(84px + var(--sa-bot));width:58px;height:58px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line);backdrop-filter:blur(8px);box-shadow:0 10px 30px rgba(0,0,0,.3);background:rgba(255,255,255,.08);z-index:999}
+
+/* Handle lateral (abre/fecha sidebar) */
+.handle{position:fixed;top:calc(50% - 24px);right:8px;z-index:999;display:grid;place-items:center;width:36px;height:48px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.06);backdrop-filter:blur(10px)}
+
+/* KIOSK: esconder UI */
+.kiosk header,.kiosk .footer-bar,.kiosk .fab,.kiosk .handle,.kiosk .panel,.kiosk .sidebar{display:none !important}
+
+/* ORIENTATION LOCK (retrato obrigatório) */
+.rotate-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.8);z-index:1200}
+.rotate-overlay.show{display:flex}
+.rotate-card{padding:18px 22px;border-radius:16px;border:1px solid var(--line);background:rgba(11,15,23,.95)}
+.rotate-card .small{opacity:.9}
+
+/* Utility */
+.ellip{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-inline-size:20ch}
+.icon-only .label{display:none}
+</style>
 </head>
 <body>
+<div id="bg"><video id="bgvid" muted loop playsinline></video></div>
+
 <div class="app" id="app">
-  <div class="topbar glass">
-    <div class="row" style="gap:10px; align-items:center; width:100%">
-      <button class="btn icon" id="toggleSidebar" data-icon="sidebar" title="Menu"><span class="sr-only">Menu</span></button>
-      <img id="logoImg" alt="logo" style="height:24px; width:auto; display:none"/>
-      <span class="title ellip">KOBLLUX InfoDose — Glow</span>
-      <span class="pill" id="versionBadge">v2.4.8</span>
-      <span class="pill" id="storageBadge" title="Modo de armazenamento">…</span>
-      <div class="spacer"></div>
-      <button class="btn icon" id="toggleDrawer" data-icon="wand" title="Marca"><span class="sr-only">Marca</span></button>
-      <button class="btn icon" id="hideUIBtn" data-icon="eye" title="Foco"><span class="sr-only">Foco</span></button>
+  <!-- ===== TOP HUD ===== -->
+  <header>
+    <div class="hud">
+      <span class="badge" title="Frames por segundo">FPS <b id="fps">~</b></span>
+      <span class="badge" title="Latência do loop">LAT <b id="lat">~</b>ms</span>
+      <span class="badge" title="Long Tasks">LT <b id="lt">0</b></span>
+      <span class="badge" title="Layout Shift">CLS <b id="cls">0.00</b></span>
+      <button class="icon-btn" id="btnPlay" title="Ping de áudio" aria-label="Áudio">{svgPlay}</button>
+      <button class="icon-btn" id="btnKiosk" title="Esconder UI (foco no fundo)" aria-label="Kiosk">{svgEyeOff}</button>
+    </div>
+  </header>
+
+  <!-- ===== CORE ===== -->
+  <main>
+    <section class="center">
+      <div class="core">
+        <div class="ring" id="ring"></div>
+        <div class="dot" id="dot"></div>
+        <div class="controls">
+          <button class="icon-btn" id="ringPrev" title="Anel anterior" aria-label="Anterior">{svgChevronL}</button>
+          <button class="icon-btn" id="ringNext" title="Próximo anel" aria-label="Próximo">{svgChevronR}</button>
+          <button class="icon-btn" id="btnToggleAnim" title="Animar/pausar anel" aria-label="Animação">{svgBolt}</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== APPS / UPLOADS ===== -->
+    <section class="panel" id="appsPane">
+      <div class="grid2 icon-only" id="gridActions">
+        <!-- ÍCONES APENAS (labels escondidas por CSS) -->
+        <label class="label-btn" for="bgUpload" title="Trocar Fundo" aria-label="Upload Fundo">{svgImage}<span class="label">Fundo</span></label>
+        <label class="label-btn" for="ringUpload" title="Adicionar Anel" aria-label="Upload Ring">{svgTarget}<span class="label">Anel</span></label>
+        <label class="label-btn" for="dotUpload" title="Trocar Dot" aria-label="Upload Dot">{svgDot}<span class="label">Dot</span></label>
+        <label class="label-btn" for="logoUpload" title="Trocar Logo" aria-label="Upload Logo">{svgLogo}<span class="label">Logo</span></label>
+
+        <label class="label-btn" for="htmlUpload" title="Carregar HTML como App" aria-label="Upload HTML">{svgHtml}<span class="label">HTML</span></label>
+        <button class="label-btn" id="btnLoadApps" title="Ler apps.json">{svgJson}<span class="label">apps.json</span></button>
+        <button class="label-btn" id="btnExport" title="Exportar ZIP (stub)">{svgDownload}<span class="label">ZIP</span></button>
+        <button class="label-btn" id="btnAppsToggle" title="Estilo do painel">{svgGrid}<span class="label">Painel</span></button>
+      </div>
+
+      <!-- FILE INPUTS -->
+      <input type="file" id="bgUpload" accept="image/*,video/webm,video/mp4"/>
+      <input type="file" id="ringUpload" accept="image/png,image/svg+xml"/>
+      <input type="file" id="dotUpload" accept="image/png,image/svg+xml"/>
+      <input type="file" id="logoUpload" accept="image/*,image/svg+xml"/>
+      <input type="file" id="htmlUpload" accept="text/html"/>
+
+      <div class="apps-list" id="appsList"></div>
+    </section>
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <div class="footer-bar">
+      <button class="nav-btn" title="Início" id="navHome">{svgHome}</button>
+      <button class="nav-btn" title="Apps" id="navApps">{svgGrid}</button>
+      <button class="nav-btn" title="Perfil" id="navUser">{svgUser}</button>
+    </div>
+  </footer>
+
+  <!-- FAB (Botão Único) -->
+  <button class="fab" id="btnInfodose" title="Ação Única">{svgBolt}</button>
+
+  <!-- Handle lateral para abrir/fechar sidebar -->
+  <button class="handle" id="btnHandle" title="Unificar/abrir controle">{svgMenu}</button>
+</div>
+
+<!-- ===== SIDEBAR: CONTROLE TOTAL ===== -->
+<aside class="sidebar" id="sidebar">
+  <div class="side-card">
+    <div class="side-head">
+      <div class="ttl">Controles</div>
+      <button class="icon-btn" id="btnSideClose" title="Fechar">{svgX}</button>
+    </div>
+
+    <div class="side-scroller">
+      <!-- Logo viewer/swap -->
+      <div class="row"><div class="thumb" id="thumbLogo"></div><div class="grow">
+        <div><b>Logo</b></div>
+        <div class="small ellip" id="metaLogo">—</div>
+      </div><label class="label-btn" for="logoUpload">Trocar</label></div>
+
+      <!-- Fundo viewer/swap -->
+      <div class="row"><div class="thumb" id="thumbBg"></div><div class="grow">
+        <div><b>Fundo</b></div>
+        <div class="small ellip" id="metaBg">—</div>
+      </div><label class="label-btn" for="bgUpload">Trocar</label></div>
+
+      <!-- Anel & Dot -->
+      <div class="row"><div class="thumb" id="thumbRing"></div><div class="grow">
+        <div><b>Anel</b></div>
+        <div class="small ellip" id="metaRing">—</div>
+      </div><label class="label-btn" for="ringUpload">Adicionar</label></div>
+
+      <div class="row"><div class="thumb" id="thumbDot"></div><div class="grow">
+        <div><b>Dot</b></div>
+        <div class="small ellip" id="metaDot">—</div>
+      </div><label class="label-btn" for="dotUpload">Trocar</label></div>
+
+      <!-- Ícones: alternar texto/ícone -->
+      <div class="row"><div class="grow">
+        <div><b>UI</b></div>
+        <div class="small">Mostrar rótulos de texto nos botões (padrão: ícone apenas)</div>
+      </div>
+      <label class="switch" title="Rótulos de texto">
+        <input type="checkbox" id="toggleLabels"/>
+        <span class="slider"></span>
+      </label></div>
+
+      <!-- Kiosk switch -->
+      <div class="row"><div class="grow">
+        <div><b>Modo Foco</b></div>
+        <div class="small">Ocultar menus, deixando apenas o background e o núcleo.</div>
+      </div>
+      <label class="switch" title="Kiosk">
+        <input type="checkbox" id="toggleKiosk"/>
+        <span class="slider"></span>
+      </label></div>
+
     </div>
   </div>
+</aside>
 
-  <!-- Sidebar -->
-  <aside class="sidebar glass" id="sidebar">
-    <div class="section">
-      <h3>Uploads</h3>
-      <div class="row" style="gap:6px">
-        <label class="btn icon" data-icon="filecode" for="uploadHtml" title="HTML"><span class="sr-only">Upload HTML</span></label>
-        <input id="uploadHtml" type="file" accept="text/html,.html" />
-        <label class="btn icon" data-icon="video" for="uploadVideo" title="Vídeo"><span class="sr-only">Upload Vídeo</span></label>
-        <input id="uploadVideo" type="file" accept="video/*" />
-        <button class="btn icon" data-icon="folderPlus" id="newFolder" title="Pasta"><span class="sr-only">Nova pasta</span></button>
-      </div>
-    </div>
-
-    <div class="section">
-      <h3>Arquivos</h3>
-      <div id="filesGrid" class="grid"></div>
-    </div>
-
-    <div class="section">
-      <h3>Snippets</h3>
-      <div class="stack">
-        <button class="btn icon" id="btnArteASC" data-icon="sparkles" title="ArteASC"><span class="sr-only">ArteASC</span></button>
-        <pre id="arteOutput" class="glass" style="padding:10px; margin:0; font-size:12px; overflow:auto"></pre>
-      </div>
-    </div>
-  </aside>
-
-  <!-- Drawer -->
-  <aside class="drawer glass" id="drawer">
-    <div class="section">
-      <h3>Marca</h3>
-      <div class="stack">
-        <div class="row">
-          <label class="btn icon" data-icon="image" for="uploadLogo" title="Logo"><span class="sr-only">Upload Logo</span></label>
-          <input id="uploadLogo" type="file" accept="image/*"/>
-          <button class="btn" id="toggleLogo">Logo on/off</button>
-        </div>
-        <div class="row" style="align-items:center">
-          <label style="width:110px">Tamanho Ícone</label>
-          <input id="iconSize" type="range" min="16" max="40" value="22"/>
-        </div>
-        <div class="row" style="align-items:center">
-          <label style="width:110px">Estilo Ícone</label>
-          <div class="row">
-            <button class="btn pill" data-iconstyle="outline">Outline</button>
-            <button class="btn pill" data-iconstyle="filled">Filled</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="section">
-      <h3>Background</h3>
-      <div class="stack">
-        <div class="row">
-          <label class="btn icon" data-icon="image" for="uploadBg" title="Background"><span class="sr-only">Upload Background</span></label>
-          <input id="uploadBg" type="file" accept="image/*"/>
-          <button class="btn" id="clearBg">Limpar</button>
-        </div>
-        <div class="grid" id="bgPresets"></div>
-      </div>
-    </div>
-
-    <div class="section">
-      <h3>Temas</h3>
-      <div class="row" style="flex-wrap:wrap; gap:8px" id="themes"></div>
-    </div>
-
-    <div class="section">
-      <h3>Diagnóstico</h3>
-      <div class="stack">
-        <button class="btn" id="runTests">Rodar testes de armazenamento</button>
-        <pre id="testLog" class="glass" style="padding:10px; margin:0; font-size:12px; max-height:160px; overflow:auto"></pre>
-      </div>
-    </div>
-  </aside>
-
-  <!-- Overlay compartilhado -->
-  <div class="overlay" id="overlay"></div>
-
-  <!-- Iframe Modal -->
-  <div class="ifr-wrap glass" id="ifrWrap">
-    <div class="ifr-head row">
-      <button class="btn icon" id="ifrMin" data-icon="min" title="Minimizar"><span class="sr-only">Minimizar</span></button>
-      <button class="btn icon" id="ifrMax" data-icon="max" title="Maximizar"><span class="sr-only">Maximizar</span></button>
-      <button class="btn icon" id="ifrPop" data-icon="popout" title="Abrir em aba"><span class="sr-only">Abrir em aba</span></button>
-      <div class="spacer"></div>
-      <button class="btn icon" id="ifrClose" data-icon="close" title="Fechar"><span class="sr-only">Fechar</span></button>
-    </div>
-    <div class="ifr-body"><iframe id="viewer" class="ifr" title="viewer"></iframe></div>
+<!-- ===== ORIENTATION (retrato) ===== -->
+<div class="rotate-overlay" id="rotateOverlay">
+  <div class="rotate-card">
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:6px">{svgRotate}<b>Gire para retrato</b></div>
+    <div class="small">A interface foi otimizada para modo retrato. Obrigado! 🙂</div>
   </div>
+</div>
 
-  <!-- Reopen badge -->
-  <button class="btn" id="reopenBtn" style="display:none; position:fixed; right:16px; bottom:154px; z-index:var(--z-ui)">Reabrir</button>
-
-  <!-- FAB + menu -->
-  <div id="btnKOBLLUX" class="fab gradient"><!-- ícone injetado via JS --></div>
-  <div class="fab-menu" id="fabMenu">
-    <label class="btn icon" data-icon="filecode" for="uploadHtml" title="HTML"><span class="sr-only">Upload HTML</span></label>
-    <label class="btn icon" data-icon="video" for="uploadVideo" title="Vídeo"><span class="sr-only">Upload Vídeo</span></label>
-    <button class="btn icon" data-icon="shuffle" id="quickBg" title="BG Aleatório"><span class="sr-only">BG Aleatório</span></button>
-    <button class="btn icon" data-icon="eye" id="quickHide" title="Ocultar UI"><span class="sr-only">Ocultar UI</span></button>
+<!-- ===== OVERLAY iFRAME (apps/HTML) ===== -->
+<div class="overlay" id="overlay">
+  <div class="ifr-wrap" role="dialog" aria-modal="true" aria-label="Sandbox">
+    <div class="ifr-head">
+      <div class="ellip" id="ifrTitle">Sandbox</div>
+      <div style="display:flex;gap:6px">
+        <button class="icon-btn" id="ifrClose" title="Fechar">{svgX}</button>
+      </div>
+    </div>
+    <iframe class="ifr-body" id="sandboxModal" referrerpolicy="no-referrer" sandbox="allow-scripts allow-forms allow-popups allow-pointer-lock allow-downloads allow-same-origin"></iframe>
   </div>
 </div>
 
 <script>
-/* ===================== ICONS ===================== */
-let ICON_STYLE = 'outline';
-let ICON_SIZE = 22;
-function icon(name, size){
-  const sz = size || ICON_SIZE;
-  const common = `width="${sz}" height="${sz}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"`;
-  const filled = (d)=>`<svg ${common} fill="currentColor" stroke="none"><path d="${d}"/></svg>`;
-  const outline = (d)=>`<svg ${common}><path d="${d}"/></svg>`;
-  const P = {
-    sidebar: 'M3 6h18M3 12h18M3 18h18',
-    wand: 'M15 4l-3 3 3 3M4 20l6-6',
-    eye: 'M1 12s5-9 11-9 11 9 11 9-5 9-11 9S1 12 1 12zm11 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6',
-    filecode: 'M14 2H6a2 2 0 0 0-2 2v16l4-4h8a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z',
-    video: 'M23 7l-7 5 7 5V7zM1 5h14v14H1z',
-    folderPlus: 'M3 7h6l2 2h10v10H3z M8 13h4 M10 11v4',
-    sparkles: 'M5 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5z M19 3l1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3z',
-    image: 'M4 4h16v16H4z M6 16l4-5 4 5H6z M14 8a2 2 0 1 0 4 0 2 2 0 0 0-4 0',
-    min: 'M5 19h14', max: 'M5 5h14v14H5z', popout: 'M8 8h8v8M8 16l8-8', close: 'M6 6l12 12M18 6L6 18',
-    asterisk: 'M12 2v20M2 12h20M4.93 4.93l14.14 14.14M19.07 4.93L4.93 19.07',
-    shuffle: 'M16 3h5v5M4 20l5-5M20 8l-7 7-4-4-5 5',
-  };
-  const map = (d)=> ICON_STYLE==='filled' ? filled(d) : outline(d);
-  return map(P[name]||P['asterisk']);
-}
-function injectIcons(){
-  document.querySelectorAll('.btn.icon, #btnKOBLLUX').forEach(btn=>{
-    const name = btn.dataset.icon || (btn.id==='btnKOBLLUX' ? 'asterisk' : 'asterisk');
-    btn.innerHTML = icon(name);
-  });
+/* ===== ICONS (inline, evita paths quebrados) ===== */
+const ICONS = {
+  play: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="8,5 19,12 8,19"/></svg>`,
+  eyeOff:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l18 18"/><path d="M10.58 10.58A2 2 0 0 0 13.42 13.4"/><path d="M9.88 4.24A10.94 10.94 0 0 1 21 12c-1.64 2.88-4.7 6-9 6-1.35 0-2.6-.25-3.74-.7"/></svg>`,
+  chevronL:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>`,
+  chevronR:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>`,
+  bolt:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 3 4 14 12 14 11 21 20 10 12 10"/></svg>`,
+  image:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>`,
+  target:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/></svg>`,
+  dot:`<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="4"/></svg>`,
+  logo:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l6 4v10l-6 4-6-4V7z"/></svg>`,
+  html:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 4h13v16H3V4z"/><path d="M10 8h7M7 12h10M7 16h10"/></svg>`,
+  json:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 7v10M19 7v10"/><path d="M9 7h2v10H9M13 7h2v10h-2"/></svg>`,
+  download:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
+  grid:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>`,
+  home:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9"/><path d="M9 21V9h6v12"/></svg>`,
+  user:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a7.5 7.5 0 0 1 13 0"/></svg>`,
+  menu:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>`,
+  x:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+  rotate:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="3" width="12" height="18" rx="2"/><path d="M12 19v2m-4-1h8"/></svg>`
+};
+// inject icons
+for(const [k,v] of Object.entries(ICONS)){
+  document.body.innerHTML = document.body.innerHTML.replaceAll(`{svg${k[0].toUpperCase()+k.slice(1)}}`, v);
 }
 
-/* ===== ArteASC ===== */
-window.ArteASC={render:(n,v={})=>({ portal369:`╔═══🌌═══╗\n ✪ (°ロ°)☝\n 🧭 ${v.tri||'KOBLLUX'}`, seal_trinity_v2:`⟐ Trinity v2\n⚡ Pulso:${v.pulso||'∞'}`}[n]||'[ArteASC]')};
+/* ===== BG helpers ===== */
+const UNO = {
+  setBgVideo(src){ const v=$('#bgvid'); v.src=src; v.style.display='block'; v.play().catch(()=>{}); updateThumb('Bg', src); },
+  setBgImage(src){ const v=$('#bgvid'); try{v.pause();}catch{} v.removeAttribute('src'); v.load(); v.style.display='none'; $('#bg').style.backgroundImage = `url("${src}")`; updateThumb('Bg', src); }
+};
+window.UNO = UNO;
 
-/* ===================== Storage Abstraction (IDB -> localStorage -> memória) ===================== */
-const DB_NAME='kobllux_glow_db_v2';
-const STORE='files';
-let store; // adapter com .init() .put(item) .all() .delete(id)
-
-function safeHasIndexedDB(){ try { return typeof indexedDB !== 'undefined' && !!indexedDB; } catch(e){ return false; } }
-function safeHasLocalStorage(){ try { const k='__test__'; localStorage.setItem(k,'1'); localStorage.removeItem(k); return true; } catch(e){ return false; } }
-
-function idbAdapter(){
-  let db; 
-  return {
-    mode:'indexedDB',
-    async init(){
-      await new Promise((res,rej)=>{
-        const req = indexedDB.open(DB_NAME, 1);
-        req.onupgradeneeded = ()=>{ const d=req.result; if(!d.objectStoreNames.contains(STORE)){ d.createObjectStore(STORE,{keyPath:'id'});} };
-        req.onsuccess = ()=>{ db=req.result; res(); };
-        req.onerror = ()=> rej(req.error);
-      });
-    },
-    async put(item){
-      // Para HTML: se houver htmlText, salvamos também (melhor reabrir depois)
-      return new Promise((res,rej)=>{ const tx=db.transaction(STORE,'readwrite'); tx.objectStore(STORE).put(item); tx.oncomplete=()=>res(); tx.onerror=()=>rej(tx.error); });
-    },
-    async all(){ return new Promise((res,rej)=>{ const tx=db.transaction(STORE,'readonly'); const req=tx.objectStore(STORE).getAll(); req.onsuccess=()=>res(req.result||[]); req.onerror=()=>rej(req.error); }); },
-    async delete(id){ return new Promise((res,rej)=>{ const tx=db.transaction(STORE,'readwrite'); tx.objectStore(STORE).delete(id); tx.oncomplete=()=>res(); tx.onerror=()=>rej(tx.error); }); },
-  }
+/* ===== Mini metrics ===== */
+let t0=performance.now(), rafCount=0, lastFpsT=performance.now();
+function loop(now){ const dt=now-t0; t0=now; $('#lat').textContent=Math.max(1,Math.round(dt)); rafCount++; if(now-lastFpsT>1000){ $('#fps').textContent=rafCount; rafCount=0; lastFpsT=now; } requestAnimationFrame(loop); }
+requestAnimationFrame(loop);
+if('PerformanceObserver' in window){
+  try{ new PerformanceObserver(l=>{ for(const e of l.getEntries()){ if(e.duration>50){ const el=$('#lt'); el.textContent=(parseInt(el.textContent,10)||0)+1; }}}).observe({entryTypes:['longtask']}); }catch(e){}
+  try{ let cls=0; new PerformanceObserver(l=>{ for(const e of l.getEntries()){ if(!e.hadRecentInput){ cls+=e.value; } } $('#cls').textContent=cls.toFixed(3); }).observe({type:'layout-shift', buffered:true}); }catch(e){}
 }
 
-function lsAdapter(){
-  const KEY='kobllux_files_v1';
-  const read=()=>{ try{ return JSON.parse(localStorage.getItem(KEY)||'[]'); }catch{ return [] } };
-  const write=(arr)=>{ try{ localStorage.setItem(KEY, JSON.stringify(arr)); }catch(e){ console.warn('localStorage write fail', e); } };
-  return {
-    mode:'localStorage',
-    async init(){ if(!localStorage.getItem(KEY)) write([]); },
-    async put(item){
-      const arr = read().filter(x=>x.id!==item.id);
-      // Se for HTML e houver htmlText, persistimos; se só tiver url (blob), não persiste entre sessões
-      arr.push(item);
-      write(arr);
-    },
-    async all(){ return read(); },
-    async delete(id){ write(read().filter(x=>x.id!==id)); },
-  }
-}
+/* ===== Helpers ===== */
+const $=s=>document.querySelector(s);
+const state = { rings:["dual_uno_assets_v1/img/core/ring_glow_01.png","dual_uno_assets_v1/img/core/ring_glow_02.png","dual_uno_assets_v1/img/core/ring_glow_03.png","dual_uno_assets_v1/img/core/ring_glow_04.png"], rIndex:0, apps:[] };
+const ringEl = $('#ring');
+function setRing(i){ state.rIndex=(i+state.rings.length)%state.rings.length; ringEl.style.backgroundImage=`url("${state.rings[state.rIndex]}")`; updateThumb('Ring', state.rings[state.rIndex]); $('#metaRing').textContent = short(state.rings[state.rIndex]); }
+function short(u){ return (u||'').toString().slice(0,48)+(u&&u.length>48?'…':''); }
 
-function memoryAdapter(){
-  const arr=[]; 
-  return {
-    mode:'memory',
-    async init(){}, async put(item){ const i=arr.findIndex(x=>x.id===item.id); if(i>=0) arr[i]=item; else arr.push(item); },
-    async all(){ return arr.slice(); }, async delete(id){ const i=arr.findIndex(x=>x.id===id); if(i>=0) arr.splice(i,1); },
-  }
-}
+/* ===== Ring anim ===== */
+let animRunning = true, angle = 0;
+(function animate(){ if(animRunning){ angle += 0.3; ringEl.style.transform = `rotate(${angle}deg)`; } requestAnimationFrame(animate); })();
 
-async function createStore(){
-  if(safeHasIndexedDB()) { const a=idbAdapter(); await a.init(); return a; }
-  if(safeHasLocalStorage()) { const a=lsAdapter(); await a.init(); return a; }
-  const a=memoryAdapter(); await a.init(); return a;
-}
+/* ===== Audio ping ===== */
+let actx,out,gain,audioReady=false;
+async function initAudio(){ if(audioReady) return; actx=new (window.AudioContext||window.webkitAudioContext)(); const code=`class B extends AudioWorkletProcessor{static get parameterDescriptors(){return[{name:'on',defaultValue:0},{name:'freq',defaultValue:220}]} process(i,o,p){const out=o[0];const on=p.on[0],f=p.freq[0];for(let ch=0; ch<out.length; ch++){const b=out[ch];for(let n=0;n<b.length;n++){let s=0;if(on>0.5){s=(Math.random()*2-1)*0.18+Math.sin(2*Math.PI*(currentFrame+n)/sampleRate*f)*0.22;}b[n]=s;}}return true}}registerProcessor('b',B);`;
+  await actx.audioWorklet.addModule(URL.createObjectURL(new Blob([code],{type:'text/javascript'})));
+  out=new AudioWorkletNode(actx,'b'); gain=actx.createGain(); gain.gain.value=0.0; out.connect(gain).connect(actx.destination); audioReady=true; }
+function ping(){ if(!audioReady) return; out.parameters.get('on').setValueAtTime(1, actx.currentTime); gain.gain.cancelScheduledValues(actx.currentTime); gain.gain.linearRampToValueAtTime(0.9, actx.currentTime+0.01); gain.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime+0.35); setTimeout(()=> out.parameters.get('on').setValueAtTime(0, actx.currentTime), 140); }
 
-function updateStorageBadge(){
-  const el = document.getElementById('storageBadge');
-  const mode = store?.mode || '…';
-  const label = mode==='indexedDB' ? 'IDB' : mode==='localStorage' ? 'LS' : 'MEM';
-  el.textContent = label;
-  el.style.borderColor = mode==='indexedDB' ? 'rgba(0,255,255,.6)' : mode==='localStorage' ? 'rgba(255,200,87,.6)' : 'rgba(255,92,138,.6)';
-}
-
-/* ===================== Estado & Helpers ===================== */
-const state = { files: [] };
-const $ = (q,root=document)=>root.querySelector(q);
-const $$ = (q,root=document)=>Array.from(root.querySelectorAll(q));
-function uid(){return 'f_'+Math.random().toString(36).slice(2)}
-function humanSize(bytes){ if(bytes==null) return ''; const s=['B','KB','MB','GB']; let i=0; while(bytes>=1024&&i<s.length-1){bytes/=1024;i++} return bytes.toFixed(1)+s[i] }
-
-/* ===================== UI: toggles, overlay compartilhado ===================== */
+/* ===== Apps render / overlay ===== */
+function renderApps(arr){ const list=$('#appsList'); list.innerHTML=''; (arr||[]).forEach((a,i)=>{ const row=document.createElement('div'); row.className='app-row'; row.innerHTML=`<span class="badge">#${i+1}</span><div style="flex:1 1 auto;min-width:0"><div><strong class="ellip" title="${a.name||'App'}">${a.name||'App'}</strong></div><div class="meta ellip" title="${a.url}">${a.url}</div></div><button class="label-btn" data-open="${i}" title="Abrir">${ICONS.play}</button>`; list.appendChild(row); }); list.onclick=e=>{ const i=e.target?.closest('[data-open]')?.dataset?.open; if(i!=null){ openSandbox((arr||[])[i]); } } }
 const overlay = $('#overlay');
-const sidebar = $('#sidebar');
-const drawer = $('#drawer');
-$('#toggleSidebar').onclick=()=>{ sidebar.classList.toggle('show'); overlay.classList.toggle('show', sidebar.classList.contains('show')); }
-$('#toggleDrawer').onclick=()=>{ drawer.classList.toggle('show'); overlay.classList.toggle('show', drawer.classList.contains('show')); }
-$('#hideUIBtn').onclick=()=> document.body.classList.toggle('ui-hidden');
-$('#quickHide').onclick=()=> document.body.classList.toggle('ui-hidden');
-$('#btnKOBLLUX').dataset.icon='asterisk';
-$('#btnKOBLLUX').onclick=()=> $('#fabMenu').classList.toggle('show');
-overlay.onclick=()=>{ sidebar.classList.remove('show'); drawer.classList.remove('show'); overlay.classList.remove('show'); closeOverlay(); };
-window.addEventListener('keydown', (e)=>{ if(e.key==='Escape'){ sidebar.classList.remove('show'); drawer.classList.remove('show'); overlay.classList.remove('show'); closeOverlay(); $('#fabMenu').classList.remove('show'); }});
+const sandboxModal = $('#sandboxModal');
+const ifrTitle = $('#ifrTitle');
+function openSandbox(app){ if(!app) return; ifrTitle.textContent = app.name||'Sandbox'; sandboxModal.src = app.url; overlay.classList.add('show'); }
+function closeOverlay(){ overlay.classList.remove('show'); sandboxModal.removeAttribute('src'); }
+$('#ifrClose').onclick = closeOverlay; overlay.addEventListener('click', (e)=>{ if(e.target===overlay){ closeOverlay(); }});
 
-/* ===================== IFrame Viewer ===================== */
-const ifrWrap = $('#ifrWrap');
-const viewer = $('#viewer');
-function openIframe(url){ overlay.classList.add('show'); ifrWrap.classList.add('show'); viewer.src=url; $('#reopenBtn').style.display='none'; }
-function closeOverlay(){ ifrWrap.classList.remove('show'); if(viewer.src) viewer.src='about:blank'; $('#reopenBtn').style.display='block'; }
-$('#reopenBtn').onclick=()=>{ overlay.classList.add('show'); ifrWrap.classList.add('show'); $('#reopenBtn').style.display='none'; };
-$('#ifrClose').onclick=()=>{ closeOverlay(); overlay.classList.remove('show'); };
-$('#ifrMin').onclick=()=>{ ifrWrap.style.inset='auto 12px 12px 12px'; ifrWrap.style.width='auto'; ifrWrap.style.height='280px'; };
-$('#ifrMax').onclick=()=>{ ifrWrap.style.inset='6vh 4vw'; ifrWrap.style.width=''; ifrWrap.style.height=''; };
-$('#ifrPop').onclick=()=>{ if(viewer.src && viewer.src!=='about:blank') window.open(viewer.src,'_blank'); };
+/* ===== File -> dataURL helpers ===== */
+function fileToDataURL(file){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file); }); }
+function updateThumb(kind, src){ const id = kind==='Bg'?'thumbBg':kind==='Ring'?'thumbRing':kind==='Dot'?'thumbDot':'thumbLogo'; const el=$('#'+id); if(!el) return; el.style.backgroundImage=`url('${src}')`; const meta = $('#meta'+kind); if(meta) meta.textContent = short(src); }
 
-/* ===================== Arquivos (render) ===================== */
-async function refreshFiles(){
-  state.files = (await store.all()).sort((a,b)=> (b.updated||0)-(a.updated||0));
-  const grid = $('#filesGrid'); grid.innerHTML='';
-  for(const f of state.files){ grid.appendChild(renderFileCard(f)); }
-}
+/* ===== UI events ===== */
+$('#ringPrev').onclick=()=>setRing(state.rIndex-1);
+$('#ringNext').onclick=()=>setRing(state.rIndex+1);
+$('#btnToggleAnim').onclick=()=>{ animRunning=!animRunning; if(!animRunning) ringEl.style.transform=''; };
+$('#btnPlay').onclick=async()=>{ await initAudio(); if(actx.state==='suspended') await actx.resume(); ping(); };
+$('#btnKiosk').onclick=()=>{ document.body.classList.toggle('kiosk'); $('#toggleKiosk').checked = document.body.classList.contains('kiosk'); };
+$('#btnInfodose').onclick=()=> alert('Ação única ⚡');
+$('#navApps').onclick=()=> $('#appsPane').scrollIntoView({behavior:'smooth'});
+$('#navHome').onclick=()=> window.scrollTo({top:0,behavior:'smooth'});
+$('#navUser').onclick=()=> alert('Perfil em breve');
 
-function renderFileCard(f){
-  const el = document.createElement('div'); el.className='card';
-  const thumb = document.createElement('div'); thumb.className='thumb'; thumb.innerHTML = `<span>${(f.type||'file').toUpperCase()}</span>`;
-  const name = document.createElement('div'); name.className='ellip'; name.textContent = f.name || '(sem nome)';
-  const meta = document.createElement('div'); meta.style.fontSize='11px'; meta.style.opacity='.75'; meta.textContent = (f.size? humanSize(f.size)+' · ': '') + new Date(f.updated||Date.now()).toLocaleString();
-  const row = document.createElement('div'); row.className='row';
-  const openBtn = document.createElement('button'); openBtn.className='btn icon'; openBtn.title='Abrir'; openBtn.dataset.icon='popout';
-  const delBtn = document.createElement('button'); delBtn.className='btn icon'; delBtn.title='Excluir'; delBtn.dataset.icon='close';
-  openBtn.onclick=()=> openItem(f);
-  delBtn.onclick=async()=>{ if(confirm('Excluir?')){ await store.delete(f.id); await refreshFiles(); } }
-  row.append(openBtn, delBtn);
-  el.append(thumb, name, meta, row);
-  // injetar ícones nestes dois botões
-  setTimeout(()=>{ openBtn.innerHTML = icon('popout'); delBtn.innerHTML = icon('close'); },0);
-  return el;
-}
+/* Sidebar */
+const sidebar=$('#sidebar');
+$('#btnHandle').onclick=()=> sidebar.classList.toggle('open');
+$('#btnSideClose').onclick=()=> sidebar.classList.remove('open');
 
-function openItem(f){
-  if(f.type==='html'){
-    let url = f.url;
-    if(!url && f.htmlText){
-      const blob = new Blob([f.htmlText], {type:'text/html'});
-      url = URL.createObjectURL(blob);
-    }
-    if(url){ openIframe(url); }
-    else { alert('Arquivo HTML sem conteúdo nesta sessão. Reenvie o arquivo.'); }
-  } else if(f.type==='video'){
-    if(f.url){
-      const html = `<video src="${f.url}" style="width:100%;height:100%" controls autoplay playsinline></video>`;
-      const blob = new Blob([`<html><meta name='viewport' content='width=device-width,initial-scale=1'><meta charset='utf-8'><body style='margin:0;background:#000'>${html}</body></html>`],{type:'text/html'});
-      const url = URL.createObjectURL(blob); openIframe(url);
-    } else {
-      alert('Vídeo não está persistido. Ele só fica disponível na sessão em que foi enviado.');
-    }
-  } else {
-    alert('Tipo não suportado: '+(f.type||'desconhecido'));
-  }
-}
+/* Labels toggle */
+$('#toggleLabels').onchange=(e)=>{ const on=e.target.checked; const grid = $('#gridActions'); if(on){ grid.classList.remove('icon-only'); } else { grid.classList.add('icon-only'); } };
 
-/* ===================== Uploads ===================== */
-$('#uploadHtml').addEventListener('change', async (e)=>{
-  const file = e.target.files[0]; if(!file) return; const text = await file.text();
-  const id = uid();
-  // criamos um blob/URL para abrir imediatamente, mas também guardamos o texto (para persistência real no LS/IDB)
-  const blob = new Blob([text], {type:'text/html'});
-  const url = URL.createObjectURL(blob);
-  const item = {id, type:'html', name:file.name, url, htmlText:text, size:file.size, updated:Date.now()};
-  await store.put(item); await refreshFiles(); e.target.value='';
-});
+/* Kiosk toggle */
+$('#toggleKiosk').onchange=(e)=>{ if(e.target.checked) document.body.classList.add('kiosk'); else document.body.classList.remove('kiosk'); };
 
-$('#uploadVideo').addEventListener('change', async (e)=>{
-  const file = e.target.files[0]; if(!file) return; const url = URL.createObjectURL(file);
-  const id = uid();
-  // Por padrão evitamos persistir blobs grandes; mantemos sessão atual.
-  const item = {id, type:'video', name:file.name, url, size:file.size, updated:Date.now(), sessionOnly:true};
-  await store.put(item); await refreshFiles(); e.target.value='';
-});
+/* Upload BG */
+$('#bgUpload').addEventListener('change', async (e)=>{ const f=e.target.files?.[0]; if(!f) return; const url=await fileToDataURL(f); if(f.type.startsWith('video')) UNO.setBgVideo(url); else UNO.setBgImage(url); });
+/* Upload RING */
+$('#ringUpload').addEventListener('change', async (e)=>{ const f=e.target.files?.[0]; if(!f) return; const url=await fileToDataURL(f); state.rings.push(url); setRing(state.rings.length-1); });
+/* Upload DOT */
+$('#dotUpload').addEventListener('change', async (e)=>{ const f=e.target.files?.[0]; if(!f) return; const url=await fileToDataURL(f); $('#dot').style.backgroundImage = `url('${url}')`; updateThumb('Dot', url); });
+/* Upload LOGO (só preview/controle) */
+$('#logoUpload').addEventListener('change', async (e)=>{ const f=e.target.files?.[0]; if(!f) return; const url=await fileToDataURL(f); updateThumb('Logo', url); });
 
-$('#newFolder').onclick=async()=>{ const name = prompt('Nome da pasta:','Nova Pasta'); if(!name) return; const id=uid(); const item={id,type:'folder',name,updated:Date.now()}; await store.put(item); await refreshFiles(); };
+/* Upload HTML => cria blob: URL e adiciona na lista (sem depender só de localStorage) */
+$('#htmlUpload').addEventListener('change', async (e)=>{ const f=e.target.files?.[0]; if(!f) return; const html = await f.text(); const blob = new Blob([html], {type:'text/html'}); const url = URL.createObjectURL(blob); const name = f.name.replace(/\.[^.]+$/, ''); state.apps.push({ name: `HTML: ${name}`, url }); renderApps(state.apps); openSandbox({name, url}); });
 
-/* ===================== Branding ===================== */
-$('#uploadLogo').addEventListener('change', (e)=>{ const f=e.target.files[0]; if(!f) return; const url=URL.createObjectURL(f); const img=$('#logoImg'); img.src=url; img.style.display='block'; });
-$('#toggleLogo').onclick=()=>{ const img=$('#logoImg'); img.style.display = (img.style.display==='none')?'block':'none'; }
+/* apps.json opcional (se existir) */
+$('#btnLoadApps').onclick=async()=>{ try{ const r=await fetch('./apps/apps.json'); const j=await r.json(); const arr=(j.apps||j)||[]; state.apps = arr.concat(state.apps); renderApps(state.apps); }catch(e){ console.warn('Falha no apps.json', e); } };
 
-/* ===================== Backgrounds ===================== */
-const PRESETS = [
-  'https://images.unsplash.com/photo-1527443154391-507e9dc6c5cc?q=80&w=1200&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1200&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1520975922203-bc2f1e8e7b1f?q=80&w=1200&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?q=80&w=1200&auto=format&fit=crop'
-];
-function loadBg(url){ document.body.style.backgroundImage = `url(${url})`; }
-$('#uploadBg').addEventListener('change', (e)=>{ const f=e.target.files[0]; if(!f) return; const url=URL.createObjectURL(f); loadBg(url)});
-$('#clearBg').onclick=()=>{ document.body.style.backgroundImage='none' }
-$('#quickBg').onclick=()=>{ const url = PRESETS[Math.floor(Math.random()*PRESETS.length)]; loadBg(url); }
+/* Painel estilo */
+$('#btnAppsToggle').onclick=()=>{ $('#appsPane').classList.toggle('neon'); };
 
-const bgPresets = $('#bgPresets'); PRESETS.forEach(u=>{ const c=document.createElement('button'); c.className='card'; c.style.padding='6px'; c.innerHTML=`<div class='thumb' style="background:url('${u}') center/cover; border:none"></div>`; c.onclick=()=>loadBg(u); bgPresets.appendChild(c)});
+/* Export ZIP (stub) */
+$('#btnExport').onclick=()=> alert('Export ZIP virá em seguida (stub)');
 
-/* ===================== Temas & Ícones dinâmicos ===================== */
-const THEMES = ['nebula','matrix','cyberpunk','tesseract','turbo'];
-const themesRow = $('#themes');
-THEMES.forEach(t=>{ const b=document.createElement('button'); b.className='btn pill'; b.textContent=t; b.onclick=()=>document.documentElement.setAttribute('data-theme',t); themesRow.appendChild(b)});
+/* Orientation lock (retrato) */
+function checkOrientation(){ const isPortrait = window.matchMedia('(orientation: portrait)').matches; $('#rotateOverlay').classList.toggle('show', !isPortrait); }
+window.addEventListener('orientationchange', checkOrientation);
+window.addEventListener('resize', checkOrientation);
+checkOrientation();
 
-$('#iconSize').addEventListener('input', (e)=>{ ICON_SIZE = +e.target.value; injectIcons(); });
-$$('[data-iconstyle]').forEach(b=> b.onclick=()=>{ ICON_STYLE = b.dataset.iconstyle; injectIcons(); });
-
-/* ===================== Diagnóstico ("test cases") ===================== */
-function logTest(msg){ const el=$('#testLog'); el.textContent += msg + '\n'; el.scrollTop = el.scrollHeight; }
-async function runStorageTests(){
-  $('#testLog').textContent='';
-  logTest('Iniciando testes…');
-  logTest(`Modo: ${store.mode}`);
-  // 1) put + all
-  const idT = 'test_'+Date.now();
-  const sampleHtml = '<!doctype html><meta charset="utf-8"><title>TEST</title><h1>OK</h1>';
-  await store.put({id:idT, type:'html', name:'test.html', htmlText:sampleHtml, updated:Date.now(), size:sampleHtml.length});
-  const all1 = await store.all();
-  const found = !!all1.find(x=>x.id===idT);
-  console.assert(found, 'Item deve existir após put');
-  logTest('Teste 1 (put/all): ' + (found ? 'PASS' : 'FAIL'));
-  // 2) abrir item (gera blob a partir de htmlText)
-  try { openItem({id:idT, type:'html', name:'test.html', htmlText:sampleHtml}); logTest('Teste 2 (open html): PASS'); }
-  catch(e){ logTest('Teste 2 (open html): FAIL -> '+e.message); }
-  // 3) delete
-  await store.delete(idT);
-  const all2 = await store.all();
-  const gone = !all2.find(x=>x.id===idT);
-  console.assert(gone, 'Item deve sumir após delete');
-  logTest('Teste 3 (delete): ' + (gone ? 'PASS' : 'FAIL'));
-}
-$('#runTests').onclick=runStorageTests;
-
-/* ===================== Boot ===================== */
-(async function(){
-  injectIcons();
-  store = await createStore();
-  updateStorageBadge();
-  await refreshFiles();
-})();
+/* init */
+setRing(0);
+updateThumb('Dot', 'dual_uno_assets_v1/img/core/dot_core_01.png');
+updateThumb('Ring', state.rings[0]);
 </script>
 </body>
 </html>
