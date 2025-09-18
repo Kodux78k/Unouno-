@@ -1,354 +1,982 @@
-<!DOCTYPE html>
-<html lang="pt-BR" data-theme="nebula">
+<!--
+  Esta é a versão final unificada do HUB UNO e do Hub Revo.
+  Ela se baseia no arquivo “unificado 3.html” (Monólito UNO) e incorpora
+  uma nova aba chamada “Revo”, que carrega o Hub Infodose Ultra em um
+  iframe.  O código do Revo foi copiado para “index-100_revo_mod.html” e
+  levemente modificado para buscar a lista de apps diretamente do
+  elemento <script id="APPS_JSON"> presente nesta página.  Isso
+  assegura que ambos os hubs compartilham o mesmo catálogo de apps sem
+  depender de arquivos externos ausentes.
+-->
+<!doctype html>
+<html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
-  <title>DUAL • UNO Hub Monolito v1 — Glow</title>
-  <meta name="theme-color" content="#0b0f17" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+  <title>HUB UNO — Unified Minimal Glow + Revo</title>
+  <meta name="theme-color" content="#0b0f14" />
   <style>
-    /* =====================
-       DUAL • UNO Hub Monolito v1
-       - Mobile-first
-       - Botão Único (FAB)
-       - iFrame com fechar por ESC/backdrop
-       - ArteASC embutido
-       - Mini FileHub + UNO Dots + Usage Gauge
-       ===================== */
-    :root{
-      --bg:#0b0f17;--panel:#0f1522;--glass:rgba(255,255,255,.06);--line:rgba(255,255,255,.14);
-      --ink:#e9f6ff;--muted:#97b1c6;--accent:#29d3ff;--accent2:#ff5af4;--ok:#39ffb6;--warn:#ffb74d;--err:#ff5a6e;
-      --rad:18px;--pad:14px;--blur:24px;--shadow:0 12px 40px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.04);
-      --z-ui:90; --z-overlay:80; --touch:56px;
+    :root {
+      /* Paleta padrão (rosa/azul) */
+      --grad-a: #ff52e5;
+      --grad-b: #00c5e5;
+      --fg: #f5f7ff;
+      --mut: rgba(245, 247, 255, .68);
+      --surface: rgba(15, 17, 32, .50);
+      --surface-strong: rgba(15, 17, 32, .88);
+      --bd: 1px solid rgba(255, 255, 255, .12);
+      --ok: #39ffb6;
+      --warn: #ffb86b;
+      --err: #ff6b6b;
+      --r: 18px;
+      --r2: 22px;
+      --shadow: 0 14px 40px rgba(0, 0, 0, .45);
+      --tabsH: 74px;
+      --hdrH: 64px;
+      --blur: 18px;
+      --ease: cubic-bezier(.22, .61, .36, 1);
     }
-    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-    html,body{height:100%}
-    body{
-      margin:0; color:var(--ink);
-      background:
-        radial-gradient(1200px 800px at 20% -10%, rgba(41,211,255,.14), transparent 60%),
-        radial-gradient(900px 600px at 110% 20%, rgba(255,90,244,.10), transparent 60%),
-        linear-gradient(0deg, #0a0d14, #0b0f17);
-      font:500 15px/1.35 system-ui, -apple-system, Segoe UI, Roboto, Inter, ui-sans-serif, sans-serif;
-      max-width:100vw; overflow-x:hidden;
+
+    /* Tema alternativo: medium gray / glasmorfismo. Quando body[data-theme="medium"] estiver definido, estas variáveis substituem as originais. */
+    body[data-theme="medium"] {
+      /* Ajustamos a paleta “medium” para um visual ainda mais tecnológico,
+         com tons de cinza-escuro/azulado e transparências suaves para
+         reforçar o glasmorfismo. */
+      --grad-a: #2c313c;
+      --grad-b: #1f242d;
+      --fg: #f1f2f5;
+      --mut: rgba(241, 242, 245, .68);
+      --surface: rgba(44, 47, 56, .40);
+      --surface-strong: rgba(44, 47, 56, .75);
+      --bd: 1px solid rgba(255, 255, 255, .06);
+      --ok: #68d391;
+      --warn: #f6ad55;
+      --err: #fc8181;
+      --blur: 24px;
     }
-    .app{position:fixed; inset:0; display:grid; grid-template-rows:auto 1fr auto; min-width:0}
-    .glass{backdrop-filter:blur(var(--blur)); background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
-      border:1px solid var(--line); border-radius:var(--rad); box-shadow:var(--shadow)}
-    .row{display:flex; gap:10px; align-items:center; min-width:0; flex-wrap:wrap}
-    .grow{flex:1 1 auto; min-width:0}
-    .btn{appearance:none; border:1px solid var(--line); background:rgba(255,255,255,.04); color:var(--ink);
-      padding:10px 12px; border-radius:14px; font-weight:700; letter-spacing:.3px; display:inline-flex; align-items:center; gap:8px;
-      box-shadow:var(--shadow); cursor:pointer; user-select:none; transition:opacity .18s ease, transform .18s ease}
-    .btn:active{transform:translateY(1px); opacity:.9}
-    .chip{font-size:12px;border-radius:999px;border:1px solid var(--line);padding:6px 10px;background:rgba(255,255,255,.06);color:var(--muted)}
-    .pill{display:inline-flex; gap:6px; align-items:center; padding:6px 10px; border-radius:999px; border:1px solid var(--line); background:rgba(255,255,255,.06)}
-    .muted{color:var(--muted)}
-    header{display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:10px env(safe-area-inset-right) 8px env(safe-area-inset-left)}
-    .logo{width:30px;height:30px;border-radius:50%;background:conic-gradient(from 0deg, var(--accent), var(--accent2), var(--accent));
-      box-shadow:0 0 20px rgba(41,211,255,.4); animation:spin 9s linear infinite}
-    @keyframes spin{to{transform:rotate(1turn)}}
-    .title{font-weight:800; letter-spacing:.4px}
-    .water{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
-    .badge{display:inline-flex; align-items:center; gap:6px; border:1px solid var(--line); background:rgba(255,255,255,.04);
-      padding:6px 8px; border-radius:10px; font-size:11px; color:var(--muted); white-space:nowrap}
 
-    /* ===== UNO • Centro vivo ===== */
-    .center{position:relative; display:grid; place-items:center; padding:6px}
-    .circle{position:relative; width:min(78vw,560px); aspect-ratio:1/1; border-radius:50%; overflow:hidden;
-      border:1px solid var(--line); background:radial-gradient(60% 60% at 50% 50%, rgba(41,211,255,.1), rgba(255,255,255,.02)); box-shadow:var(--shadow)}
-    .circle iframe{position:absolute; inset:0; width:100%; height:100%; border:0; background:transparent}
-    .switcher{position:absolute; top:10px; left:50%; transform:translateX(-50%); display:flex; gap:6px; align-items:center;
-      background:rgba(11,15,23,.7); border:1px solid var(--line); border-radius:999px; padding:6px 10px; backdrop-filter:blur(8px)}
-    .switcher select{appearance:none; background:rgba(255,255,255,.06); color:var(--ink); border:1px solid var(--line); border-radius:999px; padding:6px 10px}
-    .dotlogo{position:absolute; top:12px; right:12px; width:18px; height:18px; border-radius:50%;
-      background: conic-gradient(#29d3ff, #ff5af4, #29d3ff); box-shadow:0 0 18px color-mix(in srgb, #29d3ff 60%, transparent)}
-    #fadeCover{position:absolute; inset:0; background:#0b0f17; opacity:0; pointer-events:none; transition: opacity .28s ease}
-    #fadeCover.show{opacity:1}
+    * { box-sizing: border-box }
+    html, body { height: 100% }
 
-    /* ===== UNO • Bolinhas (Packs/Apps) ===== */
-    .dots{display:grid; grid-template-rows: 1fr auto; place-items:center; gap:18px; margin:12px 0}
-    .dot{position:relative; width:120px; height:120px; border-radius:50%; display:grid; place-items:center; cursor:pointer;
-      background:rgba(255,255,255,.02); border:none; box-shadow:0 0 40px rgba(0,255,255,.1), 0 0 80px rgba(255,0,255,.08);
-      transition: transform .25s ease, box-shadow .25s ease}
-    .dot::before{content:''; position:absolute; inset:-18px; border-radius:50%; background:linear-gradient(135deg, rgba(0,255,255,.35), rgba(255,0,255,.25)); filter:blur(40px); opacity:.6; z-index:-1}
-    .dot::after{content:''; position:absolute; inset:4px; border-radius:50%; border:1px solid rgba(255,255,255,.2); box-shadow:0 0 10px rgba(255,255,255,.18)}
-    .dot:hover{transform:scale(1.05)}
-    .dot svg{width:42px; height:42px; stroke:var(--ink); stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; fill:none; pointer-events:none}
-    .hidden{display:none}
+    body {
+      margin: 0;
+      color: var(--fg);
+      background: linear-gradient(42deg, var(--grad-a), var(--grad-b)) fixed;
+      font: 14px/1.45 Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      overflow: hidden;
+    }
 
-    /* ===== Sheets (bottom drawers) ===== */
-    .sheet{position:fixed; inset:auto 0 0 0; transform:translateY(100%); background: rgba(15,18,28,.93); backdrop-filter: blur(20px) saturate(1.2);
-      box-shadow:0 -20px 60px rgba(0,0,0,.6); border-top:1px solid var(--line); border-radius:24px 24px 0 0; transition: transform .35s cubic-bezier(.2,.9,.2,1);
-      max-height:76svh; overflow:auto; padding:16px 14px 24px 14px; z-index:var(--z-ui)}
-    .sheet.open{transform:translateY(0)}
-    .sheet .handle{width:56px; height:6px; border-radius:999px; background:rgba(255,255,255,.18); margin:6px auto 10px}
-    .section{background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); border:1px solid var(--line); border-radius:16px; padding:14px; margin:10px 0; box-shadow:var(--shadow)}
+    /* ===== Micro-interações base ===== */
+    .fx-trans { transition: transform .16s var(--ease), background .25s var(--ease), box-shadow .25s var(--ease), border-color .25s var(--ease), color .25s var(--ease), opacity .25s var(--ease) }
+    .fx-lift:hover { transform: translateY(-1px) }
+    .fx-press:active { transform: translateY(0) scale(.98) }
+    .ring:focus-visible { outline: 0; box-shadow: 0 0 0 4px rgba(255,255,255,.14) }
+    @media (prefers-reduced-motion: reduce) { .fx-trans { transition: none } }
 
-    /* ===== FileHub (mini) ===== */
-    .grid{display:grid; gap:10px}
-    @media(min-width:760px){ .grid.cols-2{grid-template-columns:1fr 1fr} }
-    .card{padding:12px; border:1px solid var(--line); border-radius:14px; background:rgba(255,255,255,.04)}
-    .filegrid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px}
-    @media(min-width:860px){ .filegrid{grid-template-columns:repeat(3,minmax(0,1fr))} }
-    .thumb{aspect-ratio:16/10; border-radius:10px; border:1px dashed rgba(255,255,255,.15); display:grid; place-items:center; font-size:11px; opacity:.85}
-    .rowline{display:flex; gap:8px; align-items:center}
+    /* ===== Botões ===== */
+    button, .btn, .ib { background: var(--surface); border: var(--bd); color: var(--fg); font-weight: 800; border-radius: 12px; cursor: pointer; position: relative }
+    .btn { padding: .58rem .9rem; background: linear-gradient(180deg, #11162a, #0b1122) }
+    .btn.prime { background: linear-gradient(90deg, #a66fff, #6db4ff); color: #0b0f14; border-color: transparent }
+    .btn:hover { box-shadow: 0 8px 26px rgba(0,0,0,.36), 0 0 0 1px rgba(255,255,255,.10) inset }
+    .btn.prime:hover { box-shadow: 0 10px 30px rgba(166,111,255,.26), 0 0 0 1px rgba(255,255,255,.18) inset }
+    .btn:active { filter: saturate(1.02) brightness(.98) }
+    .btn[disabled] { opacity: .55; pointer-events: none }
 
-    /* ===== Overlay + IFrame Viewer ===== */
-    .overlay{position:fixed; inset:0; background:rgba(0,0,0,.55); backdrop-filter: blur(3px); display:none; z-index:var(--z-overlay)}
-    .overlay.show{display:block}
-    .ifr-wrap{position:fixed; inset:6vh 4vw; border-radius:18px; overflow:hidden; display:none; z-index:var(--z-overlay)}
-    .ifr-wrap.show{display:flex; flex-direction:column}
-    .ifr-head{display:flex; align-items:center; gap:8px; padding:8px; background:rgba(0,0,0,.25)}
-    .ifr-body{flex:1; background:#0b0e13}
-    .ifr{width:100%; height:100%; border:0; background:#fff}
+    /* Ripple */
+    .ripple { position: absolute; inset: 0; overflow: hidden; border-radius: inherit }
+    .ripple > i { position: absolute; border-radius: 999px; pointer-events: none; transform: translate(-50%, -50%); background: radial-gradient(closest-side, rgba(255,255,255,.35), rgba(255,255,255,0) 70%); animation: ripple .6s var(--ease) forwards }
+    @keyframes ripple { from { opacity: .55; width: 0; height: 0 } to { opacity: 0; width: 260px; height: 260px } }
 
-    /* ===== Usage Gauge (compact) ===== */
-    .kpis{display:grid; gap:10px}
-    .kpi{display:flex; align-items:center; justify-content:space-between; padding:10px 12px; border:1px solid var(--line); border-radius:14px; background:rgba(0,0,0,.22)}
+    /* ===== Header ===== */
+    header.mast { position: relative; inset: 0 0 auto 0; height: var(--hdrH); z-index: 100; display: flex; align-items: center; gap: 10px; padding: 0 12px; backdrop-filter: blur(var(--blur)) saturate(130%); background: linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,0)) }
+    .ib { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; box-shadow: var(--shadow) }
+    .ib.fx-trans:hover { box-shadow: 0 10px 28px rgba(0,0,0,.5), 0 0 0 2px rgba(255,255,255,.10) inset }
+    .title { flex: 1; text-align: center; line-height: 1 }
+    .title h1 { margin: 0; font-size: 18px; letter-spacing: .06em; font-weight: 900 }
+    .title small { display: block; color: var(--mut); letter-spacing: .1em }
 
-    /* ===== FAB (Botão Único) ===== */
-    #btnUNICO{position:fixed; right:16px; bottom:16px; z-index:var(--z-ui); width:64px; height:64px; border-radius:50%; display:grid; place-items:center;
-      border:1px solid rgba(255,255,255,.18); background:radial-gradient(circle at 30% 30%, #5ed0ff88, #a77cff66); box-shadow:0 10px 30px rgba(0,0,0,.3)}
-    #fabMenu{position:fixed; right:16px; bottom:96px; display:none; flex-direction:column; gap:8px; z-index:var(--z-ui)}
-    #fabMenu.show{display:flex}
+    /* ===== Layout ===== */
+    main { position: relative; height: 100%; padding-top: calc(var(--hdrH) + env(safe-area-inset-top)); padding-bottom: calc(var(--tabsH) + env(safe-area-inset-bottom)); overflow: hidden }
+    .view { position: absolute; inset: 0; padding: 12px 14px; overflow: auto; display: none }
+    .view.active { display: block; animation: fade .18s var(--ease) }
+    @keyframes fade { from { opacity: 0; transform: translateY(6px) } }
 
-    /* ===== Toast ===== */
-    #toast{position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom) + 18px); transform:translateX(-50%); background:rgba(0,0,0,.7); color:#eaf6ff;
-      border:1px solid rgba(255,255,255,.2); padding:10px 14px; border-radius:12px; box-shadow:0 8px 30px rgba(0,0,0,.5); z-index:9999; backdrop-filter:blur(8px);
-      font-size:.92rem; display:none}
+    /* ===== Cards / grids ===== */
+    .grid { display: grid; gap: 12px; max-width: 820px; margin: 0 auto }
+    .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px }
+    @media (max-width: 860px) { .cards { grid-template-columns: repeat(2, minmax(0,1fr)) } }
+    @media (max-width: 560px) { .cards { grid-template-columns: 1fr } }
+    .card { background: var(--surface); border: var(--bd); border-radius: var(--r2); box-shadow: var(--shadow); padding: 12px; display: flex; gap: 10px; align-items: center; position: relative }
+    .card.fx-trans:hover { box-shadow: 0 16px 40px rgba(0,0,0,.5) }
+    .ico { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; background: rgba(255,255,255,.06); border: var(--bd) }
+    .mut { color: var(--mut); font-size: 12px }
+    .input, select, textarea { width: 100%; background: #0f1426; color: var(--fg); border: var(--bd); border-radius: 12px; padding: 10px }
 
-    /* ===== Safe ellipsis ===== */
-    .ellip{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+    /* Ajuste para ícones SVG externos: invertê-los para que fiquem claros em temas escuros */
+    header.mast img,
+    .tabbar img,
+    .card .ico img,
+    .session .tools img,
+    .dock img {
+      filter: invert(1) brightness(1.2);
+    }
+
+    /* ===== Apps ===== */
+    .apps-wrap { display: grid; gap: 12px }
+    .app-card { display: flex; gap: 12px; align-items: center; background: var(--surface); border: var(--bd); border-radius: var(--r); padding: 12px }
+    .app-card:hover { box-shadow: 0 12px 34px rgba(0,0,0,.46) }
+    .app-icon { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; background: #0f1528; border: var(--bd); overflow: hidden }
+    .app-title { font-weight: 800 }
+
+    /* ===== Viewer (Stack) ===== */
+    .session { background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)); border: var(--bd); border-radius: 16px; box-shadow: var(--shadow); overflow: hidden }
+    .session .hdr { display: flex; align-items: center; gap: 8px; padding: 10px; background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); border-bottom: 1px solid #ffffff18 }
+    .session .title { font-weight: 850; max-width: 56vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+    .session .tools { margin-left: auto; display: flex; gap: 6px }
+    .session .tools .btn:hover { box-shadow: 0 0 0 1px rgba(255,255,255,.18) inset, 0 8px 22px rgba(0,0,0,.35) }
+    .session iframe { display: block; width: 100%; height: 60vh; border: 0; background: #000 }
+    .session.min iframe { display: none }
+
+    /* ===== Dock + Tabs ===== */
+    .dock { position: fixed; left: 10px; right: 10px; bottom: calc(var(--tabsH) + 8px + env(safe-area-inset-bottom)); display: flex; gap: 8px; flex-wrap: wrap; z-index: 80 }
+    .badge { display: inline-flex; gap: 6px; align-items: center; padding: .38rem .65rem; border: 1px solid #ffffff18; background: #0f1428; border-radius: 999px; font-weight: 800; position: relative }
+    .badge.fx-trans:hover { box-shadow: 0 10px 24px rgba(0,0,0,.5) }
+    nav.tabbar { position: fixed; left: 0; right: 0; bottom: env(safe-area-inset-bottom, 0); height: var(--tabsH); z-index: 90; display: flex; justify-content: center; padding: 6px 14px }
+    .tabbar .inner { width: 100%; max-width: 820px; display: flex; justify-content: space-around; align-items: center; background: var(--surface); border: var(--bd); border-radius: 22px; box-shadow: var(--shadow); padding: 10px 14px }
+    .tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--mut); font-size: 11px; font-weight: 800; padding: 8px; border-radius: 14px; cursor: pointer; position: relative }
+    .tab.fx-trans:hover { background: rgba(255,255,255,.06) }
+    .tab.active { color: var(--fg); background: rgba(255,255,255,.10); box-shadow: 0 0 0 2px rgba(255,255,255,.10) }
+
+    /* === Área de Arquétipos (central circle) === */
+    .arch-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 24px;
+    }
+    .arch-circle {
+      position: relative;
+      width: min(80vw, 560px);
+      aspect-ratio: 1 / 1;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: radial-gradient(60% 60% at 50% 50%, rgba(0,255,255,.1), rgba(255,255,255,.02));
+      box-shadow: var(--shadow, 0 14px 40px rgba(0,0,0,.45));
+    }
+    .arch-circle iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: transparent;
+    }
+    .arch-switcher {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      background: rgba(15,17,32,.7);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 999px;
+      padding: 6px 10px;
+      backdrop-filter: blur(8px);
+    }
+    .arch-switcher select {
+      appearance: none;
+      background: rgba(255,255,255,.06);
+      color: var(--fg);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 999px;
+      padding: 6px 10px;
+    }
+    .arch-dotlogo {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: conic-gradient(#00c5e5, #ff52e5, #00c5e5);
+      box-shadow: 0 0 18px rgba(0,255,255,.4);
+    }
+    #arch-fadeCover {
+      position: absolute;
+      inset: 0;
+      background: var(--bg, #0b0f14);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .3s ease;
+    }
+    #arch-fadeCover.show { opacity: 1; }
+
+    /* ===== Modal ===== */
+    .modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 120; background: rgba(0,0,0,.45); backdrop-filter: blur(6px) }
+    .modal.open { display: flex }
+    .modal .panel { width: min(720px, 92vw); background: var(--surface-strong); border: var(--bd); border-radius: 16px; box-shadow: var(--shadow); padding: 16px }
+    .kbd { border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.06); padding: 2px 6px; border-radius: 6px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px }
+
+    /* ===== REVO view styling ===== */
+    /* Remove default padding for the new Revo section and ensure the iframe fills the space */
+    #v-revo { padding: 0; }
+    #v-revo iframe { width: 100%; height: 100%; border: 0; background: transparent; }
   </style>
 </head>
 <body>
-<div class="app" id="app">
-  <!-- ===== Topbar ===== -->
-  <header class="glass">
-    <div class="logo"></div>
-    <div>
-      <div class="title">DUAL • UNO Hub Monolito <span class="chip">v1</span></div>
-      <div class="muted" style="font-size:12px">Um botão, múltiplos planos — Glow</div>
+  <!-- ===== Header ===== -->
+  <header class="mast">
+    <button class="ib fx-trans fx-press ring" id="btnBack" title="Voltar" aria-label="Voltar">
+    <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/arrow-left.svg" alt="Voltar" width="20" height="20" onerror="this.onerror=null;this.src='icons/arrow-left.svg'">
+      <span class="ripple"></span>
+    </button>
+    <div class="title">
+      <h1>HUB UNO — Monólito + Revo</h1>
+      <small>Dual · Trinity · Minimal · Ultra</small>
     </div>
-    <div class="grow"></div>
-    <div class="water">
-      <span class="badge">FPS <b id="fps">~</b></span>
-      <span class="badge">LAT <b id="lat">~</b>ms</span>
-      <span class="badge">CLS <b id="cls">0.00</b></span>
-    </div>
-    <button class="btn" id="btnPlay">▶︎ Áudio</button>
+    <button class="ib fx-trans fx-press ring" id="btnDownload" title="Baixar HTML">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/download.svg" alt="Download" width="20" height="20" onerror="this.onerror=null;this.src='icons/download.svg'">
+      <span class="ripple"></span>
+    </button>
+    <button class="ib fx-trans fx-press ring" id="btnHelp" title="Ajuda / Atalhos">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/question-circle.svg" alt="Ajuda" width="20" height="20" onerror="this.onerror=null;this.src='icons/question-circle.svg'">
+      <span class="ripple"></span>
+    </button>
+    <button class="ib fx-trans fx-press ring" id="btnBrain" title="Brain">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/brain.svg" alt="Brain" width="20" height="20" onerror="this.onerror=null;this.src='icons/brain.svg'">
+      <span class="ripple"></span>
+    </button>
   </header>
 
-  <!-- ===== Main: Centro vivo + Dots ===== -->
-  <main style="padding:10px">
-    <section class="center glass" style="padding:12px">
-      <div class="circle" id="coreCircle">
-        <div id="fadeCover"></div>
-        <div class="dotlogo" title="arquétipo ativo"></div>
-        <div class="switcher">
-          <button class="btn" id="prevArch" title="Anterior">◀</button>
-          <select id="archSelect" title="Escolher arquétipo"></select>
-          <button class="btn" id="nextArch" title="Próximo">▶</button>
-        </div>
-        <iframe id="coreFrame" title="Archetype Core" sandbox="allow-scripts" referrerpolicy="no-referrer"></iframe>
-      </div>
-    </section>
+  <!-- Container para fundo personalizado (imagem ou vídeo).  Será preenchido via JS quando o usuário escolher
+       um tema customizado.  Fica no início do body para garantir que fique abaixo de todos os conteúdos -->
+  <div id="custom-bg" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;overflow:hidden;pointer-events:none"></div>
 
-    <section class="dots">
-      <div class="dot" id="dotPacks" title="Packs / Config">
-        <svg viewBox="0 0 24 24"><path d="m21 7.5-9-5.25L3 7.5m18 0-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"/></svg>
-      </div>
-      <div class="dot" id="dotApps" title="Apps & Assets">
-        <svg viewBox="0 0 24 24"><path d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"/></svg>
-      </div>
-    </section>
-
-    <!-- ===== Sheets ===== -->
-    <section id="sheet-packs" class="sheet" aria-hidden="true">
-      <div class="handle"></div>
-      <div class="section">
-        <h3>Ativar Packs</h3>
-        <div class="row">
-          <button class="btn pill" data-pack="fetch">Fetch</button>
-          <button class="btn pill" data-pack="training">Training</button>
-          <button class="btn pill" data-pack="design">Design</button>
-          <button class="btn pill" data-pack="robosystem">RoboSystem</button>
-          <button class="btn pill" data-pack="injections">Injections</button>
-        </div>
-      </div>
-      <div class="section grid cols-2">
-        <div class="card">
-          <h3 style="margin:0 0 8px">Diagnóstico</h3>
-          <div class="row" style="flex-wrap:wrap">
-            <span class="pill">Storage: <b id="storageMode">…</b></span>
-            <span class="pill">IndexedDB: <b id="hasIDB">?</b></span>
-            <span class="pill">PWA: <b id="isPWA">?</b></span>
+  <!-- ===== Views ===== -->
+  <main>
+    <!-- HOME -->
+    <section id="v-home" class="view active">
+      <div class="grid">
+          <!-- Saudação / chamada para cadastro. Visível quando o usuário precisa ativar a Dual Infodose ou quando já houver nome salvo -->
+          <div id="greetingCard" class="card fx-trans fx-lift" style="display:none">
+            <div id="greetingMsg" style="font-weight:800"></div>
           </div>
-          <div class="row" style="margin-top:10px">
-            <button class="btn" id="saveLocal">Salvar packs (localStorage)</button>
-            <button class="btn" id="clearLocal">Limpar</button>
-          </div>
-        </div>
-        <div class="card">
-          <h3 style="margin:0 0 8px">Uso diário</h3>
-          <div class="kpis">
-            <div class="kpi"><span>💸 Custo acumulado</span><b id="usd">US$ 0,00</b></div>
-            <div class="kpi"><span>🌊 Água invisível (ml)</span><b id="water">0 ml</b></div>
-            <div class="kpi"><span>📈 UC hoje</span><b><span id="uc">0</span> <small class="muted">/ <span id="uclimit">3000</span></small></b></div>
-            <div class="row" style="flex-wrap:wrap; gap:8px">
-              <span class="pill">Reset: <span id="resetTime" class="muted" style="margin-left:6px"></span></span>
-              <button class="btn" id="btnReset">Zerar</button>
-              <button class="btn" id="btnDemo">Demo +10 img 768</button>
+        <div class="card fx-trans fx-lift">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%">
+            <div>
+              <div style="font-weight:900;letter-spacing:.08em">UNO • foco e velocidade</div>
+              <div class="mut">Monólito: Apps embutidos + Viewer + Dock + Atalhos</div>
+            </div>
+            <div class="ico">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/bolt.svg" alt="Energia" width="24" height="24" onerror="this.onerror=null;this.src='icons/bolt.svg'">
             </div>
           </div>
         </div>
+        <!-- Área de Arquétipos incorporada -->
+        <div class="arch-container">
+          <div class="arch-circle">
+            <div id="arch-fadeCover"></div>
+            <div class="arch-dotlogo" title="arquétipo ativo"></div>
+            <div class="arch-switcher">
+              <button class="btn fx-trans fx-press ring" id="arch-prev" title="Anterior">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/chevron-left.svg" alt="Anterior" width="16" height="16" onerror="this.onerror=null;this.src='icons/chevron-left.svg'">
+              </button>
+              <select id="arch-select" title="Escolher arquétipo"></select>
+              <button class="btn fx-trans fx-press ring" id="arch-next" title="Próximo">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/chevron-right.svg" alt="Próximo" width="16" height="16" onerror="this.onerror=null;this.src='icons/chevron-right.svg'">
+              </button>
+            </div>
+            <iframe id="arch-frame" title="Archetype Core" sandbox="allow-scripts" referrerpolicy="no-referrer"></iframe>
+          </div>
+        </div>
+        <div class="cards">
+          <button class="card fx-trans fx-press ring" data-nav="apps">
+            <div class="ico">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg" alt="Apps" width="24" height="24" onerror="this.onerror=null;this.src='icons/folder-open.svg'">
+            </div>
+            <div>
+              <div style="font-weight:800">Apps</div>
+              <div class="mut">Catálogo integrado</div>
+            </div>
+            <span class="ripple"></span>
+          </button>
+          <button class="card fx-trans fx-press ring" data-nav="stack">
+            <div class="ico">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/layer-group.svg" alt="Stack" width="24" height="24" onerror="this.onerror=null;this.src='icons/layer-group.svg'">
+            </div>
+            <div>
+              <div style="font-weight:800">Stack</div>
+              <div class="mut">Sessões abertas</div>
+            </div>
+            <span class="ripple"></span>
+          </button>
+          <button class="card fx-trans fx-press ring" data-nav="brain">
+            <div class="ico">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/brain.svg" alt="Brain" width="24" height="24" onerror="this.onerror=null;this.src='icons/brain.svg'">
+            </div>
+            <div>
+              <div style="font-weight:800">Brain</div>
+              <div class="mut">Nome, SK, Modelo</div>
+            </div>
+            <span class="ripple"></span>
+          </button>
+          <!-- New card to open the Revo view directly from home -->
+          <button class="card fx-trans fx-press ring" data-nav="revo">
+            <div class="ico">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/globe.svg" alt="Revo" width="24" height="24" onerror="this.onerror=null;this.src='icons/globe.svg'">
+            </div>
+            <div>
+              <div style="font-weight:800">Revo</div>
+              <div class="mut">Hub Ultra integrado</div>
+            </div>
+            <span class="ripple"></span>
+          </button>
+        </div>
       </div>
     </section>
 
-    <section id="sheet-apps" class="sheet" aria-hidden="true">
-      <div class="handle"></div>
-      <div class="section">
-        <h3>Upload Rápido</h3>
-        <div class="row">
-          <label class="btn" for="uploadHtml">HTML</label>
-          <input id="uploadHtml" type="file" accept="text/html,.html"/>
-          <label class="btn" for="uploadVideo">Vídeo</label>
-          <input id="uploadVideo" type="file" accept="video/*"/>
-          <button class="btn" id="newFolder">+ Pasta</button>
+    <!-- APPS -->
+    <section id="v-apps" class="view">
+      <div class="grid">
+        <div class="card fx-trans fx-lift" style="display:block">
+          <div class="grid" style="gap:8px">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+              <input id="appSearch" class="input ring" placeholder="Buscar…" />
+              <select id="appSort" class="input ring" style="max-width:150px">
+                <option value="az">A–Z</option>
+                <option value="za">Z–A</option>
+              </select>
+              <label class="mut" style="display:inline-flex;gap:6px;align-items:center">
+                <input id="openInside" type="checkbox" checked /> abrir dentro
+              </label>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+              <input id="fileLocal" type="file" accept=".html,.htm,.txt" multiple class="input ring" />
+              <button id="btnImport" class="btn fx-trans fx-press ring">Adicionar Locais<span class="ripple"></span></button>
+              <button id="btnExport" class="btn fx-trans fx-press ring">Exportar Locais<span class="ripple"></span></button>
+              <button id="btnClear" class="btn fx-trans fx-press ring">Limpar Locais<span class="ripple"></span></button>
+            </div>
+            <div id="appsCount" class="mut">—</div>
+          </div>
         </div>
+        <div id="appsWrap" class="apps-wrap"></div>
       </div>
-      <div class="section">
-        <h3>Seus Arquivos</h3>
-        <div id="filesGrid" class="filegrid"></div>
+    </section>
+
+    <!-- STACK -->
+    <section id="v-stack" class="view">
+      <div class="grid">
+        <div class="card fx-trans fx-lift" style="display:block">
+          <div style="font-weight:800; display:flex; align-items:center; gap:8px">
+            Sessões
+            <button id="btnCloseAll" class="btn fx-trans fx-press ring" title="Fechar todas">Fechar todas<span class="ripple"></span></button>
+          </div>
+          <div class="mut">Reabra rápido pelo dock abaixo.</div>
+        </div>
+        <div id="stackWrap" class="grid"></div>
       </div>
+    </section>
+
+    <!-- BRAIN -->
+    <section id="v-brain" class="view">
+      <div class="grid">
+        <div class="card fx-trans fx-lift" style="display:block">
+          <div style="font-weight:800">Usuário</div>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
+            <input id="userName" class="input ring" placeholder="Seu nome" />
+            <button id="saveName" class="btn prime fx-trans fx-press ring">Salvar<span class="ripple"></span></button>
+          </div>
+        </div>
+        <div class="card fx-trans fx-lift" style="display:block">
+          <div style="font-weight:800">OpenRouter</div>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap">
+            <select id="model" class="input ring" style="max-width:260px"></select>
+            <input id="sk" class="input ring" placeholder="sk-or-v1-…" />
+            <button id="saveSK" class="btn fx-trans fx-press ring">Salvar<span class="ripple"></span></button>
+          </div>
+        </div>
+
+          <!-- Tema e Fundo personalizados -->
+          <div class="card fx-trans fx-lift" style="display:block">
+            <div style="font-weight:800">Tema &amp; Fundo</div>
+            <div style="margin-top:8px;display:flex;flex-direction:column;gap:12px">
+              <label style="display:flex;align-items:center;gap:8px">
+                <span>Escolha o tema:</span>
+                <select id="themeSelect" class="input ring" style="max-width:200px">
+                  <option value="default">Padrão (colorido)</option>
+                  <option value="medium">Cinza médio (tecnológico)</option>
+                  <option value="custom">Personalizado (sua imagem/vídeo)</option>
+                </select>
+              </label>
+              <label style="display:flex;align-items:center;gap:8px">
+                <span>Fundo personalizado:</span>
+                <input id="bgUpload" type="file" accept="image/*,video/*" class="input ring" style="max-width:260px" />
+              </label>
+              <div class="mut" style="font-size:11px">Envie uma imagem ou vídeo para usar como plano de fundo quando o tema personalizado estiver selecionado. O fundo será salvo automaticamente no seu navegador.</div>
+            </div>
+          </div>
+      </div>
+    </section>
+
+    <!-- REVO (Infodose Hub Ultra) -->
+    <section id="v-revo" class="view">
+      <!-- Carrega o conteúdo do Hub Ultra modificado via iframe.  O arquivo index-100_revo_mod.html está no mesmo diretório -->
+      <iframe id="revoEmbed" src="index-100_revo_mod.html" allow="autoplay; clipboard-read; clipboard-write; picture-in-picture; fullscreen" referrerpolicy="no-referrer"></iframe>
     </section>
   </main>
 
-  <footer style="padding:8px; text-align:center; opacity:.75">Sempre único, sempre seu. · ArteASC pronto</footer>
-
-  <!-- Overlay + IFrame Viewer compartilhado -->
-  <div class="overlay" id="overlay"></div>
-  <div class="ifr-wrap glass" id="ifrWrap">
-    <div class="ifr-head row">
-      <button class="btn" id="ifrMin">Min</button>
-      <button class="btn" id="ifrMax">Max</button>
-      <button class="btn" id="ifrPop">Popout</button>
-      <div class="grow"></div>
-      <button class="btn" id="ifrClose">Fechar</button>
+  <!-- DOCK & TABS -->
+  <div id="dock" class="dock"></div>
+  <nav class="tabbar">
+    <div class="inner">
+      <button class="tab fx-trans fx-press ring active" data-nav="home">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/house.svg" alt="Home" width="18" height="18" onerror="this.onerror=null;this.src='icons/house.svg'">
+        <span style="display:none">Home</span><span class="ripple"></span>
+      </button>
+      <button class="tab fx-trans fx-press ring" data-nav="apps">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg" alt="Apps" width="18" height="18" onerror="this.onerror=null;this.src='icons/folder-open.svg'">
+        <span style="display:none">Apps</span><span class="ripple"></span>
+      </button>
+      <button class="tab fx-trans fx-press ring" data-nav="stack">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/layer-group.svg" alt="Stack" width="18" height="18" onerror="this.onerror=null;this.src='icons/layer-group.svg'">
+        <span style="display:none">Stack</span><span class="ripple"></span>
+      </button>
+      <button class="tab fx-trans fx-press ring" data-nav="brain">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/brain.svg" alt="Brain" width="18" height="18" onerror="this.onerror=null;this.src='icons/brain.svg'">
+        <span style="display:none">Brain</span><span class="ripple"></span>
+      </button>
+      <!-- Botão da nova aba Revo -->
+      <button class="tab fx-trans fx-press ring" data-nav="revo">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/globe.svg" alt="Revo" width="18" height="18" onerror="this.onerror=null;this.src='icons/globe.svg'">
+        <span style="display:none">Revo</span><span class="ripple"></span>
+      </button>
     </div>
-    <div class="ifr-body"><iframe id="viewer" class="ifr" title="viewer"></iframe></div>
+  </nav>
+
+  <!-- HELP MODAL -->
+  <div id="modalHelp" class="modal" aria-hidden="true">
+    <div class="panel">
+      <div style="display:flex;align-items:center;gap:10px;justify-content:space-between">
+        <h3 style="margin:0">Ajuda & Atalhos</h3>
+        <button id="closeHelp" class="btn fx-trans fx-press ring">Fechar<span class="ripple"></span></button>
+      </div>
+      <div class="mut" style="margin-top:8px">Navegue mais rápido:</div>
+      <ul>
+        <li><span class="kbd">g</span> then <span class="kbd">h</span> → Home</li>
+        <li><span class="kbd">g</span> then <span class="kbd">a</span> → Apps</li>
+        <li><span class="kbd">g</span> then <span class="kbd">s</span> → Stack</li>
+        <li><span class="kbd">g</span> then <span class="kbd">b</span> → Brain</li>
+        <li><span class="kbd">g</span> then <span class="kbd">r</span> → Revo</li>
+        <li><span class="kbd">Ctrl / Cmd</span> + <span class="kbd">K</span> → Busca</li>
+        <li><span class="kbd">Ctrl / Cmd</span> + <span class="kbd">S</span> → Baixar este HTML</li>
+      </ul>
+    </div>
   </div>
 
-  <!-- FAB + menu -->
-  <button id="btnUNICO" title="Ação Única ⚡">⚡</button>
-  <div id="fabMenu">
-    <button class="btn" id="quickPacks">Packs</button>
-    <button class="btn" id="quickApps">Arquivos</button>
-    <button class="btn" id="quickHide">Ocultar UI</button>
-    <button class="btn" id="btnArteASC">ArteASC</button>
-  </div>
+  <!-- ===== Catálogo Embutido (Monólito) ===== -->
+  <script id="APPS_JSON" type="application/json">
+  {
+    "apps": [
+      {"key":"atlas","title":"Atlas · Cartesius","desc":"Planejador estratégico com cronogramas e checklists.","url":"about:blank","icon":"atlas"},
+      {"key":"nova","title":"Nova · Inspira","desc":"Criativa que desbloqueia ideias com mapas mentais e exercícios.","url":"about:blank","icon":"nova"},
+      {"key":"vitalis","title":"Vitalis · Momentum","desc":"Rotinas físicas, hacks biológicos e motivação.","url":"about:blank","icon":"vitalis"},
+      {"key":"pulse","title":"Pulse · Resona","desc":"Trilhas sonoras e ajuste de som emocional.","url":"about:blank","icon":"pulse"},
+      {"key":"artemis","title":"Artemis · Naviga","desc":"Explora conhecimentos e rotas de aprendizado.","url":"about:blank","icon":"artemis"},
+      {"key":"serena","title":"Serena · Ampara","desc":"Acolhimento e suporte emocional.","url":"about:blank","icon":"serena"},
+      {"key":"kaos","title":"Kaos · Disruptor","desc":"Questiona padrões e propõe soluções ousadas.","url":"about:blank","icon":"kaos"},
+      {"key":"genus","title":"Genus · Fabricus","desc":"Protótipos e materialização de ideias.","url":"about:blank","icon":"genus"},
+      {"key":"lumine","title":"Lumine · Brilhare","desc":"Inspiração leve e atividades lúdicas.","url":"about:blank","icon":"lumine"},
+      {"key":"rhea","title":"Rhea · Raízes","desc":"Vínculos e memórias emocionais.","url":"about:blank","icon":"rhea"},
+      {"key":"solus","title":"Solus · Arcana","desc":"Harmonização energética e meditação.","url":"about:blank","icon":"solus"},
+      {"key":"aion","title":"Aion · Evolutia","desc":"Microações estratégicas e evolução.","url":"about:blank","icon":"aion"}
+    ]
+  }
+  </script>
 
-  <div id="toast"></div>
-</div>
+  <script>
+    /* ===================== Helpers ===================== */
+    const $ = (q, r = document) => r.querySelector(q);
+    const $$ = (q, r = document) => Array.from(r.querySelectorAll(q));
+    const LS = {
+      get: (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d } catch (e) { return d } },
+      set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)) } catch (e) {} },
+      raw: (k) => localStorage.getItem(k) || ''
+    };
 
-<script>
-/* ===================== ICONS LITE (inline SVG via template) ===================== */
-// (Mantemos leve: usamos texto em botões e SVGs diretos nas bolinhas)
+    /* Ripple */
+    function addRipple(el) {
+      if (!el) return;
+      if (!el.querySelector('.ripple')) { const slot = document.createElement('span'); slot.className = 'ripple'; el.appendChild(slot); }
+      el.addEventListener('pointerdown', (ev) => {
+        const host = el.querySelector('.ripple'); if (!host) return;
+        const dot = document.createElement('i');
+        const rect = el.getBoundingClientRect(); const x = ev.clientX - rect.left; const y = ev.clientY - rect.top;
+        dot.style.left = x + 'px'; dot.style.top = y + 'px'; host.appendChild(dot); setTimeout(() => dot.remove(), 650);
+      }, { passive: true });
+    }
 
-/* ===================== ArteASC ===================== */
-window.ArteASC={render:(n,v={})=>({ portal369:`╔═══🌌═══╗\n ✪ (°ロ°)☝\n 🧭 ${v.tri||'UNO'}`, seal_trinity_v2:`⟐ Trinity v2\n⚡ Pulso:${v.pulso||'∞'}`}[n]||'[ArteASC]')};
+    /* Toast */
+    const toastBox = document.createElement('div');
+    toastBox.style.cssText = 'position:fixed;right:14px;bottom:calc(var(--tabsH) + 16px);display:grid;gap:8px;z-index:120';
+    document.body.appendChild(toastBox);
+    function toast(msg, type = 'ok') {
+      const el = document.createElement('div'); el.className = 'fx-trans';
+      const bg = type === 'ok' ? 'linear-gradient(90deg,#1b2a2a,#123c2e)' : (type === 'warn' ? 'linear-gradient(90deg,#2f261b,#3c2d12)' : 'linear-gradient(90deg,#2f1b1b,#3c1212)');
+      el.style.cssText = `background:${bg}; color:var(--fg); border:${getComputedStyle(document.documentElement).getPropertyValue('--bd')}; padding:.6rem .8rem; border-radius:12px; box-shadow:var(--shadow)`;
+      el.textContent = msg; toastBox.appendChild(el);
+      setTimeout(() => { el.style.opacity = .0; el.style.transform = 'translateY(6px)'; setTimeout(() => el.remove(), 220); }, 1600);
+    }
 
-/* ===================== Perf HUD ===================== */
-const fpsEl=document.getElementById('fps'), latEl=document.getElementById('lat'), clsEl=document.getElementById('cls');
-let t0=performance.now(), rafCount=0, lastFpsT=performance.now();
-function hud(now){ const dt=now-t0; t0=now; latEl.textContent=Math.max(1,Math.round(dt)); rafCount++; if(now-lastFpsT>1000){ fpsEl.textContent=rafCount; rafCount=0; lastFpsT=now; } requestAnimationFrame(hud); }
-requestAnimationFrame(hud);
-if('PerformanceObserver' in window){ try{ let cls=0; new PerformanceObserver(list=>{ for(const e of list.getEntries()){ if(!e.hadRecentInput) cls+=e.value; } clsEl.textContent=cls.toFixed(3); }).observe({type:'layout-shift', buffered:true}); }catch(e){} }
+    /* ===================== Saudação / último estado ===================== */
+    function displayGreeting() {
+      const card = document.getElementById('greetingCard');
+      const msgEl = document.getElementById('greetingMsg');
+      if (!card || !msgEl) return;
+      const name = (localStorage.getItem('infodose:userName') || '').trim();
+      const sessions = document.querySelectorAll('.session').length;
+      if (!name) {
+        card.style.display = 'block';
+        // Quando o usuário ainda não informou o nome, incentivamos o cadastro local.
+        msgEl.textContent = 'Salve! Ative sua Dual Infodose registrando seu nome na seção Brain.';
+      } else {
+        card.style.display = 'block';
+        // Após cadastrado, saudamos e informamos quantas sessões estão em andamento.  O nome do assistente
+        // (“UNO”) é incluído para reforçar a presença do hub.
+        msgEl.textContent = `Bem-vindo de volta, ${name}. UNO está ao seu lado. Você tem ${sessions} sessão(ões) ativa(s).`;
+      }
+    }
 
-/* ===================== Toast ===================== */
-function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block'; clearTimeout(t._t); t._t=setTimeout(()=>t.style.display='none', 1100); }
+    /* ===================== Tema & Fundo personalizados ===================== */
+    // Aplica o tema salvo no localStorage. Os temas possíveis são: 'default' (remove data-theme), 'medium'
+    // e 'custom'.  Quando 'custom' estiver ativo, usa a imagem/vídeo salvo em LS ('uno:bg') como
+    // plano de fundo.  Se 'medium' estiver selecionado, adiciona data-theme='medium'.
+    function applyTheme() {
+      const theme = LS.get('uno:theme', 'medium');
+      // Limpe qualquer dataset para que CSS default seja aplicado quando 'default'
+      if (theme === 'default') {
+        delete document.body.dataset.theme;
+      } else {
+        document.body.dataset.theme = theme;
+      }
+      // Gerenciar fundo personalizado
+      const bgContainer = document.getElementById('custom-bg');
+      if (!bgContainer) return;
+      if (theme !== 'custom') {
+        bgContainer.innerHTML = '';
+        return;
+      }
+      // Carregar dados do fundo
+      const bgData = LS.get('uno:bg', '');
+      bgContainer.innerHTML = '';
+      if (!bgData) return;
+      // Determine se é vídeo ou imagem
+      if (/^data:video\//.test(bgData)) {
+        const vid = document.createElement('video');
+        vid.src = bgData;
+        vid.autoplay = true;
+        vid.loop = true;
+        vid.muted = true;
+        vid.playsInline = true;
+        vid.style.width = '100%';
+        vid.style.height = '100%';
+        vid.style.objectFit = 'cover';
+        bgContainer.appendChild(vid);
+      } else {
+        const img = document.createElement('img');
+        img.src = bgData;
+        img.alt = '';
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'cover';
+        bgContainer.appendChild(img);
+      }
+    }
 
-/* ===================== FAB & UI toggles ===================== */
-const fab=document.getElementById('btnUNICO'); const menu=document.getElementById('fabMenu');
-fab.onclick=()=> menu.classList.toggle('show');
-document.getElementById('quickHide').onclick=()=> document.body.classList.toggle('ui-hidden');
+    /* Apply ripple */
+    $$('button').forEach(addRipple);
+    const obs = new MutationObserver((muts) => { muts.forEach(m => m.addedNodes && m.addedNodes.forEach(n => { if (n.nodeType === 1) { if (n.matches?.('button')) addRipple(n); n.querySelectorAll?.('button').forEach(addRipple); } })) });
+    obs.observe(document.body, { childList: true, subtree: true });
 
-/* ===================== Overlay + IFrame Viewer ===================== */
-const overlay=document.getElementById('overlay'); const ifrWrap=document.getElementById('ifrWrap'); const viewer=document.getElementById('viewer');
-function openIframe(url){ overlay.classList.add('show'); ifrWrap.classList.add('show'); viewer.src=url; }
-function closeOverlay(){ ifrWrap.classList.remove('show'); if(viewer.src) viewer.src='about:blank'; }
-document.getElementById('ifrClose').onclick=()=>{ closeOverlay(); overlay.classList.remove('show'); }
-document.getElementById('ifrMin').onclick=()=>{ ifrWrap.style.inset='auto 12px 12px 12px'; ifrWrap.style.width='auto'; ifrWrap.style.height='280px'; };
-document.getElementById('ifrMax').onclick=()=>{ ifrWrap.style.inset='6vh 4vw'; ifrWrap.style.width=''; ifrWrap.style.height=''; };
-document.getElementById('ifrPop').onclick=()=>{ if(viewer.src && viewer.src!=='about:blank') window.open(viewer.src,'_blank'); };
-overlay.onclick=()=>{ closeOverlay(); overlay.classList.remove('show'); };
-window.addEventListener('keydown', (e)=>{ if(e.key==='Escape'){ closeOverlay(); overlay.classList.remove('show'); menu.classList.remove('show'); }});
+    /* ===================== Navegação + Estado ===================== */
+    function nav(key) {
+      // Adicionamos 'revo' à lista de abas para suportar a nova seção
+      const tabs = ['home', 'apps', 'stack', 'brain', 'revo'];
+      tabs.forEach(k => { $('#v-' + k).classList.toggle('active', k === key); $(`.tab[data-nav="${k}"]`).classList.toggle('active', k === key); });
+      LS.set('uno:lastTab', key);
+      // Quando entrar na aba Home, apresente mensagem de saudação / última sessão
+      if (key === 'home') {
+        try { displayGreeting(); } catch (e) { console.warn(e); }
+        try {
+          const nameG = (localStorage.getItem('infodose:userName') || '').trim();
+          if (!nameG) {
+            toast('Salve! Ative sua Dual Infodose registrando seu nome na seção Brain.', 'warn');
+          } else {
+            // Saudação rápida na forma de toast quando o usuário retorna ao home.
+            toast(`Bem-vindo de volta, ${nameG}. UNO está ao seu lado.`, 'ok');
+          }
+        } catch (e) {}
+      }
+      // Quando entrar na aba Revo, envie a lista de apps ao iframe via postMessage
+      if (key === 'revo') {
+        try {
+          const apps = RAW && Array.isArray(RAW.apps) ? RAW.apps : [];
+          const iframe = document.getElementById('revoEmbed');
+          if (iframe) {
+            // If iframe already loaded, send immediately
+            const send = () => {
+              if (iframe.contentWindow) {
+                iframe.contentWindow.postMessage({ type: 'apps', apps }, '*');
+              }
+            };
+            // Always send a message after a tiny delay in case the frame is still initializing
+            setTimeout(send, 100);
+            // Also send again once the iframe loads
+            iframe.removeEventListener('load', iframe._sendApps);
+            iframe._sendApps = send;
+            iframe.addEventListener('load', send, { once: true });
+          }
+        } catch(e) {
+          console.warn('Falha ao enviar apps ao Revo:', e);
+        }
+      }
+    }
 
-/* ===================== UNO Sheets (Packs/Apps) ===================== */
-const sheetPacks=document.getElementById('sheet-packs'); const sheetApps=document.getElementById('sheet-apps');
-function openSheet(el){ document.querySelectorAll('.sheet').forEach(s=>s.classList.remove('open')); el.classList.add('open'); }
-function toggleSheet(el){ el.classList.toggle('open'); }
-document.getElementById('dotPacks').onclick=()=> openSheet(sheetPacks);
-document.getElementById('dotApps').onclick=()=> openSheet(sheetApps);
-document.getElementById('quickPacks').onclick=()=> openSheet(sheetPacks);
-document.getElementById('quickApps').onclick=()=> openSheet(sheetApps);
-Array.from(document.querySelectorAll('.sheet .handle')).forEach(h=> h.addEventListener('click', e=> e.currentTarget.closest('.sheet').classList.toggle('open')));
+    // Helper: se a aba Revo estiver ativa, envia a lista atual de apps ao iframe.  
+    function maybeSendAppsToRevo() {
+      try {
+        // Só envie se a aba Revo estiver visível
+        const view = document.getElementById('v-revo');
+        if (!view || !view.classList.contains('active')) return;
+        const iframe = document.getElementById('revoEmbed');
+        const apps = RAW && Array.isArray(RAW.apps) ? RAW.apps : [];
+        if (iframe && iframe.contentWindow) {
+          iframe.contentWindow.postMessage({ type: 'apps', apps }, '*');
+        }
+      } catch (e) {
+        console.warn('Falha ao enviar apps ao Revo (maybe):', e);
+      }
+    }
+    $$('.tab,[data-nav]').forEach(b => b.addEventListener('click', () => nav(b.dataset.nav || 'home')));
+    $('#btnBack').onclick = () => { try { history.length > 1 && history.back() } catch { } };
+    $('#btnBrain').onclick = () => nav('brain');
 
-/* ===================== Storage Abstraction (IDB->LS->MEM) ===================== */
-const DB_NAME='dual_uno_monolito_db_v1'; const STORE='files';
-function hasIDB(){ try{return !!indexedDB}catch(e){return false} }
-function hasLS(){ try{const k='__t'; localStorage.setItem(k,'1'); localStorage.removeItem(k); return true;}catch(e){return false} }
-let store;
-function idbAdapter(){ let db; return { mode:'IDB', async init(){ await new Promise((res,rej)=>{ const req=indexedDB.open(DB_NAME,1); req.onupgradeneeded=()=>{ const d=req.result; if(!d.objectStoreNames.contains(STORE)) d.createObjectStore(STORE,{keyPath:'id'}); }; req.onsuccess=()=>{db=req.result; res()}; req.onerror=()=>rej(req.error)}); }, async put(item){ return new Promise((res,rej)=>{ const tx=db.transaction(STORE,'readwrite'); tx.objectStore(STORE).put(item); tx.oncomplete=()=>res(); tx.onerror=()=>rej(tx.error); }); }, async all(){ return new Promise((res,rej)=>{ const tx=db.transaction(STORE,'readonly'); const rq=tx.objectStore(STORE).getAll(); rq.onsuccess=()=>res(rq.result||[]); rq.onerror=()=>rej(rq.error); }); }, async delete(id){ return new Promise((res,rej)=>{ const tx=db.transaction(STORE,'readwrite'); tx.objectStore(STORE).delete(id); tx.oncomplete=()=>res(); tx.onerror=()=>rej(tx.error); }); } } }
-function lsAdapter(){ const KEY='dual_uno_files_v1'; const read=()=>{ try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch{return[]} }; const write=(arr)=>{ try{localStorage.setItem(KEY, JSON.stringify(arr))}catch(e){} }; return { mode:'LS', async init(){ if(!localStorage.getItem(KEY)) write([]); }, async put(item){ const arr=read().filter(x=>x.id!==item.id); arr.push(item); write(arr); }, async all(){ return read(); }, async delete(id){ write(read().filter(x=>x.id!==id)); } } }
-function memAdapter(){ const arr=[]; return { mode:'MEM', async init(){}, async put(item){ const i=arr.findIndex(x=>x.id===item.id); if(i>=0) arr[i]=item; else arr.push(item); }, async all(){ return arr.slice(); }, async delete(id){ const i=arr.findIndex(x=>x.id===id); if(i>=0) arr.splice(i,1); } } }
-async function createStore(){ if(hasIDB()){ const a=idbAdapter(); await a.init(); return a } if(hasLS()){ const a=lsAdapter(); await a.init(); return a } const a=memAdapter(); await a.init(); return a }
+    // Restaurar última aba
+    const last = LS.get('uno:lastTab', 'home');
+    nav(last);
+    // Se a aba inicial for home, exibir saudação
+    if (last === 'home') {
+      try { displayGreeting(); } catch(e) {}
+    }
 
-/* ===================== FileHub ===================== */
-const state={files:[]};
-function uid(){return 'f_'+Math.random().toString(36).slice(2)}
-function humanSize(bytes){ if(bytes==null) return ''; const s=['B','KB','MB','GB']; let i=0; while(bytes>=1024&&i<s.length-1){bytes/=1024;i++} return bytes.toFixed(1)+s[i] }
-async function refreshFiles(){ state.files=(await store.all()).sort((a,b)=> (b.updated||0)-(a.updated||0)); const grid=document.getElementById('filesGrid'); grid.innerHTML=''; for(const f of state.files){ grid.appendChild(renderFileCard(f)); } }
-function renderFileCard(f){ const el=document.createElement('div'); el.className='card'; const th=document.createElement('div'); th.className='thumb'; th.innerHTML=`<span>${(f.type||'file').toUpperCase()}</span>`; const name=document.createElement('div'); name.className='ellip'; name.textContent=f.name||'(sem nome)'; const meta=document.createElement('div'); meta.style.fontSize='11px'; meta.style.opacity='.75'; meta.textContent=(f.size? humanSize(f.size)+' · ' : '') + new Date(f.updated||Date.now()).toLocaleString(); const row=document.createElement('div'); row.className='rowline'; const openBtn=document.createElement('button'); openBtn.className='btn'; openBtn.textContent='Abrir'; const delBtn=document.createElement('button'); delBtn.className='btn'; delBtn.textContent='Excluir'; openBtn.onclick=()=> openItem(f); delBtn.onclick=async()=>{ if(confirm('Excluir?')){ await store.delete(f.id); await refreshFiles(); } }; el.append(th,name,meta,row); row.append(openBtn,delBtn); return el; }
-function openItem(f){ if(f.type==='html'){ let url=f.url; if(!url && f.htmlText){ const blob=new Blob([f.htmlText],{type:'text/html'}); url=URL.createObjectURL(blob); } if(url){ openIframe(url); } else { alert('HTML sem conteúdo. Reenvie.'); } } else if(f.type==='video'){ if(f.url){ const html=`<video src="${f.url}" style="width:100%;height:100%" controls autoplay playsinline></video>`; const blob=new Blob([`<html><meta name='viewport' content='width=device-width,initial-scale=1'><meta charset='utf-8'><body style='margin:0;background:#000'>${html}</body></html>`],{type:'text/html'}); const url=URL.createObjectURL(blob); openIframe(url); } else { alert('Vídeo só disponível nesta sessão.'); } } else { alert('Tipo não suportado: '+(f.type||'desconhecido')); } }
-// Uploads
-const uploadHtml=document.getElementById('uploadHtml'); const uploadVideo=document.getElementById('uploadVideo');
-uploadHtml.addEventListener('change', async(e)=>{ const file=e.target.files[0]; if(!file) return; const text=await file.text(); const id=uid(); const blob=new Blob([text],{type:'text/html'}); const url=URL.createObjectURL(blob); const item={id,type:'html',name:file.name,url,htmlText:text,size:file.size,updated:Date.now()}; await store.put(item); await refreshFiles(); e.target.value=''; });
-uploadVideo.addEventListener('change', async(e)=>{ const file=e.target.files[0]; if(!file) return; const url=URL.createObjectURL(file); const id=uid(); const item={id,type:'video',name:file.name,url,size:file.size,updated:Date.now(),sessionOnly:true}; await store.put(item); await refreshFiles(); e.target.value=''; });
-document.getElementById('newFolder').onclick=async()=>{ const name=prompt('Nome da pasta:','Nova Pasta'); if(!name) return; const id=uid(); const item={id,type:'folder',name,updated:Date.now()}; await store.put(item); await refreshFiles(); };
+    // Atalhos
+    let gPressed = false;
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); downloadSelf(); return; }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); $('#appSearch')?.focus(); return; }
+      if (e.key.toLowerCase() === 'g') { gPressed = true; setTimeout(() => gPressed = false, 600); return; }
+      if (!gPressed) return; const k = e.key.toLowerCase();
+      if (k === 'h') nav('home'); if (k === 'a') nav('apps'); if (k === 's') nav('stack'); if (k === 'b') nav('brain'); if (k === 'r') nav('revo'); gPressed = false;
+    });
 
-/* ===================== Mini Usage (adaptado) ===================== */
-const U={ KEY:'dual_usage_widget_v1', R:{ usdPerKTokens:0.006, usdImg:{512:0.017,768:0.019,1024:0.050}, usdTTSperMin:0.024, usdSTTperMin:0.008, kwhPerKTokens:0.0002, kwhImg:{512:0.0002,768:0.0003,1024:0.0004}, kwhTTSperMin:0.00005, kwhSTTperMin:0.00003, mlPerKWh:500 } };
-function tKey(resetHour){ const [H,M]=(resetHour||'00:00').split(':').map(x=>parseInt(x,10)||0); const now=new Date(); const anchor=new Date(now.getFullYear(),now.getMonth(),now.getDate(),H,M,0,0); return (now>=anchor?anchor:new Date(anchor.getTime()-86400000)).toDateString()+`@${String(H).padStart(2,'0')}:${String(M).padStart(2,'0')}` }
-function loadUsage(){ const saved=JSON.parse(localStorage.getItem(U.KEY)||'{}'); const def={ uc:0, usd:0, kwh:0, ml:0, limitUC:3000, resetHour:'00:00' }; return Object.assign(def, saved) }
-const usage=loadUsage(); function persistUsage(){ localStorage.setItem(U.KEY, JSON.stringify(usage)) }
-function ensureDay(){ const cur=tKey(usage.resetHour); if(usage.dateKey!==cur){ usage.dateKey=cur; usage.uc=usage.usd=usage.kwh=usage.ml=0; persistUsage(); } }
-function addUC(x){ usage.uc+=x } function addUSD(x){ usage.usd+=x } function addKWh(x){ usage.kwh+=x; usage.ml=usage.kwh*U.R.mlPerKWh }
-function addUsage(ev){ ensureDay(); if(ev.type==='image'){ const sz=ev.size||768, qty=Math.max(1,ev.qty||1); const ucPer=(sz===512?15:sz===768?30:60); addUC(qty*ucPer); addUSD(qty*(U.R.usdImg[sz]||U.R.usdImg[768])); addKWh(qty*(U.R.kwhImg[sz]||U.R.kwhImg[768])); } if(ev.type==='text'){ const k=(ev.tokens||0)/1000; addUC(k*1); addUSD(k*(usage.usdPerKTokens||U.R.usdPerKTokens)); addKWh(k*U.R.kwhPerKTokens);} if(ev.type==='tts'){ const m=Math.max(0, ev.minutes||0); addUC(m*2); addUSD(m*U.R.usdTTSperMin); addKWh(m*U.R.kwhTTSperMin);} if(ev.type==='stt'){ const m=Math.max(0, ev.minutes||0); addUC(m*.8); addUSD(m*U.R.usdSTTperMin); addKWh(m*U.R.kwhSTTperMin);} persistUsage(); renderUsage(); }
-function renderUsage(){ ensureDay(); document.getElementById('usd').textContent=`US$ ${usage.usd.toFixed(2)}`; document.getElementById('water').textContent=`${Math.round(usage.ml)} ml`; document.getElementById('uc').textContent=Math.round(usage.uc); document.getElementById('uclimit').textContent=usage.limitUC; document.getElementById('resetTime').textContent=usage.dateKey.split('@')[1]+' (local)'; }
-document.getElementById('btnDemo').onclick=()=> addUsage({type:'image', size:768, qty:10}); document.getElementById('btnReset').onclick=()=>{ usage.uc=usage.usd=usage.kwh=usage.ml=0; usage.dateKey=tKey(usage.resetHour); persistUsage(); renderUsage(); };
+    // Ajuda modal
+    const modalHelp = $('#modalHelp');
+    $('#btnHelp').onclick = () => { modalHelp.classList.add('open'); modalHelp.setAttribute('aria-hidden', 'false'); };
+    $('#closeHelp').onclick = () => { modalHelp.classList.remove('open'); modalHelp.setAttribute('aria-hidden', 'true'); };
+    modalHelp.addEventListener('click', (e) => { if (e.target === modalHelp) $('#closeHelp').click(); });
 
-/* ===================== Packs state ===================== */
-const packs=new Set(JSON.parse(localStorage.getItem('packs')||'[]'));
-Array.from(document.querySelectorAll('[data-pack]')).forEach(btn=>{ const key=btn.dataset.pack; if(packs.has(key)) btn.classList.add('pill--on'); btn.addEventListener('click',()=>{ if(packs.has(key)){ packs.delete(key); btn.classList.remove('pill--on'); } else { packs.add(key); btn.classList.add('pill--on'); } }); });
-document.getElementById('saveLocal').onclick=()=>{ localStorage.setItem('packs', JSON.stringify([...packs])); toast('Packs salvos!') };
-document.getElementById('clearLocal').onclick=()=>{ localStorage.clear(); toast('Local limpo.'); };
+    // Baixar HTML
+    function downloadSelf() {
+      try {
+        const clone = document.documentElement.cloneNode(true);
+        const html = '<!doctype html>\n' + clone.outerHTML;
+        const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'HUB-UNO-Revo.html'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 500);
+        toast('HTML exportado', 'ok');
+      } catch (e) { alert('Falha ao exportar: ' + e.message); }
+    }
+    $('#btnDownload').onclick = downloadSelf;
 
-/* ===================== Archetypes (selector + fade) ===================== */
-const archList=["luxara.html","rhea.html","aion.html","atlas.html","nova.html","genus.html","lumine.html","kaion.html","kaos.html","horus.html","elysha.html"];
-(function(){ const sel=document.getElementById('archSelect'); const frame=document.getElementById('coreFrame'); const fade=document.getElementById('fadeCover'); function populate(){ sel.innerHTML=''; archList.forEach(name=>{ const o=document.createElement('option'); o.value=name; o.textContent=name; sel.appendChild(o); }); }
-  function setSrcByIndex(idx){ if(!archList.length) return; const n=(idx+archList.length)%archList.length; sel.selectedIndex=n; frame.src='./archetypes/'+archList[n]; }
-  populate(); let current=0; if(archList.length){ setSrcByIndex(0); }
-  document.getElementById('prevArch').addEventListener('click', ()=>{ current=(current-1+archList.length)%archList.length; fade.classList.add('show'); setTimeout(()=>{ setSrcByIndex(current); setTimeout(()=>fade.classList.remove('show'), 200); }, 140); });
-  document.getElementById('nextArch').addEventListener('click', ()=>{ current=(current+1)%archList.length; fade.classList.add('show'); setTimeout(()=>{ setSrcByIndex(current); setTimeout(()=>fade.classList.remove('show'), 200); }, 140); });
-  sel.addEventListener('change', ()=>{ current=sel.selectedIndex; fade.classList.add('show'); setTimeout(()=>{ setSrcByIndex(current); setTimeout(()=>fade.classList.remove('show'), 200); }, 140); }); })();
+    /* ===================== Brain ===================== */
+    const MODELS = ['openrouter/auto','anthropic/claude-3.5-sonnet','openai/gpt-4.1-mini','google/gemini-1.5-pro','meta/llama-3.1-405b-instruct','mistral/mistral-large-latest'];
+    (function initBrain() {
+      const sel = $('#model'); sel.innerHTML = ''; MODELS.forEach(m => { const o = document.createElement('option'); o.value = m; o.textContent = m; sel.appendChild(o) });
+      sel.value = LS.get('dual.openrouter.model', MODELS[0]);
+      $('#sk').value = LS.raw('dual.keys.openrouter');
+      $('#saveSK').onclick = () => { LS.set('dual.openrouter.model', sel.value); localStorage.setItem('dual.keys.openrouter', $('#sk').value || ''); toast('Configurações salvas', 'ok'); };
+      $('#saveName').onclick = () => {
+        localStorage.setItem('infodose:userName', ($('#userName').value || '').trim());
+        toast('Nome salvo', 'ok');
+        try { displayGreeting(); } catch (e) {}
+      };
+    })();
 
-/* ===================== Áudio simples (tap accent) ===================== */
-let actx, work, gain; document.getElementById('btnPlay').onclick=async()=>{ if(actx) { try{ if(actx.state==='suspended') await actx.resume(); }catch{} accent(); return; } actx=new (window.AudioContext||window.webkitAudioContext)(); const code=`class B extends AudioWorkletProcessor{static get parameterDescriptors(){return[{name:'on',defaultValue:0},{name:'freq',defaultValue:220}]}process(i,o,p){const out=o[0];const on=p.on[0],f=p.freq[0];for(let ch=0;ch<out.length;ch++){const b=out[ch];for(let n=0;n<b.length;n++){let s=0;if(on>0.5){s=(Math.random()*2-1)*0.18+Math.sin(2*Math.PI*(currentFrame+n)/sampleRate*f)*0.22;}b[n]=s;}}return true}}registerProcessor('b',B);`; await actx.audioWorklet.addModule(URL.createObjectURL(new Blob([code],{type:'text/javascript'}))); work=new AudioWorkletNode(actx,'b'); gain=actx.createGain(); gain.gain.value=0.0; work.connect(gain).connect(actx.destination); toast('Áudio pronto'); accent(); };
-function accent(){ if(!actx||!work||!gain) return; work.parameters.get('freq').setValueAtTime(260, actx.currentTime); work.parameters.get('on').setValueAtTime(1, actx.currentTime); gain.gain.cancelScheduledValues(actx.currentTime); gain.gain.linearRampToValueAtTime(0.9, actx.currentTime+0.01); gain.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime+0.35); setTimeout(()=> work.parameters.get('on').setValueAtTime(0, actx.currentTime), 120); }
+    /* ===================== Inicialização do tema & personalização de fundo ===================== */
+    (function initThemeSettings() {
+      // Se o usuário nunca selecionou um tema antes, defina o padrão como "medium" (cinza).
+      if (!LS.get('uno:theme')) {
+        LS.set('uno:theme', 'medium');
+      }
+      // Aplique o tema salvo imediatamente
+      applyTheme();
+      // Configure o seletor de tema
+      const sel = document.getElementById('themeSelect');
+      if (sel) {
+        sel.value = LS.get('uno:theme', 'medium');
+        sel.addEventListener('change', () => {
+          LS.set('uno:theme', sel.value);
+          applyTheme();
+          toast('Tema atualizado', 'ok');
+        });
+      }
+      const upload = document.getElementById('bgUpload');
+      if (upload) {
+        upload.addEventListener('change', (e) => {
+          const f = e.target.files && e.target.files[0];
+          if (!f) return;
+          const reader = new FileReader();
+          reader.onload = () => {
+            try {
+              LS.set('uno:bg', reader.result);
+              LS.set('uno:theme', 'custom');
+              if (sel) sel.value = 'custom';
+              applyTheme();
+              toast('Fundo personalizado salvo', 'ok');
+            } catch (err) { console.error(err); toast('Erro ao salvar fundo', 'err'); }
+          };
+          reader.readAsDataURL(f);
+        });
+      }
+    })();
 
-/* ===================== Boot ===================== */
-(async function boot(){ store=await createStore(); document.getElementById('storageMode').textContent=store.mode; document.getElementById('hasIDB').textContent=hasIDB()?'ok':'no'; document.getElementById('isPWA').textContent=(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone?'yes':'no'; await refreshFiles(); renderUsage(); })();
-</script>
+    /* ===================== Ícones inline (data SVG) ===================== */
+    function svgIcon(name){
+      const common = 'xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%23f5f7ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
+      const m = {
+        atlas: `<svg ${common}><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3v18"/><path d="M5 8c3 2 11 2 14 0M5 16c3-2 11-2 14 0"/></svg>`,
+        nova: `<svg ${common}><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><path d="M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/><circle cx="12" cy="12" r="3"/></svg>`,
+        vitalis:`<svg ${common}><path d="M3 12h4l2-5 4 10 2-5h6"/><path d="M13 3l-2 4 3 1-2 4"/></svg>`,
+        pulse: `<svg ${common}><path d="M2 12h3l2-4 3 8 2-4h8"/><path d="M20 8v-3M20 19v-3"/></svg>`,
+        artemis:`<svg ${common}><path d="M3 12h12"/><path d="M13 6l6 6-6 6"/><circle cx="12" cy="12" r="9"/></svg>`,
+        serena:`<svg ${common}><path d="M12 21s-6-3.5-6-8a4 4 0 0 1 6-3 4 4 0 0 1 6 3c0 4.5-6 8-6 8z"/></svg>`,
+        kaos:  `<svg ${common}><path d="M4 4l7 7-7 7"/><path d="M20 4l-7 7 7 7"/></svg>`,
+        genus: `<svg ${common}><rect x="7" y="7" width="10" height="10" rx="2"/><path d="M7 7l5-3 5 3M17 17l-5 3-5-3"/></svg>`,
+        lumine:`<svg ${common}><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>`,
+        rhea:  `<svg ${common}><path d="M12 3v6"/><circle cx="12" cy="9" r="4"/><path d="M12 13v2l-2 2M12 15l2 2M12 17v3"/></svg>`,
+        solus: `<svg ${common}><path d="M12 3v6M12 15v6"/><circle cx="12" cy="12" r="3"/><path d="M19 5l-3 3M5 19l3-3M5 5l3 3M19 19l-3-3"/></svg>`,
+        aion:  `<svg ${common}><path d="M7 12c0-2.2 1.8-4 4-4 1.2 0 2.3.5 3 1.3M17 12c0 2.2-1.8 4-4 4-1.2 0-2.3-.5-3-1.3"/><path d="M3 12h4M17 12h4"/></svg>`,
+        // Extra icons provided by the user. These are approximations of the requested
+        // assets (e.g. audio.svg, bolt.svg, etc.) using simple line art. They
+        // maintain the same stroke characteristics as the existing icons. To use
+        // them elsewhere in the UI, call svgIcon('audio'), svgIcon('bolt'), etc.
+        audio: `<svg ${common}><polygon points="3,9 8,9 12,5 12,19 8,15 3,15"/><path d="M15 9c1.5 1.5 1.5 4 0 5"/><path d="M17 7c3 3 3 7 0 10"/></svg>`,
+        bolt: `<svg ${common}><path d="M13 3L4 14h7l-2 7 9-11h-7l3-7z"/></svg>`,
+        download: `<svg ${common}><path d="M12 3v12"/><path d="M6 9l6 6 6-6"/><path d="M5 19h14"/></svg>`,
+        grid: `<svg ${common}><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>`,
+        home: `<svg ${common}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2h-14a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
+        json: `<svg ${common}><path d="M7 4c-2 0-2 2-2 4v8c0 2 0 4 2 4"/><path d="M17 4c2 0 2 2 2 4v8c0 2 0 4-2 4"/></svg>`,
+        'logo-capsule': `<svg ${common}><rect x="4" y="7" width="16" height="10" rx="5"/><path d="M12 7v10"/></svg>`,
+        'logo-seed-split': `<svg ${common}><path d="M12 12c0-4 4-8 8-8v8c0 4-4 8-8 8v-8z"/><path d="M12 12c0-4-4-8-8-8v8c0 4 4 8 8 8v-8z"/></svg>`,
+        pause: `<svg ${common}><rect x="6" y="4" width="3" height="16"/><rect x="15" y="4" width="3" height="16"/></svg>`,
+        play: `<svg ${common}><polygon points="6,4 20,12 6,20"/></svg>`,
+        upload: `<svg ${common}><path d="M12 21V9"/><path d="M6 15l6-6 6 6"/><path d="M5 5h14"/></svg>`,
+        user: `<svg ${common}><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-8 8-8s8 4 8 8"/></svg>`,
+        sprites: `<svg ${common}></svg>`
+      };
+      const raw = m[name] || m['atlas'];
+      return 'data:image/svg+xml;utf8,' + encodeURIComponent(raw);
+    }
+
+    /* ===================== Apps (embutido + locais) ===================== */
+    const RAW = { apps: [] };
+    const appsWrap = $('#appsWrap'), appsCount = $('#appsCount');
+
+    function normalize(list) {
+      return (list || []).map(x => ({
+        key: x.key || x.url || x.title || Math.random().toString(36).slice(2),
+        title: x.title || x.key || 'App',
+        desc: x.desc || '',
+        url: String(x.url || ''),
+        icon: x.icon || '',
+        tags: Array.isArray(x.tags) ? x.tags : []
+      }))
+    }
+    function locals() {
+      let arr = []; try { arr = JSON.parse(LS.raw('infodose:locals:v1') || '[]') } catch {}
+      return arr.map(l => ({ key: 'local:' + l.id, title: l.name || 'Local', desc: 'HTML local', url: 'local:' + l.id, icon: 'local', tags: ['local'] }))
+    }
+    function getLocal(id) {
+      let arr = []; try { arr = JSON.parse(LS.raw('infodose:locals:v1') || '[]') } catch {}
+      return arr.find(x => x.id === id) || null
+    }
+    function blobURL(local) { const blob = new Blob([local.html || ''], { type: 'text/html;charset=utf-8' }); return URL.createObjectURL(blob) }
+
+    function appIconFor(a){
+      if(!a.icon) return svgIcon('atlas');
+      if(/^(atlas|nova|vitalis|pulse|artemis|serena|kaos|genus|lumine|rhea|solus|aion|local)$/.test(a.icon)) return svgIcon(a.icon);
+      return a.icon; // caminho externo
+    }
+
+    function cardApp(a) {
+      const el = document.createElement('div'); el.className = 'app-card fx-trans fx-lift';
+      const ic = document.createElement('div'); ic.className = 'app-icon';
+      const img = document.createElement('img'); img.alt = ''; img.width = 24; img.height = 24; img.src = appIconFor(a); ic.appendChild(img);
+      const meta = document.createElement('div'); meta.style.flex = '1';
+      const t = document.createElement('div'); t.className = 'app-title'; t.textContent = a.title;
+      const d = document.createElement('div'); d.className = 'mut'; d.textContent = a.desc || a.url;
+      const open = document.createElement('button'); open.className = 'btn fx-trans fx-press ring'; open.textContent = 'Abrir';
+      const rip = document.createElement('span'); rip.className = 'ripple'; open.appendChild(rip); addRipple(open);
+      open.onclick = () => openApp(a);
+      meta.appendChild(t); meta.appendChild(d); meta.appendChild(open);
+      el.appendChild(ic); el.appendChild(meta);
+      return el
+    }
+
+    function renderApps() {
+      const q = ($('#appSearch').value || '').toLowerCase(); const mode = $('#appSort').value;
+      let L = normalize(RAW.apps).concat(locals());
+      if (q) L = L.filter(a => (a.title + ' ' + a.desc + ' ' + a.key + ' ' + a.url + ' ' + (a.tags || []).join(' ')).toLowerCase().includes(q));
+      L.sort((a, b) => (mode === 'za' ? -1 : 1) * String(a.title || '').localeCompare(b.title || ''));
+      appsWrap.innerHTML = ''; L.forEach(a => appsWrap.appendChild(cardApp(a)));
+      appsCount.textContent = L.length + ' apps'
+      // Notifique o Revo de que os apps mudaram, se estiver ativo
+      maybeSendAppsToRevo();
+    }
+
+    (function loadEmbeddedApps(){
+      try {
+        const raw = JSON.parse($('#APPS_JSON').textContent || '{}');
+        RAW.apps = Array.isArray(raw.apps) ? raw.apps : (Array.isArray(raw) ? raw : []);
+      } catch { RAW.apps = [] }
+      renderApps();
+      // Sempre envie o catálogo atualizado ao iframe do Revo após carregar os apps embutidos.
+      try {
+        const iframe = document.getElementById('revoEmbed');
+        if (iframe) {
+          const apps = RAW && Array.isArray(RAW.apps) ? RAW.apps : [];
+          const send = () => { if (iframe.contentWindow) iframe.contentWindow.postMessage({ type: 'apps', apps }, '*'); };
+          // Envie após pequeno atraso para garantir que o iframe esteja pronto
+          setTimeout(send, 100);
+          // E também quando o iframe terminar de carregar
+          iframe.removeEventListener('load', iframe._sendAppsEmbedded);
+          iframe._sendAppsEmbedded = send;
+          iframe.addEventListener('load', send, { once: true });
+        }
+      } catch(e) { console.warn('Falha ao postMessage apps após embed:', e); }
+    })();
+
+    // Locais
+    $('#btnImport').onclick = async () => {
+      const fs = Array.from($('#fileLocal').files || []); if (!fs.length) return;
+      const tasks = fs.map(f => new Promise(res => { const r = new FileReader(); r.onload = () => res({ id: 'l_' + Math.random().toString(36).slice(2), name: f.name.replace(/\.(html?|txt)$/i, ''), html: String(r.result || ''), ts: Date.now() }); r.readAsText(f) }));
+      const list = await Promise.all(tasks); const cur = JSON.parse(LS.raw('infodose:locals:v1') || '[]'); list.forEach(x => cur.unshift(x));
+      localStorage.setItem('infodose:locals:v1', JSON.stringify(cur)); renderApps(); toast('HTMLs locais adicionados', 'ok');
+    };
+    $('#btnExport').onclick = () => { const data = { v: 1, when: Date.now(), items: JSON.parse(LS.raw('infodose:locals:v1') || '[]') }; const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); a.download = 'locals_pack.json'; a.click(); };
+    $('#btnClear').onclick = () => { if (confirm('Limpar HTMLs locais salvos?')) { localStorage.removeItem('infodose:locals:v1'); renderApps(); toast('Locais limpos', 'warn'); } };
+
+    /* ===================== Stack ===================== */
+    const stackWrap = $('#stackWrap'), dock = $('#dock');
+    function badge(item) { const b = document.createElement('button'); b.className = 'badge fx-trans fx-press ring'; b.textContent = item.title || 'App'; b.title = 'Reabrir ' + (item.title || 'App'); const rp = document.createElement('span'); rp.className = 'ripple'; b.appendChild(rp); addRipple(b); b.onclick = () => { const s = document.querySelector('[data-sid="' + item.sid + '"]'); if (s) { s.scrollIntoView({ behavior: 'smooth' }); s.classList.remove('min'); } }; return b }
+    function updateDock() { dock.innerHTML = ''; $$('.session').forEach(s => { const meta = JSON.parse(s.dataset.meta || '{}'); dock.appendChild(badge({ title: meta.title, sid: s.dataset.sid })) }) }
+    function openApp(a) {
+      const sid = 's_' + Math.random().toString(36).slice(2);
+      const isLocal = String(a.url || '').startsWith('local:'); const lr = isLocal ? getLocal(String(a.url).slice(6)) : null; const url = lr ? blobURL(lr) : a.url;
+      const card = document.createElement('div'); card.className = 'session fx-trans fx-lift'; card.dataset.sid = sid; card.dataset.meta = JSON.stringify({ title: a.title || 'App', url: a.url || '' });
+      card.innerHTML = `
+        <div class="hdr">
+          <div class="title">${(a.title || 'App')}</div>
+          <div class="tools">
+            <button class="btn ring fx-trans fx-press" data-act="min" title="Minimizar">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/minus.svg" alt="Minimizar" width="14" height="14" onerror="this.onerror=null;this.src='icons/minus.svg'">
+              <span class="ripple"></span>
+            </button>
+            <button class="btn ring fx-trans fx-press" data-act="ref" title="Recarregar">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/arrow-rotate-right.svg" alt="Recarregar" width="14" height="14" onerror="this.onerror=null;this.src='icons/arrow-rotate-right.svg'">
+              <span class="ripple"></span>
+            </button>
+            <button class="btn ring fx-trans fx-press" data-act="close" title="Fechar">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/xmark.svg" alt="Fechar" width="14" height="14" onerror="this.onerror=null;this.src='icons/xmark.svg'">
+              <span class="ripple"></span>
+            </button>
+          </div>
+        </div>
+        <iframe src="${url || 'about:blank'}" allow="autoplay; clipboard-read; clipboard-write; picture-in-picture; fullscreen"></iframe>`;
+      stackWrap.prepend(card); card.querySelectorAll('.btn').forEach(addRipple);
+      card.querySelector('[data-act=min]').onclick = () => { card.classList.toggle('min'); updateDock(); };
+      card.querySelector('[data-act=ref]').onclick = () => { const fr = card.querySelector('iframe'); try { fr.contentWindow.location.reload() } catch { fr.src = fr.src } };
+      card.querySelector('[data-act=close]').onclick = () => { card.remove(); updateDock(); };
+      if ($('#openInside').checked) nav('stack'); updateDock(); toast('App aberto: ' + (a.title || 'App'), 'ok');
+    }
+    $('#btnCloseAll').onclick = () => { if (!confirm('Fechar todas as sessões abertas?')) return; $$('.session').forEach(s => s.remove()); updateDock(); toast('Todas as sessões fechadas', 'warn'); };
+
+    /* ===================== Archetypes (Central Circle) ===================== */
+    (function () {
+      const archList = [
+        'luxara.html',
+        'rhea.html',
+        'aion.html',
+        'atlas.html',
+        'nova.html',
+        'genus.html',
+        'lumine.html',
+        'kaion.html',
+        'kaos.html',
+        'horus.html',
+        'elysha.html'
+      ];
+      const select = document.getElementById('arch-select');
+      const frame = document.getElementById('arch-frame');
+      const fade = document.getElementById('arch-fadeCover');
+      function populate() {
+        select.innerHTML = '';
+        archList.forEach(name => {
+          const opt = document.createElement('option');
+          opt.value = name;
+          opt.textContent = name;
+          select.appendChild(opt);
+        });
+      }
+      function setSrcByIndex(idx) {
+        if (!archList.length) return;
+        const n = (idx + archList.length) % archList.length;
+        select.selectedIndex = n;
+        frame.src = './archetypes/' + archList[n];
+      }
+      let current = 0;
+      populate();
+      if (archList.length) setSrcByIndex(0);
+      document.getElementById('arch-prev').addEventListener('click', () => {
+        current = (current - 1 + archList.length) % archList.length;
+        fade.classList.add('show');
+        setTimeout(() => {
+          setSrcByIndex(current);
+          setTimeout(() => fade.classList.remove('show'), 200);
+        }, 140);
+      });
+      document.getElementById('arch-next').addEventListener('click', () => {
+        current = (current + 1) % archList.length;
+        fade.classList.add('show');
+        setTimeout(() => {
+          setSrcByIndex(current);
+          setTimeout(() => fade.classList.remove('show'), 200);
+        }, 140);
+      });
+      select.addEventListener('change', () => {
+        current = select.selectedIndex;
+        fade.classList.add('show');
+        setTimeout(() => {
+          setSrcByIndex(current);
+          setTimeout(() => fade.classList.remove('show'), 200);
+        }, 140);
+      });
+    })();
+
+    /* ===================== Init ===================== */
+    $$('button').forEach(addRipple);
+  </script>
 </body>
 </html>
