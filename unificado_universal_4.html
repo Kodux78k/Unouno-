@@ -105,62 +105,15 @@
 
     /* ===== Cards / grids ===== */
     .grid { display: grid; gap: 12px; max-width: 820px; margin: 0 auto }
-    /* Distribua os cartões de status da Home em duas colunas para melhor encaixe.
-       Em telas estreitas (<560px) eles se empilham em uma única coluna. */
-    .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px }
+    .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px }
+    @media (max-width: 860px) { .cards { grid-template-columns: repeat(2, minmax(0,1fr)) } }
     @media (max-width: 560px) { .cards { grid-template-columns: 1fr } }
 
-    /* Adicione margem inferior aos cartões na Home para evitar que fiquem sobrepostos à barra de abas. */
-    #v-home .cards {
-      margin-bottom: calc(var(--tabsH) + 20px);
-    }
-
     /* Ocultar o menu de opções (Apps, Stack, Brain, Revo) na Home quando apenas a bola dos arquétipos deve aparecer */
-    /* Hide the UNO info card on home. The cards row is now used for status notifications */
+    /* Hide the UNO menu cards and the UNO info card on home (show only archetype circle) */
+    #v-home .cards,
     #v-home #unoCard {
       display: none;
-    }
-
-    /* ===== Apps Page customizations ===== */
-    /* Estilizar botão de upload de HTML local para destaque */
-    #btnImport {
-      font-weight: 700;
-      color: var(--ink);
-      background: var(--glass);
-      border-color: var(--line);
-    }
-    /* Favorite icon/button dentro de cada cartão de app */
-    .app-card {
-      position: relative;
-    }
-    .fav-btn {
-      position: absolute;
-      top: 6px;
-      right: 6px;
-      width: 22px;
-      height: 22px;
-      background: transparent;
-      border: none;
-      padding: 0;
-      cursor: pointer;
-      opacity: 0.6;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 2;
-    }
-    .fav-btn.fav {
-      opacity: 1;
-    }
-    .fav-btn img {
-      width: 100%;
-      height: 100%;
-      /* Ícones não favoritados ficam em tons de cinza para indicar estado off */
-      filter: grayscale(1) brightness(0.5);
-    }
-    .fav-btn.fav img {
-      /* Ícone favoritado mantém cor original (amarelo) */
-      filter: none;
     }
     .card { background: var(--surface); border: var(--bd); border-radius: var(--r2); box-shadow: var(--shadow); padding: 12px; display: flex; gap: 10px; align-items: center; position: relative }
     .card.fx-trans:hover { box-shadow: 0 16px 40px rgba(0,0,0,.5) }
@@ -354,7 +307,7 @@
             </div>
             <div>
               <div style="font-weight:800">Apps</div>
-              <div class="mut" id="homeAppsStatus">–</div>
+              <div class="mut">Catálogo integrado</div>
             </div>
             <span class="ripple"></span>
           </button>
@@ -364,27 +317,28 @@
             </div>
             <div>
               <div style="font-weight:800">Stack</div>
-              <div class="mut" id="homeStackStatus">–</div>
+              <div class="mut">Sessões abertas</div>
             </div>
             <span class="ripple"></span>
           </button>
           <button class="card fx-trans fx-press ring" data-nav="brain">
             <div class="ico">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/user.svg" alt="Usuário" width="24" height="24" onerror="this.onerror=null;this.src='icons/user.svg'">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/brain.svg" alt="Brain" width="24" height="24" onerror="this.onerror=null;this.src='icons/brain.svg'">
             </div>
             <div>
-              <div style="font-weight:800">Usuário</div>
-              <div class="mut" id="homeUserStatus">–</div>
+              <div style="font-weight:800">Brain</div>
+              <div class="mut">Nome, SK, Modelo</div>
             </div>
             <span class="ripple"></span>
           </button>
-          <button class="card fx-trans fx-press ring" data-nav="home">
+          <!-- New card to open the Revo view directly from home -->
+          <button class="card fx-trans fx-press ring" data-nav="revo">
             <div class="ico">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/yin-yang.svg" alt="Arquétipo" width="24" height="24" onerror="this.onerror=null;this.src='icons/yin-yang.svg'">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/globe.svg" alt="Revo" width="24" height="24" onerror="this.onerror=null;this.src='icons/globe.svg'">
             </div>
             <div>
-              <div style="font-weight:800">Arquétipo</div>
-              <div class="mut" id="homeArchStatus">–</div>
+              <div style="font-weight:800">Revo</div>
+              <div class="mut">Hub Ultra integrado</div>
             </div>
             <span class="ripple"></span>
           </button>
@@ -398,11 +352,14 @@
         <div class="card fx-trans fx-lift" style="display:block">
           <div class="grid" style="gap:8px">
             <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-              <!-- Removemos a busca e o sort. Agora apenas a opção de abrir dentro e o botão para mostrar locais -->
+              <input id="appSearch" class="input ring" placeholder="Buscar…" />
+              <select id="appSort" class="input ring" style="max-width:150px">
+                <option value="az">A–Z</option>
+                <option value="za">Z–A</option>
+              </select>
               <label class="mut" style="display:inline-flex;gap:6px;align-items:center">
                 <input id="openInside" type="checkbox" checked /> abrir dentro
               </label>
-              <button id="btnToggleLocal" class="btn fx-trans fx-press ring">Mostrar Locais<span class="ripple"></span></button>
             </div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
               <input id="fileLocal" type="file" accept=".html,.htm,.txt" multiple class="input ring" />
@@ -779,9 +736,8 @@
         if (!home) return;
         const arch = home.querySelector('.arch-container');
         const cards = home.querySelector('.cards');
-        // Se ambos existirem, garanta que as cartas apareçam depois do círculo de arquétipos.
         if (arch && cards) {
-          arch.insertAdjacentElement('afterend', cards);
+          cards.insertAdjacentElement('afterend', arch);
         }
       } catch (e) {
         console.warn('Falha ao reposicionar arquétipo:', e);
@@ -808,8 +764,6 @@
             toast(`Bem-vindo de volta, ${nameG}. UNO está ao seu lado.`, 'ok');
           }
         } catch (e) {}
-        // Atualize também os status quando entrar no Home
-        try { updateHomeStatus(); } catch {}
       }
       // Quando entrar na aba Revo, envie a lista de apps ao iframe via postMessage
       if (key === 'revo') {
@@ -902,7 +856,6 @@
         localStorage.setItem('infodose:userName', ($('#userName').value || '').trim());
         toast('Nome salvo', 'ok');
         try { displayGreeting(); } catch (e) {}
-        try { updateHomeStatus(); } catch {}
       };
     })();
 
@@ -922,7 +875,6 @@
           LS.set('uno:theme', sel.value);
           applyTheme();
           toast('Tema atualizado', 'ok');
-          try { updateHomeStatus(); } catch {}
         });
       }
       const upload = document.getElementById('bgUpload');
@@ -938,7 +890,6 @@
               if (sel) sel.value = 'custom';
               applyTheme();
               toast('Fundo personalizado salvo', 'ok');
-              try { updateHomeStatus(); } catch {}
             } catch (err) { console.error(err); toast('Erro ao salvar fundo', 'err'); }
           };
           reader.readAsDataURL(f);
@@ -986,31 +937,6 @@
 
     /* ===================== Apps (embutido + locais) ===================== */
     const RAW = { apps: [] };
-
-    // Controle para exibir apenas apps locais ou todos
-    let showOnlyLocal = false;
-    // Lista de apps favoritados (por chave). Carregada do localStorage
-    let favoriteKeys = [];
-    try { favoriteKeys = JSON.parse(localStorage.getItem('infodose:favApps') || '[]') || []; } catch { favoriteKeys = []; }
-
-    /**
-     * Alterna um app na lista de favoritos. Salva no localStorage e re-renderiza.
-     * @param {string} key
-     */
-    function toggleFav(key) {
-      const idx = favoriteKeys.indexOf(key);
-      if (idx >= 0) {
-        favoriteKeys.splice(idx, 1);
-      } else {
-        favoriteKeys.push(key);
-      }
-      localStorage.setItem('infodose:favApps', JSON.stringify(favoriteKeys));
-      renderApps();
-    }
-    /** Verifica se um app está favoritado. */
-    function isFav(key) {
-      return favoriteKeys.includes(key);
-    }
     const appsWrap = $('#appsWrap'), appsCount = $('#appsCount');
 
     function normalize(list) {
@@ -1033,51 +959,6 @@
     }
     function blobURL(local) { const blob = new Blob([local.html || ''], { type: 'text/html;charset=utf-8' }); return URL.createObjectURL(blob) }
 
-    /**
-     * Atualiza os cartões de status na Home com informações atuais sobre apps, sessões,
-     * preferências do usuário e arquétipo ativo. Chamado sempre que o
-     * catálogo muda, quando sessões são abertas/fechadas, quando
-     * configurações são salvas ou ao navegar para o Home.
-     */
-    function updateHomeStatus() {
-      try {
-        // Apps: número total ou locais se estiver filtrando
-        const total = normalize(RAW.apps).concat(locals()).length;
-        const localCount = locals().length;
-        const txtApps = showOnlyLocal ? (localCount + ' local' + (localCount === 1 ? '' : 's')) : (total + ' app' + (total === 1 ? '' : 's'));
-        const elApps = document.getElementById('homeAppsStatus');
-        if (elApps) elApps.textContent = txtApps;
-      } catch (e) {}
-      try {
-        // Sessões abertas (Stack)
-        const sess = document.querySelectorAll('#stackWrap .session').length;
-        const txtSess = sess + ' sessão' + (sess === 1 ? '' : 's');
-        const elStack = document.getElementById('homeStackStatus');
-        if (elStack) elStack.textContent = txtSess;
-      } catch (e) {}
-      try {
-        // Usuário: nome + tema atual (mapa)
-        const name = (localStorage.getItem('infodose:userName') || '').trim();
-        const theme = LS.get('uno:theme', 'medium');
-        const themeLabel = { 'default': 'padrão', 'medium': 'cinza', 'custom': 'personalizado' }[theme] || theme;
-        let txtUser = name || 'Usuário';
-        txtUser += ' · ' + themeLabel;
-        const elUser = document.getElementById('homeUserStatus');
-        if (elUser) elUser.textContent = txtUser;
-      } catch (e) {}
-      try {
-        // Arquétipo ativo: obtém o nome sem extensão
-        const sel = document.getElementById('arch-select');
-        let archName = '';
-        if (sel && sel.options.length > 0) {
-          const opt = sel.options[sel.selectedIndex] || null;
-          if (opt) archName = opt.textContent.replace(/\.html$/i, '');
-        }
-        const elArch = document.getElementById('homeArchStatus');
-        if (elArch) elArch.textContent = archName || 'Nenhum';
-      } catch (e) {}
-    }
-
     function appIconFor(a){
       if(!a.icon) return svgIcon('atlas');
       if(/^(atlas|nova|vitalis|pulse|artemis|serena|kaos|genus|lumine|rhea|solus|aion|local)$/.test(a.icon)) return svgIcon(a.icon);
@@ -1086,17 +967,6 @@
 
     function cardApp(a) {
       const el = document.createElement('div'); el.className = 'app-card fx-trans fx-lift';
-      // Botão de favorito (estrela). Aparece no canto superior direito
-      const fav = document.createElement('button'); fav.className = 'fav-btn';
-      const favImg = document.createElement('img');
-      favImg.alt = 'Favorito';
-      // Use ícone local para favorito; evita depender de CDN
-      favImg.src = 'icons/star.svg';
-      fav.appendChild(favImg);
-      // Marque como favoritado se a chave estiver na lista
-      if (isFav(a.key)) fav.classList.add('fav');
-      fav.onclick = (e) => { e.stopPropagation(); toggleFav(a.key); };
-      el.appendChild(fav);
       const ic = document.createElement('div'); ic.className = 'app-icon';
       const img = document.createElement('img'); img.alt = ''; img.width = 24; img.height = 24; img.src = appIconFor(a); ic.appendChild(img);
       const meta = document.createElement('div'); meta.style.flex = '1';
@@ -1111,40 +981,14 @@
     }
 
     function renderApps() {
-      // Busque valores de busca e ordenação apenas se os campos existirem (evita erros se ocultos)
-      const searchEl = document.getElementById('appSearch');
-      const sortEl = document.getElementById('appSort');
-      const q = searchEl ? (searchEl.value || '').toLowerCase() : '';
-      const mode = sortEl ? sortEl.value : 'az';
-      // Combine apps embutidos e locais
+      const q = ($('#appSearch').value || '').toLowerCase(); const mode = $('#appSort').value;
       let L = normalize(RAW.apps).concat(locals());
-      // Filtrar apenas locais se ativado
-      if (showOnlyLocal) {
-        L = L.filter(a => String(a.url || '').startsWith('local:'));
-      }
-      // Aplicar busca (mantendo compatibilidade se o usuário ainda possuir o campo)
-      if (q) {
-        L = L.filter(a => (a.title + ' ' + a.desc + ' ' + a.key + ' ' + a.url + ' ' + (a.tags || []).join(' ')).toLowerCase().includes(q));
-      }
-      // Ordenar: favoritos primeiro, depois título A-Z ou Z-A conforme o select (padrão A-Z)
-      L.sort((a, b) => {
-        const favA = isFav(a.key); const favB = isFav(b.key);
-        if (favA !== favB) return favB - favA; // true=1, false=0 => favoritos no topo
-        const dir = mode === 'za' ? -1 : 1;
-        return dir * String(a.title || '').localeCompare(b.title || '');
-      });
-      appsWrap.innerHTML = '';
-      L.forEach(a => {
-        const card = cardApp(a);
-        appsWrap.appendChild(card);
-      });
-      appsCount.textContent = L.length + ' apps';
-      // Reaplicar ícones após adicionar novos cards (garante que as estrelas e ícones de apps carreguem)
-      try { applyIcons(); } catch {}
+      if (q) L = L.filter(a => (a.title + ' ' + a.desc + ' ' + a.key + ' ' + a.url + ' ' + (a.tags || []).join(' ')).toLowerCase().includes(q));
+      L.sort((a, b) => (mode === 'za' ? -1 : 1) * String(a.title || '').localeCompare(b.title || ''));
+      appsWrap.innerHTML = ''; L.forEach(a => appsWrap.appendChild(cardApp(a)));
+      appsCount.textContent = L.length + ' apps'
       // Notifique o Revo de que os apps mudaram, se estiver ativo
       maybeSendAppsToRevo();
-      // Atualize o painel de status na home com o novo número de apps
-      try { updateHomeStatus(); } catch {}
     }
 
     (function loadEmbeddedApps(){
@@ -1179,31 +1023,10 @@
     $('#btnExport').onclick = () => { const data = { v: 1, when: Date.now(), items: JSON.parse(LS.raw('infodose:locals:v1') || '[]') }; const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); a.download = 'locals_pack.json'; a.click(); };
     $('#btnClear').onclick = () => { if (confirm('Limpar HTMLs locais salvos?')) { localStorage.removeItem('infodose:locals:v1'); renderApps(); toast('Locais limpos', 'warn'); } };
 
-    // Alterna exibição de apps locais/apenas locais
-    try {
-      const btnToggleLocal = document.getElementById('btnToggleLocal');
-      if (btnToggleLocal) {
-        btnToggleLocal.onclick = () => {
-          showOnlyLocal = !showOnlyLocal;
-          // Atualize o texto do botão conforme o modo
-          btnToggleLocal.firstChild && (btnToggleLocal.firstChild.nodeValue = showOnlyLocal ? 'Mostrar Todos' : 'Mostrar Locais');
-          renderApps();
-        };
-      }
-    } catch (e) { console.warn('Falha ao associar btnToggleLocal:', e); }
-
     /* ===================== Stack ===================== */
     const stackWrap = $('#stackWrap'), dock = $('#dock');
     function badge(item) { const b = document.createElement('button'); b.className = 'badge fx-trans fx-press ring'; b.textContent = item.title || 'App'; b.title = 'Reabrir ' + (item.title || 'App'); const rp = document.createElement('span'); rp.className = 'ripple'; b.appendChild(rp); addRipple(b); b.onclick = () => { const s = document.querySelector('[data-sid="' + item.sid + '"]'); if (s) { s.scrollIntoView({ behavior: 'smooth' }); s.classList.remove('min'); } }; return b }
-    function updateDock() {
-      dock.innerHTML = '';
-      $$('.session').forEach(s => {
-        const meta = JSON.parse(s.dataset.meta || '{}');
-        dock.appendChild(badge({ title: meta.title, sid: s.dataset.sid }))
-      });
-      // Atualize o status de sessões na home
-      try { updateHomeStatus(); } catch {}
-    }
+    function updateDock() { dock.innerHTML = ''; $$('.session').forEach(s => { const meta = JSON.parse(s.dataset.meta || '{}'); dock.appendChild(badge({ title: meta.title, sid: s.dataset.sid })) }) }
     function openApp(a) {
       const sid = 's_' + Math.random().toString(36).slice(2);
       const isLocal = String(a.url || '').startsWith('local:'); const lr = isLocal ? getLocal(String(a.url).slice(6)) : null; const url = lr ? blobURL(lr) : a.url;
@@ -1274,10 +1097,6 @@
         try {
           const base = file.replace(/\.html$/i, '');
           speakArchetype(base);
-        } catch (e) {}
-        // Atualiza as informações da Home (cartões) quando o arquétipo muda
-        try {
-          updateHomeStatus();
         } catch (e) {}
       }
       let current = 0;

@@ -110,11 +110,6 @@
     .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px }
     @media (max-width: 560px) { .cards { grid-template-columns: 1fr } }
 
-    /* Adicione margem inferior aos cartões na Home para evitar que fiquem sobrepostos à barra de abas. */
-    #v-home .cards {
-      margin-bottom: calc(var(--tabsH) + 20px);
-    }
-
     /* Ocultar o menu de opções (Apps, Stack, Brain, Revo) na Home quando apenas a bola dos arquétipos deve aparecer */
     /* Hide the UNO info card on home. The cards row is now used for status notifications */
     #v-home #unoCard {

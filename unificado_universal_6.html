@@ -105,15 +105,9 @@
 
     /* ===== Cards / grids ===== */
     .grid { display: grid; gap: 12px; max-width: 820px; margin: 0 auto }
-    /* Distribua os cartões de status da Home em duas colunas para melhor encaixe.
-       Em telas estreitas (<560px) eles se empilham em uma única coluna. */
-    .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px }
+    .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px }
+    @media (max-width: 860px) { .cards { grid-template-columns: repeat(2, minmax(0,1fr)) } }
     @media (max-width: 560px) { .cards { grid-template-columns: 1fr } }
-
-    /* Adicione margem inferior aos cartões na Home para evitar que fiquem sobrepostos à barra de abas. */
-    #v-home .cards {
-      margin-bottom: calc(var(--tabsH) + 20px);
-    }
 
     /* Ocultar o menu de opções (Apps, Stack, Brain, Revo) na Home quando apenas a bola dos arquétipos deve aparecer */
     /* Hide the UNO info card on home. The cards row is now used for status notifications */

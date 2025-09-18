@@ -105,18 +105,13 @@
 
     /* ===== Cards / grids ===== */
     .grid { display: grid; gap: 12px; max-width: 820px; margin: 0 auto }
-    /* Distribua os cartões de status da Home em duas colunas para melhor encaixe.
-       Em telas estreitas (<560px) eles se empilham em uma única coluna. */
-    .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px }
+    .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px }
+    @media (max-width: 860px) { .cards { grid-template-columns: repeat(2, minmax(0,1fr)) } }
     @media (max-width: 560px) { .cards { grid-template-columns: 1fr } }
 
-    /* Adicione margem inferior aos cartões na Home para evitar que fiquem sobrepostos à barra de abas. */
-    #v-home .cards {
-      margin-bottom: calc(var(--tabsH) + 20px);
-    }
-
     /* Ocultar o menu de opções (Apps, Stack, Brain, Revo) na Home quando apenas a bola dos arquétipos deve aparecer */
-    /* Hide the UNO info card on home. The cards row is now used for status notifications */
+    /* Hide the UNO menu cards and the UNO info card on home (show only archetype circle) */
+    #v-home .cards,
     #v-home #unoCard {
       display: none;
     }
@@ -354,7 +349,7 @@
             </div>
             <div>
               <div style="font-weight:800">Apps</div>
-              <div class="mut" id="homeAppsStatus">–</div>
+              <div class="mut">Catálogo integrado</div>
             </div>
             <span class="ripple"></span>
           </button>
@@ -364,27 +359,28 @@
             </div>
             <div>
               <div style="font-weight:800">Stack</div>
-              <div class="mut" id="homeStackStatus">–</div>
+              <div class="mut">Sessões abertas</div>
             </div>
             <span class="ripple"></span>
           </button>
           <button class="card fx-trans fx-press ring" data-nav="brain">
             <div class="ico">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/user.svg" alt="Usuário" width="24" height="24" onerror="this.onerror=null;this.src='icons/user.svg'">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/brain.svg" alt="Brain" width="24" height="24" onerror="this.onerror=null;this.src='icons/brain.svg'">
             </div>
             <div>
-              <div style="font-weight:800">Usuário</div>
-              <div class="mut" id="homeUserStatus">–</div>
+              <div style="font-weight:800">Brain</div>
+              <div class="mut">Nome, SK, Modelo</div>
             </div>
             <span class="ripple"></span>
           </button>
-          <button class="card fx-trans fx-press ring" data-nav="home">
+          <!-- New card to open the Revo view directly from home -->
+          <button class="card fx-trans fx-press ring" data-nav="revo">
             <div class="ico">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/yin-yang.svg" alt="Arquétipo" width="24" height="24" onerror="this.onerror=null;this.src='icons/yin-yang.svg'">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/globe.svg" alt="Revo" width="24" height="24" onerror="this.onerror=null;this.src='icons/globe.svg'">
             </div>
             <div>
-              <div style="font-weight:800">Arquétipo</div>
-              <div class="mut" id="homeArchStatus">–</div>
+              <div style="font-weight:800">Revo</div>
+              <div class="mut">Hub Ultra integrado</div>
             </div>
             <span class="ripple"></span>
           </button>
@@ -779,9 +775,8 @@
         if (!home) return;
         const arch = home.querySelector('.arch-container');
         const cards = home.querySelector('.cards');
-        // Se ambos existirem, garanta que as cartas apareçam depois do círculo de arquétipos.
         if (arch && cards) {
-          arch.insertAdjacentElement('afterend', cards);
+          cards.insertAdjacentElement('afterend', arch);
         }
       } catch (e) {
         console.warn('Falha ao reposicionar arquétipo:', e);
@@ -808,8 +803,6 @@
             toast(`Bem-vindo de volta, ${nameG}. UNO está ao seu lado.`, 'ok');
           }
         } catch (e) {}
-        // Atualize também os status quando entrar no Home
-        try { updateHomeStatus(); } catch {}
       }
       // Quando entrar na aba Revo, envie a lista de apps ao iframe via postMessage
       if (key === 'revo') {
@@ -902,7 +895,6 @@
         localStorage.setItem('infodose:userName', ($('#userName').value || '').trim());
         toast('Nome salvo', 'ok');
         try { displayGreeting(); } catch (e) {}
-        try { updateHomeStatus(); } catch {}
       };
     })();
 
@@ -922,7 +914,6 @@
           LS.set('uno:theme', sel.value);
           applyTheme();
           toast('Tema atualizado', 'ok');
-          try { updateHomeStatus(); } catch {}
         });
       }
       const upload = document.getElementById('bgUpload');
@@ -938,7 +929,6 @@
               if (sel) sel.value = 'custom';
               applyTheme();
               toast('Fundo personalizado salvo', 'ok');
-              try { updateHomeStatus(); } catch {}
             } catch (err) { console.error(err); toast('Erro ao salvar fundo', 'err'); }
           };
           reader.readAsDataURL(f);
@@ -1033,51 +1023,6 @@
     }
     function blobURL(local) { const blob = new Blob([local.html || ''], { type: 'text/html;charset=utf-8' }); return URL.createObjectURL(blob) }
 
-    /**
-     * Atualiza os cartões de status na Home com informações atuais sobre apps, sessões,
-     * preferências do usuário e arquétipo ativo. Chamado sempre que o
-     * catálogo muda, quando sessões são abertas/fechadas, quando
-     * configurações são salvas ou ao navegar para o Home.
-     */
-    function updateHomeStatus() {
-      try {
-        // Apps: número total ou locais se estiver filtrando
-        const total = normalize(RAW.apps).concat(locals()).length;
-        const localCount = locals().length;
-        const txtApps = showOnlyLocal ? (localCount + ' local' + (localCount === 1 ? '' : 's')) : (total + ' app' + (total === 1 ? '' : 's'));
-        const elApps = document.getElementById('homeAppsStatus');
-        if (elApps) elApps.textContent = txtApps;
-      } catch (e) {}
-      try {
-        // Sessões abertas (Stack)
-        const sess = document.querySelectorAll('#stackWrap .session').length;
-        const txtSess = sess + ' sessão' + (sess === 1 ? '' : 's');
-        const elStack = document.getElementById('homeStackStatus');
-        if (elStack) elStack.textContent = txtSess;
-      } catch (e) {}
-      try {
-        // Usuário: nome + tema atual (mapa)
-        const name = (localStorage.getItem('infodose:userName') || '').trim();
-        const theme = LS.get('uno:theme', 'medium');
-        const themeLabel = { 'default': 'padrão', 'medium': 'cinza', 'custom': 'personalizado' }[theme] || theme;
-        let txtUser = name || 'Usuário';
-        txtUser += ' · ' + themeLabel;
-        const elUser = document.getElementById('homeUserStatus');
-        if (elUser) elUser.textContent = txtUser;
-      } catch (e) {}
-      try {
-        // Arquétipo ativo: obtém o nome sem extensão
-        const sel = document.getElementById('arch-select');
-        let archName = '';
-        if (sel && sel.options.length > 0) {
-          const opt = sel.options[sel.selectedIndex] || null;
-          if (opt) archName = opt.textContent.replace(/\.html$/i, '');
-        }
-        const elArch = document.getElementById('homeArchStatus');
-        if (elArch) elArch.textContent = archName || 'Nenhum';
-      } catch (e) {}
-    }
-
     function appIconFor(a){
       if(!a.icon) return svgIcon('atlas');
       if(/^(atlas|nova|vitalis|pulse|artemis|serena|kaos|genus|lumine|rhea|solus|aion|local)$/.test(a.icon)) return svgIcon(a.icon);
@@ -1143,8 +1088,6 @@
       try { applyIcons(); } catch {}
       // Notifique o Revo de que os apps mudaram, se estiver ativo
       maybeSendAppsToRevo();
-      // Atualize o painel de status na home com o novo número de apps
-      try { updateHomeStatus(); } catch {}
     }
 
     (function loadEmbeddedApps(){
@@ -1195,15 +1138,7 @@
     /* ===================== Stack ===================== */
     const stackWrap = $('#stackWrap'), dock = $('#dock');
     function badge(item) { const b = document.createElement('button'); b.className = 'badge fx-trans fx-press ring'; b.textContent = item.title || 'App'; b.title = 'Reabrir ' + (item.title || 'App'); const rp = document.createElement('span'); rp.className = 'ripple'; b.appendChild(rp); addRipple(b); b.onclick = () => { const s = document.querySelector('[data-sid="' + item.sid + '"]'); if (s) { s.scrollIntoView({ behavior: 'smooth' }); s.classList.remove('min'); } }; return b }
-    function updateDock() {
-      dock.innerHTML = '';
-      $$('.session').forEach(s => {
-        const meta = JSON.parse(s.dataset.meta || '{}');
-        dock.appendChild(badge({ title: meta.title, sid: s.dataset.sid }))
-      });
-      // Atualize o status de sessões na home
-      try { updateHomeStatus(); } catch {}
-    }
+    function updateDock() { dock.innerHTML = ''; $$('.session').forEach(s => { const meta = JSON.parse(s.dataset.meta || '{}'); dock.appendChild(badge({ title: meta.title, sid: s.dataset.sid })) }) }
     function openApp(a) {
       const sid = 's_' + Math.random().toString(36).slice(2);
       const isLocal = String(a.url || '').startsWith('local:'); const lr = isLocal ? getLocal(String(a.url).slice(6)) : null; const url = lr ? blobURL(lr) : a.url;
@@ -1274,10 +1209,6 @@
         try {
           const base = file.replace(/\.html$/i, '');
           speakArchetype(base);
-        } catch (e) {}
-        // Atualiza as informações da Home (cartões) quando o arquétipo muda
-        try {
-          updateHomeStatus();
         } catch (e) {}
       }
       let current = 0;
