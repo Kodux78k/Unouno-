@@ -1,386 +1,251 @@
-<!DOCTYPE html>
-<html lang="pt-BR" data-theme="tesseract">
+<!doctype html>
+<html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
-  <!-- The theme‑color meta tag informs the browser which colour to use for the browser UI (e.g. the address bar on mobile) -->
-  <meta name="theme-color" content="#0c0f14" />
-  <!-- Link to the PWA manifest. Placing this in the head tells the browser where to find metadata such as icons and colours. -->
-  <link rel="manifest" href="pwa/manifest.json">
-  <title>KOBLLUX InfoDose — Glow · AppMaker v2.4.7 (Mobile‑First)</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
-  <style>
-    :root{
-      --bg:#0c0f14; --text:#d7d7d7; --grad_a:#00d8d8; --grad_b:#d800d8;
-      --accent:#39FFB6; --ok:#00ffff; --warn:#FFC857; --err:#FF5C8A;
-      --radius:20px; --blur:24px; --shadow:0 8px 32px rgba(0,255,255,.25);
-      --z-ui: 40; --z-overlay: 60; --z-toast: 80;
-      --touch: 48px;
-    }
-    html,body{min-height:100svh;}
-    body{margin:0; font-family:'Montserrat',system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif; color:var(--text); background:#0b0e13 center/cover fixed no-repeat;}
-    .app{min-height:100%;}
-    .ellip{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+<title>HUB DUAL — Compact Family</title>
+<meta name="theme-color" content="#0b0b14">
+<style>
+  /* ——— Base family‑friendly + compact ——— */
+  :root{
+    --grad-a:#b7b5ff; /* tons mais suaves */
+    --grad-b:#8be5ff;
+    --fg:#10131a;      /* texto mais escuro para acessibilidade */
+    --mut:rgba(16,19,26,.6);
+    --surface:rgba(255,255,255,.75);
+    --surface-strong:rgba(255,255,255,.92);
+    --bd:1px solid rgba(16,19,26,.08);
+    --r:14px; --r-lg:16px;
+    --shadow:0 6px 18px rgba(16,19,26,.12);
+    --tabsH:64px;
+    --acc:#5e74ff; --acc2:#47d1ff;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; color:var(--fg);
+    background:linear-gradient(38deg,var(--grad-a),var(--grad-b)) fixed;
+    font:14px/1.35 "Inter", "SF Pro Rounded", system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    overflow:hidden;
+  }
+  /* Header compacto */
+  header.mast{position:fixed;z-index:100;top:env(safe-area-inset-top,0);left:0;right:0;height:64px;display:flex;align-items:center;gap:10px;padding:0 12px;backdrop-filter:blur(14px) saturate(130%)}
+  .icon-btn{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--surface);border:var(--bd);box-shadow:var(--shadow);color:var(--fg);cursor:pointer}
+  .icon-btn:active{transform:scale(.97)}
+  .title-block{flex:1;text-align:center;line-height:1}
+  .title-block h1{margin:0;font-size:18px;font-weight:900;letter-spacing:.04em}
+  .title-block small{display:block;font-size:10px;color:var(--mut);letter-spacing:.08em}
 
-    /* Glow base */
-    .gradient{background:linear-gradient(135deg,var(--grad_a),var(--grad_b));}
-    .glass{backdrop-filter: blur(var(--blur)); background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); box-shadow:var(--shadow); border-radius:var(--radius);}    
-    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px; padding:10px; border-radius:16px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.06); cursor:pointer; user-select:none; transition:transform .15s ease, background .2s ease, opacity .2s ease; min-width:var(--touch); min-height:var(--touch)}
-    .btn:active{transform:scale(.98)}
-    .btn.icon{padding:10px; width:var(--touch); height:var(--touch)}
-    .btn[aria-pressed="true"], .btn.primary{background:linear-gradient(135deg, rgba(0,216,216,.25), rgba(216,0,216,.25));}
-    .pill{font-size:11px; padding:4px 8px; border-radius:50px; border:1px solid rgba(255,255,255,.12)}
+  /* Brain dropdown clean */
+  .brain-wrap{position:relative}
+  .brain-menu{position:absolute;top:calc(100% + 4px);right:0;width:min(92vw,320px);padding:8px;background:var(--surface-strong);border:var(--bd);border-radius:var(--r-lg);box-shadow:var(--shadow);display:none;z-index:101}
+  .brain-menu.open{display:block}
+  .brain-menu h3{margin:2px 6px 6px;font-size:13px;font-weight:800;letter-spacing:.04em}
+  .b-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+  .b-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;background:rgba(16,19,26,.04);border:var(--bd);cursor:pointer}
+  .b-item:hover{background:rgba(16,19,26,.07)}
+  .b-item svg{width:18px;height:18px}
+  .b-item span{flex:1;font-weight:700;font-size:13px}
+  .b-item small{font-size:11px;color:var(--mut)}
 
-    /* Topbar — compacto no mobile */
-    .topbar{position:sticky; top: env(safe-area-inset-top,0); z-index:var(--z-ui); display:flex; align-items:center; gap:8px; padding:10px 12px; border-radius:0 0 var(--radius) var(--radius)}
-    .title{font-weight:800; letter-spacing:.3px; font-size:14px}
-    .spacer{flex:1}
+  /* Main */
+  main{position:relative;height:100%;padding-top:calc(64px + env(safe-area-inset-top));padding-bottom:calc(var(--tabsH) + 8px + env(safe-area-inset-bottom));overflow:auto}
+  .view{padding:10px 12px}
 
-    /* Sidebar mobile-first: off-canvas por padrão */
-    .sidebar{position:fixed; inset:0 auto 0 0; width:min(88vw,320px); padding:12px; overflow:auto; z-index:var(--z-ui); transform:translateX(-104%); transition:transform .25s ease;}
-    .sidebar.show{transform:translateX(0)}
-    .sidebar .section{margin:12px 0;}
-    .sidebar h3{margin:0 0 8px 0; font-size:12px; text-transform:uppercase; opacity:.85; letter-spacing:.08em}
+  /* Cards compactos */
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media (max-width:520px){.cards{grid-template-columns:1fr}}
+  .card{background:var(--surface);border:var(--bd);border-radius:var(--r);box-shadow:var(--shadow);padding:10px;min-height:72px;display:flex;gap:8px;align-items:center}
+  .ico{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;background:#fff;border:1px solid rgba(16,19,26,.08);color:#495266}
+  .muted{color:var(--mut);font-size:12px}
+  .btn{appearance:none;border:1px solid rgba(16,19,26,.12);border-radius:10px;background:#ffffff;box-shadow:var(--shadow);color:var(--fg);font-weight:800;padding:.5rem .7rem;cursor:pointer}
+  .btn.prime{background:linear-gradient(90deg,var(--acc),var(--acc2));color:#0b0b14;border-color:transparent}
+  .pill{font-size:10px;color:#4f65ff;letter-spacing:.04em}
+  .input,textarea,select{width:100%;background:#fff;color:var(--fg);border:1px solid rgba(16,19,26,.12);border-radius:10px;padding:8px}
 
-    /* Drawer de propriedades (direita) */
-    .drawer{position:fixed; inset:0 0 0 auto; width:min(90vw,360px); padding:14px; overflow:auto; z-index:70; transform:translateX(104%); transition:transform .25s ease;}
-    .drawer.show{transform:translateX(0)}
+  /* Apps list */
+  .apps-list .card .title{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .apps-list .card .row{display:flex;gap:6px;flex-wrap:wrap}
 
-    /* Grid de arquivos enxuto */
-    .grid{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px}
-    .card{padding:10px; border-radius:14px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.04); display:flex; flex-direction:column; gap:8px}
-    .thumb{aspect-ratio:16/10; border-radius:10px; border:1px dashed rgba(255,255,255,.15); display:grid; place-items:center; font-size:11px; opacity:.85}
-    .row{display:flex; gap:8px; align-items:center}
-    .stack{display:flex; flex-direction:column; gap:10px}
+  /* Stack (iframe) */
+  .session{background:#ffffff;border:var(--bd);border-radius:12px;box-shadow:var(--shadow);overflow:hidden}
+  .session .hdr{display:flex;align-items:center;gap:6px;padding:8px 8px;background:#f6f8ff;border-bottom:1px solid rgba(16,19,26,.08)}
+  .session .title{font-weight:850;max-width:56vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .session .tools{margin-left:auto;display:flex;gap:4px}
+  .session .tools .btn{width:34px;height:34px;padding:0;border-radius:10px;display:grid;place-items:center;background:#fff}
+  .session iframe{display:block;width:100%;height:58vh;border:0;background:#000}
+  .session.min iframe{display:none}
+  .dock{position:fixed;left:10px;right:10px;bottom:calc(var(--tabsH) + 6px);display:flex;gap:6px;flex-wrap:wrap;z-index:70}
+  .badge{display:inline-flex;gap:6px;align-items:center;padding:.3rem .55rem;border:1px solid rgba(16,19,26,.12);background:#fff;border-radius:999px;font-weight:800}
 
-    /* Overlay (usado por sidebar/drawer/iframe no mobile) */
-    .overlay{position:fixed; inset:0; background:rgba(0,0,0,.55); backdrop-filter: blur(3px); display:none; z-index:30)}
-    .overlay.show{display:block}
+  /* Tabbar compacta */
+  nav.tabbar{position:fixed;left:0;right:0;bottom:env(safe-area-inset-bottom,0);height:var(--tabsH);z-index:100;display:flex;justify-content:center;padding:6px 12px}
+  .tabbar .inner{width:100%;max-width:520px;display:flex;justify-content:space-around;align-items:center;background:var(--surface);border:var(--bd);border-radius:var(--r-lg);box-shadow:var(--shadow);padding:8px}
+  .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--mut);font-size:10px;font-weight:800;padding:6px;border-radius:10px;cursor:pointer}
+  .tab.active{color:var(--fg);background:#fff;box-shadow:0 0 0 2px rgba(16,19,26,.06)}
 
-    /* IFrame viewer */
-    .ifr-wrap{position:fixed; inset:6vh 4vw; border-radius:18px; overflow:hidden; display:none; z-index:var(--z-overlay)}
-    .ifr-wrap.show{display:flex; flex-direction:column}
-    .ifr-head{display:flex; align-items:center; gap:8px; padding:8px}
-    .ifr-body{flex:1; background:#0b0e13}
-    .ifr{width:100%; height:100%; border:0; background:#fff}
-    .badge-reopen{position:fixed; right:16px; bottom:90px; z-index:var(--z-ui)}
-
-    /* FAB (Botão Único) */
-    #btnKOBLLUX{position:fixed; right:16px; bottom:16px; z-index:var(--z-ui)}
-    .fab{width:64px; height:64px; border-radius:50%; border:1px solid rgba(255,255,255,.1); background:linear-gradient(135deg, rgba(0,216,216,.25), rgba(216,0,216,.25)); display:grid; place-items:center}
-    .fab-menu{position:fixed; right:16px; bottom:92px; display:none; flex-direction:column; gap:8px}
-    .fab-menu.show{display:flex}
-
-    /* Hide-UI (foco total em background) */
-    .ui-hidden .sidebar, .ui-hidden .drawer, .ui-hidden .topbar, .ui-hidden .badge-reopen, {display:none !important}
-
-    /* ≥768px: amplia grid e mostra sidebar fixa */
-    @media (min-width: 768px){
-      .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
-      .sidebar{transform:translateX(0)}
-    }
-    @media (min-width: 1024px){
-      .grid{grid-template-columns:repeat(4,minmax(0,1fr))}
-    }
-  </style>
+  /* Helpers */
+  html,body{overflow-x:hidden}
+</style>
 </head>
 <body>
-<div class="app" id="app">
-  <div class="topbar glass">
-    <div class="row" style="gap:10px; align-items:center; width:100%">
-      <button class="btn icon" id="toggleSidebar" title="Menu" data-icon="sidebar"></button>
-      <img id="logoImg" alt="logo" style="height:24px; width:auto; display:none"/>
-      <span class="title ellip">KOBLLUX InfoDose — Glow</span>
-      <span class="pill">v2.4.7</span>
-      <div class="spacer"></div>
-      <button class="btn icon" id="toggleDrawer" title="Marca" data-icon="wand"></button>
-      <button class="btn icon" id="hideUIBtn" title="Foco" data-icon="eye"></button>
+  <header class="mast">
+    <button class="icon-btn" id="btnBack" title="Voltar" aria-label="Voltar">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div class="title-block">
+      <h1>HUB DUAL</h1>
+      <small>UNO · DUAL · TRINITY</small>
     </div>
-  </div>
-
-  <!-- Sidebar -->
-  <aside class="sidebar glass" id="sidebar">
-    <div class="section">
-      <h3>Uploads</h3>
-      <div class="row" style="gap:6px">
-        <label class="btn icon" data-icon="filecode" for="uploadHtml" title="HTML"></label>
-        <input id="uploadHtml" type="file" accept="text/html,.html" />
-        <label class="btn icon" data-icon="video" for="uploadVideo" title="Vídeo"></label>
-        <input id="uploadVideo" type="file" accept="video/*" />
-        <button class="btn icon" data-icon="folderPlus" id="newFolder" title="Pasta"></button>
+    <div class="brain-wrap">
+      <button class="icon-btn" id="btnBrainDrop" aria-haspopup="true" aria-expanded="false" title="Brain">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21a8 8 0 1 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
+      </button>
+      <div class="brain-menu" id="brainMenu">
+        <h3>Brain</h3>
+        <ul class="b-list">
+          <li class="b-item" onclick="openBrain(true)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20v-8"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+            <span>Dual Infodose</span><small>abrir painel</small>
+          </li>
+          <li class="b-item" onclick="setPerf('Low')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v4H3z"/><path d="M3 10h12v4H3z"/><path d="M3 17h6v4H3z"/></svg>
+            <span>Performance</span><small id="perfSmall">Low</small>
+          </li>
+          <li class="b-item" onclick="ttsTest()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a4 4 0 0 1-4 4H7l-4 4V5a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg>
+            <span>TTS Voices</span><small>teste</small>
+          </li>
+          <li class="b-item" onclick="clearLogs()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
+            <span>Logs</span><small>limpar</small>
+          </li>
+          <li class="b-item" onclick="exportBackup()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg>
+            <span>Download</span><small>backup</small>
+          </li>
+        </ul>
       </div>
     </div>
+  </header>
 
-    <div class="section">
-      <h3>Arquivos</h3>
-      <div id="filesGrid" class="grid"></div>
-    </div>
-
-    <div class="section">
-      <h3>Snippets</h3>
-      <div class="stack">
-        <button class="btn icon" id="btnArteASC" title="ArteASC" data-icon="sparkles"></button>
-        <pre id="arteOutput" class="glass" style="padding:10px; margin:0; font-size:12px; overflow:auto"></pre>
+  <main>
+    <!-- HOME -->
+    <section id="view-home" class="view">
+      <div class="cards">
+        <button class="card" data-open="apps">
+          <div class="ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/></svg></div>
+          <div><div style="font-weight:800">Apps</div><div class="muted">Catálogo (apps.json) + Locais</div></div>
+        </button>
+        <button class="card" data-open="stack">
+          <div class="ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l9 4.5-9 4.5L3 6.5 12 2z"/><path d="M3 13l9 4.5 9-4.5"/></svg></div>
+          <div><div style="font-weight:800">Stack</div><div class="muted">Sessões abertas</div></div>
+        </button>
+        <button class="card" data-open="trinity">
+          <div class="ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+          <div><div style="font-weight:800">Trinity</div><div class="muted">Viewer integrado</div></div>
+        </button>
+        <button class="card" data-open="brain">
+          <div class="ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21a8 8 0 1 0-16 0"/><circle cx="12" cy="7" r="4"/></svg></div>
+          <div><div style="font-weight:800">Dual Brain</div><div class="muted">Nome, SK, TTS</div></div>
+        </button>
       </div>
-    </div>
-  </aside>
+    </section>
 
-  <!-- Drawer -->
-  <aside class="drawer glass" id="drawer">
-    <div class="section">
-      <h3>Marca</h3>
-      <div class="stack">
-        <div class="row">
-          <label class="btn icon" data-icon="image" for="uploadLogo" title="Logo"></label>
-          <input id="uploadLogo" type="file" accept="image/*"/>
-          <button class="btn" id="toggleLogo">Logo on/off</button>
+    <!-- APPS -->
+    <section id="view-apps" class="view">
+      <div class="card" style="width:100%">
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;width:100%">
+          <input id="appSearch" class="input" placeholder="Buscar…" style="max-width:320px">
+          <select id="appSort" class="input" style="max-width:120px"><option value="az">A–Z</option><option value="za">Z–A</option></select>
+          <label class="pill"><input id="openInside" type="checkbox" checked> abrir dentro</label>
         </div>
-        <div class="row" style="align-items:center">
-          <label style="width:110px">Tamanho Ícone</label>
-          <input id="iconSize" type="range" min="16" max="40" value="22"/>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px;width:100%">
+          <input id="fileLocal" type="file" accept=".html,.htm,.txt" multiple class="input">
+          <button id="btnImportLocals" class="btn">+ Locais</button>
+          <button id="btnExportLocals" class="btn">Exportar</button>
+          <button id="btnClearLocals"  class="btn">Limpar</button>
+          <div id="appsCount" class="pill" style="margin-left:auto">—</div>
         </div>
-        <div class="row" style="align-items:center">
-          <label style="width:110px">Estilo Ícone</label>
-          <div class="row">
-            <button class="btn pill" data-iconstyle="outline">Outline</button>
-            <button class="btn pill" data-iconstyle="filled">Filled</button>
+      </div>
+      <div id="appsWrap" class="apps-list" style="display:grid;grid-template-columns:1fr;gap:8px"></div>
+    </section>
+
+    <!-- STACK -->
+    <section id="view-stack" class="view">
+      <div id="stackWrap" class="grid" style="display:flex;flex-direction:column;gap:10px"></div>
+    </section>
+
+    <!-- TRINITY -->
+    <section id="view-trinity" class="view">
+      <div class="card" style="display:flex;gap:8px;align-items:center">
+        <div class="ico">◎</div>
+        <div style="flex:1">
+          <div style="font-weight:800">Dual-App acoplado</div>
+          <div class="muted">Abrir qualquer URL dentro do viewer</div>
+          <div style="display:flex;gap:6px;align-items:center;margin-top:6px">
+            <input id="trinityUrl" class="input" placeholder="./index.html ou /app.html">
+            <button id="btnOpenTrinity" class="btn prime">Abrir</button>
           </div>
         </div>
       </div>
-    </div>
+      <div class="card" id="trinityLog" style="font:12px/1.25 ui-monospace,Menlo,Consolas">—</div>
+    </section>
+  </main>
 
-    <div class="section">
-      <h3>Background</h3>
-      <div class="stack">
-        <div class="row">
-          <label class="btn icon" data-icon="image" for="uploadBg" title="Background"></label>
-          <input id="uploadBg" type="file" accept="image/*"/>
-          <button class="btn" id="clearBg">Limpar</button>
-        </div>
-        <div class="grid" id="bgPresets"></div>
-      </div>
-    </div>
+  <div id="dock" class="dock"></div>
 
-    <div class="section">
-      <h3>Temas</h3>
-      <div class="row" style="flex-wrap:wrap; gap:8px" id="themes"></div>
+  <nav class="tabbar">
+    <div class="inner">
+      <button class="tab active" data-nav="home" title="Home"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9"/><path d="M9 21V9h6v12"/></svg><span style="display:none">Home</span></button>
+      <button class="tab" data-nav="apps" title="Apps"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/></svg><span style="display:none">Apps</span></button>
+      <button class="tab" data-nav="stack" title="Stack"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l9 4.5-9 4.5L3 6.5 12 2z"/><path d="M3 13l9 4.5 9-4.5"/></svg><span style="display:none">Stack</span></button>
+      <button class="tab" data-nav="trinity" title="Trinity"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg><span style="display:none">Trinity</span></button>
     </div>
+  </nav>
+
+  <!-- Brain drawer mantém as funções, mas usará o mesmo JS do seu Hub unificado se colar abaixo. Para esta demo, colocamos utilidades mínimas -->
+  <aside id="brain" aria-label="Dual Brain" style="position:fixed;right:0;top:0;bottom:0;width:360px;max-width:92vw;transform:translateX(105%);transition:transform .26s ease;background:var(--surface-strong);border-left:var(--bd);box-shadow:-10px 0 28px rgba(16,19,26,.18);padding:10px;z-index:120;border-top-left-radius:12px;border-bottom-left-radius:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><div style="font-weight:800;letter-spacing:.04em">AETHER • BRAIN</div><button id="brainClose" class="btn">Fechar</button></div>
+    <div class="card" style="display:block"><div class="pill">Usuário</div><div style="display:flex;gap:6px;align-items:center;margin-top:4px"><input id="userName" class="input" placeholder="Seu nome"><button id="saveName" class="btn prime">Salvar</button></div></div>
+    <div class="card" style="display:block"><div class="pill">OpenRouter SK</div><div style="display:flex;gap:6px;align-items:center;margin-top:4px;flex-wrap:wrap"><input id="userSK" class="input" placeholder="sk-or-v1-…"><button id="saveSK" class="btn prime">Salvar</button></div></div>
+    <div class="card" style="display:block"><div class="pill">Logs</div><pre id="log" style="min-height:100px;font:12px/1.25 ui-monospace,Menlo,Consolas"></pre><button id="btnExportBrain" class="btn">Exportar Brain</button></div>
   </aside>
 
-  <!-- Overlay compartilhado -->
-  <div class="overlay" id="overlay"></div>
-
-  <!-- Iframe Modal -->
-  <div class="ifr-wrap glass" id="ifrWrap">
-    <div class="ifr-head row">
-      <button class="btn icon" id="ifrMin" data-icon="min"></button>
-      <button class="btn icon" id="ifrMax" data-icon="max"></button>
-      <button class="btn icon" id="ifrPop" data-icon="popout"></button>
-      <div class="spacer"></div>
-      <button class="btn icon" id="ifrClose" data-icon="close"></button>
-    </div>
-    <div class="ifr-body"><iframe id="viewer" class="ifr" title="viewer"></iframe></div>
-  </div>
-
-  <!-- Reopen badge -->
-  <button class="btn" id="reopenBtn" style="display:none; position:fixed; right:16px; bottom:154px; z-index:var(--z-ui)">Reabrir</button>
-
-  <!-- FAB + menu -->
-  <div id="btnKOBLLUX" class="fab gradient" data-icon="asterisk" data-size="28"></div>
-  <div class="fab-menu" id="fabMenu">
-    <label class="btn icon" data-icon="filecode" for="uploadHtml" title="HTML"></label>
-    <label class="btn icon" data-icon="video" for="uploadVideo" title="Vídeo"></label>
-    <button class="btn icon" data-icon="shuffle" id="quickBg" title="BG Aleatório"></button>
-    <button class="btn icon" data-icon="eye" id="quickHide" title="Ocultar UI"></button>
-  </div>
-</div>
-
 <script>
-/* ===================== ICONS ===================== */
-let ICON_STYLE = 'outline';
-let ICON_SIZE = 22;
-function icon(name, size){
-  const sz = size || ICON_SIZE;
-  const common = `width="${sz}" height="${sz}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"`;
-  const filled = (d)=>`<svg ${common} fill="currentColor" stroke="none"><path d="${d}"/></svg>`;
-  const outline = (d)=>`<svg ${common}><path d="${d}"/></svg>`;
-  const P = {
-    // Prefix each path with 'M' to ensure a valid path command sequence.
-    sidebar: 'M3 3h18M3 9h18M3 15h18',
-    wand: 'M15 4l-3 3 3 3m-3-3h8m-2 2l1 1M3 21l6-6',
-    eye: 'M1 12s5-9 11-9 11 9 11 9-5 9-11 9S1 12 1 12zm11 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6',
-    filecode: 'M14 2H6a2 2 0 0 0-2 2v16l4-4h8a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z',
-    video: 'M23 7l-7 5 7 5V7zM1 5h14v14H1z',
-    folderPlus: 'M3 7h6l2 2h10v10H3z M8 13h4 M10 11v4',
-    sparkles: 'M5 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5z M19 3l1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3z',
-    image: 'M4 4h16v16H4z M6 16l4-5 4 5H6z M14 8a2 2 0 1 0 4 0 2 2 0 0 0-4 0',
-    min: 'M5 19h14',
-    max: 'M5 5h14v14H5z',
-    popout: 'M8 8h8v8M8 16l8-8',
-    close: 'M6 6l12 12M18 6L6 18',
-    asterisk: 'M12 2v20M2 12h20M4.93 4.93l14.14 14.14M19.07 4.93L4.93 19.07',
-    shuffle: 'M16 3h5v5M4 20l5-5M20 8l-7 7-4-4-5 5',
-  };
-  const map = (d)=> ICON_STYLE==='filled' ? filled(d) : outline(d);
-  return map(P[name]||P['asterisk']);
-}
+const $=(q,r=document)=>r.querySelector(q);const $$=(q,r=document)=>Array.from(r.querySelectorAll(q));
+function navTo(key){ $$('.view').forEach(v=>v.style.display='none'); const v=$('#view-'+key); if(v) v.style.display='block'; $$('.tab').forEach(b=>b.classList.toggle('active', b.dataset.nav===key)); }
+$$('[data-nav]').forEach(b=> b.addEventListener('click', ()=> navTo(b.dataset.nav)));
+$$('[data-open]').forEach(c=> c.addEventListener('click', ()=> navTo(c.dataset.open==='brain'?'apps':c.dataset.open)));
 
-// Populate all icon buttons on initial load. This function iterates over
-// elements that define a `data-icon` attribute (e.g. buttons, labels, the
-// floating action button) and inserts the corresponding SVG returned by
-// the `icon()` helper. An optional `data-size` attribute may override
-// the global ICON_SIZE for that element.
-function updateIcons(){
-  document.querySelectorAll('[data-icon]').forEach(el => {
-    const name = el.getAttribute('data-icon') || 'asterisk';
-    const sizeAttr = el.getAttribute('data-size');
-    const size = sizeAttr ? parseInt(sizeAttr, 10) : undefined;
-    el.innerHTML = icon(name, size);
-  });
-}
+// Brain dropdown
+const brainMenu=$('#brainMenu'); $('#btnBrainDrop').onclick=(e)=>{ brainMenu.classList.toggle('open'); e.stopPropagation(); };
+document.addEventListener('click', (e)=>{ if(!brainMenu.contains(e.target)) brainMenu.classList.remove('open'); });
 
-/* ===== ArteASC ===== */
-window.ArteASC={render:(n,v={})=>({ portal369:`╔═══🌌═══╗\n ✪ (°ロ°)☝\n 🧭 ${v.tri||'KOBLLUX'}`, seal_trinity_v2:`⟐ Trinity v2\n⚡ Pulso:${v.pulso||'∞'}`}[n]||'[ArteASC]')};
+// Drawer
+function openBrain(on){ $('#brain').style.transform= on? 'translateX(0)': 'translateX(105%)'; }
+$('#brainClose').onclick=()=> openBrain(false);
 
-/* ===== IndexedDB (persistência real de uploads) ===== */
-const DB_NAME='kobllux_glow_db';
-const STORE='files';
-let db;
-function idbOpen(){return new Promise((res,rej)=>{const req=indexedDB.open(DB_NAME,1); req.onupgradeneeded=()=>{const d=req.result; if(!d.objectStoreNames.contains(STORE)){ d.createObjectStore(STORE,{keyPath:'id'});} }; req.onsuccess=()=>{db=req.result; res(db)}; req.onerror=()=>rej(req.error);});}
-function idbPut(file){return new Promise((res,rej)=>{const tx=db.transaction(STORE,'readwrite'); tx.objectStore(STORE).put(file); tx.oncomplete=()=>res(); tx.onerror=()=>rej(tx.error)});}
-function idbAll(){return new Promise((res,rej)=>{const tx=db.transaction(STORE,'readonly'); const req=tx.objectStore(STORE).getAll(); req.onsuccess=()=>res(req.result||[]); req.onerror=()=>rej(req.error)});} 
-function idbDelete(id){return new Promise((res,rej)=>{const tx=db.transaction(STORE,'readwrite'); tx.objectStore(STORE).delete(id); tx.oncomplete=()=>res(); tx.onerror=()=>rej(tx.error)});} 
+// Perf/TTS demo
+function setPerf(p){ $('#perfSmall') && ($('#perfSmall').textContent=p); log('Perf='+p); }
+function ttsTest(){ try{ if(!('speechSynthesis' in window)) return; const u=new SpeechSynthesisUtterance('Teste de voz'); u.lang='pt-BR'; speechSynthesis.cancel(); speechSynthesis.speak(u);}catch{} }
 
-/* ===== Estado ===== */
-const state = { files: [] };
-const $ = (q,root=document)=>root.querySelector(q);
-const $$ = (q,root=document)=>Array.from(root.querySelectorAll(q));
-function uid(){return 'f_'+Math.random().toString(36).slice(2)}
-function humanSize(bytes){ if(bytes==null) return ''; const s=['B','KB','MB','GB']; let i=0; while(bytes>=1024&&i<s.length-1){bytes/=1024;i++} return bytes.toFixed(1)+s[i] }
+// Logs/backup demo
+function log(m){ const box=$('#log'); if(!box) return; box.textContent=(new Date().toLocaleTimeString()+" • "+m+"\n")+box.textContent }
+function exportBackup(){ const data={ when:Date.now(), storage:Object.assign({},localStorage) }; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='dual.backup.json'; a.click(); }
 
-/* ===== UI: toggles, overlay compartilhado ===== */
-const overlay = $('#overlay');
-const sidebar = $('#sidebar');
-const drawer = $('#drawer');
-$('#toggleSidebar').onclick=()=>{ sidebar.classList.toggle('show'); overlay.classList.toggle('show', sidebar.classList.contains('show')); }
-$('#toggleDrawer').onclick=()=>{ drawer.classList.toggle('show'); overlay.classList.toggle('show', drawer.classList.contains('show')); }
-$('#hideUIBtn').onclick=()=> document.body.classList.toggle('ui-hidden');
-$('#quickHide').onclick=()=> document.body.classList.toggle('ui-hidden');
-$('#btnKOBLLUX').onclick=()=> $('#fabMenu').classList.toggle('show');
-overlay.onclick=()=>{ sidebar.classList.remove('show'); drawer.classList.remove('show'); overlay.classList.remove('show'); closeOverlay(); };
-window.addEventListener('keydown', (e)=>{ if(e.key==='Escape'){ sidebar.classList.remove('show'); drawer.classList.remove('show'); overlay.classList.remove('show'); closeOverlay(); $('#fabMenu').classList.remove('show'); }});
+// Apps (mínimo para listar locais)
+const RAW={apps:[]}; function renderApps(list){ const wrap=$('#appsWrap'); wrap.innerHTML=''; const q=($('#appSearch')?.value||'').toLowerCase(); let L=(list||[]); if(q) L=L.filter(a=> (a.title||'').toLowerCase().includes(q)); L.forEach(a=>{ const el=document.createElement('div'); el.className='card'; el.innerHTML='<div class="ico">🧩</div><div><div class="title" style="font-weight:800">'+(a.title||'App')+'</div><div class="muted">'+(a.desc||'')+'</div><div style="margin-top:6px"><button class="btn">Abrir</button></div></div>'; wrap.appendChild(el); }); $('#appsCount').textContent=L.length+' apps'; }
+renderApps(RAW.apps);
 
-/* ===== IFrame Viewer ===== */
-const ifrWrap = $('#ifrWrap');
-const viewer = $('#viewer');
-function openIframe(url){ overlay.classList.add('show'); ifrWrap.classList.add('show'); viewer.src=url; $('#reopenBtn').style.display='none'; }
-function closeOverlay(){ ifrWrap.classList.remove('show'); if(viewer.src) viewer.src='about:blank'; $('#reopenBtn').style.display='block'; }
-$('#reopenBtn').onclick=()=>{ overlay.classList.add('show'); ifrWrap.classList.add('show'); $('#reopenBtn').style.display='none'; };
-$('#ifrClose').onclick=()=>{ closeOverlay(); overlay.classList.remove('show'); };
-$('#ifrMin').onclick=()=>{ ifrWrap.style.inset='auto 12px 12px 12px'; ifrWrap.style.width='auto'; ifrWrap.style.height='280px'; };
-$('#ifrMax').onclick=()=>{ ifrWrap.style.inset='6vh 4vw'; ifrWrap.style.width=''; ifrWrap.style.height=''; };
-$('#ifrPop').onclick=()=>{ if(viewer.src && viewer.src!=='about:blank') window.open(viewer.src,'_blank'); };
+// Stack minimal
+const stackWrap=$('#stackWrap'); const dock=$('#dock'); function updateDock(){ dock.innerHTML=''; $$('.session').forEach(s=>{ const meta=JSON.parse(s.dataset.meta||'{}'); const b=document.createElement('button'); b.className='badge'; b.textContent=meta.title||'App'; b.onclick=()=>{ s.classList.remove('min'); s.scrollIntoView({behavior:'smooth'}); }; dock.appendChild(b); }); }
+function openApp(a){ const sid='s_'+Math.random().toString(36).slice(2); const url=a.url||'about:blank'; const card=document.createElement('div'); card.className='session'; card.dataset.sid=sid; card.dataset.meta=JSON.stringify({title:a.title||'App', url:a.url||''}); card.innerHTML=`<div class="hdr"><div class="title">${a.title||'App'}</div><div class="tools"><button class="btn" data-act="min" title="Minimizar">—</button><button class="btn" data-act="ref" title="Recarregar">↻</button><button class="btn" data-act="close" title="Fechar">✕</button></div></div><iframe src="${url}"></iframe>`; stackWrap.prepend(card); card.querySelector('[data-act=min]').onclick=()=>{ card.classList.toggle('min'); updateDock(); }; card.querySelector('[data-act=ref]').onclick=()=>{ const fr=card.querySelector('iframe'); try{ fr.contentWindow.location.reload(); }catch{ fr.src=fr.src; } }; card.querySelector('[data-act=close]').onclick=()=>{ card.remove(); updateDock(); }; navTo('stack'); updateDock(); }
 
-/* ===== Uploads ===== */
-$('#uploadHtml').addEventListener('change', async (e)=>{
-  const file = e.target.files[0]; if(!file) return; const text = await file.text();
-  const id = uid(); const blob = new Blob([text], {type:'text/html'}); const url = URL.createObjectURL(blob);
-  const item = {id, type:'html', name:file.name, url, size:file.size, updated:Date.now()};
-  await idbPut(item); await refreshFiles(); e.target.value='';
-});
-$('#uploadVideo').addEventListener('change', async (e)=>{
-  const file = e.target.files[0]; if(!file) return; const url = URL.createObjectURL(file);
-  const id = uid(); const item = {id, type:'video', name:file.name, url, size:file.size, updated:Date.now()};
-  await idbPut(item); await refreshFiles(); e.target.value='';
-});
-$('#newFolder').onclick=async()=>{ const name = prompt('Nome da pasta:','Nova Pasta'); if(!name) return; const id=uid(); const item={id,type:'folder',name,updated:Date.now()}; await idbPut(item); await refreshFiles(); };
-
-async function refreshFiles(){
-  state.files = (await idbAll()).sort((a,b)=> (b.updated||0)-(a.updated||0));
-  const grid = $('#filesGrid'); grid.innerHTML='';
-  for(const f of state.files){ grid.appendChild(renderFileCard(f)); }
-}
-
-function renderFileCard(f){
-  const el = document.createElement('div'); el.className='card';
-  const thumb = document.createElement('div'); thumb.className='thumb'; thumb.innerHTML = `<span>${f.type.toUpperCase()}</span>`;
-  const name = document.createElement('div'); name.className='ellip'; name.textContent = f.name;
-  const meta = document.createElement('div'); meta.style.fontSize='11px'; meta.style.opacity='.75'; meta.textContent = (f.size? humanSize(f.size)+' · ': '') + new Date(f.updated||Date.now()).toLocaleString();
-  const row = document.createElement('div'); row.className='row';
-  const openBtn = document.createElement('button'); openBtn.className='btn icon'; openBtn.title='Abrir'; openBtn.setAttribute('data-icon','popout'); openBtn.innerHTML=icon('popout');
-  const delBtn = document.createElement('button'); delBtn.className='btn icon'; delBtn.title='Excluir'; delBtn.setAttribute('data-icon','close'); delBtn.innerHTML=icon('close');
-  openBtn.onclick=()=>{
-    if(f.type==='html'){ openIframe(f.url); }
-    else if(f.type==='video'){
-      const html = `<video src="${f.url}" style="width:100%;height:100%" controls autoplay playsinline></video>`;
-      const blob = new Blob([`<html><meta name='viewport' content='width=device-width,initial-scale=1'><meta charset='utf-8'><body style='margin:0;background:#000'>${html}</body></html>`],{type:'text/html'});
-      const url = URL.createObjectURL(blob); openIframe(url);
-    }
-  }
-  delBtn.onclick=async()=>{ if(confirm('Excluir?')){ await idbDelete(f.id); await refreshFiles(); } }
-  row.append(openBtn, delBtn);
-  el.append(thumb, name, meta, row);
-  return el;
-}
-
-/* ===== Branding ===== */
-$('#uploadLogo').addEventListener('change', (e)=>{ const f=e.target.files[0]; if(!f) return; const url=URL.createObjectURL(f); const img=$('#logoImg'); img.src=url; img.style.display='block'; });
-$('#toggleLogo').onclick=()=>{ const img=$('#logoImg'); img.style.display = (img.style.display==='none')?'block':'none'; }
-
-/* ===== Backgrounds ===== */
-const PRESETS = [
-  'https://images.unsplash.com/photo-1527443154391-507e9dc6c5cc?q=80&w=1200&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1200&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1520975922203-bc2f1e8e7b1f?q=80&w=1200&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?q=80&w=1200&auto=format&fit=crop'
-];
-function loadBg(url){ document.body.style.backgroundImage = `url(${url})`; }
-$('#uploadBg').addEventListener('change', (e)=>{ const f=e.target.files[0]; if(!f) return; const url=URL.createObjectURL(f); loadBg(url)});
-$('#clearBg').onclick=()=>{ document.body.style.backgroundImage='none' }
-$('#quickBg').onclick=()=>{ const url = PRESETS[Math.floor(Math.random()*PRESETS.length)]; loadBg(url); }
-
-const bgPresets = $('#bgPresets'); PRESETS.forEach(u=>{ const c=document.createElement('button'); c.className='card'; c.style.padding='6px'; c.innerHTML=`<div class='thumb' style="background:url('${u}') center/cover; border:none"></div>`; c.onclick=()=>loadBg(u); bgPresets.appendChild(c)})
-
-/* ===== Temas ===== */
-const THEMES = ['nebula','matrix','cyberpunk','tesseract','turbo'];
-const themesRow = $('#themes');
-THEMES.forEach(t=>{ const b=document.createElement('button'); b.className='btn pill'; b.textContent=t; b.onclick=()=>document.documentElement.setAttribute('data-theme',t); themesRow.appendChild(b)})
-
-/* ===== Ícones dinâmicos ===== */
-$('#iconSize').addEventListener('input', (e)=>{
-  ICON_SIZE = +e.target.value;
-  // Re‑render all icons when the slider changes the global size
-  updateIcons();
-});
-$$('[data-iconstyle]').forEach(b=> b.onclick=()=>{
-  ICON_STYLE = b.dataset.iconstyle;
-  // Re‑render all icons when the style changes (filled vs outline)
-  updateIcons();
-});
-
-/* ===== ArteASC btn ===== */
-$('#btnArteASC').onclick=()=>{ const out=window.ArteASC.render('portal369',{tri:'KOBLLUX'}); $('#arteOutput').textContent=out; };
-
-/* ===== Boot ===== */
-(async function(){
-  await idbOpen(); await refreshFiles();
-})();
-
-  // After the boot sequence, populate icons on the page. Without this call
-  // the template literal markers (e.g. ${icon('sidebar')}) would remain
-  // empty, because the HTML is static and the icons are inserted at runtime.
-  updateIcons();
-
-/* ===== Service Worker registration ===== */
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('pwa/sw.js')
-      .then(reg => console.log('ServiceWorker registered with scope:', reg.scope))
-      .catch(err => console.error('ServiceWorker registration failed:', err));
-  });
-}
+$('#btnBack').onclick=()=>{ try{ history.back(); }catch{} };
+// Boot
+navTo('home');
 </script>
 </body>
 </html>
