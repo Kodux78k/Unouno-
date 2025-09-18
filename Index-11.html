@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="nebula">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no"/>
+<title>HUB • Html Único (Glow)</title>
+<meta name="theme-color" content="#0b0f14"/>
+<style>
+  :root{
+    --grad-a:#ff52e5; --grad-b:#00c5e5;
+    --fg:#eaf0ff; --mut:rgba(234,240,255,.7);
+    --glass:#0f1428b3; --glass2:#121a33; --bd:1px solid #ffffff22;
+    --r:20px; --blur:18px; --shadow:0 18px 48px rgba(0,0,0,.45);
+  }
+  *{box-sizing:border-box} html,body{height:100%}
+  body{
+    margin:0; color:var(--fg);
+    background: radial-gradient(1200px 900px at 80% 10%, #222b54 0%, #0b0f14 55%) fixed;
+    font:500 15px/1.45 "Montserrat",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  }
+  /* phone card */
+  .wrap{min-height:100%; display:grid; place-items:center; padding:20px}
+  .phone{
+    width:min(420px,95vw); height:min(780px,86vh);
+    background:linear-gradient(180deg,#1b2844,#23224c);
+    border-radius:28px; border:2px solid #12192a; box-shadow:var(--shadow);
+    position:relative; overflow:hidden;
+  }
+  .phone::after{content:""; position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(120deg,#ffffff22 0%,#ffffff07 40%,transparent 60%);
+    mix-blend-mode:overlay}
+  header{
+    position:absolute; inset:0 0 auto 0; height:68px; display:flex; align-items:center; gap:10px;
+    padding:0 12px; backdrop-filter:blur(var(--blur)) saturate(130%); z-index:5;
+  }
+  .ib{width:40px;height:40px;border-radius:50%; display:grid; place-items:center;
+    background:#121a33; border:var(--bd); color:var(--fg); cursor:pointer}
+  .title{flex:1; text-align:center; line-height:1}
+  .title h1{margin:0; font-weight:900; letter-spacing:.08em; font-size:19px}
+  .title small{display:block; color:var(--mut); letter-spacing:.12em}
+  .screen{position:absolute; inset:68px 0 0 0; padding:14px; overflow:auto}
+  .card{background:var(--glass); border:var(--bd); border-radius:var(--r); padding:14px; box-shadow:var(--shadow)}
+  .grid{display:grid; gap:12px}
+  .cards{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px}
+  @media (max-width:520px){.cards{grid-template-columns:1fr}}
+  .tile{display:flex; gap:10px; align-items:center; padding:12px; border-radius:16px; background:#141b34;border:var(--bd)}
+  .mut{color:var(--mut); font-size:12px}
+  .btn{appearance:none;border:var(--bd);border-radius:12px;background:linear-gradient(180deg,#11162a,#0b1122);color:var(--fg);font-weight:800;padding:.55rem .85rem;cursor:pointer}
+  .btn.prime{background:linear-gradient(90deg,#a66fff,#6db4ff); color:#0b0f14; border-color:transparent}
+
+  /* FAB + menu */
+  .fab{
+    position:absolute; right:16px; bottom:16px; width:60px; height:60px; z-index:6;
+    border-radius:999px; display:grid; place-items:center; color:#fff; font-size:30px;
+    background:linear-gradient(160deg,var(--grad-a),var(--grad-b)); border:1px solid #ffffff22;
+    box-shadow:0 16px 34px rgba(0,0,0,.35), 0 8px 18px rgba(0,0,0,.35); cursor:pointer; user-select:none;
+  }
+  .fab .pulse{position:absolute; inset:-7px; border-radius:inherit; pointer-events:none;
+    box-shadow:0 0 0 0 rgba(123,44,255,.45); animation:pulse 2s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(123,44,255,.45)}70%{box-shadow:0 0 0 26px rgba(123,44,255,0)}100%{box-shadow:0 0 0 0 rgba(123,44,255,0)}}
+  .fab-menu{
+    position:absolute; right:16px; bottom:86px; display:flex; flex-direction:column; gap:10px; z-index:7;
+    opacity:0; transform:translateY(10px); pointer-events:none; transition:opacity .22s, transform .22s;
+  }
+  .fab-menu.open{opacity:1; transform:translateY(0); pointer-events:auto}
+  .chip{min-width:190px; max-width:260px; display:flex; align-items:center; gap:10px; padding:12px 14px;
+    border-radius:14px; color:#e8ecff; background:#141b34; border:var(--bd); box-shadow:var(--shadow); backdrop-filter:blur(var(--blur)); cursor:pointer}
+  .chip .dot{width:9px; height:9px; border-radius:50%; background:var(--grad-b); box-shadow:0 0 12px var(--grad-b)}
+  .chip .ellip{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-inline-size:20ch}
+  .fab-backdrop{position:absolute; inset:0; display:none; z-index:5}
+  .fab-backdrop.show{display:block}
+
+  /* Overlay/iFrame */
+  .overlay{position:fixed; inset:0; display:none; place-items:center; background:#0008; z-index:1000}
+  .overlay.show{display:grid; animation:fade .25s}
+  @keyframes fade{from{opacity:0} to{opacity:1}}
+  .ifr-wrap{
+    width:min(960px,92vw); height:min(640px,80vh); border-radius:20px; overflow:hidden;
+    background:linear-gradient(180deg,#0f1425,#0b0f1a); border:1px solid #ffffff1f; box-shadow:0 28px 80px #000c;
+    position:relative; display:flex; flex-direction:column;
+  }
+  .ifr-title{display:flex; align-items:center; gap:10px; padding:10px 12px; background:linear-gradient(180deg,#131b2f,#0f1528); border-bottom:1px solid #ffffff1a}
+  .title-dot{width:8px; height:8px; border-radius:50%; background:#7b2cff}
+  .ttext{font-weight:700; font-size:.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .ttools{margin-left:auto; display:flex; gap:8px}
+  .ctrl{width:34px; height:34px; display:grid; place-items:center; border-radius:10px; cursor:pointer;
+    background:linear-gradient(160deg,#262b42,#1d2238); border:1px solid #ffffff1a; color:#e3e7ff}
+  iframe{flex:1; border:0; background:#0a0f1b}
+  .badge-reopen{position:fixed; right:16px; bottom:98px; display:none; z-index:1001;
+    background:#2f3552; padding:10px 12px; border-radius:14px; border:1px solid #ffffff22; color:#dfe6ff; font-size:.9rem; box-shadow:var(--shadow); cursor:pointer}
+
+  /* theme swap */
+  html{transition:filter .6s ease} html.blur{filter:blur(20px)} html.blur.on{filter:blur(0)}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="phone" id="phone">
+      <header>
+        <button class="ib" title="Voltar" aria-label="Voltar" onclick="history.length>1&&history.back()">⟵</button>
+        <div class="title"><h1>HUB UNO</h1><small>Html Único • Glow</small></div>
+        <button class="ib" id="btnTheme" title="Tema">🎨</button>
+      </header>
+
+      <div class="screen">
+        <div class="grid">
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+              <div>
+                <div style="font-weight:900;letter-spacing:.08em">UNO • foco e velocidade</div>
+                <div class="mut">Botão Único + iFrame Overlay + Upload local</div>
+              </div>
+              <button class="btn prime" onclick="actions.trinity()">TRINITY</button>
+            </div>
+          </div>
+          <div class="cards">
+            <div class="tile"><div>🗂</div><div><div style="font-weight:800">Locais</div><div class="mut">Importe HTML e abra no viewer</div></div></div>
+            <div class="tile"><input id="fileLocal" type="file" accept=".html,.htm,.txt" multiple class="btn" style="width:100%"/></div>
+          </div>
+          <div class="card" id="localsWrap"><div class="mut">Nenhum arquivo local importado ainda.</div></div>
+        </div>
+      </div>
+
+      <!-- FAB -->
+      <button id="btnKOBLLUX" class="fab" aria-haspopup="true" aria-expanded="false" title="Ações">
+        <span>+</span><span class="pulse" aria-hidden="true"></span>
+      </button>
+      <div id="fabBackdrop" class="fab-backdrop" aria-hidden="true"></div>
+      <div id="fabMenu" class="fab-menu" role="menu" aria-label="Menu Principal">
+        <div class="chip" data-act="uno"><span class="dot"></span><span class="ellip">UNO</span></div>
+        <div class="chip" data-act="dual"><span class="dot"></span><span class="ellip">DUAL</span></div>
+        <div class="chip" data-act="trinity"><span class="dot"></span><span class="ellip">TRINITY</span></div>
+        <div class="chip" data-act="quickUpload"><span class="dot"></span><span class="ellip">Upload Rápido (HTML)</span></div>
+        <div class="chip" data-act="toggleTheme"><span class="dot"></span><span class="ellip">Trocar Tema</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Overlay & iFrame -->
+  <div class="overlay" id="overlay" aria-hidden="true">
+    <div class="ifr-wrap" role="dialog" aria-modal="true" aria-labelledby="dlgTitle">
+      <div class="ifr-title">
+        <span class="title-dot"></span>
+        <div class="ttext" id="dlgTitle">Preview</div>
+        <div class="ttools">
+          <button class="ctrl" id="btnMin" title="Minimizar">—</button>
+          <button class="ctrl" id="btnMax" title="Maximizar">▢</button>
+          <button class="ctrl" id="btnPop" title="Popout">↗</button>
+          <button class="ctrl" id="btnClose" title="Fechar">✕</button>
+        </div>
+      </div>
+      <iframe id="preview"></iframe>
+    </div>
+  </div>
+  <button class="badge-reopen" id="reopen">Reabrir Preview</button>
+
+<script>
+/* ===== ArteASC simples ===== */
+window.ArteASC={render:(n,v={})=>({portal369:`╔═══🌌═══╗\\n ✪ (°ロ°)☝\\n 🧭 ${v.tri||'TRI'} | ${v.hz||432}hz`,
+  seal_trinity_v2:`⟐ Trinity v2\\n⚡ Pulso:${v.pulso||'ON'}`}[n]||'[ArteASC]')};
+
+/* ===== Helpers ===== */
+const $=s=>document.querySelector(s), on=(el,ev,fn)=>el.addEventListener(ev,fn);
+
+/* ===== Overlay / iFrame ===== */
+const overlay=$('#overlay'), iframe=$('#preview'), dlgTitle=$('#dlgTitle');
+const btnClose=$('#btnClose'), btnMin=$('#btnMin'), btnMax=$('#btnMax'), btnPop=$('#btnPop'), badge=$('#reopen');
+function openOverlay(title, htmlOrUrl, isUrl=false){
+  dlgTitle.textContent=title||'Preview';
+  if(isUrl){ iframe.src=htmlOrUrl; } else { iframe.removeAttribute('src'); iframe.srcdoc=htmlOrUrl; }
+  overlay.classList.add('show'); overlay.setAttribute('aria-hidden','false');
+}
+function closeOverlay(){ overlay.classList.remove('show'); overlay.setAttribute('aria-hidden','true'); iframe.src='about:blank'; iframe.srcdoc=''; }
+function minimizeOverlay(){ overlay.classList.remove('show'); badge.style.display='block'; }
+function maximizeOverlay(){
+  const wrap=overlay.querySelector('.ifr-wrap');
+  const full=wrap.style.width==='100vw';
+  wrap.style.width=full?'min(960px,92vw)':'100vw';
+  wrap.style.height=full?'min(640px,80vh)':'100vh';
+  wrap.style.borderRadius=full?'20px':'0';
+}
+on(btnClose,'click',closeOverlay); on(btnMin,'click',minimizeOverlay); on(btnMax,'click',maximizeOverlay);
+on(btnPop,'click',()=>{ try{ window.open(iframe.src || URL.createObjectURL(new Blob([iframe.srcdoc||''],{type:'text/html'})),'_blank'); }catch{} });
+on(overlay,'click',e=>{ if(e.target===overlay) closeOverlay(); });
+on(document,'keydown',e=>{ if(e.key==='Escape'){ if(overlay.classList.contains('show')) closeOverlay(); if(fabOpen) fabToggle(false);} });
+on(badge,'click',()=>{ overlay.classList.add('show'); badge.style.display='none'; });
+
+/* ===== Conteúdo básico ===== */
+const htmlMini=(title,body)=>`<!doctype html><html lang='pt-BR'><head>
+<meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>${title}</title>
+<style>
+body{margin:0;background:#0b0f14;color:#e5eaff;font:500 16px/1.5 system-ui,Segoe UI,Roboto,sans-serif;display:grid;place-items:center;height:100vh}
+.card{background:#13172a;border:1px solid #ffffff22;border-radius:16px;padding:26px 22px;box-shadow:0 14px 40px #0008;max-width:640px}
+h1{margin:0 0 8px;font:800 1.2rem/1.25 system-ui;letter-spacing:.04em}
+p{opacity:.9;margin:0;white-space:pre-line}
+</style></head><body><div class="card"><h1>${title}</h1><p>${body}</p></div></body></html>`;
+
+/* ===== Locais (import simples) ===== */
+const localsWrap=$('#localsWrap'), fileLocal=$('#fileLocal');
+function renderLocals(list){ if(!list.length){ localsWrap.innerHTML='<div class="mut">Nenhum arquivo local importado ainda.</div>'; return;}
+  localsWrap.innerHTML=''; list.forEach((x,i)=>{ const b=document.createElement('button'); b.className='btn'; b.textContent='Abrir: '+(x.name||('Local '+(i+1))); b.style.margin='6px'; b.onclick=()=>openOverlay(x.name, x.html, false); localsWrap.appendChild(b); }); }
+on(fileLocal,'change',async()=>{ const fs=[...fileLocal.files]; if(!fs.length) return;
+  const items=await Promise.all(fs.map(f=> new Promise(res=>{ const r=new FileReader(); r.onload=()=>res({name:f.name.replace(/\.(html?|txt)$/i,''),html:String(r.result||'')}); r.readAsText(f)})));
+  renderLocals(items);
+});
+
+/* ===== FAB ===== */
+const fab=$('#btnKOBLLUX'), fabMenu=$('#fabMenu'), fabBackdrop=$('#fabBackdrop'); let fabOpen=false;
+function fabToggle(state){ fabOpen=state ?? !fabOpen; fab.setAttribute('aria-expanded', fabOpen);
+  fabMenu.classList.toggle('open', fabOpen); fabBackdrop.classList.toggle('show', fabOpen); }
+on(fab,'click',()=>fabToggle()); on(fabBackdrop,'click',()=>fabToggle(false));
+document.addEventListener('click',e=>{ const within=e.target.closest('.fab,.fab-menu'); if(!within&&fabOpen) fabToggle(false); }, true);
+
+/* ===== Ações ===== */
+window.actions={
+  uno(){ openOverlay('UNO', htmlMini('UNO', 'Modo UNO ativo.\\n'+ArteASC.render('portal369',{tri:'UNO',hz:528})), false); },
+  dual(){ openOverlay('DUAL', htmlMini('DUAL', 'Modo DUAL ativo.\\n'+ArteASC.render('portal369',{tri:'DUAL',hz:432})), false); },
+  trinity(){ openOverlay('TRINITY', htmlMini('TRINITY', 'Modo TRINITY ativo.\\n'+ArteASC.render('seal_trinity_v2',{pulso:'∞'})), false); },
+  quickUpload(){ fileLocal.click(); },
+  toggleTheme(){
+    const themes=[['#ff52e5','#00c5e5'],['#6a62ff','#7b2cff'],['#00d8d8','#d800d8'],['#6db4ff','#a66fff']];
+    const s=getComputedStyle(document.documentElement), a=s.getPropertyValue('--grad-a').trim(), b=s.getPropertyValue('--grad-b').trim();
+    const idx=themes.findIndex(t=>t[0]===a&&t[1]===b); const next=themes[(idx+1)%themes.length]; const html=document.documentElement;
+    html.classList.add('blur'); html.setAttribute('data-theme','nebula'); html.style.setProperty('--grad-a',next[0]); html.style.setProperty('--grad-b',next[1]);
+    requestAnimationFrame(()=>html.classList.add('on')); setTimeout(()=>html.classList.remove('blur','on'),650);
+  }
+};
+fabMenu.querySelectorAll('.chip').forEach(c=> on(c,'click',()=>{ const act=c.dataset.act; fabToggle(false); actions[act]?.(); }));
+
+/* botão tema do header */
+on($('#btnTheme'),'click',()=>actions.toggleTheme());
+</script>
+</body>
+</html>

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Dual • HUB Unificado (Offline-Ready)</title>
+<meta name="theme-color" content="#0A0B0E"/>
+<style>
+/* ====== Base da página unificada ====== */
+:root{
+  --bg:#0A0B0E; --fg:#EEEFF7; --muted:#B6B9CA; --line:#262835; --card:#12131a;
+  --accent:#B17AFF; --focus:#2E59FF; --c2:#39FFB6; --glass: rgba(255,255,255,.08);
+  --radius:16px; --radius-lg:22px; --shadow:0 18px 60px rgba(0,0,0,.35);
+  --safe-top: env(safe-area-inset-top,0px); --safe-bottom: env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; color:var(--fg); font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Inter,sans-serif;
+  background:
+    radial-gradient(900px 500px at 50% -10%, rgba(177,122,255,.16), transparent),
+    radial-gradient(700px 420px at 65% 120%, rgba(57,255,182,.10), transparent),
+    var(--bg);
+  overflow-x:hidden;
+}
+
+/* ====== App-shell com 4 áreas (HUB, INDEX, DUAL, RENDER) ====== */
+header.appbar{
+  position:sticky; top:0; z-index:10; height:64px;
+  display:flex; align-items:center; gap:10px; padding:0 12px calc(6px + var(--safe-top));
+  border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(0,0,0,.65),rgba(0,0,0,0));
+  backdrop-filter: blur(8px);
+}
+.appbar .brand{display:flex; align-items:center; gap:10px}
+.appbar .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--accent)}
+.appbar h1{margin:0;font-size:15px; color:var(--accent); letter-spacing:.2px}
+.tabs{
+  margin-left:auto; display:flex; gap:6px; flex-wrap:wrap;
+}
+.tab-btn{
+  border:1px solid var(--line); background:rgba(0,0,0,.35); color:var(--fg);
+  padding:8px 10px; border-radius:12px; cursor:pointer; font-weight:600;
+}
+.tab-btn.active{
+  border-color:var(--focus);
+  box-shadow:0 0 0 1px var(--focus) inset, 0 10px 30px rgba(46,89,255,.2);
+}
+
+main{max-width:1200px; margin:0 auto; padding:12px 12px calc(80px + var(--safe-bottom))}
+section.page{display:none; animation:fade .18s ease-out}
+section.page.active{display:block}
+@keyframes fade{from{opacity:0; transform:translateY(4px)} to{opacity:1; transform:none}}
+
+/* ====== BOTÃO DE DOWNLOAD DO PRÓPRIO ARQUIVO ====== */
+.toolbar{
+  position:sticky; top:64px; z-index:9;
+  display:flex; gap:8px; align-items:center;
+  padding:8px 12px; background:linear-gradient(180deg,rgba(0,0,0,.3),rgba(0,0,0,0));
+}
+.btn{
+  border:1px solid var(--line); background:rgba(0,0,0,.35); color:var(--fg);
+  padding:8px 12px; border-radius:12px; cursor:pointer; font-weight:700;
+}
+.btn.primary{
+  border-color:var(--focus);
+  box-shadow:0 0 0 1px var(--focus), 0 0 20px rgba(46,89,255,.16) inset;
+}
+
+/* ====== 1) HUB (inspirado no HUB Dual) ====== */
+.hub-wrap{max-width:520px; margin:0 auto}
+.hub-cards{display:flex; flex-direction:column; gap:12px}
+.card{
+  background: rgba(15,17,32,0.45);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:22px; padding:14px 16px; box-shadow: var(--shadow);
+  display:flex; align-items:center; justify-content:space-between; cursor:pointer;
+}
+.card .left{display:flex; align-items:center; gap:12px}
+.card .name{font-weight:800}
+.card .tag{font-size:12px; color:#cfd3ff90}
+
+/* ====== 2) INDEX (inspirado no INDEX_SUPER) ====== */
+.index .search{display:flex; gap:8px}
+.index input{
+  flex:1; border:1px solid var(--line); background:var(--card); color:var(--fg);
+  padding:10px 12px; border-radius:12px; outline:none;
+}
+.index input:focus{border-color:var(--focus); box-shadow:0 0 0 3px rgba(46,89,255,.15)}
+.grid{display:grid; grid-template-columns:1fr; gap:8px}
+.index .item{
+  display:flex; flex-direction:column; gap:6px; padding:10px; border:1px solid var(--line);
+  border-radius:12px; background:var(--card);
+}
+.index .meta{font-size:12px; color:var(--muted)}
+.index .actions{display:flex; gap:8px; flex-wrap:wrap}
+.index a.btn{text-decoration:none}
+
+/* ====== 3) DUAL (loader + voiceBtn do Dark) ====== */
+.fake-bg{ position:relative; width:100%; height:120px; border-radius:16px;
+  background: radial-gradient(80% 120% at 50% 0%, rgba(255,0,255,.12), rgba(0,0,0,0)),
+              radial-gradient(60% 120% at 50% 120%, rgba(0,255,255,.08), rgba(0,0,0,0));
+  border:1px solid rgba(255,255,255,.06); margin:8px 0 16px;
+}
+#voiceBtn{
+  width:48px;height:48px;border-radius:50%; border:0; cursor:pointer; color:#fff;
+  background:rgba(0,0,0,.22);
+  display:inline-flex; align-items:center; justify-content:center; isolation:isolate;
+  backdrop-filter: blur(10px);
+  box-shadow:0 10px 30px rgba(0,0,0,.45);
+}
+#voiceBtn.active{ box-shadow:0 0 0 2px rgba(177,122,255,.2) inset, 0 12px 40px rgba(177,122,255,.18) }
+.dual-stack{ position:relative; width:22px; height:22px }
+.dual-stack>*{ position:absolute; inset:0; transition:opacity .25s ease }
+.dual-stack>*[data-state="out"]{ opacity:0 } .dual-stack>*[data-state="in"]{ opacity:1 }
+.dual-loader .ring,.dual-loader .dash,.dual-loader .dots,.dual-loader .wave{ position:absolute; inset:0 }
+.dual-loader .ring{
+  background: conic-gradient(from 90deg,#F0F,#0FF); border-radius:50%;
+  -webkit-mask: radial-gradient(farthest-side,transparent calc(50% - 1px),#000 calc(50% - 1px));
+          mask: radial-gradient(farthest-side,transparent calc(50% - 1px),#000 calc(50% - 1px));
+  animation: spin 6s linear infinite
+}
+.dual-loader .dash{
+  left:50%; top:50%; width:62%; height:2px; background:linear-gradient(90deg,#F0F,#0FF);
+  transform:translate(-50%,-50%); border-radius:999px; animation:breathe 2s ease-in-out infinite
+}
+.dual-loader .dots{ transform:rotate(-90deg) }
+.dual-loader .dots i{ --i:0; position:absolute; left:50%; top:50%; width:3px; height:3px; border-radius:50%;
+  background:conic-gradient(#F0F,#0FF);
+  -webkit-mask:radial-gradient(circle,#000 62%,transparent 63%); mask:radial-gradient(circle,#000 62%,transparent 63%);
+  opacity:.8; transform:rotate(calc(var(--i)*51deg)) translate(calc(5px + var(--i)*1.6px)) rotate(calc(var(--i)*-51deg));
+  animation: dotPulse 3.2s linear infinite; animation-delay: calc(var(--i)*.45s)
+}
+@keyframes spin{to{transform:rotate(360deg)}} @keyframes breathe{0%,100%{opacity:.8}50%{opacity:1}}
+@keyframes dotPulse{0%,70%{opacity:.55;transform:scale(.9)}76%,84%{opacity:1;transform:scale(1.1)}100%{opacity:.7;transform:scale(.95)}}
+
+/* ====== 4) RENDER RESPONSE (offline) ====== */
+.rr-wrap{display:grid; grid-template-rows:1fr auto; gap:10px; border:1px solid var(--line);
+  background:var(--card); border-radius:16px; overflow:hidden}
+.rr-feed{padding:14px; display:flex; flex-direction:column; gap:10px; max-height:50vh; overflow:auto}
+.msg{background:#0e1016;border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:12px}
+.msg pre{background:#0b0d12;border:1px solid rgba(255,255,255,.08); padding:10px;border-radius:10px; overflow:auto}
+.msg code{font-family: ui-monospace,Menlo,Consolas,monospace; font-size:12.5px}
+.msg h3{margin:0 0 6px 0;font-size:13px;color:#c9cff5}
+.rr-row{display:flex; gap:8px; padding:10px; border-top:1px solid var(--line); background:rgba(0,0,0,.25)}
+.rr-row input{flex:1; background:#0e1016; border:1px solid rgba(255,255,255,.08); border-radius:10px; padding:10px 12px; color:var(--fg)}
+.rr-row button{border-radius:10px; border:1px solid rgba(255,255,255,.12); background:#0f1016; color:var(--fg);
+  padding:10px 12px; cursor:pointer; font-weight:700}
+
+/* ====== util ====== */
+.pills{display:flex; gap:6px; flex-wrap:wrap}
+.pill{display:inline-block;padding:2px 8px;border:1px solid rgba(255,255,255,.12);border-radius:999px;font-size:11px;color:#cfd3ff;background:rgba(138,99,255,.12)}
+hr.sep{border:0; height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent); margin:10px 0}
+.footer-note{position:fixed; left:0; right:0; bottom:0; padding:10px 12px calc(8px + var(--safe-bottom));
+  font-size:12px; color:#9aa0a6; border-top:1px solid var(--line); background:linear-gradient(0deg,rgba(0,0,0,.6),rgba(0,0,0,0)); backdrop-filter: blur(6px);}
+</style>
+</head>
+<body>
+<header class="appbar">
+  <div class="brand"><span class="dot"></span><h1>Dual • HUB Unificado</h1></div>
+  <nav class="tabs" role="tablist" aria-label="Seções">
+    <button class="tab-btn active" data-tab="hub" role="tab" aria-selected="true">HUB</button>
+    <button class="tab-btn" data-tab="index" role="tab">INDEX</button>
+    <button class="tab-btn" data-tab="dual" role="tab">DUAL</button>
+    <button class="tab-btn" data-tab="render" role="tab">RENDER</button>
+  </nav>
+</header>
+
+<div class="toolbar">
+  <button id="downloadSelf" class="btn primary" title="Baixar este HTML unificado">⬇️ Baixar HTML</button>
+  <div class="pills">
+    <span class="pill">💊 Pronto p/ uso</span>
+    <span class="pill">🧪 Offline Ready</span>
+    <span class="pill">🎛️ Single File</span>
+  </div>
+</div>
+
+<main>
+  <!-- ========== HUB ========== -->
+  <section id="page-hub" class="page active" aria-label="HUB">
+    <div class="hub-wrap">
+      <div class="hub-cards">
+        <article class="card" onclick="switchTab('index')">
+          <div class="left">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/></svg>
+            <span class="name">INDEX</span>
+          </div>
+          <span class="tag">Lista & viewers</span>
+        </article>
+        <article class="card" onclick="switchTab('dual')">
+          <div class="left">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10"/><path d="M7 12h10"/></svg>
+            <span class="name">Dual Loader</span>
+          </div>
+          <span class="tag">Botão & modos</span>
+        </article>
+        <article class="card" onclick="switchTab('render')">
+          <div class="left">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M7 8h10M7 12h6"/></svg>
+            <span class="name">Render Resp.</span>
+          </div>
+          <span class="tag">Mocks offline</span>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== INDEX ========== -->
+  <section id="page-index" class="page index" aria-label="INDEX">
+    <div class="search" style="margin-bottom:8px">
+      <input id="q" placeholder="Filtrar por nome, tipo ou extensão…"/>
+    </div>
+    <div id="list" class="grid"></div>
+  </section>
+
+  <!-- ========== DUAL (voiceBtn + modos) ========== -->
+  <section id="page-dual" class="page" aria-label="DUAL">
+    <div class="fake-bg"></div>
+    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap">
+      <button class="btn" onclick="setVoiceBtnMode('simbio')">SIMBIO</button>
+      <button class="btn" onclick="setVoiceBtnMode('pulso')">PULSO</button>
+      <button class="btn" onclick="setVoiceBtnMode('coblux')">COBLUX</button>
+      <button class="btn" onclick="setVoiceBtnMode('uno')">UNO</button>
+      <button class="btn" onclick="setVoiceBtnActive(true)">ATIVAR</button>
+      <button class="btn" onclick="setVoiceBtnActive(false)">DESATIVAR</button>
+    </div>
+    <div style="margin:12px 0">
+      <button id="voiceBtn" aria-label="Falar"><span class="dual-stack"></span></button>
+    </div>
+    <p class="index meta">Dica: os modos alternam microanimações do loader.</p>
+  </section>
+
+  <!-- ========== RENDER RESPONSE (offline) ========== -->
+  <section id="page-render" class="page" aria-label="RENDER">
+    <div class="rr-wrap">
+      <section id="feed" class="rr-feed" aria-live="polite"></section>
+      <div class="rr-row">
+        <input id="input" placeholder="Digite aqui… ex.: /mock list → Enter" autocomplete="off"/>
+        <button id="send" class="btn">Enviar</button>
+      </div>
+    </div>
+    <div class="pills" style="margin-top:8px">
+      <span class="pill">/offline on</span><span class="pill">/offline off</span>
+      <span class="pill">/mock list</span><span class="pill">/rand</span>
+    </div>
+  </section>
+</main>
+
+<footer class="footer-note">
+  Dual • HUB Unificado — arquivo único · 💾 “⬇️ Baixar HTML” exporta este próprio arquivo.
+</footer>
+
+<script>
+/* ===== Navegação de abas ===== */
+function switchTab(id){
+  document.querySelectorAll('.page').forEach(s=>s.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.tab===id);
+    b.setAttribute('aria-selected', b.dataset.tab===id ? 'true':'false');
+  });
+}
+document.querySelectorAll('.tab-btn').forEach(b=>{
+  b.addEventListener('click', ()=> switchTab(b.dataset.tab));
+});
+
+/* ===== Baixar o próprio HTML ===== */
+document.getElementById('downloadSelf').addEventListener('click', ()=>{
+  try{
+    // Clona o documento para um snapshot limpo
+    const clone = document.documentElement.cloneNode(true);
+    // Evita disparar download recursivo ao abrir
+    const dl = clone.querySelector('#downloadSelf'); if(dl){ dl.textContent='⬇️ Baixar HTML'; }
+    const html = '<!DOCTYPE html>\n' + clone.outerHTML;
+    const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'Dual-HUB-Unificado.html';
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 500);
+  }catch(e){ alert('Falha ao gerar download: '+ e.message); }
+});
+
+/* ===== INDEX: lista fake (pode trocar pelos seus arquivos locais) ===== */
+/* Inspirado no INDEX_SUPER */
+const entries = [
+  {path:'Assistentes_GPT_UPA_Infodose v2.4.5.docx', size_h:'37.0KB', mime:'application/vnd.openxmlformats-officedocument.wordprocessingml.document', viewer:''},
+  {path:'78KFDS - Livro - Teoria & Prática.pdf', size_h:'2.2MB', mime:'application/pdf', viewer:''},
+  {path:'Infodose_Consolidado_Ajustado_v2.4.3.pdf', size_h:'2.6KB', mime:'application/pdf', viewer:''},
+  {path:'Treinamento_Completo_Ativacoes_Doses v2.5.1.docx', size_h:'37.2KB', mime:'application/vnd.openxmlformats-officedocument.wordprocessingml.document', viewer:''}
+];
+const listEl = document.getElementById('list');
+const qEl = document.getElementById('q');
+function renderList(items){
+  listEl.innerHTML='';
+  items.forEach(it=>{
+    const div = document.createElement('div');
+    div.className='item';
+    const h = document.createElement('h3'); h.textContent = it.path; div.appendChild(h);
+    const meta = document.createElement('div'); meta.className='meta'; meta.textContent = (it.mime||'—')+' · '+(it.size_h||'—'); div.appendChild(meta);
+    const acts = document.createElement('div'); acts.className='actions';
+    const aRaw = document.createElement('a'); aRaw.href = it.path; aRaw.className='btn'; aRaw.textContent='Abrir Original'; acts.appendChild(aRaw);
+    div.appendChild(acts);
+    listEl.appendChild(div);
+  });
+}
+function filt(){
+  const q=(qEl.value||'').toLowerCase().trim();
+  const items = !q ? entries : entries.filter(e =>
+     e.path.toLowerCase().includes(q) || (e.mime||'').toLowerCase().includes(q) || e.path.toLowerCase().endsWith(q)
+  );
+  renderList(items);
+}
+qEl && qEl.addEventListener('input',filt);
+renderList(entries);
+
+/* ===== DUAL: loader compacto + modos (do Dual Dark) ===== */
+(function(){
+  const BTN_ID='voiceBtn', MODES=['simbio','pulso','coblux','uno'], CYCLE_MS=12000;
+  function mk(m='simbio'){
+    const el=document.createElement('span'); el.className='dual-loader '+m; el.dataset.state='out'; el.setAttribute('aria-hidden','true');
+    el.innerHTML='<span class="ring"></span><span class="dash"></span><span class="dots"><i style="--i:0"></i><i style="--i:1"></i><i style="--i:2"></i><i style="--i:3"></i><i style="--i:4"></i><i style="--i:5"></i><i style="--i:6"></i></span><span class="wave"></span>';
+    return el;
+  }
+  function ensureStack(btn){ let s=btn.querySelector('.dual-stack'); if(!s){ s=document.createElement('span'); s.className='dual-stack'; btn.innerHTML=''; btn.appendChild(s);} return s; }
+  function crossfadeTo(btn,mode){ const s=ensureStack(btn), next=mk(mode); s.appendChild(next);
+    requestAnimationFrame(()=>{ const cur=s.querySelector('.dual-loader[data-state="in"]'); if(cur) cur.dataset.state='out'; next.dataset.state='in';
+      setTimeout(()=>{ const list=s.querySelectorAll('.dual-loader'); for(let i=0;i<list.length-2;i++) list[i].remove(); }, 360);
+    });
+  }
+  function init(){
+    const btn=document.getElementById(BTN_ID); if(!btn) return;
+    crossfadeTo(btn,'simbio'); btn.dataset.loaderMode='simbio';
+    let idx=0; if(btn._cycleTimer) clearInterval(btn._cycleTimer);
+    btn._cycleTimer=setInterval(()=>{ idx=(idx+1)%MODES.length; crossfadeTo(btn,MODES[idx]); btn.dataset.loaderMode=MODES[idx]; }, CYCLE_MS);
+    window.setVoiceBtnMode = (k)=>{ const MAP={UNO:'uno',SIMBIO:'simbio',PULSO:'pulso',COBLUX:'coblux'}; const m=(MAP[(k||'').toUpperCase()]||'simbio'); crossfadeTo(btn,m); btn.dataset.loaderMode=m; return m; };
+    window.setVoiceBtnActive=(on)=>{ if(on) btn.classList.add('active'); else btn.classList.remove('active'); return btn.classList.contains('active'); };
+  }
+  if(document.readyState!=='loading') init(); else document.addEventListener('DOMContentLoaded', init);
+})();
+
+/* ===== Render Response: mock OFFLINE (inspirado no RR Offline) ===== */
+const conversation=[]; const userName='Dual User'; const assistantBase='Dual.infodose';
+const OFFLINE_KEY='rrOffline'; const MOCK_KEY='rrMockName';
+try{ localStorage.setItem(OFFLINE_KEY,'1'); }catch(e){}
+const TEMPLATES={
+  saudacao:{intro:"Olá, {USER}. Eu sou {ASSISTANT}. Vamos testar seu Render Response.",
+            middle:"Blocos de exemplo para paginação e ritmo. Foque em **1 → 2 → 3**.",
+            ending:"CTA curto: *Rodar outro mock?* [SIM|NÃO|DEPENDE] — {DATE} {TIME}"},
+  pitch:{intro:"Proposta clara em 3 linhas:",
+         middle:"**Problema** — tempo e custo para validar UI/UX.\n**Solução** — Render Response offline.\n**Valor** — testar fluxo e CTA sem token.",
+         ending:"Próximo passo: *ativar pacote piloto* → [AGORA|DEPOIS]"},
+  lista:{intro:"3 ideias curtas:", middle:"• Ritmo visual\n• Hierarquia clara\n• CTA objetivo", ending:"Qual priorizar? [RITMO|HIERARQUIA|CTA]"}
+};
+function nowParts(){const d=new Date(),p=n=>String(n).padStart(2,'0');return{DATE:`${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()}`,TIME:`${p(d.getHours())}:${p(d.getMinutes())}`};}
+function uuid(){return'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0,v=c=='x'?r:(r&0x3|0x8);return v.toString(16);});}
+function lipsum(){return"Fluxo mínimo para validar ritmo e quebra — texto de teste curto.";}
+function picklist(str){return str.replace(/\[([^\]]+)\]/g,(_,ins)=>ins.split('|')[Math.floor(Math.random()*ins.split('|').length)].trim());}
+function fillVars(s,ctx){const base={USER:ctx.userName||'Dual User',ASSISTANT:(ctx.assistantBase||'Dual.infodose'),...nowParts(),UUID:uuid(),LOREM:lipsum()};return picklist(s.replace(/\{([A-Z_]+)\}/g,(_,k)=>base[k]??`{${k}}`));}
+function joinBlocks(o){if(typeof o==='string')return o;return [o.intro,o.middle,o.ending].filter(Boolean).join('\n\n');}
+function mdToHtml(txt){
+  txt = String(txt)
+    .replace(/```([\s\S]*?)```/g,(_,code)=>'<pre><code>'+code.replace(/[&<>]/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[s]))+'</code></pre>')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .replace(/`([^`]+)`/g,'<code>$1</code>')
+    .replace(/(^|\n)\-\s(.+?)(?=\n[^\-]|$)/g,(m,pre,item)=> pre + '• ' + item)
+    .replace(/\n/g,'<br/>');
+  return txt;
+}
+function renderResponse(text){
+  const feed=document.getElementById('feed'); const parts=String(text).split(/\n\n+/);
+  parts.forEach((chunk,i)=>{ const card=document.createElement('article'); card.className='msg';
+    if(parts.length>1){ const h=document.createElement('h3'); h.textContent='Bloco '+(i+1); card.appendChild(h); }
+    const div=document.createElement('div'); div.innerHTML=mdToHtml(chunk); card.appendChild(div); feed.appendChild(card); });
+  feed.scrollTop=feed.scrollHeight;
+}
+function handleCommand(raw){
+  const lc=raw.trim().toLowerCase();
+  if(lc.startsWith('/offline ')){ const on=lc.endsWith('on'); localStorage.setItem(OFFLINE_KEY,on?'1':'0'); return {handled:true, reply:`Modo OFFLINE ${on?'ligado':'desligado'}.`}; }
+  if(lc==='/mock list'){ return {handled:true, reply:"Mocks: "+Object.keys(TEMPLATES).join(', ')}; }
+  if(lc.startsWith('/mock ')){ const name=raw.trim().split(/\s+/)[1]; if(TEMPLATES[name]){ localStorage.setItem(MOCK_KEY,name); return {handled:true, reply:`Mock definido: ${name}`}; } return {handled:true, reply:`Mock desconhecido. Use /mock list`}; }
+  if(lc==='/rand'){ const keys=Object.keys(TEMPLATES); const r=keys[Math.floor(Math.random()*keys.length)]; localStorage.setItem(MOCK_KEY,r); return {handled:true, reply:`Mock aleatório: ${r}`}; }
+  return {handled:false};
+}
+async function callAI(){
+  const lastUser=(conversation||[]).filter(m=>m.role==='user').slice(-1)[0]?.content||'';
+  const cmd=handleCommand(lastUser); if(cmd.handled){ conversation.push({role:'assistant',content:cmd.reply}); renderResponse(cmd.reply); return; }
+  const offline=(localStorage.getItem(OFFLINE_KEY)==='1')||!navigator.onLine;
+  if(offline){ const name=localStorage.getItem(MOCK_KEY)||'saudacao'; const txt=fillVars(joinBlocks(TEMPLATES[name]),{userName,assistantBase}); conversation.push({role:'assistant',content:txt}); renderResponse(txt); return; }
+  const fallback="Online real não configurado aqui. Use OFFLINE para testes.";
+  conversation.push({role:'assistant',content:fallback}); renderResponse(fallback);
+}
+const input=document.getElementById('input'); const send=document.getElementById('send');
+send.addEventListener('click', onSend); input.addEventListener('keydown', e=>{ if(e.key==='Enter') onSend(); });
+function onSend(){ const val=input.value.trim(); if(!val) return; conversation.push({role:'user',content:val}); renderResponse('> '+val); input.value=''; callAI(); }
+renderResponse("Bem-vindo ao modo de teste OFFLINE (⊚). Use /mock list, /rand, /offline on|off.");
+
+</script>
+</body>
+</html>
