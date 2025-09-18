@@ -1,23 +1,13 @@
-<!--
-  Esta é a versão final unificada do HUB UNO e do Hub Revo.
-  Ela se baseia no arquivo “unificado 3.html” (Monólito UNO) e incorpora
-  uma nova aba chamada “Revo”, que carrega o Hub Infodose Ultra em um
-  iframe.  O código do Revo foi copiado para “index-100_revo_mod.html” e
-  levemente modificado para buscar a lista de apps diretamente do
-  elemento <script id="APPS_JSON"> presente nesta página.  Isso
-  assegura que ambos os hubs compartilham o mesmo catálogo de apps sem
-  depender de arquivos externos ausentes.
--->
 <!doctype html>
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
-  <title>HUB UNO — Unified Minimal Glow + Revo</title>
+  <title>HUB UNO — Unified Minimal Glow (v3.4 · Monólito)</title>
   <meta name="theme-color" content="#0b0f14" />
   <style>
     :root {
-      /* Paleta padrão (rosa/azul) */
+      /* Paleta e tokens */
       --grad-a: #ff52e5;
       --grad-b: #00c5e5;
       --fg: #f5f7ff;
@@ -35,24 +25,6 @@
       --hdrH: 64px;
       --blur: 18px;
       --ease: cubic-bezier(.22, .61, .36, 1);
-    }
-
-    /* Tema alternativo: medium gray / glasmorfismo. Quando body[data-theme="medium"] estiver definido, estas variáveis substituem as originais. */
-    body[data-theme="medium"] {
-      /* Ajustamos a paleta “medium” para um visual ainda mais tecnológico,
-         com tons de cinza-escuro/azulado e transparências suaves para
-         reforçar o glasmorfismo. */
-      --grad-a: #2c313c;
-      --grad-b: #1f242d;
-      --fg: #f1f2f5;
-      --mut: rgba(241, 242, 245, .68);
-      --surface: rgba(44, 47, 56, .40);
-      --surface-strong: rgba(44, 47, 56, .75);
-      --bd: 1px solid rgba(255, 255, 255, .06);
-      --ok: #68d391;
-      --warn: #f6ad55;
-      --err: #fc8181;
-      --blur: 24px;
     }
 
     * { box-sizing: border-box }
@@ -114,15 +86,6 @@
     .mut { color: var(--mut); font-size: 12px }
     .input, select, textarea { width: 100%; background: #0f1426; color: var(--fg); border: var(--bd); border-radius: 12px; padding: 10px }
 
-    /* Ajuste para ícones SVG externos: invertê-los para que fiquem claros em temas escuros */
-    header.mast img,
-    .tabbar img,
-    .card .ico img,
-    .session .tools img,
-    .dock img {
-      filter: invert(1) brightness(1.2);
-    }
-
     /* ===== Apps ===== */
     .apps-wrap { display: grid; gap: 12px }
     .app-card { display: flex; gap: 12px; align-items: center; background: var(--surface); border: var(--bd); border-radius: var(--r); padding: 12px }
@@ -149,155 +112,108 @@
     .tab.fx-trans:hover { background: rgba(255,255,255,.06) }
     .tab.active { color: var(--fg); background: rgba(255,255,255,.10); box-shadow: 0 0 0 2px rgba(255,255,255,.10) }
 
-    /* === Área de Arquétipos (central circle) === */
-    .arch-container {
-      display: flex;
-      justify-content: center;
-      margin-top: 24px;
-    }
-    .arch-circle {
-      position: relative;
-      width: min(80vw, 560px);
-      aspect-ratio: 1 / 1;
-      border-radius: 50%;
-      overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: radial-gradient(60% 60% at 50% 50%, rgba(0,255,255,.1), rgba(255,255,255,.02));
-      box-shadow: var(--shadow, 0 14px 40px rgba(0,0,0,.45));
-    }
-    .arch-circle iframe {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      border: 0;
-      background: transparent;
-    }
-    .arch-switcher {
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 6px;
-      align-items: center;
-      background: rgba(15,17,32,.7);
-      border: 1px solid rgba(255,255,255,.12);
-      border-radius: 999px;
-      padding: 6px 10px;
-      backdrop-filter: blur(8px);
-    }
-    .arch-switcher select {
-      appearance: none;
-      background: rgba(255,255,255,.06);
-      color: var(--fg);
-      border: 1px solid rgba(255,255,255,.12);
-      border-radius: 999px;
-      padding: 6px 10px;
-    }
-    .arch-dotlogo {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: conic-gradient(#00c5e5, #ff52e5, #00c5e5);
-      box-shadow: 0 0 18px rgba(0,255,255,.4);
-    }
-    #arch-fadeCover {
-      position: absolute;
-      inset: 0;
-      background: var(--bg, #0b0f14);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity .3s ease;
-    }
-    #arch-fadeCover.show { opacity: 1; }
-
+  /* === Área de Arquétipos (central circle) === */
+  .arch-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 24px;
+  }
+  .arch-circle {
+    position: relative;
+    width: min(80vw, 560px);
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: radial-gradient(60% 60% at 50% 50%, rgba(0,255,255,.1), rgba(255,255,255,.02));
+    box-shadow: var(--shadow, 0 14px 40px rgba(0,0,0,.45));
+  }
+  .arch-circle iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: transparent;
+  }
+  .arch-switcher {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    background: rgba(15,17,32,.7);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 999px;
+    padding: 6px 10px;
+    backdrop-filter: blur(8px);
+  }
+  .arch-switcher select {
+    appearance: none;
+    background: rgba(255,255,255,.06);
+    color: var(--fg);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 999px;
+    padding: 6px 10px;
+  }
+  .arch-dotlogo {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: conic-gradient(#00c5e5, #ff52e5, #00c5e5);
+    box-shadow: 0 0 18px rgba(0,255,255,.4);
+  }
+  #arch-fadeCover {
+    position: absolute;
+    inset: 0;
+    background: var(--bg, #0b0f14);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .3s ease;
+  }
+  #arch-fadeCover.show { opacity: 1; }
     /* ===== Modal ===== */
     .modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 120; background: rgba(0,0,0,.45); backdrop-filter: blur(6px) }
     .modal.open { display: flex }
     .modal .panel { width: min(720px, 92vw); background: var(--surface-strong); border: var(--bd); border-radius: 16px; box-shadow: var(--shadow); padding: 16px }
     .kbd { border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.06); padding: 2px 6px; border-radius: 6px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px }
-
-    /* ===== REVO view styling ===== */
-    /* Remove default padding for the new Revo section and ensure the iframe fills the space */
-    #v-revo { padding: 0; }
-    #v-revo iframe { width: 100%; height: 100%; border: 0; background: transparent; }
   </style>
 </head>
 <body>
   <!-- ===== Header ===== -->
   <header class="mast">
-    <button class="ib fx-trans fx-press ring" id="btnBack" title="Voltar" aria-label="Voltar">
-    <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/arrow-left.svg" alt="Voltar" width="20" height="20" onerror="this.onerror=null;this.src='icons/arrow-left.svg'">
-      <span class="ripple"></span>
-    </button>
+    <button class="ib fx-trans fx-press ring" id="btnBack" title="Voltar" aria-label="Voltar">⟵<span class="ripple"></span></button>
     <div class="title">
-      <h1>HUB UNO</h1>
-      <small>Dual · Trinity </small>
+      <h1>HUB UNO — Monólito</h1>
+      <small>Dual · Trinity · Minimal</small>
     </div>
-    <button class="ib fx-trans fx-press ring" id="btnDownload" title="Baixar HTML">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/download.svg" alt="Download" width="20" height="20" onerror="this.onerror=null;this.src='icons/download.svg'">
-      <span class="ripple"></span>
-    </button>
-    <button class="ib fx-trans fx-press ring" id="btnHelp" title="Ajuda / Atalhos">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/question-circle.svg" alt="Ajuda" width="20" height="20" onerror="this.onerror=null;this.src='icons/question-circle.svg'">
-      <span class="ripple"></span>
-    </button>
-    <button class="ib fx-trans fx-press ring" id="btnBrain" title="Brain">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/brain.svg" alt="Brain" width="20" height="20" onerror="this.onerror=null;this.src='icons/brain.svg'">
-      <span class="ripple"></span>
-    </button>
+    <button class="ib fx-trans fx-press ring" id="btnDownload" title="Baixar HTML">⬇️<span class="ripple"></span></button>
+    <button class="ib fx-trans fx-press ring" id="btnHelp" title="Ajuda / Atalhos">❓<span class="ripple"></span></button>
+    <button class="ib fx-trans fx-press ring" id="btnBrain" title="Brain">🧠<span class="ripple"></span></button>
   </header>
-
-  <!-- Container para fundo personalizado (imagem ou vídeo).  Será preenchido via JS quando o usuário escolher
-       um tema customizado.  Fica no início do body para garantir que fique abaixo de todos os conteúdos -->
-  <div id="custom-bg" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;overflow:hidden;pointer-events:none"></div>
 
   <!-- ===== Views ===== -->
   <main>
     <!-- HOME -->
     <section id="v-home" class="view active">
       <div class="grid">
-          <!-- Saudação / chamada para cadastro. Visível quando o usuário precisa ativar a Dual Infodose ou quando já houver nome salvo -->
-          <div id="greetingCard" class="card fx-trans fx-lift" style="display:none">
-            <div id="greetingMsg" style="font-weight:800"></div>
-          </div>
         <div class="card fx-trans fx-lift">
           <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%">
             <div>
               <div style="font-weight:900;letter-spacing:.08em">UNO • foco e velocidade</div>
               <div class="mut">Monólito: Apps embutidos + Viewer + Dock + Atalhos</div>
             </div>
-            <div class="ico">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/bolt.svg" alt="Energia" width="24" height="24" onerror="this.onerror=null;this.src='icons/bolt.svg'">
-            </div>
-          </div>
-        </div>
-        <!-- Área de Arquétipos incorporada -->
-        <div class="arch-container">
-          <div class="arch-circle">
-            <div id="arch-fadeCover"></div>
-            <div class="arch-dotlogo" title="arquétipo ativo"></div>
-            <div class="arch-switcher">
-              <button class="btn fx-trans fx-press ring" id="arch-prev" title="Anterior">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/chevron-left.svg" alt="Anterior" width="16" height="16" onerror="this.onerror=null;this.src='icons/chevron-left.svg'">
-              </button>
-              <select id="arch-select" title="Escolher arquétipo"></select>
-              <button class="btn fx-trans fx-press ring" id="arch-next" title="Próximo">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/chevron-right.svg" alt="Próximo" width="16" height="16" onerror="this.onerror=null;this.src='icons/chevron-right.svg'">
-              </button>
-            </div>
-            <iframe id="arch-frame" title="Archetype Core" sandbox="allow-scripts" referrerpolicy="no-referrer"></iframe>
+            <div class="ico">⚡</div>
           </div>
         </div>
         <div class="cards">
           <button class="card fx-trans fx-press ring" data-nav="apps">
-            <div class="ico">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg" alt="Apps" width="24" height="24" onerror="this.onerror=null;this.src='icons/folder-open.svg'">
-            </div>
+            <div class="ico">🗂</div>
             <div>
               <div style="font-weight:800">Apps</div>
               <div class="mut">Catálogo integrado</div>
@@ -305,9 +221,7 @@
             <span class="ripple"></span>
           </button>
           <button class="card fx-trans fx-press ring" data-nav="stack">
-            <div class="ico">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/layer-group.svg" alt="Stack" width="24" height="24" onerror="this.onerror=null;this.src='icons/layer-group.svg'">
-            </div>
+            <div class="ico">⬛</div>
             <div>
               <div style="font-weight:800">Stack</div>
               <div class="mut">Sessões abertas</div>
@@ -315,28 +229,28 @@
             <span class="ripple"></span>
           </button>
           <button class="card fx-trans fx-press ring" data-nav="brain">
-            <div class="ico">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/brain.svg" alt="Brain" width="24" height="24" onerror="this.onerror=null;this.src='icons/brain.svg'">
-            </div>
+            <div class="ico">🧠</div>
             <div>
               <div style="font-weight:800">Brain</div>
               <div class="mut">Nome, SK, Modelo</div>
             </div>
             <span class="ripple"></span>
           </button>
-          <!-- New card to open the Revo view directly from home -->
-          <button class="card fx-trans fx-press ring" data-nav="revo">
-            <div class="ico">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/globe.svg" alt="Revo" width="24" height="24" onerror="this.onerror=null;this.src='icons/globe.svg'">
-            </div>
-            <div>
-              <div style="font-weight:800">Revo</div>
-              <div class="mut">Hub Ultra integrado</div>
-            </div>
-            <span class="ripple"></span>
-          </button>
         </div>
       </div>
+        <!-- Área de Arquétipos incorporada -->
+        <div class="arch-container">
+          <div class="arch-circle">
+            <div id="arch-fadeCover"></div>
+            <div class="arch-dotlogo" title="arquétipo ativo"></div>
+            <div class="arch-switcher">
+              <button class="btn fx-trans fx-press ring" id="arch-prev" title="Anterior">◀</button>
+              <select id="arch-select" title="Escolher arquétipo"></select>
+              <button class="btn fx-trans fx-press ring" id="arch-next" title="Próximo">▶</button>
+            </div>
+            <iframe id="arch-frame" title="Archetype Core" sandbox="allow-scripts" referrerpolicy="no-referrer"></iframe>
+          </div>
+        </div>
     </section>
 
     <!-- APPS -->
@@ -399,33 +313,7 @@
             <button id="saveSK" class="btn fx-trans fx-press ring">Salvar<span class="ripple"></span></button>
           </div>
         </div>
-
-          <!-- Tema e Fundo personalizados -->
-          <div class="card fx-trans fx-lift" style="display:block">
-            <div style="font-weight:800">Tema &amp; Fundo</div>
-            <div style="margin-top:8px;display:flex;flex-direction:column;gap:12px">
-              <label style="display:flex;align-items:center;gap:8px">
-                <span>Escolha o tema:</span>
-                <select id="themeSelect" class="input ring" style="max-width:200px">
-                  <option value="default">Padrão (colorido)</option>
-                  <option value="medium">Cinza médio (tecnológico)</option>
-                  <option value="custom">Personalizado (sua imagem/vídeo)</option>
-                </select>
-              </label>
-              <label style="display:flex;align-items:center;gap:8px">
-                <span>Fundo personalizado:</span>
-                <input id="bgUpload" type="file" accept="image/*,video/*" class="input ring" style="max-width:260px" />
-              </label>
-              <div class="mut" style="font-size:11px">Envie uma imagem ou vídeo para usar como plano de fundo quando o tema personalizado estiver selecionado. O fundo será salvo automaticamente no seu navegador.</div>
-            </div>
-          </div>
       </div>
-    </section>
-
-    <!-- REVO (Infodose Hub Ultra) -->
-    <section id="v-revo" class="view">
-      <!-- Carrega o conteúdo do Hub Ultra modificado via iframe.  O arquivo index-100_revo_mod.html está no mesmo diretório -->
-      <iframe id="revoEmbed" src="index-100_revo_mod.html" allow="autoplay; clipboard-read; clipboard-write; picture-in-picture; fullscreen" referrerpolicy="no-referrer"></iframe>
     </section>
   </main>
 
@@ -433,27 +321,10 @@
   <div id="dock" class="dock"></div>
   <nav class="tabbar">
     <div class="inner">
-      <button class="tab fx-trans fx-press ring active" data-nav="home">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/house.svg" alt="Home" width="18" height="18" onerror="this.onerror=null;this.src='icons/house.svg'">
-        <span style="display:none">Home</span><span class="ripple"></span>
-      </button>
-      <button class="tab fx-trans fx-press ring" data-nav="apps">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg" alt="Apps" width="18" height="18" onerror="this.onerror=null;this.src='icons/folder-open.svg'">
-        <span style="display:none">Apps</span><span class="ripple"></span>
-      </button>
-      <button class="tab fx-trans fx-press ring" data-nav="stack">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/layer-group.svg" alt="Stack" width="18" height="18" onerror="this.onerror=null;this.src='icons/layer-group.svg'">
-        <span style="display:none">Stack</span><span class="ripple"></span>
-      </button>
-      <button class="tab fx-trans fx-press ring" data-nav="brain">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/brain.svg" alt="Brain" width="18" height="18" onerror="this.onerror=null;this.src='icons/brain.svg'">
-        <span style="display:none">Brain</span><span class="ripple"></span>
-      </button>
-      <!-- Botão da nova aba Revo -->
-      <button class="tab fx-trans fx-press ring" data-nav="revo">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/globe.svg" alt="Revo" width="18" height="18" onerror="this.onerror=null;this.src='icons/globe.svg'">
-        <span style="display:none">Revo</span><span class="ripple"></span>
-      </button>
+      <button class="tab fx-trans fx-press ring active" data-nav="home">⌂<span style="display:none">Home</span><span class="ripple"></span></button>
+      <button class="tab fx-trans fx-press ring" data-nav="apps">🗂<span style="display:none">Apps</span><span class="ripple"></span></button>
+      <button class="tab fx-trans fx-press ring" data-nav="stack">⬛<span style="display:none">Stack</span><span class="ripple"></span></button>
+      <button class="tab fx-trans fx-press ring" data-nav="brain">🧠<span style="display:none">Brain</span><span class="ripple"></span></button>
     </div>
   </nav>
 
@@ -470,7 +341,6 @@
         <li><span class="kbd">g</span> then <span class="kbd">a</span> → Apps</li>
         <li><span class="kbd">g</span> then <span class="kbd">s</span> → Stack</li>
         <li><span class="kbd">g</span> then <span class="kbd">b</span> → Brain</li>
-        <li><span class="kbd">g</span> then <span class="kbd">r</span> → Revo</li>
         <li><span class="kbd">Ctrl / Cmd</span> + <span class="kbd">K</span> → Busca</li>
         <li><span class="kbd">Ctrl / Cmd</span> + <span class="kbd">S</span> → Baixar este HTML</li>
       </ul>
@@ -531,71 +401,6 @@
       setTimeout(() => { el.style.opacity = .0; el.style.transform = 'translateY(6px)'; setTimeout(() => el.remove(), 220); }, 1600);
     }
 
-    /* ===================== Saudação / último estado ===================== */
-    function displayGreeting() {
-      const card = document.getElementById('greetingCard');
-      const msgEl = document.getElementById('greetingMsg');
-      if (!card || !msgEl) return;
-      const name = (localStorage.getItem('infodose:userName') || '').trim();
-      const sessions = document.querySelectorAll('.session').length;
-      if (!name) {
-        card.style.display = 'block';
-        // Quando o usuário ainda não informou o nome, incentivamos o cadastro local.
-        msgEl.textContent = 'Salve! Ative sua Dual Infodose registrando seu nome na seção Brain.';
-      } else {
-        card.style.display = 'block';
-        // Após cadastrado, saudamos e informamos quantas sessões estão em andamento.  O nome do assistente
-        // (“UNO”) é incluído para reforçar a presença do hub.
-        msgEl.textContent = `Bem-vindo de volta, ${name}. UNO está ao seu lado. Você tem ${sessions} sessão(ões) ativa(s).`;
-      }
-    }
-
-    /* ===================== Tema & Fundo personalizados ===================== */
-    // Aplica o tema salvo no localStorage. Os temas possíveis são: 'default' (remove data-theme), 'medium'
-    // e 'custom'.  Quando 'custom' estiver ativo, usa a imagem/vídeo salvo em LS ('uno:bg') como
-    // plano de fundo.  Se 'medium' estiver selecionado, adiciona data-theme='medium'.
-    function applyTheme() {
-      const theme = LS.get('uno:theme', 'medium');
-      // Limpe qualquer dataset para que CSS default seja aplicado quando 'default'
-      if (theme === 'default') {
-        delete document.body.dataset.theme;
-      } else {
-        document.body.dataset.theme = theme;
-      }
-      // Gerenciar fundo personalizado
-      const bgContainer = document.getElementById('custom-bg');
-      if (!bgContainer) return;
-      if (theme !== 'custom') {
-        bgContainer.innerHTML = '';
-        return;
-      }
-      // Carregar dados do fundo
-      const bgData = LS.get('uno:bg', '');
-      bgContainer.innerHTML = '';
-      if (!bgData) return;
-      // Determine se é vídeo ou imagem
-      if (/^data:video\//.test(bgData)) {
-        const vid = document.createElement('video');
-        vid.src = bgData;
-        vid.autoplay = true;
-        vid.loop = true;
-        vid.muted = true;
-        vid.playsInline = true;
-        vid.style.width = '100%';
-        vid.style.height = '100%';
-        vid.style.objectFit = 'cover';
-        bgContainer.appendChild(vid);
-      } else {
-        const img = document.createElement('img');
-        img.src = bgData;
-        img.alt = '';
-        img.style.width = '100%';
-        img.style.height = '100%';
-        img.style.objectFit = 'cover';
-        bgContainer.appendChild(img);
-      }
-    }
-
     /* Apply ripple */
     $$('button').forEach(addRipple);
     const obs = new MutationObserver((muts) => { muts.forEach(m => m.addedNodes && m.addedNodes.forEach(n => { if (n.nodeType === 1) { if (n.matches?.('button')) addRipple(n); n.querySelectorAll?.('button').forEach(addRipple); } })) });
@@ -603,74 +408,16 @@
 
     /* ===================== Navegação + Estado ===================== */
     function nav(key) {
-      // Adicionamos 'revo' à lista de abas para suportar a nova seção
-      const tabs = ['home', 'apps', 'stack', 'brain', 'revo'];
+      const tabs = ['home', 'apps', 'stack', 'brain'];
       tabs.forEach(k => { $('#v-' + k).classList.toggle('active', k === key); $(`.tab[data-nav="${k}"]`).classList.toggle('active', k === key); });
       LS.set('uno:lastTab', key);
-      // Quando entrar na aba Home, apresente mensagem de saudação / última sessão
-      if (key === 'home') {
-        try { displayGreeting(); } catch (e) { console.warn(e); }
-        try {
-          const nameG = (localStorage.getItem('infodose:userName') || '').trim();
-          if (!nameG) {
-            toast('Salve! Ative sua Dual Infodose registrando seu nome na seção Brain.', 'warn');
-          } else {
-            // Saudação rápida na forma de toast quando o usuário retorna ao home.
-            toast(`Bem-vindo de volta, ${nameG}. UNO está ao seu lado.`, 'ok');
-          }
-        } catch (e) {}
-      }
-      // Quando entrar na aba Revo, envie a lista de apps ao iframe via postMessage
-      if (key === 'revo') {
-        try {
-          const apps = RAW && Array.isArray(RAW.apps) ? RAW.apps : [];
-          const iframe = document.getElementById('revoEmbed');
-          if (iframe) {
-            // If iframe already loaded, send immediately
-            const send = () => {
-              if (iframe.contentWindow) {
-                iframe.contentWindow.postMessage({ type: 'apps', apps }, '*');
-              }
-            };
-            // Always send a message after a tiny delay in case the frame is still initializing
-            setTimeout(send, 100);
-            // Also send again once the iframe loads
-            iframe.removeEventListener('load', iframe._sendApps);
-            iframe._sendApps = send;
-            iframe.addEventListener('load', send, { once: true });
-          }
-        } catch(e) {
-          console.warn('Falha ao enviar apps ao Revo:', e);
-        }
-      }
-    }
-
-    // Helper: se a aba Revo estiver ativa, envia a lista atual de apps ao iframe.  
-    function maybeSendAppsToRevo() {
-      try {
-        // Só envie se a aba Revo estiver visível
-        const view = document.getElementById('v-revo');
-        if (!view || !view.classList.contains('active')) return;
-        const iframe = document.getElementById('revoEmbed');
-        const apps = RAW && Array.isArray(RAW.apps) ? RAW.apps : [];
-        if (iframe && iframe.contentWindow) {
-          iframe.contentWindow.postMessage({ type: 'apps', apps }, '*');
-        }
-      } catch (e) {
-        console.warn('Falha ao enviar apps ao Revo (maybe):', e);
-      }
     }
     $$('.tab,[data-nav]').forEach(b => b.addEventListener('click', () => nav(b.dataset.nav || 'home')));
     $('#btnBack').onclick = () => { try { history.length > 1 && history.back() } catch { } };
     $('#btnBrain').onclick = () => nav('brain');
 
     // Restaurar última aba
-    const last = LS.get('uno:lastTab', 'home');
-    nav(last);
-    // Se a aba inicial for home, exibir saudação
-    if (last === 'home') {
-      try { displayGreeting(); } catch(e) {}
-    }
+    const last = LS.get('uno:lastTab', 'home'); nav(last);
 
     // Atalhos
     let gPressed = false;
@@ -679,7 +426,7 @@
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); $('#appSearch')?.focus(); return; }
       if (e.key.toLowerCase() === 'g') { gPressed = true; setTimeout(() => gPressed = false, 600); return; }
       if (!gPressed) return; const k = e.key.toLowerCase();
-      if (k === 'h') nav('home'); if (k === 'a') nav('apps'); if (k === 's') nav('stack'); if (k === 'b') nav('brain'); if (k === 'r') nav('revo'); gPressed = false;
+      if (k === 'h') nav('home'); if (k === 'a') nav('apps'); if (k === 's') nav('stack'); if (k === 'b') nav('brain'); gPressed = false;
     });
 
     // Ajuda modal
@@ -694,7 +441,7 @@
         const clone = document.documentElement.cloneNode(true);
         const html = '<!doctype html>\n' + clone.outerHTML;
         const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'HUB-UNO-Revo.html'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 500);
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'HUB-UNO-Glow-v3.4-monolito.html'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 500);
         toast('HTML exportado', 'ok');
       } catch (e) { alert('Falha ao exportar: ' + e.message); }
     }
@@ -707,49 +454,7 @@
       sel.value = LS.get('dual.openrouter.model', MODELS[0]);
       $('#sk').value = LS.raw('dual.keys.openrouter');
       $('#saveSK').onclick = () => { LS.set('dual.openrouter.model', sel.value); localStorage.setItem('dual.keys.openrouter', $('#sk').value || ''); toast('Configurações salvas', 'ok'); };
-      $('#saveName').onclick = () => {
-        localStorage.setItem('infodose:userName', ($('#userName').value || '').trim());
-        toast('Nome salvo', 'ok');
-        try { displayGreeting(); } catch (e) {}
-      };
-    })();
-
-    /* ===================== Inicialização do tema & personalização de fundo ===================== */
-    (function initThemeSettings() {
-      // Se o usuário nunca selecionou um tema antes, defina o padrão como "medium" (cinza).
-      if (!LS.get('uno:theme')) {
-        LS.set('uno:theme', 'medium');
-      }
-      // Aplique o tema salvo imediatamente
-      applyTheme();
-      // Configure o seletor de tema
-      const sel = document.getElementById('themeSelect');
-      if (sel) {
-        sel.value = LS.get('uno:theme', 'medium');
-        sel.addEventListener('change', () => {
-          LS.set('uno:theme', sel.value);
-          applyTheme();
-          toast('Tema atualizado', 'ok');
-        });
-      }
-      const upload = document.getElementById('bgUpload');
-      if (upload) {
-        upload.addEventListener('change', (e) => {
-          const f = e.target.files && e.target.files[0];
-          if (!f) return;
-          const reader = new FileReader();
-          reader.onload = () => {
-            try {
-              LS.set('uno:bg', reader.result);
-              LS.set('uno:theme', 'custom');
-              if (sel) sel.value = 'custom';
-              applyTheme();
-              toast('Fundo personalizado salvo', 'ok');
-            } catch (err) { console.error(err); toast('Erro ao salvar fundo', 'err'); }
-          };
-          reader.readAsDataURL(f);
-        });
-      }
+      $('#saveName').onclick = () => { localStorage.setItem('infodose:userName', ($('#userName').value || '').trim()); toast('Nome salvo', 'ok'); };
     })();
 
     /* ===================== Ícones inline (data SVG) ===================== */
@@ -842,8 +547,6 @@
       L.sort((a, b) => (mode === 'za' ? -1 : 1) * String(a.title || '').localeCompare(b.title || ''));
       appsWrap.innerHTML = ''; L.forEach(a => appsWrap.appendChild(cardApp(a)));
       appsCount.textContent = L.length + ' apps'
-      // Notifique o Revo de que os apps mudaram, se estiver ativo
-      maybeSendAppsToRevo();
     }
 
     (function loadEmbeddedApps(){
@@ -852,20 +555,6 @@
         RAW.apps = Array.isArray(raw.apps) ? raw.apps : (Array.isArray(raw) ? raw : []);
       } catch { RAW.apps = [] }
       renderApps();
-      // Sempre envie o catálogo atualizado ao iframe do Revo após carregar os apps embutidos.
-      try {
-        const iframe = document.getElementById('revoEmbed');
-        if (iframe) {
-          const apps = RAW && Array.isArray(RAW.apps) ? RAW.apps : [];
-          const send = () => { if (iframe.contentWindow) iframe.contentWindow.postMessage({ type: 'apps', apps }, '*'); };
-          // Envie após pequeno atraso para garantir que o iframe esteja pronto
-          setTimeout(send, 100);
-          // E também quando o iframe terminar de carregar
-          iframe.removeEventListener('load', iframe._sendAppsEmbedded);
-          iframe._sendAppsEmbedded = send;
-          iframe.addEventListener('load', send, { once: true });
-        }
-      } catch(e) { console.warn('Falha ao postMessage apps após embed:', e); }
     })();
 
     // Locais
@@ -890,18 +579,9 @@
         <div class="hdr">
           <div class="title">${(a.title || 'App')}</div>
           <div class="tools">
-            <button class="btn ring fx-trans fx-press" data-act="min" title="Minimizar">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/minus.svg" alt="Minimizar" width="14" height="14" onerror="this.onerror=null;this.src='icons/minus.svg'">
-              <span class="ripple"></span>
-            </button>
-            <button class="btn ring fx-trans fx-press" data-act="ref" title="Recarregar">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/arrow-rotate-right.svg" alt="Recarregar" width="14" height="14" onerror="this.onerror=null;this.src='icons/arrow-rotate-right.svg'">
-              <span class="ripple"></span>
-            </button>
-            <button class="btn ring fx-trans fx-press" data-act="close" title="Fechar">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/xmark.svg" alt="Fechar" width="14" height="14" onerror="this.onerror=null;this.src='icons/xmark.svg'">
-              <span class="ripple"></span>
-            </button>
+            <button class="btn ring fx-trans fx-press" data-act="min">—<span class="ripple"></span></button>
+            <button class="btn ring fx-trans fx-press" data-act="ref">↻<span class="ripple"></span></button>
+            <button class="btn ring fx-trans fx-press" data-act="close">✕<span class="ripple"></span></button>
           </div>
         </div>
         <iframe src="${url || 'about:blank'}" allow="autoplay; clipboard-read; clipboard-write; picture-in-picture; fullscreen"></iframe>`;
@@ -914,6 +594,10 @@
     $('#btnCloseAll').onclick = () => { if (!confirm('Fechar todas as sessões abertas?')) return; $$('.session').forEach(s => s.remove()); updateDock(); toast('Todas as sessões fechadas', 'warn'); };
 
     /* ===================== Archetypes (Central Circle) ===================== */
+    // Integrates the original UNO archetype viewer into this unified monolith.
+    // Define the list of archetype HTML files. These should reside under an
+    // "archetypes" folder relative to this HTML. The names correspond to the
+    // available archetype pages shipped with the original UNO Hub.
     (function () {
       const archList = [
         'luxara.html',
@@ -931,6 +615,7 @@
       const select = document.getElementById('arch-select');
       const frame = document.getElementById('arch-frame');
       const fade = document.getElementById('arch-fadeCover');
+      // Populate the selector with available archetypes
       function populate() {
         select.innerHTML = '';
         archList.forEach(name => {
@@ -940,15 +625,18 @@
           select.appendChild(opt);
         });
       }
+      // Update iframe source based on current index
       function setSrcByIndex(idx) {
         if (!archList.length) return;
         const n = (idx + archList.length) % archList.length;
         select.selectedIndex = n;
         frame.src = './archetypes/' + archList[n];
       }
+      // Initialize
       let current = 0;
       populate();
       if (archList.length) setSrcByIndex(0);
+      // Navigate to previous archetype
       document.getElementById('arch-prev').addEventListener('click', () => {
         current = (current - 1 + archList.length) % archList.length;
         fade.classList.add('show');
@@ -957,6 +645,7 @@
           setTimeout(() => fade.classList.remove('show'), 200);
         }, 140);
       });
+      // Navigate to next archetype
       document.getElementById('arch-next').addEventListener('click', () => {
         current = (current + 1) % archList.length;
         fade.classList.add('show');
@@ -965,6 +654,7 @@
           setTimeout(() => fade.classList.remove('show'), 200);
         }, 140);
       });
+      // Change archetype via selector
       select.addEventListener('change', () => {
         current = select.selectedIndex;
         fade.classList.add('show');
