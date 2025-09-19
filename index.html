@@ -33,7 +33,7 @@
       --shadow: 0 14px 40px rgba(0, 0, 0, .45);
       --tabsH: 74px;
       --hdrH: 64px;
-      --blur: 18px;
+      --blur: 24px;
       --ease: cubic-bezier(.22, .61, .36, 1);
     }
 
@@ -110,11 +110,6 @@
     .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px }
     @media (max-width: 560px) { .cards { grid-template-columns: 1fr } }
 
-    /* Adicione margem inferior aos cartões na Home para evitar que fiquem sobrepostos à barra de abas. */
-    #v-home .cards {
-      margin-bottom: calc(var(--tabsH) + 20px);
-    }
-
     /* Ocultar o menu de opções (Apps, Stack, Brain, Revo) na Home quando apenas a bola dos arquétipos deve aparecer */
     /* Hide the UNO info card on home. The cards row is now used for status notifications */
     #v-home #unoCard {
@@ -178,11 +173,48 @@
     }
 
     /* ===== Apps ===== */
-    .apps-wrap { display: grid; gap: 12px }
-    .app-card { display: flex; gap: 12px; align-items: center; background: var(--surface); border: var(--bd); border-radius: var(--r); padding: 12px }
+.apps-wrap {
+      display: grid;
+      gap: 12px;
+      /* Distribui os apps em colunas responsivas: cada cartão terá no mínimo 240px. */
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      /* Adiciona uma margem inferior generosa para que o dock/tabbar não sobreponha os últimos elementos. */
+      padding-bottom: 80px;
+    }
+.app-card {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      /* Use um fundo um pouco mais claro para destacar cada app e melhorar a legibilidade */
+      background: rgba(255, 255, 255, 0.06);
+      border: var(--bd);
+      border-radius: var(--r);
+      padding: 14px;
+    }
     .app-card:hover { box-shadow: 0 12px 34px rgba(0,0,0,.46) }
     .app-icon { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; background: #0f1528; border: var(--bd); overflow: hidden }
-    .app-title { font-weight: 800 }
+    .app-title {
+      font-weight: 800;
+      /* Evitar quebra de linhas em títulos longos e mostrar reticências */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    /* Âncora para sessões abertas no topo da página (modo "abrir dentro"). */
+    #sessionsAnchor {
+      display: grid;
+      gap: 12px;
+      margin: 12px 14px;
+    }
+    /* Estilos para o painel Brain (perfil, performance, voz, logs). */
+    #brain { position: fixed; top: calc(var(--hdrH) + 12px); right: 14px; width: min(92vw, 440px); z-index: 130; }
+    #brain.hide { display: none !important; }
+    .popover { border-radius: 24px; padding: 12px; background: var(--surface-strong); border: var(--bd); backdrop-filter: blur(var(--blur)); }
+    .menuItem { display: flex; gap: 12px; align-items: center; border: var(--bd); background: var(--surface); border-radius: 16px; padding: 12px; }
+    .menuItem + .menuItem { margin-top: 9px; }
+    .input { display: flex; gap: 8px; align-items: center; background: var(--surface); border: var(--bd); border-radius: 14px; padding: 9px 11px; }
+    .input input, .input select { flex: 1; background: transparent; border: 0; outline: 0; color: var(--fg); font-size: 13px; }
+    .notice { font-size: 12px; color: var(--mut); }
 
     /* ===== Viewer (Stack) ===== */
     .session { background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)); border: var(--bd); border-radius: 16px; box-shadow: var(--shadow); overflow: hidden }
@@ -214,11 +246,13 @@
       width: min(80vw, 560px);
       aspect-ratio: 1 / 1;
       border-radius: 50%;
-      overflow: hidden;
+      /* Permitir que elementos (como o seletor de arquétipos) saiam para fora do círculo */
+      overflow: visible;
       border: 1px solid rgba(255,255,255,0.12);
       background: radial-gradient(60% 60% at 50% 50%, rgba(0,255,255,.1), rgba(255,255,255,.02));
       box-shadow: var(--shadow, 0 14px 40px rgba(0,0,0,.45));
     }
+
     .arch-circle iframe {
       position: absolute;
       inset: 0;
@@ -227,9 +261,18 @@
       border: 0;
       background: transparent;
     }
+
+  /* Certifique-se de que o switcher de arquétipos e o logotipo de ponto
+     fiquem sobrepostos ao círculo e seus conteúdos. Um z-index alto
+     garante que os botões de navegação não fiquem escondidos atrás do iframe. */
+  .arch-switcher, .arch-dotlogo, .arch-circle {
+    position: relative;
+    z-index: 60;
+  }
     .arch-switcher {
       position: absolute;
-      top: 10px;
+      /* Mover o seletor para cima do círculo (fora) */
+      top: -32px;
       left: 50%;
       transform: translateX(-50%);
       display: flex;
@@ -238,7 +281,7 @@
       background: rgba(15,17,32,.7);
       border: 1px solid rgba(255,255,255,.12);
       border-radius: 999px;
-      padding: 6px 10px;
+      padding: 4px 8px;
       backdrop-filter: blur(8px);
     }
     .arch-switcher select {
@@ -247,8 +290,19 @@
       color: var(--fg);
       border: 1px solid rgba(255,255,255,.12);
       border-radius: 999px;
-      padding: 6px 10px;
+      /* Reduzir padding e tamanho de fonte para caber melhor fora do círculo */
+      padding: 4px 8px;
+      font-size: 12px;
     }
+
+  /* Redimensionar botões do seletor de arquétipos para um tamanho mais compacto */
+  .arch-switcher button {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border-radius: 8px;
+  }
+
     .arch-dotlogo {
       position: absolute;
       top: 12px;
@@ -259,6 +313,31 @@
       background: conic-gradient(#00c5e5, #ff52e5, #00c5e5);
       box-shadow: 0 0 18px rgba(0,255,255,.4);
     }
+
+    /* Quando o modo áudio está ativo, destaque o círculo com uma borda sutil */
+    .arch-circle.audio-on {
+      box-shadow: 0 0 0 2px var(--ok), var(--shadow);
+    }
+
+    /* Mensagem exibida dentro do círculo do arquétipo. Fica na parte inferior
+       do círculo, com plano de fundo translúcido e sem interceptar eventos. */
+    .arch-msg {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 6px 10px;
+      border-radius: 12px;
+      background: rgba(15,17,32,.72);
+      color: var(--fg);
+      font-size: 13px;
+      max-width: 80%;
+      text-align: center;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .3s ease;
+    }
+    .arch-msg.show { opacity: 1; }
     #arch-fadeCover {
       position: absolute;
       inset: 0;
@@ -268,6 +347,21 @@
       transition: opacity .3s ease;
     }
     #arch-fadeCover.show { opacity: 1; }
+
+    /* Camada para ripples de áudio: fica sobre o conteúdo do círculo e ajusta a opacidade
+       conforme a intensidade capturada pelo microfone. Utilizamos mix-blend-mode
+       para adicionar um brilho sutil sem quebrar a estética minimalista. */
+    .audio-ripple {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      /* A camada de ripple agora serve também como área de clique para ativar o modo áudio. */
+      pointer-events: auto;
+      /* Retire o gradiente, pois o efeito visual passa a ser aplicado via box-shadow no círculo */
+      background: transparent;
+      /* Mantenha um z-index alto para captar cliques acima do iframe */
+      z-index: 70;
+    }
 
     /* ===== Modal ===== */
     .modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 120; background: rgba(0,0,0,.45); backdrop-filter: blur(6px) }
@@ -289,8 +383,8 @@
       <span class="ripple"></span>
     </button>
     <div class="title">
-      <h1>HUB UNO</h1>
-      <small>Dual · Trinity ·</small>
+      <h1>HUB UNO — Monólito + Revo</h1>
+      <small>Dual · Trinity · Minimal · Ultra</small>
     </div>
     <button class="ib fx-trans fx-press ring" id="btnDownload" title="Baixar HTML">
 <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/download.svg" alt="Download" width="20" height="20" onerror="this.onerror=null;this.src='icons/download.svg'">
@@ -305,6 +399,9 @@
       <span class="ripple"></span>
     </button>
   </header>
+
+  <!-- Âncora para sessões abertas quando o usuário optar por abrir dentro da página -->
+  <section id="sessionsAnchor"></section>
 
   <!-- Container para fundo personalizado (imagem ou vídeo).  Será preenchido via JS quando o usuário escolher
        um tema customizado.  Fica no início do body para garantir que fique abaixo de todos os conteúdos -->
@@ -322,8 +419,8 @@
         <div id="unoCard" class="card fx-trans fx-lift" style="display:none">
           <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%">
             <div>
-              <div style="font-weight:900;letter-spacing:.08em">UNO •</div>
-              <div class="mut">Apps + Viewer + Dock + Atalhos</div>
+              <div style="font-weight:900;letter-spacing:.08em">UNO • foco e velocidade</div>
+              <div class="mut">Monólito: Apps embutidos + Viewer + Dock + Atalhos</div>
             </div>
             <div class="ico">
 <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/bolt.svg" alt="Energia" width="24" height="24" onerror="this.onerror=null;this.src='icons/bolt.svg'">
@@ -335,6 +432,8 @@
           <div class="arch-circle">
             <div id="arch-fadeCover"></div>
             <div class="arch-dotlogo" title="arquétipo ativo"></div>
+  <!-- Mensagens exibidas dentro da bolinha de arquétipo -->
+  <div id="archMsg" class="arch-msg"></div>
             <div class="arch-switcher">
               <button class="btn fx-trans fx-press ring" id="arch-prev" title="Anterior">
                 <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/chevron-left.svg" alt="Anterior" width="16" height="16" onerror="this.onerror=null;this.src='icons/chevron-left.svg'">
@@ -344,6 +443,8 @@
                 <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/chevron-right.svg" alt="Próximo" width="16" height="16" onerror="this.onerror=null;this.src='icons/chevron-right.svg'">
               </button>
             </div>
+  <!-- Camada de ripple auditivo inserida dentro do círculo -->
+  <div id="audioRipple" class="audio-ripple"></div>
             <iframe id="arch-frame" title="Archetype Core" sandbox="allow-scripts" referrerpolicy="no-referrer"></iframe>
           </div>
         </div>
@@ -405,7 +506,8 @@
               <button id="btnToggleLocal" class="btn fx-trans fx-press ring">Mostrar Locais<span class="ripple"></span></button>
             </div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-              <input id="fileLocal" type="file" accept=".html,.htm,.txt" multiple class="input ring" />
+              <!-- Aceita arquivos .json além de HTML/TXT para permitir upload de catálogos personalizados -->
+              <input id="fileLocal" type="file" accept=".html,.htm,.txt,.json" multiple class="input ring" />
               <button id="btnImport" class="btn fx-trans fx-press ring">Adicionar Locais<span class="ripple"></span></button>
               <button id="btnExport" class="btn fx-trans fx-press ring">Exportar Locais<span class="ripple"></span></button>
               <button id="btnClear" class="btn fx-trans fx-press ring">Limpar Locais<span class="ripple"></span></button>
@@ -487,6 +589,40 @@
           <div class="card fx-trans fx-lift" style="display:block">
             <div style="font-weight:800; margin-bottom:6px">Vozes dos Arquétipos</div>
             <div id="voicesWrap" style="display:grid; gap:10px"></div>
+
+          <!-- Preferências de Performance -->
+          <div class="card fx-trans fx-lift" style="display:block">
+            <div style="font-weight:800">Performance</div>
+            <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
+              <select id="selPerf" class="input ring" style="max-width:200px">
+                <option value="low">Low</option>
+                <option value="med">Med</option>
+                <option value="high">High</option>
+              </select>
+              <button id="btnPerf" class="btn fx-trans fx-press ring">Aplicar<span class="ripple"></span></button>
+            </div>
+          </div>
+
+          <!-- Preferências de Voz -->
+          <div class="card fx-trans fx-lift" style="display:block">
+            <div style="font-weight:800">Voz</div>
+            <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
+              <select id="selVoice" class="input ring" style="max-width:200px">
+                <option>Nova</option>
+                <option>Elysha</option>
+                <option>Kaion</option>
+                <option>Serena</option>
+              </select>
+              <button id="btnVoice" class="btn fx-trans fx-press ring">Salvar<span class="ripple"></span></button>
+            </div>
+          </div>
+
+          <!-- Logs -->
+          <div class="card fx-trans fx-lift" style="display:block">
+            <div style="font-weight:800">Logs</div>
+            <div class="mut" style="font-size:11px;margin-bottom:4px">Eventos recentes</div>
+            <pre id="logs" style="margin:0;font:12px/1.4 ui-monospace,monospace;color:var(--mut);max-height:140px;overflow:auto"></pre>
+          </div>
           </div>
       </div>
     </section>
@@ -576,6 +712,21 @@
       raw: (k) => localStorage.getItem(k) || ''
     };
 
+    /* ===================== DualHub State & Logging ===================== */
+    // Armazena preferências de performance, voz e registros de eventos para a funcionalidade "Dual" aprimorada.
+    const dualState = {
+      perf: localStorage.getItem('hub.perf') || 'med',
+      voice: localStorage.getItem('hub.voice') || 'Nova',
+      logs: []
+    };
+    // Adiciona uma entrada ao log e atualiza o painel de logs no Brain.
+    function dualLog(msg) {
+      const entry = '[' + new Date().toLocaleTimeString() + '] ' + msg;
+      dualState.logs.unshift(entry);
+      const logsEl = document.getElementById('logs');
+      if (logsEl) logsEl.textContent = dualState.logs.slice(0, 60).join('\n');
+    }
+
     /* Ripple */
     function addRipple(el) {
       if (!el) return;
@@ -603,19 +754,14 @@
     /* ===================== Saudação / último estado ===================== */
     function displayGreeting() {
       const card = document.getElementById('greetingCard');
-      const msgEl = document.getElementById('greetingMsg');
-      if (!card || !msgEl) return;
+      // Não exibir o cartão de saudação; usamos mensagens na bolinha
+      if (card) card.style.display = 'none';
       const name = (localStorage.getItem('infodose:userName') || '').trim();
       const sessions = document.querySelectorAll('.session').length;
       if (!name) {
-        card.style.display = 'block';
-        // Quando o usuário ainda não informou o nome, incentivamos o cadastro local.
-        msgEl.textContent = 'Salve! Ative sua Dual Infodose registrando seu nome na seção Brain.';
+        showArchMessage('Salve! Ative sua Dual Infodose registrando seu nome na seção Brain.', 'warn');
       } else {
-        card.style.display = 'block';
-        // Após cadastrado, saudamos e informamos quantas sessões estão em andamento.  O nome do assistente
-        // (“UNO”) é incluído para reforçar a presença do hub.
-        msgEl.textContent = `Bem-vindo de volta, ${name}. UNO está ao seu lado. Você tem ${sessions} sessão(ões) ativa(s).`;
+        showArchMessage(`Bem-vindo de volta, ${name}. UNO está ao seu lado. Você tem ${sessions} sessão(ões) ativa(s).`, 'ok');
       }
     }
 
@@ -689,7 +835,15 @@
         // Filtrar por idiomas suportados (Português e Inglês) se disponível
         const filtered = voices.filter(v => v.lang && (v.lang.startsWith('pt') || v.lang.startsWith('en')));
         voices = filtered.length ? filtered : voices;
-        const saved = LS.get('infodose:voices', {});
+        const saved = LS.get('infodose:voices', {}) || {};
+        // Se ainda não houver vozes salvas, defina um mapeamento padrão
+        if (Object.keys(saved).length === 0 && voices.length) {
+          archList.forEach((name, idx) => {
+            const v = voices[idx % voices.length];
+            if (v) saved[name] = v.name;
+          });
+          LS.set('infodose:voices', saved);
+        }
         archList.forEach(name => {
           const row = document.createElement('div');
           row.style.display = 'flex';
@@ -760,13 +914,143 @@
       } catch (e) {}
     }
 
+    // Fala um texto usando a voz associada ao arquétipo atualmente ativo.  Utiliza a lista
+    // de vozes do Speech Synthesis e o mapeamento salvo em LS para encontrar a voz
+    // correta. Se não houver voz definida, escolhe a primeira disponível (PT/EN).
+    function speakWithActiveArch(text) {
+      try {
+        const select = document.getElementById('arch-select');
+        let archFile = select ? select.value || '' : '';
+        let base = archFile.replace(/\.html$/i, '');
+        const key = base.charAt(0).toUpperCase() + base.slice(1).toLowerCase();
+        const saved = LS.get('infodose:voices', {}) || {};
+        const voices = speechSynthesis.getVoices();
+        let voice = null;
+        if (saved[key]) {
+          voice = voices.find(v => v.name === saved[key]);
+        }
+        if (!voice) {
+          voice = voices.find(v => v.lang && (v.lang.startsWith('pt') || v.lang.startsWith('en')));
+        }
+        if (!voice && voices.length) voice = voices[0];
+        if (!voice) return;
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.voice = voice;
+        speechSynthesis.cancel();
+        speechSynthesis.speak(utter);
+      } catch (e) {}
+    }
+
+    // Exibe uma mensagem dentro do círculo do arquétipo. A mensagem desaparece após alguns segundos.
+    function showArchMessage(text, type = 'info') {
+      try {
+        const el = document.getElementById('archMsg');
+        if (!el) return;
+        el.textContent = text;
+        // Ajuste a cor de fundo conforme o tipo
+        if (type === 'ok') {
+          el.style.background = 'rgba(57,255,182,0.75)';
+          el.style.color = '#0b0f14';
+        } else if (type === 'warn') {
+          el.style.background = 'rgba(255,184,107,0.78)';
+          el.style.color = '#0b0f14';
+        } else if (type === 'err') {
+          el.style.background = 'rgba(255,107,107,0.78)';
+          el.style.color = '#0b0f14';
+        } else {
+          el.style.background = 'rgba(15,17,32,0.72)';
+          el.style.color = '';
+        }
+        el.classList.add('show');
+        clearTimeout(el._tm);
+        el._tm = setTimeout(() => {
+          el.classList.remove('show');
+        }, 4000);
+      } catch (e) {}
+    }
+
+    // Configura o modo de ripple que responde ao áudio do microfone.  Cria um
+    // analisador de áudio usando Web Audio API e ajusta a opacidade da camada
+    // "audioRipple" conforme a intensidade do som capturado. Um botão
+    // (arch-audio) ativa/desativa o efeito de forma discreta.
+    function initAudioRipple() {
+      const clickLayer = document.getElementById('audioRipple');
+      const archCircleEl = document.querySelector('.arch-circle');
+      if (!clickLayer || !archCircleEl) return;
+      let enabled = false;
+      let audioCtx = null;
+      let analyser = null;
+      let micStream = null;
+      // Inicia a captura de áudio e animação
+      async function start() {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          micStream = stream;
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          const src = audioCtx.createMediaStreamSource(stream);
+          analyser = audioCtx.createAnalyser();
+          analyser.fftSize = 256;
+          src.connect(analyser);
+          animate();
+        } catch (e) {
+          toast('Não foi possível acessar o microfone.', 'err');
+          enabled = false;
+          archCircleEl.classList.remove('audio-on');
+        }
+      }
+      // Para a captura de áudio e reseta a camada
+      function stop() {
+        if (micStream) {
+          micStream.getTracks().forEach(t => t.stop());
+          micStream = null;
+        }
+        if (audioCtx) {
+          try { audioCtx.close(); } catch {}
+          audioCtx = null;
+        }
+        // Remova o efeito de sombra quando desligar
+        archCircleEl.style.boxShadow = '';
+      }
+      // Atualiza a opacidade da camada conforme o volume (RMS)
+      function animate() {
+        if (!enabled || !analyser) return;
+        const buf = new Uint8Array(analyser.fftSize);
+        analyser.getByteTimeDomainData(buf);
+        let sum = 0;
+        for (let i = 0; i < buf.length; i++) {
+          const v = (buf[i] - 128) / 128;
+          sum += v * v;
+        }
+        const rms = Math.sqrt(sum / buf.length);
+        // Ajuste a intensidade: multiplique por um fator e limite a 0.6
+        // Aplique um brilho em torno do círculo proporcional ao volume
+        const intensity = Math.min(0.8, rms * 4);
+        const blur = rms * 80;
+        archCircleEl.style.boxShadow = `0 0 ${blur}px rgba(255,255,255,${intensity})`;
+        requestAnimationFrame(animate);
+      }
+      clickLayer.addEventListener('click', () => {
+        enabled = !enabled;
+        archCircleEl.classList.toggle('audio-on', enabled);
+        if (enabled) {
+          start();
+        } else {
+          stop();
+        }
+      });
+    }
+
     // Mensagem de boas-vindas/ativação
     function welcome() {
       const name = (localStorage.getItem('infodose:userName') || '').trim();
       if (!name) {
-        toast('Salve! Ative sua Dual Infodose registrando seu nome na seção Brain.', 'warn');
+        const msg = 'Salve! Ative sua Dual Infodose registrando seu nome na seção Brain.';
+        showArchMessage(msg, 'warn');
+        try { speakWithActiveArch(msg); } catch {}
       } else {
-        toast(`Bem-vindo de volta, ${name}. UNO está ao seu lado.`, 'ok');
+        const msg = `Bem-vindo de volta, ${name}. UNO está ao seu lado.`;
+        showArchMessage(msg, 'ok');
+        try { speakWithActiveArch(msg); } catch {}
       }
     }
 
@@ -834,6 +1118,24 @@
           console.warn('Falha ao enviar apps ao Revo:', e);
         }
       }
+
+      // Falar uma frase curta ao trocar de aba, usando a voz do arquétipo ativo
+      try {
+        let phrase = '';
+        let type = 'info';
+        switch (key) {
+          case 'home': phrase = 'Página inicial'; break;
+          case 'apps': phrase = 'Abrindo apps'; break;
+          case 'stack': phrase = 'Abrindo stack'; break;
+          case 'brain': phrase = 'Abrindo usuário'; break;
+          case 'revo': phrase = 'Abrindo revo'; break;
+          default: phrase = '';
+        }
+        if (phrase) {
+          speakWithActiveArch(phrase);
+          showArchMessage(phrase, type);
+        }
+      } catch (e) {}
     }
 
     // Helper: se a aba Revo estiver ativa, envia a lista atual de apps ao iframe.  
@@ -1100,7 +1402,16 @@
       const ic = document.createElement('div'); ic.className = 'app-icon';
       const img = document.createElement('img'); img.alt = ''; img.width = 24; img.height = 24; img.src = appIconFor(a); ic.appendChild(img);
       const meta = document.createElement('div'); meta.style.flex = '1';
-      const t = document.createElement('div'); t.className = 'app-title'; t.textContent = a.title;
+      // Truncar o título para exibir apenas as três primeiras palavras; adicionar reticências quando houver mais.
+      const fullTitle = String(a.title || a.key || '').trim();
+      const words = fullTitle.split(/\s+/);
+      const truncated = words.slice(0, 3).join(' ');
+      const displayTitle = words.length > 3 ? truncated + '…' : truncated;
+      const t = document.createElement('div');
+      t.className = 'app-title';
+      t.textContent = displayTitle || fullTitle;
+      // O título completo fica como tooltip para acesso total via hover
+      t.title = fullTitle;
       const d = document.createElement('div'); d.className = 'mut'; d.textContent = a.desc || a.url;
       const open = document.createElement('button'); open.className = 'btn fx-trans fx-press ring'; open.textContent = 'Abrir';
       const rip = document.createElement('span'); rip.className = 'ripple'; open.appendChild(rip); addRipple(open);
@@ -1171,10 +1482,40 @@
 
     // Locais
     $('#btnImport').onclick = async () => {
-      const fs = Array.from($('#fileLocal').files || []); if (!fs.length) return;
-      const tasks = fs.map(f => new Promise(res => { const r = new FileReader(); r.onload = () => res({ id: 'l_' + Math.random().toString(36).slice(2), name: f.name.replace(/\.(html?|txt)$/i, ''), html: String(r.result || ''), ts: Date.now() }); r.readAsText(f) }));
-      const list = await Promise.all(tasks); const cur = JSON.parse(LS.raw('infodose:locals:v1') || '[]'); list.forEach(x => cur.unshift(x));
-      localStorage.setItem('infodose:locals:v1', JSON.stringify(cur)); renderApps(); toast('HTMLs locais adicionados', 'ok');
+      const fs = Array.from($('#fileLocal').files || []);
+      if (!fs.length) return;
+      const tasks = fs.map(f => new Promise(res => {
+        const r = new FileReader();
+        r.onload = () => {
+          const content = String(r.result || '');
+          // Se for um arquivo JSON, tente carregá-lo como catálogo de apps
+          if (/\.json$/i.test(f.name)) {
+            try {
+              const obj = JSON.parse(content);
+              const apps = Array.isArray(obj.apps) ? obj.apps : (Array.isArray(obj) ? obj : []);
+              // Substitua o catálogo embutido pelo JSON local e recarregue a lista
+              RAW.apps = apps;
+              renderApps();
+              toast('apps.json local carregado', 'ok');
+            } catch (err) {
+              console.error(err);
+              toast('Erro ao ler apps.json', 'err');
+            }
+            // Não adicionar JSON à lista de locais; retorne null
+            res(null);
+          } else {
+            // Trate como HTML local
+            res({ id: 'l_' + Math.random().toString(36).slice(2), name: f.name.replace(/\.(html?|txt)$/i, ''), html: content, ts: Date.now() });
+          }
+        };
+        r.readAsText(f);
+      }));
+      const list = (await Promise.all(tasks)).filter(Boolean);
+      const cur = JSON.parse(LS.raw('infodose:locals:v1') || '[]');
+      list.forEach(x => cur.unshift(x));
+      localStorage.setItem('infodose:locals:v1', JSON.stringify(cur));
+      renderApps();
+      if (list.length) toast('HTMLs locais adicionados', 'ok');
     };
     $('#btnExport').onclick = () => { const data = { v: 1, when: Date.now(), items: JSON.parse(LS.raw('infodose:locals:v1') || '[]') }; const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); a.download = 'locals_pack.json'; a.click(); };
     $('#btnClear').onclick = () => { if (confirm('Limpar HTMLs locais salvos?')) { localStorage.removeItem('infodose:locals:v1'); renderApps(); toast('Locais limpos', 'warn'); } };
@@ -1213,27 +1554,45 @@
           <div class="title">${(a.title || 'App')}</div>
           <div class="tools">
             <button class="btn ring fx-trans fx-press" data-act="min" title="Minimizar">
-              <img data-icon="minus" alt="Minimizar" width="14" height="14">
+              <span style="font-size:16px;line-height:1">&minus;</span>
               <span class="ripple"></span>
             </button>
             <button class="btn ring fx-trans fx-press" data-act="ref" title="Recarregar">
-              <img data-icon="arrow-rotate-right" alt="Recarregar" width="14" height="14">
+              <span style="font-size:16px;line-height:1">&#8635;</span>
               <span class="ripple"></span>
             </button>
             <button class="btn ring fx-trans fx-press" data-act="close" title="Fechar">
-              <img data-icon="xmark" alt="Fechar" width="14" height="14">
+              <span style="font-size:16px;line-height:1">&times;</span>
               <span class="ripple"></span>
             </button>
           </div>
         </div>
         <iframe src="${url || 'about:blank'}" allow="autoplay; clipboard-read; clipboard-write; picture-in-picture; fullscreen"></iframe>`;
-      // Prepend the session card and apply icons for dynamic buttons
-      stackWrap.prepend(card);
-      applyIcons();
-      card.querySelector('[data-act=min]').onclick = () => { card.classList.toggle('min'); updateDock(); };
+      // Prepend the session card dependendo do modo de abertura. Se "abrir dentro" estiver marcado,
+      // insira a sessão no topo da página (sessionsAnchor); caso contrário, use o stackWrap padrão.
+      const anchor = document.getElementById('sessionsAnchor');
+      if ($('#openInside').checked && anchor) {
+        anchor.prepend(card);
+      } else {
+        stackWrap.prepend(card);
+      }
+      // Não chamar applyIcons aqui: ícones embutidos manualmente nos botões de sessão
+      card.querySelector('[data-act=min]').onclick = () => {
+        card.classList.toggle('min');
+        updateDock();
+        dualLog('Sessão minimizada: ' + (a.title || 'App'));
+      };
       card.querySelector('[data-act=ref]').onclick = () => { const fr = card.querySelector('iframe'); try { fr.contentWindow.location.reload() } catch { fr.src = fr.src } };
-      card.querySelector('[data-act=close]').onclick = () => { card.remove(); updateDock(); };
-      if ($('#openInside').checked) nav('stack'); updateDock(); toast('App aberto: ' + (a.title || 'App'), 'ok');
+      card.querySelector('[data-act=close]').onclick = () => {
+        card.remove();
+        updateDock();
+        dualLog('Sessão fechada: ' + (a.title || 'App'));
+      };
+      // Navegue para a view Stack apenas quando não estiver abrindo dentro da página.
+      if (!$('#openInside').checked) nav('stack');
+      updateDock();
+      toast('App aberto: ' + (a.title || 'App'), 'ok');
+      dualLog('Sessão aberta: ' + (a.title || 'App'));
     }
     $('#btnCloseAll').onclick = () => { if (!confirm('Fechar todas as sessões abertas?')) return; $$('.session').forEach(s => s.remove()); updateDock(); toast('Todas as sessões fechadas', 'warn'); };
 
@@ -1314,6 +1673,8 @@
     try { applyCSS(); } catch (e) {}
     // Inicializar vozes na aba Brain
     try { initVoices(); } catch (e) {}
+    // Inicializar ripple de áudio (modo que responde ao microfone)
+    try { initAudioRipple(); } catch (e) {}
     // Exibir saudação inicial se aplicável
     try { welcome(); } catch (e) {}
     // Conectar botões de CSS personalizado
@@ -1351,6 +1712,31 @@
     }
 
     /* ===================== Init ===================== */
+    // Inicialize preferências de performance e voz e associe botões no Brain
+    (function initDualPrefs(){
+      const perfSel = document.getElementById('selPerf');
+      const voiceSel = document.getElementById('selVoice');
+      if (perfSel) perfSel.value = dualState.perf;
+      if (voiceSel) voiceSel.value = dualState.voice;
+      const perfBtn = document.getElementById('btnPerf');
+      const voiceBtn = document.getElementById('btnVoice');
+      if (perfBtn && perfSel) {
+        perfBtn.addEventListener('click', () => {
+          dualState.perf = perfSel.value;
+          localStorage.setItem('hub.perf', dualState.perf);
+          dualLog('Performance atualizada: ' + dualState.perf);
+          toast('Performance atualizada', 'ok');
+        });
+      }
+      if (voiceBtn && voiceSel) {
+        voiceBtn.addEventListener('click', () => {
+          dualState.voice = voiceSel.value;
+          localStorage.setItem('hub.voice', dualState.voice);
+          dualLog('Voz selecionada: ' + dualState.voice);
+          toast('Voz atualizada', 'ok');
+        });
+      }
+    })();
     $$('button').forEach(addRipple);
   </script>
 </body>
