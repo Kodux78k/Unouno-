@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UNO Minimal – Áudio e Temas</title>
+<style>
+  /* Base timing tokens */
+  :root {
+    --duration-fast: .15s;
+    --duration-med: .35s;
+    --duration-slow: .6s;
+    /* Fallback palette */
+    --bg1: #0a0d12;
+    --bg2: #101522;
+    --text: #d7d7d7;
+    --accent: #7b2cff;
+    --accent-rgb: 123, 44, 255;
+    --shadow: 0 10px 30px rgba(0,0,0,.35);
+    --blur: 20px;
+    --radius: 20px;
+  }
+  /* Theme definitions (override variables) */
+  body.theme-nebula {
+    --bg1: #0a0d12;
+    --bg2: #101522;
+    --text: #d7d7d7;
+    --accent: #7b2cff;
+    --accent-rgb: 123,44,255;
+  }
+  body.theme-medium {
+    --bg1: #1c1e24;
+    --bg2: #282a36;
+    --text: #e5e5e5;
+    --accent: #39ffb6;
+    --accent-rgb: 57,255,182;
+  }
+  body.theme-light {
+    --bg1: #f1f4f8;
+    --bg2: #e5edf5;
+    --text: #2b3050;
+    --accent: #6a62ff;
+    --accent-rgb: 106,98,255;
+  }
+  body {
+    margin: 0;
+    background: radial-gradient(120% 80% at 50% 0%, var(--bg2) 0%, var(--bg1) 100%);
+    color: var(--text);
+    font-family: 'Montserrat', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  /* Central archetype circle */
+  #circleWrapper {
+    position: relative;
+    width: min(80vw, 500px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.15);
+    overflow: hidden;
+    background: radial-gradient(circle at center, rgba(255,255,255,.05), rgba(255,255,255,.02) 70%);
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform .3s ease;
+    /* CSS variable that the audio analyser updates (0–1) */
+    --pulse: 0;
+  }
+  /* Pulsating overlay based on audio */
+  #circleWrapper::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at center,
+      rgba(var(--accent-rgb), calc(var(--pulse) * 0.6)) 0%,
+      rgba(var(--accent-rgb), 0) 70%);
+    pointer-events: none;
+    transition: background .1s linear;
+  }
+  #circleWrapper iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: transparent;
+  }
+  /* Dot logo in the circle */
+  #dotLogo {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: conic-gradient(var(--accent), var(--accent) 30%, rgba(255,255,255,.2));
+    box-shadow: 0 0 10px rgba(255,255,255,.4);
+    pointer-events: none;
+  }
+  /* Archetype switch buttons */
+  #archControls {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 10;
+  }
+  #archControls button {
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.18);
+    color: var(--text);
+    padding: 6px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background var(--duration-fast), transform var(--duration-fast);
+    backdrop-filter: blur(var(--blur));
+  }
+  #archControls button:hover { background: rgba(255,255,255,.12); }
+  #archControls button:active { transform: scale(.95); }
+  /* Floating Action Button (FAB) */
+  #fab {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(160deg, var(--accent), var(--accent));
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-size: 32px;
+    border: 1px solid rgba(255,255,255,.25);
+    box-shadow: 0 16px 32px rgba(0,0,0,.45), 0 4px 12px rgba(0,0,0,.3);
+    cursor: pointer;
+    transition: transform .15s ease, box-shadow .3s ease;
+  }
+  #fab:active { transform: scale(.95); }
+  #fab .pulse {
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    pointer-events: none;
+    box-shadow: 0 0 0 0 var(--accent);
+    animation: fabPulse 2.5s infinite;
+  }
+  @keyframes fabPulse {
+    0% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb), .6); }
+    70% { box-shadow: 0 0 0 28px rgba(var(--accent-rgb), 0); }
+    100% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0); }
+  }
+  /* Menu container */
+  #menu {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    opacity: 0;
+    transform: translateY(10px);
+    pointer-events: none;
+    transition: opacity var(--duration-med), transform var(--duration-med);
+    z-index: 100;
+  }
+  #menu.open {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .menu-item {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    min-width: 200px;
+    padding: 10px 14px;
+    border-radius: 14px;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.18);
+    color: var(--text);
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(var(--blur));
+    font-size: 14px;
+    font-weight: 600;
+    transition: background var(--duration-fast);
+  }
+  .menu-item:hover {
+    background: rgba(255,255,255,.08);
+  }
+  .menu-item .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+  }
+  /* Highlight audio-on state */
+  .menu-item.audio-on {
+    background: rgba(255,255,255,.12);
+  }
+  /* Theme group inside menu */
+  #themeItem { display: flex; align-items: center; gap: 10px; }
+  #themeGroup {
+    display: flex;
+    gap: 8px;
+  }
+  .theme-swatch {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,.25);
+    cursor: pointer;
+  }
+  .swatch-nebula { background: linear-gradient(135deg,#151d38,#3c0d4d); }
+  .swatch-medium { background: linear-gradient(135deg,#2e324a,#57607d); }
+  .swatch-light { background: linear-gradient(135deg,#e2e8f0,#cbd5e1); }
+  /* Fractal overlay */
+  #overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.6);
+    display: none;
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  #overlay.show {
+    display: flex;
+    animation: fadeIn var(--duration-slow);
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  #overlayContent {
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: rgba(15,17,32,.75);
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    padding: 20px;
+    color: var(--text);
+    font-family: 'Courier New', monospace;
+    white-space: pre-wrap;
+    line-height: 1.4;
+    font-size: 14px;
+  }
+</style>
+</head>
+<body class="theme-nebula">
+  <!-- Central archetype circle and controls -->
+  <div id="circleWrapper">
+    <iframe id="archFrame" srcdoc="<html><body style='margin:0;display:flex;align-items:center;justify-content:center;height:100%;background:transparent;color:#fff;font-family:sans-serif;'><div style='text-align:center;font-size:18px;opacity:.7'>Carregue um arquétipo<br/>ou escolha no menu</div></body></html>"></iframe>
+    <div id="dotLogo"></div>
+    <div id="archControls">
+      <button id="prevArch" title="Anterior">◀</button>
+      <button id="nextArch" title="Próximo">▶</button>
+    </div>
+  </div>
+  <!-- Floating action button to toggle menu -->
+  <button id="fab" aria-label="Menu">
+    <span>+</span>
+    <span class="pulse" aria-hidden="true"></span>
+  </button>
+  <!-- Menu with actions -->
+  <div id="menu">
+    <div class="menu-item" data-action="uno"><span class="dot"></span><span>UNO</span></div>
+    <div class="menu-item" data-action="dual"><span class="dot"></span><span>DUAL</span></div>
+    <div class="menu-item" data-action="trinity"><span class="dot"></span><span>TRINITY</span></div>
+    <div class="menu-item" data-action="audio"><span class="dot"></span><span id="audioLabel">Áudio Off</span></div>
+    <div class="menu-item" id="themeItem">
+      <span>Temas:</span>
+      <div id="themeGroup">
+        <div class="theme-swatch swatch-nebula" data-theme="nebula" title="Nebula"></div>
+        <div class="theme-swatch swatch-medium" data-theme="medium" title="Medium"></div>
+        <div class="theme-swatch swatch-light" data-theme="light" title="Light"></div>
+      </div>
+    </div>
+  </div>
+  <!-- Fractal overlay -->
+  <div id="overlay">
+    <div id="overlayContent"></div>
+  </div>
+  <script>
+  (function(){
+    /* Archetypes available (files relative to this HTML) */
+    const ARCH = ['hub_dual_variant_b_truncado.html','unificado_universal.html','unificado_7.html'];
+    let currentArch = 0;
+    const archFrame = document.getElementById('archFrame');
+    const circleWrapper = document.getElementById('circleWrapper');
+    const fab = document.getElementById('fab');
+    const menu = document.getElementById('menu');
+    const overlay = document.getElementById('overlay');
+    const overlayContent = document.getElementById('overlayContent');
+    const audioLabel = document.getElementById('audioLabel');
+    let menuOpen = false;
+    let audioMode = false;
+    let audioCtx, analyser, microphone;
+    /* Initialize state from localStorage */
+    function initState(){
+      const savedTheme = localStorage.getItem('unoTheme');
+      if(savedTheme){ setTheme(savedTheme, false); }
+      const savedIndex = parseInt(localStorage.getItem('unoArch')||'0',10);
+      if(!isNaN(savedIndex) && savedIndex >= 0 && savedIndex < ARCH.length){ currentArch = savedIndex; }
+      loadArch(currentArch);
+      const savedAudio = localStorage.getItem('unoAudio');
+      if(savedAudio === 'on'){ enableAudio(); }
+    }
+    /* Load an archetype by index */
+    function loadArch(idx){
+      currentArch = (idx + ARCH.length) % ARCH.length;
+      localStorage.setItem('unoArch', String(currentArch));
+      const file = ARCH[currentArch];
+      /* Directly assign the src. When opened via file:// protocol the fetch API may be blocked,
+         so we simply set the iframe's src. If the file cannot be loaded the iframe will show blank. */
+      archFrame.src = file;
+      archFrame.removeAttribute('srcdoc');
+    }
+    document.getElementById('prevArch').addEventListener('click', ()=>loadArch(currentArch - 1));
+    document.getElementById('nextArch').addEventListener('click', ()=>loadArch(currentArch + 1));
+    /* Menu toggle */
+    fab.addEventListener('click', ()=>{
+      menuOpen = !menuOpen;
+      menu.classList.toggle('open', menuOpen);
+    });
+    /* Menu actions handler */
+    menu.addEventListener('click', (ev)=>{
+      const target = ev.target.closest('.menu-item, .theme-swatch');
+      if(!target) return;
+      const action = target.getAttribute('data-action');
+      if(action){
+        if(action === 'uno') showAscii('UNO');
+        else if(action === 'dual') showAscii('DUAL');
+        else if(action === 'trinity') showAscii('TRINITY');
+        else if(action === 'audio') toggleAudio();
+        // Close menu when showing ascii fractal; keep open when toggling audio
+        if(action !== 'audio'){ toggleMenu(false); }
+      } else {
+        const theme = target.getAttribute('data-theme');
+        if(theme){ setTheme(theme, true); toggleMenu(false); }
+      }
+    });
+    function toggleMenu(state){
+      menuOpen = (state !== undefined) ? state : !menuOpen;
+      menu.classList.toggle('open', menuOpen);
+    }
+    /* Show ASCII fractal for UNO, DUAL, TRINITY */
+    function showAscii(mode){
+      const art = ascii369(mode);
+      overlayContent.textContent = art;
+      overlay.classList.add('show');
+      // Clicking anywhere hides overlay
+      overlay.addEventListener('click', hideOverlay, { once: true });
+    }
+    function hideOverlay(){ overlay.classList.remove('show'); }
+    /* Generate a simple repeating fractal pattern */
+    function ascii369(type){
+      const base = type === 'DUAL' ? '●○' : type === 'TRINITY' ? '▲▼' : '●';
+      const lines = [];
+      for(let i=0; i<16; i++){
+        let line = '';
+        for(let j=0; j<14; j++){
+          line += base[(i + j) % base.length] + ' ';
+        }
+        lines.push(line.trim());
+      }
+      return lines.join('\n');
+    }
+    /* Theme switching */
+    function setTheme(name, persist){
+      document.body.classList.remove('theme-nebula','theme-medium','theme-light');
+      if(name === 'nebula') document.body.classList.add('theme-nebula');
+      else if(name === 'medium') document.body.classList.add('theme-medium');
+      else if(name === 'light') document.body.classList.add('theme-light');
+      if(persist) localStorage.setItem('unoTheme', name);
+    }
+    /* Audio toggling */
+    function enableAudio(){
+      audioMode = true;
+      localStorage.setItem('unoAudio','on');
+      audioLabel.textContent = 'Áudio On';
+      document.querySelector('.menu-item[data-action="audio"]').classList.add('audio-on');
+      navigator.mediaDevices.getUserMedia({ audio: true }).then(stream=>{
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        microphone = audioCtx.createMediaStreamSource(stream);
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 256;
+        microphone.connect(analyser);
+        processAudio();
+      }).catch(err=>{
+        console.warn('Erro ao acessar microfone', err);
+      });
+    }
+    function disableAudio(){
+      audioMode = false;
+      localStorage.setItem('unoAudio','off');
+      audioLabel.textContent = 'Áudio Off';
+      const audioItem = document.querySelector('.menu-item[data-action="audio"]');
+      audioItem && audioItem.classList.remove('audio-on');
+      if(analyser){ analyser.disconnect(); analyser = null; }
+      if(microphone){ microphone.disconnect(); microphone = null; }
+      if(audioCtx){ audioCtx.close(); audioCtx = null; }
+      circleWrapper.style.setProperty('--pulse', 0);
+    }
+    function toggleAudio(){
+      if(audioMode){ disableAudio(); }
+      else { enableAudio(); }
+    }
+    function processAudio(){
+      if(!audioMode || !analyser) return;
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      const loop = () => {
+        if(!audioMode) return;
+        analyser.getByteTimeDomainData(dataArray);
+        let sum = 0;
+        for(let i=0; i<dataArray.length; i++){
+          const v = (dataArray[i] - 128) / 128;
+          sum += v * v;
+        }
+        const rms = Math.sqrt(sum / dataArray.length);
+        // Map RMS amplitude to 0–1 scale (scaling factor for visual effect)
+        const pulse = Math.min(Math.max(rms * 3, 0), 1);
+        circleWrapper.style.setProperty('--pulse', pulse.toString());
+        requestAnimationFrame(loop);
+      };
+      requestAnimationFrame(loop);
+    }
+    /* Initialize on load */
+    initState();
+  })();
+  </script>
+</body>
+</html>
