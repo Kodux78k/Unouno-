@@ -116,6 +116,26 @@
       display: none;
     }
 
+    /* Esconde a grade de cards na Home */
+    #v-home .cards { display: none !important; }
+
+    /* Área de texto/respostas da IA */
+    #iaFeed {
+      margin: 12px auto 0;
+      max-width: 820px;
+      background: var(--surface);
+      border: var(--bd);
+      border-radius: var(--r2);
+      box-shadow: var(--shadow);
+      padding: 12px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    #iaFeed .msg { margin: 8px 0; }
+    #iaFeed .msg.user { opacity:.9; }
+    #iaFeed .msg.ai { font-weight:700; }
+    #iaFeed .status { color: var(--mut); font-size: 12px; }
+
     /* ===== Apps Page customizations ===== */
     /* Estilizar botão de upload de HTML local para destaque */
     #btnImport {
@@ -224,6 +244,17 @@
     .session .tools .btn:hover { box-shadow: 0 0 0 1px rgba(255,255,255,.18) inset, 0 8px 22px rgba(0,0,0,.35) }
     .session iframe { display: block; width: 100%; height: 60vh; border: 0; background: #000 }
     .session.min iframe { display: none }
+
+    /* Permite redimensionar a altura do iframe dentro das sessões arrastando o canto inferior esquerdo */
+    .session { position: relative; }
+    .session .resize-handle {
+      position: absolute; left: 8px; bottom: 8px;
+      width: 16px; height: 16px; cursor: ns-resize;
+      border-radius: 4px;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.25);
+    }
+    .session .resize-handle:hover { background: rgba(255,255,255,.25); }
 
     /* ===== Dock + Tabs ===== */
     .dock { position: fixed; left: 10px; right: 10px; bottom: calc(var(--tabsH) + 8px + env(safe-area-inset-bottom)); display: flex; gap: 8px; flex-wrap: wrap; z-index: 80 }
@@ -531,6 +562,10 @@
           </button>
           </div>
         </div>
+        <!-- Área de respostas e status da IA na Home -->
+        <div id="iaFeed" aria-live="polite" aria-atomic="false">
+          <div class="status">Toque a bolinha para falar com a IA.</div>
+        </div>
         <div class="cards">
           <button class="card fx-trans fx-press ring" data-nav="apps">
             <div class="ico">
@@ -584,7 +619,7 @@
             <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
               <!-- Removemos a busca e o sort. Agora apenas a opção de abrir dentro e o botão para mostrar locais -->
               <label class="mut" style="display:inline-flex;gap:6px;align-items:center">
-                <input id="openInside" type="checkbox" /> abrir dentro
+                <input id="openInside" type="checkbox" checked /> abrir dentro
               </label>
               <button id="btnToggleLocal" class="btn fx-trans fx-press ring">
                 <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg" alt="Locais" width="16" height="16" onerror="this.onerror=null;this.src='icons/folder-open.svg'" style="margin-right:4px">
@@ -687,6 +722,9 @@
                  um seletor de voz e um botão de teste.  Essa grade será
                  preenchida dinamicamente pelo código em initVoices(). -->
             <div id="voicesWrap" style="display:grid; gap:10px"></div>
+            <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap">
+              <button id="btnSaveVoicePresets" class="btn fx-trans fx-press ring">Salvar Presets PT-BR<span class="ripple"></span></button>
+            </div>
 
           <!-- Preferências de Performance -->
           <div class="card fx-trans fx-lift" style="display:block">
@@ -882,29 +920,25 @@
         bgContainer.innerHTML = '';
         return;
       }
-      // Carregar dados do fundo
-      const bgData = LS.get('uno:bg', '');
+      // Carregar dados do fundo. Pode ser imagem (data URL) ou vídeo via URL temporário (ObjectURL).
+      const kind = LS.get('uno:bgKind','');
+      const data = LS.get('uno:bg','');
+      const url  = LS.get('uno:bgUrl','');
       bgContainer.innerHTML = '';
-      if (!bgData) return;
-      // Determine se é vídeo ou imagem
-      if (/^data:video\//.test(bgData)) {
+      if (kind === 'video-url' && url) {
         const vid = document.createElement('video');
-        vid.src = bgData;
-        vid.autoplay = true;
-        vid.loop = true;
-        vid.muted = true;
-        vid.playsInline = true;
-        vid.style.width = '100%';
-        vid.style.height = '100%';
-        vid.style.objectFit = 'cover';
+        vid.src = url; vid.autoplay = true; vid.loop = true; vid.muted = true; vid.playsInline = true;
+        vid.style.width='100%'; vid.style.height='100%'; vid.style.objectFit='cover';
         bgContainer.appendChild(vid);
-      } else {
+      } else if (/^data:video\//.test(data)) {
+        const vid = document.createElement('video');
+        vid.src = data; vid.autoplay = true; vid.loop = true; vid.muted = true; vid.playsInline = true;
+        vid.style.width='100%'; vid.style.height='100%'; vid.style.objectFit='cover';
+        bgContainer.appendChild(vid);
+      } else if (data) {
         const img = document.createElement('img');
-        img.src = bgData;
-        img.alt = '';
-        img.style.width = '100%';
-        img.style.height = '100%';
-        img.style.objectFit = 'cover';
+        img.src = data; img.alt = '';
+        img.style.width='100%'; img.style.height='100%'; img.style.objectFit='cover';
         bgContainer.appendChild(img);
       }
     }
@@ -930,9 +964,9 @@
       const archList = [ 'Luxara','Rhea','Aion','Atlas','Nova','Genus','Lumine','Kaion','Kaos','Horus','Elysha','Serena' ];
       function populateVoices() {
         let voices = speechSynthesis.getVoices();
-        // Filtrar por idiomas suportados (Português e Inglês) se disponível
-        const filtered = voices.filter(v => v.lang && (v.lang.startsWith('pt') || v.lang.startsWith('en')));
-        voices = filtered.length ? filtered : voices;
+        // Prioriza vozes em Português (pt). Se não houver, utiliza todas as vozes disponíveis.
+        const pt = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('pt'));
+        voices = pt.length ? pt : voices;
         const saved = LS.get('infodose:voices', {}) || {};
         // Se ainda não houver vozes salvas, defina um mapeamento padrão
         if (Object.keys(saved).length === 0 && voices.length) {
@@ -990,23 +1024,42 @@
       window.speechSynthesis.onvoiceschanged = () => populateVoices();
     }
 
+  // Gera mapeamento de voz + variação (pitch/rate) por arquétipo (PT-BR). Usado para presets PT.
+  function generatePtPresets() {
+    const archList = [ 'Luxara','Rhea','Aion','Atlas','Nova','Genus','Lumine','Kaion','Kaos','Horus','Elysha','Serena' ];
+    const all = speechSynthesis.getVoices();
+    const pt = all.filter(v => v.lang && v.lang.toLowerCase().startsWith('pt'));
+    const bank = pt.length ? pt : all;
+    const presets = {};
+    let idx = 0;
+    archList.forEach((name,i)=>{
+      const v = bank[idx % bank.length];
+      const pitch = 0.9 + ((i % 4) * 0.1);
+      const rate  = 0.95 + ((i % 3) * 0.05);
+      presets[name] = { name: v?.name || '', pitch: Math.min(2, pitch), rate: Math.min(2, rate) };
+      idx++;
+    });
+    return presets;
+  }
+  // Salva os presets PT-BR ao clicar no botão de presets
+  (function bindSavePresets(){
+    const btn = document.getElementById('btnSaveVoicePresets');
+    if(!btn) return;
+    btn.onclick = ()=>{
+      const p = generatePtPresets();
+      LS.set('infodose:voicePresets', p);
+      toast('Presets PT-BR salvos', 'ok');
+    };
+  })();
+
     // Pronuncia o nome do arquétipo usando a voz selecionada
     function speakArchetype(name) {
       try {
-        const archName = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
-        const saved = LS.get('infodose:voices', {});
+        const key = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
         const voices = speechSynthesis.getVoices();
-        let voice = null;
-        if (saved && saved[archName]) {
-          voice = voices.find(v => v.name === saved[archName]);
-        }
-        if (!voice) {
-          voice = voices.find(v => v.lang && (v.lang.startsWith('pt') || v.lang.startsWith('en')));
-        }
-        if (!voice && voices.length) voice = voices[0];
-        if (!voice) return;
-        const utter = new SpeechSynthesisUtterance(`Olá, eu sou ${archName}`);
-        utter.voice = voice;
+        let fallback = voices.find(v => v.lang?.toLowerCase().startsWith('pt')) || voices[0];
+        const utter = new SpeechSynthesisUtterance(`Olá, eu sou ${key}`);
+        applyUtterPrefs(key, utter, fallback);
         speechSynthesis.cancel();
         speechSynthesis.speak(utter);
       } catch (e) {}
@@ -1018,25 +1071,28 @@
     function speakWithActiveArch(text) {
       try {
         const select = document.getElementById('arch-select');
-        let archFile = select ? select.value || '' : '';
-        let base = archFile.replace(/\.html$/i, '');
+        let base = (select?.value || '').replace(/\.html$/i, '');
         const key = base.charAt(0).toUpperCase() + base.slice(1).toLowerCase();
-        const saved = LS.get('infodose:voices', {}) || {};
         const voices = speechSynthesis.getVoices();
-        let voice = null;
-        if (saved[key]) {
-          voice = voices.find(v => v.name === saved[key]);
-        }
-        if (!voice) {
-          voice = voices.find(v => v.lang && (v.lang.startsWith('pt') || v.lang.startsWith('en')));
-        }
-        if (!voice && voices.length) voice = voices[0];
-        if (!voice) return;
+        let fallback = voices.find(v => v.lang?.toLowerCase().startsWith('pt')) || voices[0];
         const utter = new SpeechSynthesisUtterance(text);
-        utter.voice = voice;
+        applyUtterPrefs(key, utter, fallback);
         speechSynthesis.cancel();
         speechSynthesis.speak(utter);
       } catch (e) {}
+    }
+
+    // Aplica preferências de voz (voz, pitch, rate) baseadas nos presets PT-BR para o arquétipo.
+    function applyUtterPrefs(archKey, utter, fallbackVoice){
+      const map = LS.get('infodose:voicePresets', {});
+      const voices = speechSynthesis.getVoices();
+      let chosen = fallbackVoice;
+      if (map[archKey]?.name) {
+        chosen = voices.find(v => v.name === map[archKey].name) || chosen;
+      }
+      if (chosen) utter.voice = chosen;
+      if (map[archKey]?.pitch) utter.pitch = map[archKey].pitch;
+      if (map[archKey]?.rate)  utter.rate  = map[archKey].rate;
     }
 
     // Exibe uma mensagem dentro do círculo do arquétipo. A mensagem desaparece após alguns segundos.
@@ -1253,6 +1309,18 @@
       menu.classList.toggle('show');
     }
 
+    // Função auxiliar para adicionar mensagens ao feed de IA.
+    // 'type' pode ser 'user', 'ai' ou 'status'; o texto será anexado e o feed rolado ao final.
+    function feedPush(type, text){
+      const box = document.getElementById('iaFeed');
+      if(!box) return;
+      const div = document.createElement('div');
+      div.className = 'msg ' + (type || 'status');
+      div.textContent = text;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    }
+
     /**
      * Inicia a interação Dual ao tocar a bolinha.  Esta função aplica uma
      * animação breve de pressão à bolinha, fala a saudação “Oi DUAL” (ou
@@ -1298,27 +1366,33 @@
      * @param {string} model Modelo selecionado
      */
     function startSpeechConversation(userName, sk, model) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) {
-        showArchMessage('Reconhecimento de fala não suportado neste navegador.', 'err');
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) {
+        showArchMessage('Reconhecimento de fala não suportado.', 'err');
         return;
       }
-      const recognition = new SpeechRecognition();
+      const recognition = new SR();
       recognition.lang = 'pt-BR';
       recognition.interimResults = false;
       recognition.maxAlternatives = 1;
-      recognition.onresult = async (event) => {
+      recognition.onstart = () => {
+        showArchMessage('Estou ouvindo…', 'ok');
+        feedPush('status','🎙️ Ouvindo…');
+      };
+      recognition.onresult = (event) => {
         const transcript = event.results[0][0].transcript.trim();
         if (transcript) {
+          feedPush('user','Você: ' + transcript);
+          showArchMessage('Pulso enviado. Recebendo intenção…','ok');
+          feedPush('status','⚡ Pulso enviado · recebendo intenção…');
           handleUserMessage(transcript, userName, sk, model);
         }
       };
       recognition.onerror = (e) => {
-        console.error('Erro no reconhecimento de fala:', e);
         showArchMessage('Erro no reconhecimento de fala.', 'err');
+        feedPush('status','❌ Erro no reconhecimento de fala.');
       };
       recognition.start();
-      showArchMessage('Estou ouvindo…', 'ok');
     }
 
     /**
@@ -1331,7 +1405,9 @@
      * @param {string} model Modelo de IA
      */
     async function handleUserMessage(text, userName, sk, model) {
+      // Exibe no feed o texto do usuário e prepara prompt para IA
       showArchMessage('Você: ' + text, 'ok');
+      feedPush('user','Você: ' + text);
       // Monta prompt incluindo o nome do usuário para personalização
       const prompt = `${userName} disse: ${text}`;
       // Envia ao modelo de IA
@@ -1343,6 +1419,7 @@
         reply = 'Desculpe, não consegui responder no momento.';
       }
       if (reply) {
+        feedPush('ai', 'Dual: ' + reply);
         showArchMessage(reply, 'ok');
         try { speakWithActiveArch(reply); } catch {}
       }
@@ -1510,20 +1587,38 @@
         upload.addEventListener('change', (e) => {
           const f = e.target.files && e.target.files[0];
           if (!f) return;
-          const reader = new FileReader();
-          reader.onload = () => {
-            try {
-              LS.set('uno:bg', reader.result);
-              LS.set('uno:theme', 'custom');
+          // Imagem pequena: pode ir em base64; Vídeo: usa ObjectURL (persistência até reload)
+          if (f.type.startsWith('video/')) {
+            const url = URL.createObjectURL(f);
+            LS.set('uno:bgKind','video-url');
+            LS.set('uno:bgUrl', url);
+            LS.set('uno:theme','custom');
+            if (sel) sel.value = 'custom';
+            applyTheme();
+            toast('Vídeo aplicado no background', 'ok');
+          } else {
+            const reader = new FileReader();
+            reader.onload = () => {
+              LS.set('uno:bg','' + reader.result);
+              LS.set('uno:bgKind','image-data');
+              LS.set('uno:theme','custom');
               if (sel) sel.value = 'custom';
               applyTheme();
-              toast('Fundo personalizado salvo', 'ok');
-              try { updateHomeStatus(); } catch {}
-            } catch (err) { console.error(err); toast('Erro ao salvar fundo', 'err'); }
-          };
-          reader.readAsDataURL(f);
+              toast('Imagem aplicada no background', 'ok');
+            };
+            reader.readAsDataURL(f);
+          }
         });
       }
+    })();
+
+    // Persistir preferência "Abrir dentro". Define o estado inicial a partir do localStorage e atualiza ao alterar.
+    (function initOpenInside(){
+      const chk = document.getElementById('openInside');
+      if(!chk) return;
+      const saved = LS.get('uno:openInside', true);
+      chk.checked = saved;
+      chk.addEventListener('change', () => LS.set('uno:openInside', chk.checked));
     })();
 
     /* ===================== Ícones inline (data SVG) ===================== */
@@ -1845,7 +1940,28 @@
             </button>
           </div>
         </div>
-        <iframe src="${url || 'about:blank'}" allow="autoplay; clipboard-read; clipboard-write; picture-in-picture; fullscreen"></iframe>`;
+        <iframe src="${url || 'about:blank'}" allow="autoplay; clipboard-read; clipboard-write; picture-in-picture; fullscreen"></iframe>
+        <div class="resize-handle" title="Arraste para ajustar a altura"></div>`;
+      // Redimensionar altura do iframe arrastando o handle
+      (function bindResize(){
+        const handle = card.querySelector('.resize-handle');
+        const iframe = card.querySelector('iframe');
+        if(!handle || !iframe) return;
+        let startY=0, startH=0, dragging=false;
+        handle.addEventListener('pointerdown', (ev)=>{
+          dragging=true; startY = ev.clientY; startH = iframe.clientHeight;
+          handle.setPointerCapture(ev.pointerId);
+        });
+        handle.addEventListener('pointermove', (ev)=>{
+          if(!dragging) return;
+          const dy = ev.clientY - startY;
+          const h = Math.max(120, startH + dy);
+          iframe.style.height = h + 'px';
+        });
+        const stop=()=> dragging=false;
+        handle.addEventListener('pointerup', stop);
+        handle.addEventListener('pointercancel', stop);
+      })();
       // Prepend the session card dependendo do modo de abertura. Se "abrir dentro" estiver marcado,
       // insira a sessão no topo da página (sessionsAnchor); caso contrário, use o stackWrap padrão.
       const anchor = document.getElementById('sessionsAnchor');
