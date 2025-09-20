@@ -116,10 +116,12 @@
       display: none;
     }
 
-    /* Esconde a grade de cards na Home */
-    #v-home .cards { display: none !important; }
+    /* Esconde a grade de cards na Home e abre espaço para o feed de IA */
+    #v-home .cards {
+      display: none !important;
+    }
 
-    /* Área de texto/respostas da IA */
+    /* Estiliza o feed de mensagens da IA em formato de conversa */
     #iaFeed {
       margin: 12px auto 0;
       max-width: 820px;
@@ -130,11 +132,32 @@
       padding: 12px;
       font-size: 14px;
       line-height: 1.5;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
-    #iaFeed .msg { margin: 8px 0; }
-    #iaFeed .msg.user { opacity:.9; }
-    #iaFeed .msg.ai { font-weight:700; }
-    #iaFeed .status { color: var(--mut); font-size: 12px; }
+    #iaFeed .msg {
+      margin: 0;
+      padding: 8px 12px;
+      border-radius: 16px;
+      max-width: 75%;
+      word-wrap: break-word;
+    }
+    #iaFeed .msg.user {
+      align-self: flex-end;
+      background: rgba(255,255,255,0.1);
+      border-radius: 16px 16px 0 16px;
+    }
+    #iaFeed .msg.ai {
+      align-self: flex-start;
+      background: rgba(57,255,182,0.12);
+      border-radius: 16px 16px 16px 0;
+    }
+    #iaFeed .status {
+      color: var(--mut);
+      font-size: 12px;
+      align-self: center;
+    }
 
     /* ===== Apps Page customizations ===== */
     /* Estilizar botão de upload de HTML local para destaque */
@@ -245,17 +268,6 @@
     .session iframe { display: block; width: 100%; height: 60vh; border: 0; background: #000 }
     .session.min iframe { display: none }
 
-    /* Permite redimensionar a altura do iframe dentro das sessões arrastando o canto inferior esquerdo */
-    .session { position: relative; }
-    .session .resize-handle {
-      position: absolute; left: 8px; bottom: 8px;
-      width: 16px; height: 16px; cursor: ns-resize;
-      border-radius: 4px;
-      background: rgba(255,255,255,.15);
-      border: 1px solid rgba(255,255,255,.25);
-    }
-    .session .resize-handle:hover { background: rgba(255,255,255,.25); }
-
     /* ===== Dock + Tabs ===== */
     .dock { position: fixed; left: 10px; right: 10px; bottom: calc(var(--tabsH) + 8px + env(safe-area-inset-bottom)); display: flex; gap: 8px; flex-wrap: wrap; z-index: 80 }
     .badge { display: inline-flex; gap: 6px; align-items: center; padding: .38rem .65rem; border: 1px solid #ffffff18; background: #0f1428; border-radius: 999px; font-weight: 800; position: relative }
@@ -278,7 +290,8 @@
       align-items: center;
       gap: 8px;
       justify-content: center;
-      margin-top: 24px;
+      /* Dá mais espaço do topo, relativo à altura da viewport */
+      margin-top: 5vh;
     }
     .arch-circle {
       position: relative;
@@ -459,7 +472,54 @@
     /* Remove default padding for the new Revo section and ensure the iframe fills the space */
     #v-revo { padding: 0; }
     #v-revo iframe { width: 100%; height: 100%; border: 0; background: transparent; }
-  </style>
+  
+/* === Dual adjustments (Kodux request) === */
+/* Feed no topo do portal e com tamanho máximo */
+#v-home #iaFeed{
+  max-height: 260px;
+  overflow: auto;
+  margin: 8px auto 10px;
+  z-index: 90;
+}
+/* Quando body.nav-right: barra de navegação vertical à direita */
+body.nav-right .tabbar{
+  position: fixed;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 56px;
+  height: auto;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+}
+body.nav-right .tabbar .inner{
+  display: grid;
+  gap: 10px;
+}
+body.nav-right .tabbar .tab{
+  width: 56px; height: 56px; border-radius: 16px;
+  display: grid; place-items: center;
+}
+
+/* --- Compact preview ticker --- */
+#msgPreview{
+  max-width:820px; margin:0 auto 10px; background:#ffb86b1f; border:1px solid #ffb86b55;
+  color:#ffd39a; border-radius:14px; padding:10px 12px; cursor:pointer; box-shadow:var(--shadow);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+#msgPreview:hover{ background:#ffb86b2b }
+/* Chat bubbles */
+#chatFeed .msg{max-width:78%; padding:10px 12px; border-radius:16px}
+#chatFeed .msg.user{align-self:flex-end; background:rgba(255,255,255,.08)}
+#chatFeed .msg.ai{align-self:flex-start; background:rgba(57,255,182,.14)}
+#chatFeed .msg.rich pre.code{white-space:pre-wrap; overflow:auto}
+/* Logs wrapping (avoid horizontal blowout) */
+.log, .toast, #chatFeed, #msgPreview, #iaFeed, .card{word-wrap:break-word; overflow-wrap:anywhere}
+/* Paragraph split look */
+.paragraph{margin:6px 0; line-height:1.55}
+</style>
 </head>
 <body>
   <!-- ===== Header ===== -->
@@ -552,9 +612,7 @@
               <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/yin-yang.svg" alt="Arquétipo" width="20" height="20" onerror="this.onerror=null;this.src='icons/yin-yang.svg'">
               <span>Arquétipo</span>
             </button>
-            <button data-nav="revo">
-              <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/globe.svg" alt="Revo" width="20" height="20" onerror="this.onerror=null;this.src='icons/globe.svg'">
-              <span>Revo</span>
+            \1chat\2Chat\3Dual Chat\4
             </button>
           <button data-audio="true" id="archAudioBtn">
             <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/microphone-lines.svg" alt="Áudio" width="20" height="20" onerror="this.onerror=null;this.src='icons/microphone-lines.svg'">
@@ -562,9 +620,8 @@
           </button>
           </div>
         </div>
-        <!-- Área de respostas e status da IA na Home -->
-        <div id="iaFeed" aria-live="polite" aria-atomic="false">
-          <div class="status">Toque a bolinha para falar com a IA.</div>
+        <!-- Feed de texto da IA -->
+        <div id="msgPreview" class="mut" style="display:none"></div>
         </div>
         <div class="cards">
           <button class="card fx-trans fx-press ring" data-nav="apps">
@@ -619,7 +676,7 @@
             <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
               <!-- Removemos a busca e o sort. Agora apenas a opção de abrir dentro e o botão para mostrar locais -->
               <label class="mut" style="display:inline-flex;gap:6px;align-items:center">
-                <input id="openInside" type="checkbox" checked /> abrir dentro
+                <input id="openInside" type="checkbox" /> abrir dentro
               </label>
               <button id="btnToggleLocal" class="btn fx-trans fx-press ring">
                 <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg" alt="Locais" width="16" height="16" onerror="this.onerror=null;this.src='icons/folder-open.svg'" style="margin-right:4px">
@@ -722,9 +779,6 @@
                  um seletor de voz e um botão de teste.  Essa grade será
                  preenchida dinamicamente pelo código em initVoices(). -->
             <div id="voicesWrap" style="display:grid; gap:10px"></div>
-            <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap">
-              <button id="btnSaveVoicePresets" class="btn fx-trans fx-press ring">Salvar Presets PT-BR<span class="ripple"></span></button>
-            </div>
 
           <!-- Preferências de Performance -->
           <div class="card fx-trans fx-lift" style="display:block">
@@ -764,10 +818,26 @@
     </section>
 
     <!-- REVO (Infodose Hub Ultra) -->
-    <section id="v-revo" class="view">
-      <!-- Carrega o conteúdo do Hub Ultra modificado via iframe.  O arquivo index-100_revo_mod.html está no mesmo diretório -->
-      <iframe id="revoEmbed" src="index-100_revo_mod.html" allow="autoplay; clipboard-read; clipboard-write; picture-in-picture; fullscreen" referrerpolicy="no-referrer"></iframe>
-    </section>
+    
+<section id="v-chat" class="view">
+  <div class="grid">
+    <div class="card fx-trans fx-lift" style="display:block">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-weight:800">Dual • Chat</div>
+        <div class="mut" style="font-size:12px">render-response + ações</div>
+      </div>
+    </div>
+    <div class="card fx-trans fx-lift" style="display:block">
+      <div id="chatFeed" style="max-height:46svh; overflow:auto; display:flex; flex-direction:column; gap:8px"></div>
+      <div style="display:flex; gap:8px; margin-top:10px">
+        <input id="chatInput" class="input ring" placeholder="Escreva sua intenção…" />
+        <button id="chatSend" class="btn prime fx-trans fx-press ring">Enviar<span class="ripple"></span></button>
+      </div>
+      <div class="mut" style="font-size:12px;margin-top:6px">Dica: clique em (ações), chips e links que surgirem nas respostas.</div>
+    </div>
+  </div>
+</section>
+
   </main>
 
   <!-- DOCK & TABS -->
@@ -836,7 +906,161 @@
       {"key":"aion","title":"Aion · Evolutia","desc":"Microações estratégicas e evolução.","url":"about:blank","icon":"aion"}
     ]
   }
-  </script>
+  
+// --- Preview ticker + Chat wiring ---
+(function(){
+  const preview = document.getElementById('msgPreview');
+  const chatFeed = document.getElementById('chatFeed');
+  const chatInput = document.getElementById('chatInput');
+  const chatSend = document.getElementById('chatSend');
+
+  function showPreview(text){
+    if(!preview) return;
+    if(!text) { preview.style.display='none'; return; }
+    preview.textContent = text.length>200 ? text.slice(0,200)+'…' : text;
+    preview.style.display = 'block';
+  }
+  function addChatMsg(text, who){
+    if(!chatFeed) return;
+    const div = document.createElement('div');
+    div.className = 'msg ' + (who||'ai');
+    div.textContent = text;
+    chatFeed.appendChild(div);
+    // enrich if ai
+    if(who!=='user'){ div.classList.add('rich'); try{ dualEnrich(div) }catch(_){} }
+    chatFeed.scrollTop = chatFeed.scrollHeight;
+  }
+  window.__dual_addChatMsg = addChatMsg;
+  window.__dual_showPreview = showPreview;
+
+  if(preview){
+    preview.addEventListener('click', ()=>{ try{ nav('chat') }catch(_){ } });
+  }
+  if(chatSend && chatInput){
+    chatSend.addEventListener('click', ()=>{
+      const t = (chatInput.value||'').trim(); if(!t) return;
+      addChatMsg(t, 'user');
+      chatInput.value='';
+      const sk = localStorage.getItem('dual.keys.openrouter') || '';
+      const userName = (localStorage.getItem('infodose:userName') || '').trim();
+      const model = LS.get('dual.openrouter.model');
+      handleUserMessage(t, userName, sk, model);
+    });
+    chatInput.addEventListener('keydown', (e)=>{
+      if(e.key==='Enter'){ e.preventDefault(); chatSend.click(); }
+    });
+  }
+})();
+// Override: when reply arrives, mirror into Chat and Preview (instead of iaFeed)
+(function(){
+  const _old = window.feedPushDual || window.feedPush;
+  window.feedPushDual = function(type, text){
+    try{ __dual_addChatMsg(text, 'ai'); __dual_showPreview(text); }catch(_){}
+  };
+  window.feedPush = function(type, text){
+    if(type==='user'){ try{ __dual_addChatMsg(text.replace(/^Você:\s*/i,''), 'user') }catch(_){} }
+  };
+})();
+
+
+// --- Background persistence (video/png) + perf fallback ---
+(function(){
+  const bgHost = document.getElementById('custom-bg');
+  const themeSel = document.getElementById('themeSelect');
+  const perfSel  = document.getElementById('selPerf');
+  const upload   = document.getElementById('bgUpload');
+
+  const KEYS = {
+    type: 'dual.bg.type',      // 'video' | 'image'
+    data: 'dual.bg.data',      // dataURL
+    src : 'dual.bg.src',       // optional URL/path (assets/base.mp4/png)
+  };
+  const DEF = {
+    video: 'assets/base.mp4',
+    image: 'assets/base.png'
+  };
+
+  function clearBG(){ if(bgHost) bgHost.innerHTML=''; }
+  function setVideo(src){
+    if(!bgHost) return;
+    bgHost.innerHTML = `<video autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover">
+      <source src="${src}" type="video/mp4"></video>`;
+  }
+  function setImage(src){
+    if(!bgHost) return;
+    bgHost.innerHTML = `<img src="${src}" alt="" style="width:100%;height:100%;object-fit:cover;filter:brightness(.9)">`;
+  }
+  function applyBG(){
+    try{
+      const t = (localStorage.getItem(KEYS.type)||'').trim();
+      const data = localStorage.getItem(KEYS.data)||'';
+      const src  = localStorage.getItem(KEYS.src)||'';
+      const perf = (localStorage.getItem('hub.perf')||'high');
+      const theme = (localStorage.getItem('dual.theme')||'default');
+      clearBG();
+      // If perf low/med => prefer PNG
+      const forceImage = (perf==='low' || perf==='med' || theme==='medium');
+      if(forceImage){
+        const png = (t==='image' && data) ? data : (t==='image' && src? src : DEF.image);
+        setImage(png);
+      }else{
+        if(t==='video'){
+          setVideo((data or src or DEF.video))
+        }else if(t==='image'){
+          setImage((data or src or DEF.image))
+        }else{
+          // default video
+          setVideo(DEF.video);
+        }
+      }
+    }catch(e){}
+  }
+  function saveBG(kind, dataURL){
+    localStorage.setItem(KEYS.type, kind);
+    if(dataURL) localStorage.setItem(KEYS.data, dataURL);
+    localStorage.removeItem(KEYS.src); // prefer data
+  }
+  // Persist on upload
+  if(upload){
+    upload.addEventListener('change', async (e)=>{
+      const f = e.target.files && e.target.files[0]; if(!f) return;
+      const isVideo = /video/i.test(f.type);
+      const reader = new FileReader();
+      reader.onload = ()=>{
+        saveBG(isVideo?'video':'image', reader.result);
+        toast('Fundo salvo no dispositivo','ok'); applyBG();
+      };
+      reader.readAsDataURL(f);
+    });
+  }
+  // React to perf/theme changes
+  if(perfSel){ perfSel.addEventListener('change', ()=>{ localStorage.setItem('hub.perf', perfSel.value); applyBG(); }); }
+  if(themeSel){ themeSel.addEventListener('change', ()=>{
+    const v = themeSel.value==='medium' ? 'medium' : 'default';
+    localStorage.setItem('dual.theme', v); applyBG();
+  }); }
+  // First paint
+  document.addEventListener('DOMContentLoaded', applyBG);
+  window.addEventListener('load', applyBG);
+})();
+
+
+// --- Split long texts into paragraphs to protect layout ---
+function splitIntoParagraphs(txt, max=280){
+  if(!txt) return [];
+  const parts = [];
+  let s = String(txt);
+  // If already has line breaks, respect them
+  if(/\n/.test(s)){
+    s.split(/\n+/).forEach(p=>{ if(p.trim()) parts.push(p.trim()) });
+  }else{
+    while(s.length>max){ parts.push(s.slice(0,max)); s = s.slice(max); }
+    if(s.trim()) parts.push(s.trim());
+  }
+  return parts.map(p=>`<div class="paragraph">${p}</div>`).join('');
+}
+
+</script>
 
   <script>
     /* ===================== Helpers ===================== */
@@ -920,25 +1144,29 @@
         bgContainer.innerHTML = '';
         return;
       }
-      // Carregar dados do fundo. Pode ser imagem (data URL) ou vídeo via URL temporário (ObjectURL).
-      const kind = LS.get('uno:bgKind','');
-      const data = LS.get('uno:bg','');
-      const url  = LS.get('uno:bgUrl','');
+      // Carregar dados do fundo
+      const bgData = LS.get('uno:bg', '');
       bgContainer.innerHTML = '';
-      if (kind === 'video-url' && url) {
+      if (!bgData) return;
+      // Determine se é vídeo ou imagem
+      if (/^data:video\//.test(bgData)) {
         const vid = document.createElement('video');
-        vid.src = url; vid.autoplay = true; vid.loop = true; vid.muted = true; vid.playsInline = true;
-        vid.style.width='100%'; vid.style.height='100%'; vid.style.objectFit='cover';
+        vid.src = bgData;
+        vid.autoplay = true;
+        vid.loop = true;
+        vid.muted = true;
+        vid.playsInline = true;
+        vid.style.width = '100%';
+        vid.style.height = '100%';
+        vid.style.objectFit = 'cover';
         bgContainer.appendChild(vid);
-      } else if (/^data:video\//.test(data)) {
-        const vid = document.createElement('video');
-        vid.src = data; vid.autoplay = true; vid.loop = true; vid.muted = true; vid.playsInline = true;
-        vid.style.width='100%'; vid.style.height='100%'; vid.style.objectFit='cover';
-        bgContainer.appendChild(vid);
-      } else if (data) {
+      } else {
         const img = document.createElement('img');
-        img.src = data; img.alt = '';
-        img.style.width='100%'; img.style.height='100%'; img.style.objectFit='cover';
+        img.src = bgData;
+        img.alt = '';
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'cover';
         bgContainer.appendChild(img);
       }
     }
@@ -964,9 +1192,9 @@
       const archList = [ 'Luxara','Rhea','Aion','Atlas','Nova','Genus','Lumine','Kaion','Kaos','Horus','Elysha','Serena' ];
       function populateVoices() {
         let voices = speechSynthesis.getVoices();
-        // Prioriza vozes em Português (pt). Se não houver, utiliza todas as vozes disponíveis.
-        const pt = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('pt'));
-        voices = pt.length ? pt : voices;
+        // Filtrar por idiomas suportados (Português e Inglês) se disponível
+        const filtered = voices.filter(v => v.lang && (v.lang.startsWith('pt') || v.lang.startsWith('en')));
+        voices = filtered.length ? filtered : voices;
         const saved = LS.get('infodose:voices', {}) || {};
         // Se ainda não houver vozes salvas, defina um mapeamento padrão
         if (Object.keys(saved).length === 0 && voices.length) {
@@ -1024,42 +1252,23 @@
       window.speechSynthesis.onvoiceschanged = () => populateVoices();
     }
 
-  // Gera mapeamento de voz + variação (pitch/rate) por arquétipo (PT-BR). Usado para presets PT.
-  function generatePtPresets() {
-    const archList = [ 'Luxara','Rhea','Aion','Atlas','Nova','Genus','Lumine','Kaion','Kaos','Horus','Elysha','Serena' ];
-    const all = speechSynthesis.getVoices();
-    const pt = all.filter(v => v.lang && v.lang.toLowerCase().startsWith('pt'));
-    const bank = pt.length ? pt : all;
-    const presets = {};
-    let idx = 0;
-    archList.forEach((name,i)=>{
-      const v = bank[idx % bank.length];
-      const pitch = 0.9 + ((i % 4) * 0.1);
-      const rate  = 0.95 + ((i % 3) * 0.05);
-      presets[name] = { name: v?.name || '', pitch: Math.min(2, pitch), rate: Math.min(2, rate) };
-      idx++;
-    });
-    return presets;
-  }
-  // Salva os presets PT-BR ao clicar no botão de presets
-  (function bindSavePresets(){
-    const btn = document.getElementById('btnSaveVoicePresets');
-    if(!btn) return;
-    btn.onclick = ()=>{
-      const p = generatePtPresets();
-      LS.set('infodose:voicePresets', p);
-      toast('Presets PT-BR salvos', 'ok');
-    };
-  })();
-
     // Pronuncia o nome do arquétipo usando a voz selecionada
     function speakArchetype(name) {
       try {
-        const key = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+        const archName = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+        const saved = LS.get('infodose:voices', {});
         const voices = speechSynthesis.getVoices();
-        let fallback = voices.find(v => v.lang?.toLowerCase().startsWith('pt')) || voices[0];
-        const utter = new SpeechSynthesisUtterance(`Olá, eu sou ${key}`);
-        applyUtterPrefs(key, utter, fallback);
+        let voice = null;
+        if (saved && saved[archName]) {
+          voice = voices.find(v => v.name === saved[archName]);
+        }
+        if (!voice) {
+          voice = voices.find(v => v.lang && (v.lang.startsWith('pt') || v.lang.startsWith('en')));
+        }
+        if (!voice && voices.length) voice = voices[0];
+        if (!voice) return;
+        const utter = new SpeechSynthesisUtterance(`Olá, eu sou ${archName}`);
+        utter.voice = voice;
         speechSynthesis.cancel();
         speechSynthesis.speak(utter);
       } catch (e) {}
@@ -1071,28 +1280,25 @@
     function speakWithActiveArch(text) {
       try {
         const select = document.getElementById('arch-select');
-        let base = (select?.value || '').replace(/\.html$/i, '');
+        let archFile = select ? select.value || '' : '';
+        let base = archFile.replace(/\.html$/i, '');
         const key = base.charAt(0).toUpperCase() + base.slice(1).toLowerCase();
+        const saved = LS.get('infodose:voices', {}) || {};
         const voices = speechSynthesis.getVoices();
-        let fallback = voices.find(v => v.lang?.toLowerCase().startsWith('pt')) || voices[0];
+        let voice = null;
+        if (saved[key]) {
+          voice = voices.find(v => v.name === saved[key]);
+        }
+        if (!voice) {
+          voice = voices.find(v => v.lang && (v.lang.startsWith('pt') || v.lang.startsWith('en')));
+        }
+        if (!voice && voices.length) voice = voices[0];
+        if (!voice) return;
         const utter = new SpeechSynthesisUtterance(text);
-        applyUtterPrefs(key, utter, fallback);
+        utter.voice = voice;
         speechSynthesis.cancel();
         speechSynthesis.speak(utter);
       } catch (e) {}
-    }
-
-    // Aplica preferências de voz (voz, pitch, rate) baseadas nos presets PT-BR para o arquétipo.
-    function applyUtterPrefs(archKey, utter, fallbackVoice){
-      const map = LS.get('infodose:voicePresets', {});
-      const voices = speechSynthesis.getVoices();
-      let chosen = fallbackVoice;
-      if (map[archKey]?.name) {
-        chosen = voices.find(v => v.name === map[archKey].name) || chosen;
-      }
-      if (chosen) utter.voice = chosen;
-      if (map[archKey]?.pitch) utter.pitch = map[archKey].pitch;
-      if (map[archKey]?.rate)  utter.rate  = map[archKey].rate;
     }
 
     // Exibe uma mensagem dentro do círculo do arquétipo. A mensagem desaparece após alguns segundos.
@@ -1309,18 +1515,6 @@
       menu.classList.toggle('show');
     }
 
-    // Função auxiliar para adicionar mensagens ao feed de IA.
-    // 'type' pode ser 'user', 'ai' ou 'status'; o texto será anexado e o feed rolado ao final.
-    function feedPush(type, text){
-      const box = document.getElementById('iaFeed');
-      if(!box) return;
-      const div = document.createElement('div');
-      div.className = 'msg ' + (type || 'status');
-      div.textContent = text;
-      box.appendChild(div);
-      box.scrollTop = box.scrollHeight;
-    }
-
     /**
      * Inicia a interação Dual ao tocar a bolinha.  Esta função aplica uma
      * animação breve de pressão à bolinha, fala a saudação “Oi DUAL” (ou
@@ -1365,32 +1559,50 @@
      * @param {string} sk Chave da API do OpenRouter
      * @param {string} model Modelo selecionado
      */
+
+    // Insere mensagens no feed de IA da Home. Mantém somente as últimas 10 entradas.
+    function feedPush(type, text) {
+      const box = document.getElementById('iaFeed');
+      if (!box) return;
+      const div = document.createElement('div');
+      div.className = 'msg ' + (type || 'status');
+      div.textContent = text;
+      box.appendChild(div);
+      // Limita o número de mensagens exibidas
+      const msgs = box.querySelectorAll('.msg');
+      const limit = 10;
+      if (msgs.length > limit) {
+        box.removeChild(msgs[0]);
+      }
+      box.scrollTop = box.scrollHeight;
+    }
     function startSpeechConversation(userName, sk, model) {
-      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SR) {
-        showArchMessage('Reconhecimento de fala não suportado.', 'err');
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        showArchMessage('Reconhecimento de fala não suportado neste navegador.', 'err');
         return;
       }
-      const recognition = new SR();
+      const recognition = new SpeechRecognition();
       recognition.lang = 'pt-BR';
       recognition.interimResults = false;
       recognition.maxAlternatives = 1;
       recognition.onstart = () => {
         showArchMessage('Estou ouvindo…', 'ok');
-        feedPush('status','🎙️ Ouvindo…');
+        feedPush('status', '🎙️ Ouvindo…');
       };
       recognition.onresult = (event) => {
         const transcript = event.results[0][0].transcript.trim();
         if (transcript) {
-          feedPush('user','Você: ' + transcript);
-          showArchMessage('Pulso enviado. Recebendo intenção…','ok');
-          feedPush('status','⚡ Pulso enviado · recebendo intenção…');
+          feedPush('user', 'Você: ' + transcript);
+          showArchMessage('Pulso enviado. Recebendo intenção…', 'ok');
+          feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
           handleUserMessage(transcript, userName, sk, model);
         }
       };
       recognition.onerror = (e) => {
+        console.error('Erro no reconhecimento de fala:', e);
         showArchMessage('Erro no reconhecimento de fala.', 'err');
-        feedPush('status','❌ Erro no reconhecimento de fala.');
+        feedPush('status', '❌ Erro no reconhecimento de fala.');
       };
       recognition.start();
     }
@@ -1405,9 +1617,7 @@
      * @param {string} model Modelo de IA
      */
     async function handleUserMessage(text, userName, sk, model) {
-      // Exibe no feed o texto do usuário e prepara prompt para IA
-      showArchMessage('Você: ' + text, 'ok');
-      feedPush('user','Você: ' + text);
+      // A mensagem do usuário já foi adicionada ao feed no evento onresult do reconhecimento de fala
       // Monta prompt incluindo o nome do usuário para personalização
       const prompt = `${userName} disse: ${text}`;
       // Envia ao modelo de IA
@@ -1419,7 +1629,14 @@
         reply = 'Desculpe, não consegui responder no momento.';
       }
       if (reply) {
-        feedPush('ai', 'Dual: ' + reply);
+        // Determine o arquétipo ativo para prefixar as respostas no feed
+        let archName = 'Dual';
+        try {
+          const select = document.getElementById('arch-select');
+          let base = (select?.value || '').replace(/\.html$/i, '');
+          archName = base.charAt(0).toUpperCase() + base.slice(1).toLowerCase();
+        } catch (e) {}
+        feedPush('ai', archName + ': ' + reply);
         showArchMessage(reply, 'ok');
         try { speakWithActiveArch(reply); } catch {}
       }
@@ -1587,38 +1804,20 @@
         upload.addEventListener('change', (e) => {
           const f = e.target.files && e.target.files[0];
           if (!f) return;
-          // Imagem pequena: pode ir em base64; Vídeo: usa ObjectURL (persistência até reload)
-          if (f.type.startsWith('video/')) {
-            const url = URL.createObjectURL(f);
-            LS.set('uno:bgKind','video-url');
-            LS.set('uno:bgUrl', url);
-            LS.set('uno:theme','custom');
-            if (sel) sel.value = 'custom';
-            applyTheme();
-            toast('Vídeo aplicado no background', 'ok');
-          } else {
-            const reader = new FileReader();
-            reader.onload = () => {
-              LS.set('uno:bg','' + reader.result);
-              LS.set('uno:bgKind','image-data');
-              LS.set('uno:theme','custom');
+          const reader = new FileReader();
+          reader.onload = () => {
+            try {
+              LS.set('uno:bg', reader.result);
+              LS.set('uno:theme', 'custom');
               if (sel) sel.value = 'custom';
               applyTheme();
-              toast('Imagem aplicada no background', 'ok');
-            };
-            reader.readAsDataURL(f);
-          }
+              toast('Fundo personalizado salvo', 'ok');
+              try { updateHomeStatus(); } catch {}
+            } catch (err) { console.error(err); toast('Erro ao salvar fundo', 'err'); }
+          };
+          reader.readAsDataURL(f);
         });
       }
-    })();
-
-    // Persistir preferência "Abrir dentro". Define o estado inicial a partir do localStorage e atualiza ao alterar.
-    (function initOpenInside(){
-      const chk = document.getElementById('openInside');
-      if(!chk) return;
-      const saved = LS.get('uno:openInside', true);
-      chk.checked = saved;
-      chk.addEventListener('change', () => LS.set('uno:openInside', chk.checked));
     })();
 
     /* ===================== Ícones inline (data SVG) ===================== */
@@ -1940,28 +2139,7 @@
             </button>
           </div>
         </div>
-        <iframe src="${url || 'about:blank'}" allow="autoplay; clipboard-read; clipboard-write; picture-in-picture; fullscreen"></iframe>
-        <div class="resize-handle" title="Arraste para ajustar a altura"></div>`;
-      // Redimensionar altura do iframe arrastando o handle
-      (function bindResize(){
-        const handle = card.querySelector('.resize-handle');
-        const iframe = card.querySelector('iframe');
-        if(!handle || !iframe) return;
-        let startY=0, startH=0, dragging=false;
-        handle.addEventListener('pointerdown', (ev)=>{
-          dragging=true; startY = ev.clientY; startH = iframe.clientHeight;
-          handle.setPointerCapture(ev.pointerId);
-        });
-        handle.addEventListener('pointermove', (ev)=>{
-          if(!dragging) return;
-          const dy = ev.clientY - startY;
-          const h = Math.max(120, startH + dy);
-          iframe.style.height = h + 'px';
-        });
-        const stop=()=> dragging=false;
-        handle.addEventListener('pointerup', stop);
-        handle.addEventListener('pointercancel', stop);
-      })();
+        <iframe src="${url || 'about:blank'}" allow="autoplay; clipboard-read; clipboard-write; picture-in-picture; fullscreen"></iframe>`;
       // Prepend the session card dependendo do modo de abertura. Se "abrir dentro" estiver marcado,
       // insira a sessão no topo da página (sessionsAnchor); caso contrário, use o stackWrap padrão.
       const anchor = document.getElementById('sessionsAnchor');
@@ -2132,6 +2310,340 @@
       }
     })();
     $$('button').forEach(addRipple);
-  </script>
+  
+// (disabled) move feed to top
+document.addEventListener('DOMContentLoaded', () => {
+  try{
+    const feed = document.getElementById('iaFeed');
+    const archContainer = document.querySelector('#v-home .arch-container');
+    if(feed && archContainer && archContainer.parentNode){
+      archContainer.parentNode.insertBefore(feed, archContainer);
+    }
+  }catch(e){}
+});
+
+// === Dual Voices: mapping por arquétipo com micro variações (pitch/rate) ===
+const ARCH_GENDER = {
+  "Atlas":"m","Kaion":"m","Kaos":"m","Horus":"m","Genus":"m","Aion":"m",
+  "Nova":"f","Elysha":"f","Luxara":"f","Serena":"f","Rhea":"f","Artemis":"f"
+};
+function loadVoiceMap(){
+  try{ return JSON.parse(localStorage.getItem('dual.voices.map'))||{} }catch(_){ return {} }
+}
+function saveVoiceMap(map){
+  localStorage.setItem('dual.voices.map', JSON.stringify(map||{}));
+}
+function pickVoiceByGender(voices, gender){
+  const langPref = v => /pt\-BR|Portugu[eê]s/i.test(v.lang||v.name||'');
+  const femHint = v => /(female|feminina|mulher)/i.test(v.name||'');
+  const mascHint = v => /(male|masculina|homem)/i.test(v.name||'');
+  const choose = (preds) => voices.find(v => preds.every(p=>p(v)));
+  if(gender==='f'){
+    return choose([langPref, femHint]) || choose([femHint]) || choose([langPref]) || voices[0];
+  }else{
+    return choose([langPref, mascHint]) || choose([mascHint]) || choose([langPref]) || voices[0];
+  }
+}
+function microVarFor(name){
+  // micro variação determinística por arquétipo
+  let h=0; for(const c of name) h=(h*31 + c.charCodeAt(0)) & 0xffffffff;
+  const rnd = (seed)=>((seed%1000)/1000);
+  const r = rnd(Math.abs(h));
+  const pitch = 0.95 + (r*0.2); // 0.95..1.15
+  const rate  = 0.96 + ((1-r)*0.18); // 0.96..1.14
+  return {pitch: +pitch.toFixed(2), rate: +rate.toFixed(2)};
+}
+// Override speakWithActiveArch to use mapping if available
+(function(){
+  const _orig = window.speakWithActiveArch;
+  window.speakWithActiveArch = function(text){
+    const synth = window.speechSynthesis;
+    if(!synth){ try{ _orig && _orig(text) }catch(_){}; return; }
+    const voices = synth.getVoices();
+    const select = document.getElementById('arch-select');
+    let base = (select?.value||'').replace(/\.html$/i,'');
+    const arch = base ? (base[0].toUpperCase()+base.slice(1).toLowerCase()) : 'Atlas';
+    const map = loadVoiceMap();
+    const conf = map[arch] || {};
+    const u = new SpeechSynthesisUtterance(String(text||''));
+    let v = voices.find(v=>v.name===conf.name) || pickVoiceByGender(voices, ARCH_GENDER[arch]||'m');
+    u.voice = v;
+    const mv = conf.pitch && conf.rate ? conf : microVarFor(arch);
+    u.pitch = mv.pitch; u.rate = mv.rate;
+    u.lang = (v && v.lang) || 'pt-BR';
+    synth.speak(u);
+  };
+})();
+// UI: construir painel por arquétipo no #voicesWrap (se existir)
+document.addEventListener('DOMContentLoaded', ()=>{
+  const wrap = document.getElementById('voicesWrap');
+  if(!wrap) return;
+  const synth = window.speechSynthesis;
+  function rebuild(){
+    const voices = synth.getVoices();
+    if(!voices || !voices.length){ setTimeout(rebuild, 200); return; }
+    const map = loadVoiceMap();
+    wrap.innerHTML = '';
+    const ARCHS = Object.keys(ARCH_GENDER);
+    ARCHS.forEach(arch=>{
+      const row = document.createElement('div');
+      row.style.display='grid'; row.style.gridTemplateColumns='120px 1fr auto'; row.style.gap='8px'; row.style.alignItems='center';
+      const label = document.createElement('div'); label.textContent = arch; label.style.fontWeight='800';
+      const sel = document.createElement('select'); sel.className='input ring'; sel.dataset.arch=arch;
+      voices.forEach(v=>{
+        const opt = document.createElement('option');
+        opt.value = v.name; opt.textContent = `${v.name} (${v.lang})`;
+        sel.appendChild(opt);
+      });
+      const save = document.createElement('button'); save.className='btn fx-trans fx-press ring'; save.textContent='Salvar';
+      const test = document.createElement('button'); test.className='btn fx-trans fx-press ring'; test.style.marginLeft='6px'; test.textContent='Testar';
+      const btnBox = document.createElement('div'); btnBox.appendChild(save); btnBox.appendChild(test);
+      // defaults
+      const conf = map[arch] || {};
+      const defVoice = voices.find(v=>v.name===conf.name) || pickVoiceByGender(voices, ARCH_GENDER[arch]);
+      sel.value = (defVoice && defVoice.name) || voices[0].name;
+      row.appendChild(label); row.appendChild(sel); row.appendChild(btnBox);
+      wrap.appendChild(row);
+      save.onclick = ()=>{
+        const m = loadVoiceMap();
+        const mv = microVarFor(arch);
+        m[arch] = { name: sel.value, pitch: (conf.pitch||mv.pitch), rate: (conf.rate||mv.rate) };
+        saveVoiceMap(m);
+        toast('Voz salva', 'ok');
+      };
+      test.onclick = ()=>{
+        const m = loadVoiceMap();
+        const mv = m[arch] || microVarFor(arch);
+        const u = new SpeechSynthesisUtterance(`${arch} conectado. Teste de voz.`);
+        u.voice = voices.find(v=>v.name===sel.value) || voices[0];
+        u.pitch = mv.pitch; u.rate = mv.rate; u.lang = u.voice.lang || 'pt-BR';
+        synth.speak(u);
+      };
+    });
+  }
+  rebuild();
+  // Botão global de atualizar lista
+  const perfCard = document.getElementById('voicesWrap'); // reusar card
+  const updateBtn = document.createElement('button');
+  updateBtn.id='btnVoicesUpdate'; updateBtn.className='btn fx-trans fx-press ring';
+  updateBtn.textContent='Atualizar Vozes';
+  updateBtn.style.marginTop='6px';
+  perfCard.parentNode.appendChild(updateBtn);
+  updateBtn.onclick = ()=>{ window.speechSynthesis.onvoiceschanged = null; rebuild(); toast('Lista de vozes atualizada', 'ok'); };
+  // re-popular quando o navegador carregar as vozes
+  window.speechSynthesis.onvoiceschanged = rebuild;
+});
+
+// === Enriquecimento no feed (ações, chips, links, code) ===
+function feedPushDual(type, text){
+  const box = document.getElementById('iaFeed');
+  if(!box) return;
+  const div = document.createElement('div');
+  div.className = 'msg ' + (type||'ai');
+  div.textContent = text;
+  box.appendChild(div);
+  // Limitar quantidade
+  const msgs = box.querySelectorAll('.msg');
+  const limit = 10; if (msgs.length>limit) box.removeChild(msgs[0]);
+  // Tornar interativo
+  div.classList.add('rich');
+  dualEnrich(div);
+  box.scrollTop = box.scrollHeight;
+}
+function sendMessageFromSuggestion(txt){
+  if(!txt) return;
+  // Reusar pipeline de voz → IA
+  const sk = localStorage.getItem('dual.keys.openrouter') || '';
+  const userName = (localStorage.getItem('infodose:userName') || '').trim();
+  const model = LS.get('dual.openrouter.model');
+  feedPush('user','Você: '+txt);
+  handleUserMessage(txt, userName, sk, model);
+}
+// Html → elementos interativos (simplificado)
+function dualEnrich(node){
+  const escapeHtml = s => String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const attr = s => String(s).replace(/"/g,'&quot;');
+  let raw = node.textContent||'';
+  let html = escapeHtml(raw);
+  // ( ... ) → ação
+  html = html.replace(/\(([^()]+)\)/g, (m,inner)=>{
+    const lab = inner.trim().replace(/\s*->\s*/g,' → ');
+    return `<button class="action" data-send="${attr(lab)}">${escapeHtml(lab)}</button>`;
+  });
+  // Emojis → chip
+  html = html.replace(/(\p{Emoji_Presentation}|\p{Extended_Pictographic}|[⚡⭕✦☆★✧✩◆◇▶️◀️⏯️⏵⏸️⏹️🎛️🎚️🎙️🎧️🎼️🎹️🗂️📎🧩🔥🌙✨💡💾🧪⭐️])/gu,
+    (m)=>`<span class="chip" data-send="${attr(m)}">${escapeHtml(m)}</span>`);
+  // Links
+  html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (m,label,url)=>`<button class="link" data-url="${attr(url)}">${escapeHtml(label)} ↗</button>`);
+  html = html.replace(/(https?:\/\/[^\s]+)/g, (m,url)=>`<button class="link" data-url="${attr(url)}">${escapeHtml(url)} ↗</button>`);
+  // Code fence
+  html = html.replace(/```([a-z0-9_\-.+#]*)\n([\s\S]*?)```/gi, (m,lang,body)=>{
+    return `<pre class="code"><button class="copy" data-code="${attr(body)}">Copiar</button><code data-lang="${attr(lang||'text')}">${escapeHtml(body)}</code><span class="lang">${escapeHtml(lang||'text')}</span></pre>`;
+  });
+  node.innerHTML = html;
+  // binds
+  node.querySelectorAll('.action,.chip').forEach(el=>el.addEventListener('click',()=>sendMessageFromSuggestion(el.getAttribute('data-send'))));
+  node.querySelectorAll('.link').forEach(el=>el.addEventListener('click',()=>{ const url=el.getAttribute('data-url'); try{ window.open(url,'_blank') }catch(e){} }));
+  node.querySelectorAll('.code .copy').forEach(btn=>btn.addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(btn.getAttribute('data-code')||''); toast('Código copiado','ok') }catch(e){ toast('Falha ao copiar','err') } }));
+  // highlight
+  node.querySelectorAll('code[data-lang]').forEach(codeEl=>{
+    try{ highlightCode(codeEl, codeEl.getAttribute('data-lang')||'text'); }catch(_){}
+  });
+}
+
+// --- Preview ticker + Chat wiring ---
+(function(){
+  const preview = document.getElementById('msgPreview');
+  const chatFeed = document.getElementById('chatFeed');
+  const chatInput = document.getElementById('chatInput');
+  const chatSend = document.getElementById('chatSend');
+
+  function showPreview(text){
+    if(!preview) return;
+    if(!text) { preview.style.display='none'; return; }
+    preview.textContent = text.length>200 ? text.slice(0,200)+'…' : text;
+    preview.style.display = 'block';
+  }
+  function addChatMsg(text, who){
+    if(!chatFeed) return;
+    const div = document.createElement('div');
+    div.className = 'msg ' + (who||'ai');
+    div.textContent = text;
+    chatFeed.appendChild(div);
+    // enrich if ai
+    if(who!=='user'){ div.classList.add('rich'); try{ dualEnrich(div) }catch(_){} }
+    chatFeed.scrollTop = chatFeed.scrollHeight;
+  }
+  window.__dual_addChatMsg = addChatMsg;
+  window.__dual_showPreview = showPreview;
+
+  if(preview){
+    preview.addEventListener('click', ()=>{ try{ nav('chat') }catch(_){ } });
+  }
+  if(chatSend && chatInput){
+    chatSend.addEventListener('click', ()=>{
+      const t = (chatInput.value||'').trim(); if(!t) return;
+      addChatMsg(t, 'user');
+      chatInput.value='';
+      const sk = localStorage.getItem('dual.keys.openrouter') || '';
+      const userName = (localStorage.getItem('infodose:userName') || '').trim();
+      const model = LS.get('dual.openrouter.model');
+      handleUserMessage(t, userName, sk, model);
+    });
+    chatInput.addEventListener('keydown', (e)=>{
+      if(e.key==='Enter'){ e.preventDefault(); chatSend.click(); }
+    });
+  }
+})();
+// Override: when reply arrives, mirror into Chat and Preview (instead of iaFeed)
+(function(){
+  const _old = window.feedPushDual || window.feedPush;
+  window.feedPushDual = function(type, text){
+    try{ __dual_addChatMsg(text, 'ai'); __dual_showPreview(text); }catch(_){}
+  };
+  window.feedPush = function(type, text){
+    if(type==='user'){ try{ __dual_addChatMsg(text.replace(/^Você:\s*/i,''), 'user') }catch(_){} }
+  };
+})();
+
+
+// --- Background persistence (video/png) + perf fallback ---
+(function(){
+  const bgHost = document.getElementById('custom-bg');
+  const themeSel = document.getElementById('themeSelect');
+  const perfSel  = document.getElementById('selPerf');
+  const upload   = document.getElementById('bgUpload');
+
+  const KEYS = {
+    type: 'dual.bg.type',      // 'video' | 'image'
+    data: 'dual.bg.data',      // dataURL
+    src : 'dual.bg.src',       // optional URL/path (assets/base.mp4/png)
+  };
+  const DEF = {
+    video: 'assets/base.mp4',
+    image: 'assets/base.png'
+  };
+
+  function clearBG(){ if(bgHost) bgHost.innerHTML=''; }
+  function setVideo(src){
+    if(!bgHost) return;
+    bgHost.innerHTML = `<video autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover">
+      <source src="${src}" type="video/mp4"></video>`;
+  }
+  function setImage(src){
+    if(!bgHost) return;
+    bgHost.innerHTML = `<img src="${src}" alt="" style="width:100%;height:100%;object-fit:cover;filter:brightness(.9)">`;
+  }
+  function applyBG(){
+    try{
+      const t = (localStorage.getItem(KEYS.type)||'').trim();
+      const data = localStorage.getItem(KEYS.data)||'';
+      const src  = localStorage.getItem(KEYS.src)||'';
+      const perf = (localStorage.getItem('hub.perf')||'high');
+      const theme = (localStorage.getItem('dual.theme')||'default');
+      clearBG();
+      // If perf low/med => prefer PNG
+      const forceImage = (perf==='low' || perf==='med' || theme==='medium');
+      if(forceImage){
+        const png = (t==='image' && data) ? data : (t==='image' && src? src : DEF.image);
+        setImage(png);
+      }else{
+        if(t==='video'){
+          setVideo((data or src or DEF.video))
+        }else if(t==='image'){
+          setImage((data or src or DEF.image))
+        }else{
+          // default video
+          setVideo(DEF.video);
+        }
+      }
+    }catch(e){}
+  }
+  function saveBG(kind, dataURL){
+    localStorage.setItem(KEYS.type, kind);
+    if(dataURL) localStorage.setItem(KEYS.data, dataURL);
+    localStorage.removeItem(KEYS.src); // prefer data
+  }
+  // Persist on upload
+  if(upload){
+    upload.addEventListener('change', async (e)=>{
+      const f = e.target.files && e.target.files[0]; if(!f) return;
+      const isVideo = /video/i.test(f.type);
+      const reader = new FileReader();
+      reader.onload = ()=>{
+        saveBG(isVideo?'video':'image', reader.result);
+        toast('Fundo salvo no dispositivo','ok'); applyBG();
+      };
+      reader.readAsDataURL(f);
+    });
+  }
+  // React to perf/theme changes
+  if(perfSel){ perfSel.addEventListener('change', ()=>{ localStorage.setItem('hub.perf', perfSel.value); applyBG(); }); }
+  if(themeSel){ themeSel.addEventListener('change', ()=>{
+    const v = themeSel.value==='medium' ? 'medium' : 'default';
+    localStorage.setItem('dual.theme', v); applyBG();
+  }); }
+  // First paint
+  document.addEventListener('DOMContentLoaded', applyBG);
+  window.addEventListener('load', applyBG);
+})();
+
+
+// --- Split long texts into paragraphs to protect layout ---
+function splitIntoParagraphs(txt, max=280){
+  if(!txt) return [];
+  const parts = [];
+  let s = String(txt);
+  // If already has line breaks, respect them
+  if(/\n/.test(s)){
+    s.split(/\n+/).forEach(p=>{ if(p.trim()) parts.push(p.trim()) });
+  }else{
+    while(s.length>max){ parts.push(s.slice(0,max)); s = s.slice(max); }
+    if(s.trim()) parts.push(s.trim());
+  }
+  return parts.map(p=>`<div class="paragraph">${p}</div>`).join('');
+}
+
+</script>
 </body>
 </html>
