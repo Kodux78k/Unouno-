@@ -13,6 +13,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
   <title>HUB UNO</title>
   <meta name="theme-color" content="#0b0f14" />
   <style>
@@ -59,7 +63,8 @@
     html, body { height: 100% }
 
     body {
-      margin: 10;
+      margin: 0;
+      min-height: 100dvh;
       color: var(--fg);
       background: linear-gradient(42deg, var(--grad-a), var(--grad-b)) fixed;
       font: 14px/1.45 Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
