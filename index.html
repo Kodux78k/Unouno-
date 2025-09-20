@@ -59,7 +59,7 @@
     html, body { height: 100% }
 
     body {
-      margin: 0;
+      margin: 10;
       color: var(--fg);
       background: linear-gradient(42deg, var(--grad-a), var(--grad-b)) fixed;
       font: 14px/1.45 Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
@@ -502,23 +502,6 @@ body.nav-right .tabbar .tab{
   width: 56px; height: 56px; border-radius: 16px;
   display: grid; place-items: center;
 }
-
-/* --- Compact preview ticker --- */
-#msgPreview{
-  max-width:820px; margin:0 auto 10px; background:#ffb86b1f; border:1px solid #ffb86b55;
-  color:#ffd39a; border-radius:14px; padding:10px 12px; cursor:pointer; box-shadow:var(--shadow);
-  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-}
-#msgPreview:hover{ background:#ffb86b2b }
-/* Chat bubbles */
-#chatFeed .msg{max-width:78%; padding:10px 12px; border-radius:16px}
-#chatFeed .msg.user{align-self:flex-end; background:rgba(255,255,255,.08)}
-#chatFeed .msg.ai{align-self:flex-start; background:rgba(57,255,182,.14)}
-#chatFeed .msg.rich pre.code{white-space:pre-wrap; overflow:auto}
-/* Logs wrapping (avoid horizontal blowout) */
-.log, .toast, #chatFeed, #msgPreview, #iaFeed, .card{word-wrap:break-word; overflow-wrap:anywhere}
-/* Paragraph split look */
-.paragraph{margin:6px 0; line-height:1.55}
 </style>
 </head>
 <body>
@@ -612,7 +595,9 @@ body.nav-right .tabbar .tab{
               <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/yin-yang.svg" alt="Arquétipo" width="20" height="20" onerror="this.onerror=null;this.src='icons/yin-yang.svg'">
               <span>Arquétipo</span>
             </button>
-            \1chat\2Chat\3Dual Chat\4
+            <button data-nav="revo">
+              <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/globe.svg" alt="Revo" width="20" height="20" onerror="this.onerror=null;this.src='icons/globe.svg'">
+              <span>Revo</span>
             </button>
           <button data-audio="true" id="archAudioBtn">
             <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/microphone-lines.svg" alt="Áudio" width="20" height="20" onerror="this.onerror=null;this.src='icons/microphone-lines.svg'">
@@ -621,7 +606,8 @@ body.nav-right .tabbar .tab{
           </div>
         </div>
         <!-- Feed de texto da IA -->
-        <div id="msgPreview" class="mut" style="display:none"></div>
+        <div id="iaFeed" aria-live="polite" aria-atomic="false">
+          <div class="status">Toque a bolinha para falar com a IA.</div>
         </div>
         <div class="cards">
           <button class="card fx-trans fx-press ring" data-nav="apps">
@@ -818,26 +804,10 @@ body.nav-right .tabbar .tab{
     </section>
 
     <!-- REVO (Infodose Hub Ultra) -->
-    
-<section id="v-chat" class="view">
-  <div class="grid">
-    <div class="card fx-trans fx-lift" style="display:block">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div style="font-weight:800">Dual • Chat</div>
-        <div class="mut" style="font-size:12px">render-response + ações</div>
-      </div>
-    </div>
-    <div class="card fx-trans fx-lift" style="display:block">
-      <div id="chatFeed" style="max-height:46svh; overflow:auto; display:flex; flex-direction:column; gap:8px"></div>
-      <div style="display:flex; gap:8px; margin-top:10px">
-        <input id="chatInput" class="input ring" placeholder="Escreva sua intenção…" />
-        <button id="chatSend" class="btn prime fx-trans fx-press ring">Enviar<span class="ripple"></span></button>
-      </div>
-      <div class="mut" style="font-size:12px;margin-top:6px">Dica: clique em (ações), chips e links que surgirem nas respostas.</div>
-    </div>
-  </div>
-</section>
-
+    <section id="v-revo" class="view">
+      <!-- Carrega o conteúdo do Hub Ultra modificado via iframe.  O arquivo index-100_revo_mod.html está no mesmo diretório -->
+      <iframe id="revoEmbed" src="index-100_revo_mod.html" allow="autoplay; clipboard-read; clipboard-write; picture-in-picture; fullscreen" referrerpolicy="no-referrer"></iframe>
+    </section>
   </main>
 
   <!-- DOCK & TABS -->
@@ -906,161 +876,7 @@ body.nav-right .tabbar .tab{
       {"key":"aion","title":"Aion · Evolutia","desc":"Microações estratégicas e evolução.","url":"about:blank","icon":"aion"}
     ]
   }
-  
-// --- Preview ticker + Chat wiring ---
-(function(){
-  const preview = document.getElementById('msgPreview');
-  const chatFeed = document.getElementById('chatFeed');
-  const chatInput = document.getElementById('chatInput');
-  const chatSend = document.getElementById('chatSend');
-
-  function showPreview(text){
-    if(!preview) return;
-    if(!text) { preview.style.display='none'; return; }
-    preview.textContent = text.length>200 ? text.slice(0,200)+'…' : text;
-    preview.style.display = 'block';
-  }
-  function addChatMsg(text, who){
-    if(!chatFeed) return;
-    const div = document.createElement('div');
-    div.className = 'msg ' + (who||'ai');
-    div.textContent = text;
-    chatFeed.appendChild(div);
-    // enrich if ai
-    if(who!=='user'){ div.classList.add('rich'); try{ dualEnrich(div) }catch(_){} }
-    chatFeed.scrollTop = chatFeed.scrollHeight;
-  }
-  window.__dual_addChatMsg = addChatMsg;
-  window.__dual_showPreview = showPreview;
-
-  if(preview){
-    preview.addEventListener('click', ()=>{ try{ nav('chat') }catch(_){ } });
-  }
-  if(chatSend && chatInput){
-    chatSend.addEventListener('click', ()=>{
-      const t = (chatInput.value||'').trim(); if(!t) return;
-      addChatMsg(t, 'user');
-      chatInput.value='';
-      const sk = localStorage.getItem('dual.keys.openrouter') || '';
-      const userName = (localStorage.getItem('infodose:userName') || '').trim();
-      const model = LS.get('dual.openrouter.model');
-      handleUserMessage(t, userName, sk, model);
-    });
-    chatInput.addEventListener('keydown', (e)=>{
-      if(e.key==='Enter'){ e.preventDefault(); chatSend.click(); }
-    });
-  }
-})();
-// Override: when reply arrives, mirror into Chat and Preview (instead of iaFeed)
-(function(){
-  const _old = window.feedPushDual || window.feedPush;
-  window.feedPushDual = function(type, text){
-    try{ __dual_addChatMsg(text, 'ai'); __dual_showPreview(text); }catch(_){}
-  };
-  window.feedPush = function(type, text){
-    if(type==='user'){ try{ __dual_addChatMsg(text.replace(/^Você:\s*/i,''), 'user') }catch(_){} }
-  };
-})();
-
-
-// --- Background persistence (video/png) + perf fallback ---
-(function(){
-  const bgHost = document.getElementById('custom-bg');
-  const themeSel = document.getElementById('themeSelect');
-  const perfSel  = document.getElementById('selPerf');
-  const upload   = document.getElementById('bgUpload');
-
-  const KEYS = {
-    type: 'dual.bg.type',      // 'video' | 'image'
-    data: 'dual.bg.data',      // dataURL
-    src : 'dual.bg.src',       // optional URL/path (assets/base.mp4/png)
-  };
-  const DEF = {
-    video: 'assets/base.mp4',
-    image: 'assets/base.png'
-  };
-
-  function clearBG(){ if(bgHost) bgHost.innerHTML=''; }
-  function setVideo(src){
-    if(!bgHost) return;
-    bgHost.innerHTML = `<video autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover">
-      <source src="${src}" type="video/mp4"></video>`;
-  }
-  function setImage(src){
-    if(!bgHost) return;
-    bgHost.innerHTML = `<img src="${src}" alt="" style="width:100%;height:100%;object-fit:cover;filter:brightness(.9)">`;
-  }
-  function applyBG(){
-    try{
-      const t = (localStorage.getItem(KEYS.type)||'').trim();
-      const data = localStorage.getItem(KEYS.data)||'';
-      const src  = localStorage.getItem(KEYS.src)||'';
-      const perf = (localStorage.getItem('hub.perf')||'high');
-      const theme = (localStorage.getItem('dual.theme')||'default');
-      clearBG();
-      // If perf low/med => prefer PNG
-      const forceImage = (perf==='low' || perf==='med' || theme==='medium');
-      if(forceImage){
-        const png = (t==='image' && data) ? data : (t==='image' && src? src : DEF.image);
-        setImage(png);
-      }else{
-        if(t==='video'){
-          setVideo((data or src or DEF.video))
-        }else if(t==='image'){
-          setImage((data or src or DEF.image))
-        }else{
-          // default video
-          setVideo(DEF.video);
-        }
-      }
-    }catch(e){}
-  }
-  function saveBG(kind, dataURL){
-    localStorage.setItem(KEYS.type, kind);
-    if(dataURL) localStorage.setItem(KEYS.data, dataURL);
-    localStorage.removeItem(KEYS.src); // prefer data
-  }
-  // Persist on upload
-  if(upload){
-    upload.addEventListener('change', async (e)=>{
-      const f = e.target.files && e.target.files[0]; if(!f) return;
-      const isVideo = /video/i.test(f.type);
-      const reader = new FileReader();
-      reader.onload = ()=>{
-        saveBG(isVideo?'video':'image', reader.result);
-        toast('Fundo salvo no dispositivo','ok'); applyBG();
-      };
-      reader.readAsDataURL(f);
-    });
-  }
-  // React to perf/theme changes
-  if(perfSel){ perfSel.addEventListener('change', ()=>{ localStorage.setItem('hub.perf', perfSel.value); applyBG(); }); }
-  if(themeSel){ themeSel.addEventListener('change', ()=>{
-    const v = themeSel.value==='medium' ? 'medium' : 'default';
-    localStorage.setItem('dual.theme', v); applyBG();
-  }); }
-  // First paint
-  document.addEventListener('DOMContentLoaded', applyBG);
-  window.addEventListener('load', applyBG);
-})();
-
-
-// --- Split long texts into paragraphs to protect layout ---
-function splitIntoParagraphs(txt, max=280){
-  if(!txt) return [];
-  const parts = [];
-  let s = String(txt);
-  // If already has line breaks, respect them
-  if(/\n/.test(s)){
-    s.split(/\n+/).forEach(p=>{ if(p.trim()) parts.push(p.trim()) });
-  }else{
-    while(s.length>max){ parts.push(s.slice(0,max)); s = s.slice(max); }
-    if(s.trim()) parts.push(s.trim());
-  }
-  return parts.map(p=>`<div class="paragraph">${p}</div>`).join('');
-}
-
-</script>
+  </script>
 
   <script>
     /* ===================== Helpers ===================== */
@@ -2311,7 +2127,7 @@ function splitIntoParagraphs(txt, max=280){
     })();
     $$('button').forEach(addRipple);
   
-// (disabled) move feed to top
+// === Dual adjustments: move feed to top ===
 document.addEventListener('DOMContentLoaded', () => {
   try{
     const feed = document.getElementById('iaFeed');
@@ -2490,160 +2306,6 @@ function dualEnrich(node){
     try{ highlightCode(codeEl, codeEl.getAttribute('data-lang')||'text'); }catch(_){}
   });
 }
-
-// --- Preview ticker + Chat wiring ---
-(function(){
-  const preview = document.getElementById('msgPreview');
-  const chatFeed = document.getElementById('chatFeed');
-  const chatInput = document.getElementById('chatInput');
-  const chatSend = document.getElementById('chatSend');
-
-  function showPreview(text){
-    if(!preview) return;
-    if(!text) { preview.style.display='none'; return; }
-    preview.textContent = text.length>200 ? text.slice(0,200)+'…' : text;
-    preview.style.display = 'block';
-  }
-  function addChatMsg(text, who){
-    if(!chatFeed) return;
-    const div = document.createElement('div');
-    div.className = 'msg ' + (who||'ai');
-    div.textContent = text;
-    chatFeed.appendChild(div);
-    // enrich if ai
-    if(who!=='user'){ div.classList.add('rich'); try{ dualEnrich(div) }catch(_){} }
-    chatFeed.scrollTop = chatFeed.scrollHeight;
-  }
-  window.__dual_addChatMsg = addChatMsg;
-  window.__dual_showPreview = showPreview;
-
-  if(preview){
-    preview.addEventListener('click', ()=>{ try{ nav('chat') }catch(_){ } });
-  }
-  if(chatSend && chatInput){
-    chatSend.addEventListener('click', ()=>{
-      const t = (chatInput.value||'').trim(); if(!t) return;
-      addChatMsg(t, 'user');
-      chatInput.value='';
-      const sk = localStorage.getItem('dual.keys.openrouter') || '';
-      const userName = (localStorage.getItem('infodose:userName') || '').trim();
-      const model = LS.get('dual.openrouter.model');
-      handleUserMessage(t, userName, sk, model);
-    });
-    chatInput.addEventListener('keydown', (e)=>{
-      if(e.key==='Enter'){ e.preventDefault(); chatSend.click(); }
-    });
-  }
-})();
-// Override: when reply arrives, mirror into Chat and Preview (instead of iaFeed)
-(function(){
-  const _old = window.feedPushDual || window.feedPush;
-  window.feedPushDual = function(type, text){
-    try{ __dual_addChatMsg(text, 'ai'); __dual_showPreview(text); }catch(_){}
-  };
-  window.feedPush = function(type, text){
-    if(type==='user'){ try{ __dual_addChatMsg(text.replace(/^Você:\s*/i,''), 'user') }catch(_){} }
-  };
-})();
-
-
-// --- Background persistence (video/png) + perf fallback ---
-(function(){
-  const bgHost = document.getElementById('custom-bg');
-  const themeSel = document.getElementById('themeSelect');
-  const perfSel  = document.getElementById('selPerf');
-  const upload   = document.getElementById('bgUpload');
-
-  const KEYS = {
-    type: 'dual.bg.type',      // 'video' | 'image'
-    data: 'dual.bg.data',      // dataURL
-    src : 'dual.bg.src',       // optional URL/path (assets/base.mp4/png)
-  };
-  const DEF = {
-    video: 'assets/base.mp4',
-    image: 'assets/base.png'
-  };
-
-  function clearBG(){ if(bgHost) bgHost.innerHTML=''; }
-  function setVideo(src){
-    if(!bgHost) return;
-    bgHost.innerHTML = `<video autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover">
-      <source src="${src}" type="video/mp4"></video>`;
-  }
-  function setImage(src){
-    if(!bgHost) return;
-    bgHost.innerHTML = `<img src="${src}" alt="" style="width:100%;height:100%;object-fit:cover;filter:brightness(.9)">`;
-  }
-  function applyBG(){
-    try{
-      const t = (localStorage.getItem(KEYS.type)||'').trim();
-      const data = localStorage.getItem(KEYS.data)||'';
-      const src  = localStorage.getItem(KEYS.src)||'';
-      const perf = (localStorage.getItem('hub.perf')||'high');
-      const theme = (localStorage.getItem('dual.theme')||'default');
-      clearBG();
-      // If perf low/med => prefer PNG
-      const forceImage = (perf==='low' || perf==='med' || theme==='medium');
-      if(forceImage){
-        const png = (t==='image' && data) ? data : (t==='image' && src? src : DEF.image);
-        setImage(png);
-      }else{
-        if(t==='video'){
-          setVideo((data or src or DEF.video))
-        }else if(t==='image'){
-          setImage((data or src or DEF.image))
-        }else{
-          // default video
-          setVideo(DEF.video);
-        }
-      }
-    }catch(e){}
-  }
-  function saveBG(kind, dataURL){
-    localStorage.setItem(KEYS.type, kind);
-    if(dataURL) localStorage.setItem(KEYS.data, dataURL);
-    localStorage.removeItem(KEYS.src); // prefer data
-  }
-  // Persist on upload
-  if(upload){
-    upload.addEventListener('change', async (e)=>{
-      const f = e.target.files && e.target.files[0]; if(!f) return;
-      const isVideo = /video/i.test(f.type);
-      const reader = new FileReader();
-      reader.onload = ()=>{
-        saveBG(isVideo?'video':'image', reader.result);
-        toast('Fundo salvo no dispositivo','ok'); applyBG();
-      };
-      reader.readAsDataURL(f);
-    });
-  }
-  // React to perf/theme changes
-  if(perfSel){ perfSel.addEventListener('change', ()=>{ localStorage.setItem('hub.perf', perfSel.value); applyBG(); }); }
-  if(themeSel){ themeSel.addEventListener('change', ()=>{
-    const v = themeSel.value==='medium' ? 'medium' : 'default';
-    localStorage.setItem('dual.theme', v); applyBG();
-  }); }
-  // First paint
-  document.addEventListener('DOMContentLoaded', applyBG);
-  window.addEventListener('load', applyBG);
-})();
-
-
-// --- Split long texts into paragraphs to protect layout ---
-function splitIntoParagraphs(txt, max=280){
-  if(!txt) return [];
-  const parts = [];
-  let s = String(txt);
-  // If already has line breaks, respect them
-  if(/\n/.test(s)){
-    s.split(/\n+/).forEach(p=>{ if(p.trim()) parts.push(p.trim()) });
-  }else{
-    while(s.length>max){ parts.push(s.slice(0,max)); s = s.slice(max); }
-    if(s.trim()) parts.push(s.trim());
-  }
-  return parts.map(p=>`<div class="paragraph">${p}</div>`).join('');
-}
-
 </script>
 </body>
 </html>
