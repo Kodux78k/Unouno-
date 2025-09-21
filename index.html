@@ -747,6 +747,92 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
   #ls-stats .stat{padding:6px 8px}
 }
 </style>
+
+<!-- ===== LS Panel Compact UI Styles ===== -->
+<style>
+/* Make LS panels column-flex so header/actions don't steal space */
+#ls-panel, #lsx-panel{
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+}
+/* Assume there is a header/actions row; keep it sticky-ish */
+#ls-actions, #lsx-actions, #ls-header, #lsx-header{
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--glass, rgba(0,0,0,.35));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding-top: .25rem;
+  padding-bottom: .25rem;
+}
+
+/* Buttons as compact chips */
+#ls-actions button, #lsx-actions button{
+  gaps: .25rem;
+  margin: .125rem;
+  padding: .4rem .55rem;
+  border-radius: .6rem;
+  font-size: .82rem;
+}
+
+/* The compact toggle button style */
+.ls-compact-toggle{
+  margin-left: .25rem;
+  padding: .35rem .55rem;
+  font-size: .8rem;
+  border-radius: .6rem;
+  opacity: .9;
+}
+
+/* Hide advanced controls when in compact mode */
+#ls-panel.ls-compact #ls-add,
+#ls-panel.ls-compact #ls-export,
+#ls-panel.ls-compact #ls-import-btn,
+#ls-panel.ls-compact #ls-search,
+#ls-panel.ls-compact #ls-stats,
+#ls-panel.ls-compact #ls-clear-idb,
+#lsx-panel.ls-compact #lsx-add,
+#lsx-panel.ls-compact #lsx-export,
+#lsx-panel.ls-compact #lsx-import-btn,
+#lsx-panel.ls-compact #lsx-search,
+#lsx-panel.ls-compact #lsx-stats,
+#lsx-panel.ls-compact #lsx-clear-idb{
+  display: none !important;
+}
+
+/* Always keep these visible in compact mode */
+#ls-panel.ls-compact #ls-refresh,
+#ls-panel.ls-compact #ls-clear-all,
+#ls-panel.ls-compact #ls-hide,
+#lsx-panel.ls-compact #lsx-refresh,
+#lsx-panel.ls-compact #lsx-clear-all,
+#lsx-panel.ls-compact #lsx-hide{
+  display: inline-flex !important;
+}
+
+/* Data/List area candidates get generous height and scrolling */
+#ls-list, #lsx-list, #ls-keys, .ls-list, .ls-keys, .ls-data{
+  max-height: 70vh;
+  overflow: auto;
+}
+
+/* When compact, give even more space to the list */
+#ls-panel.ls-compact #ls-list,
+#ls-panel.ls-compact #ls-keys,
+#ls-panel.ls-compact .ls-list,
+#ls-panel.ls-compact .ls-keys,
+#ls-panel.ls-compact .ls-data,
+#lsx-panel.ls-compact #lsx-list,
+#lsx-panel.ls-compact .ls-list,
+#lsx-panel.ls-compact .ls-keys,
+#lsx-panel.ls-compact .ls-data{
+  max-height: 78vh;
+}
+</style>
+<!-- ===== /LS Panel Compact UI Styles ===== -->
+
 </head>
 <body>
   <!-- ===== Header ===== -->
@@ -3023,6 +3109,265 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
 })();
 </script>
 <!-- ===== /LSX Modular Panel ===== -->
+
+
+<!-- ===== TTS Enhancer • LS + Brain Actions ===== -->
+<script>
+(function(){
+  const $ = (q,r=document)=>r.querySelector(q);
+  const $$ = (q,r=document)=>Array.from(r.querySelectorAll(q));
+
+  function sayLS(text){
+    try{
+      if(typeof speakWithActiveArch === 'function'){
+        speakWithActiveArch(text);
+      }else if(window.speechSynthesis){
+        const u = new SpeechSynthesisUtterance(text);
+        const vs = speechSynthesis.getVoices();
+        const v = vs.find(v=>v.lang && (v.lang.startsWith('pt')||v.lang.startsWith('en'))) || vs[0];
+        if(v) u.voice = v;
+        speechSynthesis.cancel();
+        speechSynthesis.speak(u);
+      }
+    }catch(e){}
+  }
+
+  // Patch DualLS open/close/toggle to speak
+  function patchDualLS(){
+    if(!window.DualLS) return;
+    const origOpen = window.DualLS.open?.bind(window.DualLS);
+    const origClose = window.DualLS.close?.bind(window.DualLS);
+    const origToggle = window.DualLS.toggle?.bind(window.DualLS);
+
+    if(origOpen){
+      window.DualLS.open = function(){
+        const r = origOpen?.();
+        sayLS('Local Storage aberto');
+        return r;
+      };
+    }
+    if(origClose){
+      window.DualLS.close = function(){
+        sayLS('Local Storage fechado');
+        return origClose?.();
+      };
+    }
+    if(origToggle){
+      window.DualLS.toggle = function(){
+        const p = $('#lsx-panel');
+        const willOpen = !(p && p.style.display==='block');
+        const r = origToggle?.();
+        sayLS(willOpen ? 'Local Storage aberto' : 'Local Storage fechado');
+        return r;
+      };
+    }
+  }
+
+  // Add listeners to LSX panel controls (namespaced UI)
+  function wireLSX(){
+    const map = [
+      ['#lsx-add',        ()=>{
+        const k = ($('#lsx-new-k')?.value || '').trim();
+        sayLS(k ? `Chave ${k} salva no Local Storage` : 'Chave salva no Local Storage');
+      }],
+      ['#lsx-export',     ()=> sayLS('Backup exportado')],
+      ['#lsx-import-btn', ()=> sayLS('Importar backup. Selecione o arquivo')],
+      ['#lsx-clear-all',  ()=> sayLS('Limpar Local Storage. Confirme sua escolha')],
+      ['#lsx-clear-idb',  ()=> sayLS('Limpar IndexedDB. Confirme sua escolha')],
+      ['#lsx-refresh',    ()=> sayLS('Atualizando visão do Local Storage')],
+      ['#lsx-hide',       ()=> sayLS('Fechando painel do Local Storage')],
+    ];
+    map.forEach(([sel,fn])=>{
+      const el = $(sel);
+      if(el) el.addEventListener('click', fn, {passive:true});
+    });
+
+    // Reflect row-level actions via logger hook (save/delete etc.)
+    if(window.DualLSLogger){
+      const origPush = window.DualLSLogger.push?.bind(window.DualLSLogger);
+      if(origPush){
+        window.DualLSLogger.push = function(msg){
+          try{
+            const m = String(msg||'').toLowerCase();
+            if(m.includes('ls: salvou'))      sayLS('Chave salva');
+            if(m.includes('ls: apagou'))      sayLS('Chave apagada');
+            if(m.includes('limpou tudo'))     sayLS('Local Storage limpo');
+            if(m.includes('importou backup')) sayLS('Backup importado com sucesso');
+            if(m.includes('exportou backup')) sayLS('Backup exportado com sucesso');
+          }catch(e){}
+          return origPush(msg);
+        };
+      }
+    }
+  }
+
+  // Add listeners to legacy LS panel controls (if present)
+  function wireLegacyLS(){
+    const map = [
+      ['#ls-add',        ()=>{
+        const k = ($('#ls-new-k')?.value || '').trim();
+        sayLS(k ? `Chave ${k} salva no Local Storage` : 'Chave salva no Local Storage');
+      }],
+      ['#ls-export',     ()=> sayLS('Backup exportado')],
+      ['#ls-import-btn', ()=> sayLS('Importar backup. Selecione o arquivo')],
+      ['#ls-clear-all',  ()=> sayLS('Limpar Local Storage. Confirme sua escolha')],
+      ['#ls-clear-idb',  ()=> sayLS('Limpar IndexedDB. Confirme sua escolha')],
+      ['#ls-refresh',    ()=> sayLS('Atualizando visão do Local Storage')],
+      ['#ls-hide',       ()=> sayLS('Fechando painel do Local Storage')],
+      ['#btnLS',         ()=> sayLS('Abrindo painel do Local Storage')],
+    ];
+    map.forEach(([sel,fn])=>{
+      const el = $(sel);
+      if(el) el.addEventListener('click', fn, {passive:true});
+    });
+  }
+
+  // Theme & background announcements
+  function wireThemeBG(){
+    const themeSel = $('#themeSelect');
+    if(themeSel){
+      themeSel.addEventListener('change', ()=>{
+        const v = themeSel.value;
+        const label = ({default:'padrão', medium:'cinza médio', custom:'personalizado'}[v]||v);
+        sayLS(`Tema ${label} aplicado`);
+      }, {passive:true});
+    }
+    const bgInput = $('#bgUpload');
+    if(bgInput){
+      bgInput.addEventListener('change', ()=>{
+        sayLS('Fundo personalizado salvo');
+      }, {passive:true});
+    }
+  }
+
+  // CSS custom announcements
+  function wireCSS(){
+    const apply = $('#applyCSS');
+    const clear = $('#clearCSS');
+    const down  = $('#downloadCSS');
+    if(apply)  apply.addEventListener('click', ()=> sayLS('CSS aplicado'), {passive:true});
+    if(clear)  clear.addEventListener('click', ()=> sayLS('CSS removido'), {passive:true});
+    if(down)   down .addEventListener('click', ()=> sayLS('Baixando CSS'), {passive:true});
+  }
+
+  // Brain basic saves (name, SK, perf/voice)
+  function wireBrain(){
+    const map = [
+      ['#saveName', ()=> sayLS('Nome salvo')],
+      ['#saveSK',   ()=> sayLS('Configurações de modelo salvas')],
+      ['#btnPerf',  ()=> sayLS('Preferência de performance atualizada')],
+      ['#btnVoice', ()=> sayLS('Preferência de voz atualizada')],
+    ];
+    map.forEach(([sel,fn])=>{
+      const el = $(sel);
+      if(el) el.addEventListener('click', fn, {passive:true});
+    });
+  }
+
+  // Speak when LS header "LS" badge is clicked
+  function wireHeaderLS(){
+    const btn = $('#btnLS');
+    if(btn){
+      btn.addEventListener('click', ()=>{
+        // DualLS.toggle may also speak; this is fallback
+        sayLS('Abrindo painel do Local Storage');
+      }, {passive:true});
+    }
+  }
+
+  // Init once DOM is ready
+  document.addEventListener('DOMContentLoaded', ()=>{
+    patchDualLS();
+    wireLSX();
+    wireLegacyLS();
+    wireThemeBG();
+    wireCSS();
+    wireBrain();
+    wireHeaderLS();
+  });
+})();
+</script>
+<!-- ===== /TTS Enhancer ===== -->
+
+
+<!-- ===== LS Panel Compact UI Script ===== -->
+<script>
+(function(){
+  const $ = (q,r=document)=>r.querySelector(q);
+  const $$ = (q,r=document)=>Array.from(r.querySelectorAll(q));
+
+  function ensureCompactButton(panelId, actionsId, ids){
+    const panel = $(panelId);
+    const actions = $(actionsId);
+    if(!panel || !actions) return;
+
+    // Create toggle button (once)
+    let btn = actions.querySelector('.ls-compact-toggle');
+    if(!btn){
+      btn = document.createElement('button');
+      btn.className = 'ls-compact-toggle';
+      btn.type = 'button';
+      btn.id = ids.toggleId;
+      btn.title = 'Alternar modo compacto do painel LS';
+      btn.textContent = 'Compactar';
+      actions.appendChild(btn);
+    }
+
+    // Initial state: compact ON (to liberar espaço)
+    if(!panel.classList.contains('ls-compact')){
+      panel.classList.add('ls-compact');
+    }
+
+    // Toggle logic
+    btn.addEventListener('click', ()=>{
+      const compact = panel.classList.toggle('ls-compact');
+      btn.textContent = compact ? 'Expandir' : 'Compactar';
+      // Optional: announce via TTS if available
+      try{
+        if(typeof speakWithActiveArch === 'function'){
+          speakWithActiveArch(compact ? 'Modo compacto ativado' : 'Modo compacto desativado');
+        }
+      }catch(e){}
+      // After toggling, recompute list height
+      setTimeout(resizeListArea, 10);
+    }, {passive:true});
+  }
+
+  function pickListCandidate(root){
+    const sels = ['#lsx-list','#ls-list','#ls-keys','.ls-list','.ls-keys','.ls-data'];
+    for(const s of sels){
+      const el = root.querySelector(s);
+      if(el) return el;
+    }
+    return null;
+  }
+
+  function resizeListArea(){
+    const panels = ['#lsx-panel','#ls-panel'];
+    panels.forEach(pid=>{
+      const p = $(pid);
+      if(!p) return;
+      const actions = p.querySelector('#lsx-actions, #ls-actions, #ls-header, #lsx-header');
+      const list = pickListCandidate(p);
+      if(!list) return;
+      const rect = p.getBoundingClientRect();
+      const topY = actions ? actions.getBoundingClientRect().bottom : rect.top;
+      const available = Math.max(160, window.innerHeight - topY - 24);
+      list.style.maxHeight = available + 'px';
+      list.style.overflow = 'auto';
+    });
+  }
+
+  // Wire up both legacy and namespaced panels
+  document.addEventListener('DOMContentLoaded', ()=>{
+    ensureCompactButton('#lsx-panel', '#lsx-actions', {toggleId:'lsx-compact-toggle'});
+    ensureCompactButton('#ls-panel',  '#ls-actions',  {toggleId:'ls-compact-toggle'});
+    resizeListArea();
+    window.addEventListener('resize', resizeListArea);
+  });
+})();
+</script>
+<!-- ===== /LS Panel Compact UI Script ===== -->
 
 </body>
 </html>
