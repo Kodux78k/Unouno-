@@ -2740,7 +2740,7 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
     // Drop empty or very short
     if(!norm || norm.length < 2) return false;
     // Drop repeats within 1200ms
-    if(norm === (_lastUtter.text||'') and (now - _lastUtter.t) < 1200) return false;
+    if(norm === (_lastUtter.text||'') && (now - _lastUtter.t) < 1200) return false;
     // If it's about Local Storage panel, prefer "abrindo/fechando" phrasing only.
     if(/local storage/.test(norm)){
       if(/aberto|fechado/.test(norm) && !/abrindo|fechando/.test(norm)) return false;
@@ -3034,10 +3034,9 @@ ${training}` : '';
   const $=(q,r=document)=>r.querySelector(q);
   function keepOpen(ev){
     try{
-      ev && ev.preventDefault && ev.preventDefault();
-      ev && ev.stopPropagation && ev.stopPropagation();
       const p = $('#lsx-panel') || $('#ls-panel');
       if(p) p.style.display='block';
+      // Não bloqueie os handlers originais
     }catch(e){}
   }
   function bindKeep(sel){
@@ -3046,7 +3045,7 @@ ${training}` : '';
     // avoid form submit or anchor navigation
     if(el.tagName==='BUTTON') el.type='button';
     if(el.tagName==='A') el.removeAttribute('href');
-    el.addEventListener('click', keepOpen, true);
+    el.addEventListener('click', keepOpen, false);
   }
   function moveIntoActions(panelSel, actionsSel, ids){
     const panel=$(panelSel), actions=$(actionsSel);
@@ -3154,7 +3153,7 @@ ${training}` : '';
         setTimeout(stop, TIMEOUT_MS+200); // safety stop
         window.addEventListener('unhandledrejection', stop, {once:true});
       }, true);
-      form.__timerWrapped = True = true;
+      form.__timerWrapped = true;
     }
   });
 })();
