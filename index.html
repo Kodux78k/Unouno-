@@ -3107,5 +3107,150 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
   })();
 })();</script>
 
+
+<style id="dual-patch-ls">
+/* ==== Dual Patch • LS panel + nav-right fit ==== */
+@media (max-width: 540px){
+  #ls-panel .ls-head,
+  #ls-panel .ls-row{ grid-template-columns: 1fr; }
+  #ls-panel .ls-a{ justify-content: flex-start; }
+}
+body.nav-right #ls-panel{
+  right: calc(78px + 16px);
+}
+#ls-panel{ 
+  max-width: min(96vw, 1080px);
+}
+#ls-grid .ls-row{ 
+  grid-template-columns: minmax(180px, 280px) minmax(0,1fr) 170px;
+}
+#ls-grid .ls-preview{ 
+  overflow-wrap:anywhere;
+}
+
+</style>
+<script id="dual-patch-voice">
+/* ==== Dual Patch • Archetype Voice Hooks v1 ==== */
+(function(){
+  const $ = (q,r=document)=>r.querySelector(q);
+  const $$ = (q,r=document)=>Array.from(r.querySelectorAll(q));
+  function say(text){
+    try{
+      if(typeof speakWithActiveArch === 'function'){ speakWithActiveArch(String(text)); }
+    }catch(e){}
+  }
+  function bubble(text, type){
+    try{
+      if(typeof showArchMessage === 'function'){ showArchMessage(String(text), type||'ok'); }
+    }catch(e){}
+  }
+
+  // 1) Upload de HTML (btnImport)
+  const btnImport = document.getElementById('btnImport');
+  if(btnImport){
+    btnImport.addEventListener('click', ()=>{
+      // O handler original fará o trabalho; depois de um pequeno atraso, falamos
+      setTimeout(()=>{
+        try{
+          const fs = (document.getElementById('fileLocal')?.files||[]);
+          if(fs.length){ say(`Adicionei ${fs.length} arquivo${fs.length>1?'s':''} local${fs.length>1?'s':''}.`); bubble('Locais adicionados.', 'ok'); }
+        }catch(e){}
+      }, 800);
+    });
+  }
+
+  // 2) Preferências do usuário (nome, modelo, SK, tema, fundo, CSS, performance, voz)
+  const saveName = document.getElementById('saveName');
+  if(saveName){
+    saveName.addEventListener('click', ()=>{
+      const name = (document.getElementById('userName')?.value || '').trim();
+      if(name){
+        try{ localStorage.setItem('dual.name', name); }catch(e){}
+        say(`Salvo. Bem-vindo, ${name}.`);
+        bubble('Nome salvo.', 'ok');
+      }
+    });
+  }
+  const saveSK = document.getElementById('saveSK');
+  if(saveSK){
+    saveSK.addEventListener('click', ()=>{
+      say('Chave e modelo salvos.');
+      bubble('Configurações do OpenRouter salvas.', 'ok');
+    });
+  }
+  const themeSelect = document.getElementById('themeSelect');
+  if(themeSelect){
+    themeSelect.addEventListener('change', ()=>{
+      const map = {default:'padrão', medium:'cinza', custom:'personalizado'};
+      say('Tema ' + (map[themeSelect.value]||themeSelect.value) + ' aplicado.');
+    });
+  }
+  const bgUpload = document.getElementById('bgUpload');
+  if(bgUpload){
+    bgUpload.addEventListener('change', (e)=>{
+      const f = e.target.files && e.target.files[0];
+      if(f){ say('Fundo personalizado salvo.'); bubble('Fundo salvo.', 'ok'); }
+    });
+  }
+  const btnApplyCSS = document.getElementById('applyCSS');
+  if(btnApplyCSS){
+    btnApplyCSS.addEventListener('click', ()=>{ say('CSS personalizado aplicado.'); });
+  }
+  const btnClearCSS = document.getElementById('clearCSS');
+  if(btnClearCSS){
+    btnClearCSS.addEventListener('click', ()=>{ say('CSS personalizado removido.'); });
+  }
+  const btnPerf = document.getElementById('btnPerf');
+  if(btnPerf){
+    btnPerf.addEventListener('click', ()=>{ say('Performance atualizada.'); });
+  }
+  const btnVoice = document.getElementById('btnVoice');
+  if(btnVoice){
+    btnVoice.addEventListener('click', ()=>{ say('Voz preferida salva.'); });
+  }
+
+  // 3) Painel de LocalStorage — falar em ações principais
+  function hookLSPanel(){
+    const p = document.getElementById('ls-panel');
+    if(!p) return;
+    const exp = document.getElementById('ls-export');
+    const impBtn = document.getElementById('ls-import-btn');
+    const add = document.getElementById('ls-add');
+    const clearAll = document.getElementById('ls-clear-all');
+    const clearIDB = document.getElementById('ls-clear-idb');
+    if(exp) exp.addEventListener('click', ()=> say('Backup do LocalStorage exportado.'));
+    if(impBtn) impBtn.addEventListener('click', ()=> say('Importar backup do LocalStorage.'));
+    if(add) add.addEventListener('click', ()=> setTimeout(()=> say('Chave salva no LocalStorage.'), 300));
+    if(clearAll) clearAll.addEventListener('click', ()=> setTimeout(()=> say('LocalStorage limpo.'), 600));
+    if(clearIDB) clearIDB.addEventListener('click', ()=> setTimeout(()=> say('IndexedDB limpo.'), 600));
+  }
+  hookLSPanel();
+
+  // 4) Quando abrir o painel via botão LS no header, garantir que fala uma frase curta
+  const btnLS = document.getElementById('btnLS');
+  if(btnLS){
+    btnLS.addEventListener('click', ()=>{
+      setTimeout(()=>{
+        bubble('Painel de LocalStorage aberto.', 'ok');
+        say('Abrindo painel do LocalStorage.');
+      }, 120);
+    });
+  }
+
+  // 5) Garantir que respostas da IA no feed também atualizam um preview falado curto (já rotea via chatPush)
+  // (Sem alteração: já existe integração com speakWithActiveArch(reply) na handleUserMessage.)
+
+  // 6) Pequeno ajuste: se CODUX estiver setado como nome, sincronizar com dual.name ao carregar
+  document.addEventListener('DOMContentLoaded', ()=>{
+    try{
+      const nm = (localStorage.getItem('infodose:userName')||'').trim();
+      if(nm && localStorage.getItem('dual.name')!==nm){
+        localStorage.setItem('dual.name', nm);
+      }
+    }catch(e){}
+  });
+})();
+
+</script>
 </body>
 </html>
