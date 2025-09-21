@@ -810,7 +810,11 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
 #lsx-panel.ls-compact .ls-data{
   max-height: 78vh;
 }
-</style></head><body><header class="mast"><button class="ib fx-trans fx-press ring" id="btnBack" title="Voltar" aria-label="Voltar"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/arrow-left.svg" alt="Voltar" width="20" height="20" onerror="this.onerror=null;this.src='icons/arrow-left.svg'"><span class="ripple"></span></button><div class="title"><h1>HUB UNO</h1><small>Dual · Trinity</small></div><button class="ib fx-trans fx-press ring" id="btnDownload" title="Baixar HTML"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/download.svg" alt="Download" width="20" height="20" onerror="this.onerror=null;this.src='icons/download.svg'"><span class="ripple"></span></button><button class="ib fx-trans fx-press ring" id="btnHelp" title="Ajuda / Atalhos"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/question-circle.svg" alt="Ajuda" width="20" height="20" onerror="this.onerror=null;this.src='icons/question-circle.svg'"><span class="ripple"></span></button><button class="ib fx-trans fx-press ring" id="btnBrain" title="Brain"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/brain.svg" alt="Brain" width="20" height="20" onerror="this.onerror=null;this.src='icons/brain.svg'"><span class="ripple"></span></button><button class="ib fx-trans fx-press ring" id="btnLS" title="Local Storage (Brain)" aria-label="Local Storage"><span class="ls-badge">LS</span><span class="ripple"></span></button></header><section id="sessionsAnchor"></section><div id="custom-bg" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;overflow:hidden;pointer-events:none"></div><main><section id="v-home" class="view active"><div class="grid"><div id="greetingCard" class="card fx-trans fx-lift" style="display:none"><div id="greetingMsg" style="font-weight:800"></div></div><div id="unoCard" class="card fx-trans fx-lift" style="display:none"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%"><div><div style="font-weight:900;letter-spacing:.08em">UNO • foco e velocidade</div><div class="mut">Monólito: Apps embutidos + Viewer + Dock + Atalhos</div></div><div class="ico"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/bolt.svg" alt="Energia" width="24" height="24" onerror="this.onerror=null;this.src='icons/bolt.svg'"></div></div></div><div class="arch-container"><div class="arch-switcher"><button class="btn fx-trans fx-press ring" id="arch-prev" title="Anterior"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/chevron-left.svg" alt="Anterior" width="16" height="16" onerror="this.onerror=null;this.src='icons/chevron-left.svg'"></button><select id="arch-select" title="Escolher arquétipo"></select><button class="btn fx-trans fx-press ring" id="arch-next" title="Próximo"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/chevron-right.svg" alt="Próximo" width="16" height="16" onerror="this.onerror=null;this.src='icons/chevron-right.svg'"></button></div><div class="arch-circle"><div id="arch-fadeCover"></div><div id="audioRipple" class="audio-ripple"></div><iframe id="arch-frame" title="Archetype Core" sandbox="allow-scripts" referrerpolicy="no-referrer"></iframe></div><div id="archMsg" class="arch-msg"></div><div id="archMenu" class="arch-menu"><button data-nav="apps"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg" alt="Apps" width="20" height="20" onerror="this.onerror=null;this.src='icons/folder-open.svg'"><span>Apps</span></button><button data-nav="stack"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/layer-group.svg" alt="Stack" width="20" height="20" onerror="this.onerror=null;this.src='icons/layer-group.svg'"><span>Stack</span></button><button data-nav="brain"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/user.svg" alt="Usuário" width="20" height="20" onerror="this.onerror=null;this.src='icons/user.svg'"><span>Usuário</span></button><button data-nav="home"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/yin-yang.svg" alt="Arquétipo" width="20" height="20" onerror="this.onerror=null;this.src='icons/yin-yang.svg'"><span>Arquétipo</span></button><button data-nav="chat"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/comments.svg" alt="Chat" width="20" height="20" onerror="this.onerror=null;this.src='icons/comments.svg'"><span>Chat</span></button><button data-audio="true" id="archAudioBtn"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/microphone-lines.svg" alt="Áudio" width="20" height="20" onerror="this.onerror=null;this.src='icons/microphone-lines.svg'"><span>Áudio</span></button></div></div><div id="iaFeed" aria-live="polite" aria-atomic="false"><div class="status">Toque a bolinha para falar com a IA.</div></div><div class="cards"><button class="card fx-trans fx-press ring" data-nav="apps"><div class="ico"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg" alt="Apps" width="24" height="24" onerror="this.onerror=null;this.src='icons/folder-open.svg'"></div><div><div style="font-weight:800">Apps</div><div class="mut" id="homeAppsStatus">–</div></div><span class="ripple"></span></button><button class="card fx-trans fx-press ring" data-nav="stack"><div class="ico"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/layer-group.svg" alt="Stack" width="24" height="24" onerror="this.onerror=null;this.src='icons/layer-group.svg'"></div><div><div style="font-weight:800">Stack</div><div class="mut" id="homeStackStatus">–</div></div><span class="ripple"></span></button><button class="card fx-trans fx-press ring" data-nav="brain"><div class="ico"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/user.svg" alt="Usuário" width="24" height="24" onerror="this.onerror=null;this.src='icons/user.svg'"></div><div><div style="font-weight:800">Usuário</div><div class="mut" id="homeUserStatus">–</div></div><span class="ripple"></span></button><button class="card fx-trans fx-press ring" data-nav="home"><div class="ico"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/yin-yang.svg" alt="Arquétipo" width="24" height="24" onerror="this.onerror=null;this.src='icons/yin-yang.svg'"></div><div><div style="font-weight:800">Arquétipo</div><div class="mut" id="homeArchStatus">–</div></div><span class="ripple"></span></button></div></div></section><section id="v-apps" class="view"><div class="grid"><div class="card fx-trans fx-lift" style="display:block"><div class="grid" style="gap:8px"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><label class="mut" style="display:inline-flex;gap:6px;align-items:center"><input id="openInside" type="checkbox" /> abrir dentro
+</style>
+<style>/* PATCH: ocultar logs do Brain */
+#logs{display:none!important}
+</style>
+</head><body><header class="mast"><button class="ib fx-trans fx-press ring" id="btnBack" title="Voltar" aria-label="Voltar"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/arrow-left.svg" alt="Voltar" width="20" height="20" onerror="this.onerror=null;this.src='icons/arrow-left.svg'"><span class="ripple"></span></button><div class="title"><h1>HUB UNO</h1><small>Dual · Trinity</small></div><button class="ib fx-trans fx-press ring" id="btnDownload" title="Baixar HTML"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/download.svg" alt="Download" width="20" height="20" onerror="this.onerror=null;this.src='icons/download.svg'"><span class="ripple"></span></button><button class="ib fx-trans fx-press ring" id="btnHelp" title="Ajuda / Atalhos"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/question-circle.svg" alt="Ajuda" width="20" height="20" onerror="this.onerror=null;this.src='icons/question-circle.svg'"><span class="ripple"></span></button><button class="ib fx-trans fx-press ring" id="btnBrain" title="Brain"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/brain.svg" alt="Brain" width="20" height="20" onerror="this.onerror=null;this.src='icons/brain.svg'"><span class="ripple"></span></button><button class="ib fx-trans fx-press ring" id="btnLS" title="Local Storage (Brain)" aria-label="Local Storage"><span class="ls-badge">LS</span><span class="ripple"></span></button></header><section id="sessionsAnchor"></section><div id="custom-bg" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;overflow:hidden;pointer-events:none"></div><main><section id="v-home" class="view active"><div class="grid"><div id="greetingCard" class="card fx-trans fx-lift" style="display:none"><div id="greetingMsg" style="font-weight:800"></div></div><div id="unoCard" class="card fx-trans fx-lift" style="display:none"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%"><div><div style="font-weight:900;letter-spacing:.08em">UNO • foco e velocidade</div><div class="mut">Monólito: Apps embutidos + Viewer + Dock + Atalhos</div></div><div class="ico"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/bolt.svg" alt="Energia" width="24" height="24" onerror="this.onerror=null;this.src='icons/bolt.svg'"></div></div></div><div class="arch-container"><div class="arch-switcher"><button class="btn fx-trans fx-press ring" id="arch-prev" title="Anterior"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/chevron-left.svg" alt="Anterior" width="16" height="16" onerror="this.onerror=null;this.src='icons/chevron-left.svg'"></button><select id="arch-select" title="Escolher arquétipo"></select><button class="btn fx-trans fx-press ring" id="arch-next" title="Próximo"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/chevron-right.svg" alt="Próximo" width="16" height="16" onerror="this.onerror=null;this.src='icons/chevron-right.svg'"></button></div><div class="arch-circle"><div id="arch-fadeCover"></div><div id="audioRipple" class="audio-ripple"></div><iframe id="arch-frame" title="Archetype Core" sandbox="allow-scripts" referrerpolicy="no-referrer"></iframe></div><div id="archMsg" class="arch-msg"></div><div id="archMenu" class="arch-menu"><button data-nav="apps"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg" alt="Apps" width="20" height="20" onerror="this.onerror=null;this.src='icons/folder-open.svg'"><span>Apps</span></button><button data-nav="stack"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/layer-group.svg" alt="Stack" width="20" height="20" onerror="this.onerror=null;this.src='icons/layer-group.svg'"><span>Stack</span></button><button data-nav="brain"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/user.svg" alt="Usuário" width="20" height="20" onerror="this.onerror=null;this.src='icons/user.svg'"><span>Usuário</span></button><button data-nav="home"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/yin-yang.svg" alt="Arquétipo" width="20" height="20" onerror="this.onerror=null;this.src='icons/yin-yang.svg'"><span>Arquétipo</span></button><button data-nav="chat"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/comments.svg" alt="Chat" width="20" height="20" onerror="this.onerror=null;this.src='icons/comments.svg'"><span>Chat</span></button><button data-audio="true" id="archAudioBtn"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/microphone-lines.svg" alt="Áudio" width="20" height="20" onerror="this.onerror=null;this.src='icons/microphone-lines.svg'"><span>Áudio</span></button></div></div><div id="iaFeed" aria-live="polite" aria-atomic="false"><div class="status">Toque a bolinha para falar com a IA.</div></div><div class="cards"><button class="card fx-trans fx-press ring" data-nav="apps"><div class="ico"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg" alt="Apps" width="24" height="24" onerror="this.onerror=null;this.src='icons/folder-open.svg'"></div><div><div style="font-weight:800">Apps</div><div class="mut" id="homeAppsStatus">–</div></div><span class="ripple"></span></button><button class="card fx-trans fx-press ring" data-nav="stack"><div class="ico"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/layer-group.svg" alt="Stack" width="24" height="24" onerror="this.onerror=null;this.src='icons/layer-group.svg'"></div><div><div style="font-weight:800">Stack</div><div class="mut" id="homeStackStatus">–</div></div><span class="ripple"></span></button><button class="card fx-trans fx-press ring" data-nav="brain"><div class="ico"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/user.svg" alt="Usuário" width="24" height="24" onerror="this.onerror=null;this.src='icons/user.svg'"></div><div><div style="font-weight:800">Usuário</div><div class="mut" id="homeUserStatus">–</div></div><span class="ripple"></span></button><button class="card fx-trans fx-press ring" data-nav="home"><div class="ico"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/yin-yang.svg" alt="Arquétipo" width="24" height="24" onerror="this.onerror=null;this.src='icons/yin-yang.svg'"></div><div><div style="font-weight:800">Arquétipo</div><div class="mut" id="homeArchStatus">–</div></div><span class="ripple"></span></button></div></div></section><section id="v-apps" class="view"><div class="grid"><div class="card fx-trans fx-lift" style="display:block"><div class="grid" style="gap:8px"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><label class="mut" style="display:inline-flex;gap:6px;align-items:center"><input id="openInside" type="checkbox" /> abrir dentro
               </label><button id="btnToggleLocal" class="btn fx-trans fx-press ring"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg" alt="Locais" width="16" height="16" onerror="this.onerror=null;this.src='icons/folder-open.svg'" style="margin-right:4px">
                 Mostrar Locais<span class="ripple"></span></button></div><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="fileLocal" type="file" accept=".html,.htm,.txt,.json" multiple class="input ring" /><button id="btnImport" class="btn fx-trans fx-press ring"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/plus-circle.svg" alt="Adicionar" width="16" height="16" onerror="this.onerror=null;this.src='icons/plus-circle.svg'" style="margin-right:4px">
                 Adicionar Locais<span class="ripple"></span></button><button id="btnExport" class="btn fx-trans fx-press ring"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/file-export.svg" alt="Exportar" width="16" height="16" onerror="this.onerror=null;this.src='icons/file-export.svg'" style="margin-right:4px">
@@ -1392,8 +1396,9 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
         if(transcript) {
           feedPush('user', 'Você: ' + transcript);
           showArchMessage('Pulso enviado. Recebendo intenção…', 'ok');
-          feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
-          handleUserMessage(transcript, userName, sk, model);
+try{ speakWithActiveArch('Pulso enviado, recebendo intenção.'); }catch(e){}
+feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
+handleUserMessage(transcript, userName, sk, model);
         }
       };
       recognition.onerror = (e) => {
@@ -1535,7 +1540,8 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
           if(!msg) return;
           feedPush('user', 'Você: ' + msg);
           showArchMessage('Pulso enviado. Recebendo intenção…', 'ok');
-          feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
+try{ speakWithActiveArch('Pulso enviado, recebendo intenção.'); }catch(e){}
+feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
           const userName = (localStorage.getItem('dual.name') || localStorage.getItem('infodose:userName') || '').trim();
           const sk = (localStorage.getItem('dual.keys.openrouter') || localStorage.getItem('infodose:sk') || '').trim();
           let mdl = LS.get('dual.openrouter.model');
@@ -3021,4 +3027,278 @@ ${training}` : '';
     init();
 })();
 </script>
+
+<script>
+// PATCH: LS/LSX keep-open + mover botões soltos pro header de ações
+(function(){
+  const $=(q,r=document)=>r.querySelector(q);
+  function keepOpen(ev){
+    try{
+      ev && ev.preventDefault && ev.preventDefault();
+      ev && ev.stopPropagation && ev.stopPropagation();
+      const p = $('#lsx-panel') || $('#ls-panel');
+      if(p) p.style.display='block';
+    }catch(e){}
+  }
+  function bindKeep(sel){
+    const el = $(sel);
+    if(!el) return;
+    // avoid form submit or anchor navigation
+    if(el.tagName==='BUTTON') el.type='button';
+    if(el.tagName==='A') el.removeAttribute('href');
+    el.addEventListener('click', keepOpen, true);
+  }
+  function moveIntoActions(panelSel, actionsSel, ids){
+    const panel=$(panelSel), actions=$(actionsSel);
+    if(!panel || !actions) return;
+    ids.forEach(id=>{
+      const el = document.getElementById(id);
+      if(el && !actions.contains(el)){
+        try{ actions.appendChild(el); }catch(e){}
+      }
+    });
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    const ids = ['lsx-refresh','lsx-export','lsx-import-btn','lsx-clear-all','lsx-clear-idb','lsx-hide','ls-refresh','ls-export','ls-import-btn','ls-clear-all','ls-clear-idb','ls-hide'];
+    ids.forEach(id=> bindKeep('#'+id));
+    moveIntoActions('#lsx-panel','#lsx-actions', ids);
+    moveIntoActions('#ls-panel','#ls-actions', ids);
+  });
+})();
+</script>
+
+
+<script>
+// PATCH: busy-guard + voice-guard + timeout(20s) + timer + AbortController
+(function(){
+  // busy guard
+  if(typeof window.handleUserMessage==='function' && !window.__patchedHandleGuard){
+    const __origHandle = window.handleUserMessage;
+    let __busy = false;
+    window.__chatBusy = ()=>__busy;
+    window.handleUserMessage = async function(){
+      if(__busy){ try{ window.toast && toast('Aguarde a resposta terminar','warn'); }catch(e){} return; }
+      __busy = true;
+      try { return await __origHandle.apply(this, arguments); }
+      finally { __busy = false; }
+    };
+    window.__patchedHandleGuard = true;
+  }
+  // voice guard
+  document.addEventListener('DOMContentLoaded', function(){
+    const vb = document.getElementById('homeVoiceBtn');
+    if(vb && !vb.__guarded){
+      const old = vb.onclick;
+      vb.addEventListener('click', function(ev){
+        if(window.__chatBusy && window.__chatBusy()){
+          ev.preventDefault(); ev.stopPropagation();
+          try{ speakWithActiveArch('Aguarde o pulso anterior finalizar.'); }catch(e){}
+          return false;
+        }
+        if(typeof old==='function') return old.call(this, ev);
+      }, true);
+      vb.__guarded = true;
+    }
+  });
+  // timeout + abort
+  const TIMEOUT_MS = 20000;
+  function timeoutPromise(ms){ return new Promise((_,rej)=> setTimeout(()=>rej(new Error('timeout')), ms)); }
+  if(typeof window.sendAIMessage==='function' && !window.__wrappedSendTimeoutSignal){
+    const __origSend = window.sendAIMessage;
+    window.sendAIMessage = async function(){
+      // Inject AbortSignal as last arg options if possible
+      try{
+        window.__activeSendController?.abort?.('superseded');
+        window.__activeSendController = new AbortController();
+        const args = Array.from(arguments);
+        const last = args[args.length-1];
+        if(last && typeof last==='object' && !Array.isArray(last)){
+          if(!('signal' in last)) last.signal = window.__activeSendController.signal;
+        } else {
+          args.push({ signal: window.__activeSendController.signal });
+        }
+        const p = __origSend.apply(this, args);
+        return await Promise.race([p, timeoutPromise(TIMEOUT_MS)]);
+      }finally{ /* noop */ }
+    };
+    window.__wrappedSendTimeoutSignal = true;
+    window.addEventListener('unhandledrejection', function(ev){
+      const msg = (ev && ev.reason && (ev.reason.message||ev.reason)) || '';
+      if(String(msg).toLowerCase().includes('timeout')){
+        try{ window.__activeSendController && window.__activeSendController.abort('timeout'); }catch(e){}
+        try{ window.toast && toast('Tempo esgotado (20s). Tente novamente.','warn'); }catch(e){}
+        try{ window.speakWithActiveArch && speakWithActiveArch('Tempo esgotado. Reenvie quando quiser.'); }catch(e){}
+      }
+    });
+  }
+  // button timer
+  function findSendBtn(){ return document.querySelector('#homeInputForm button[type="submit"]'); }
+  function startBtnTimer(){
+    const btn = findSendBtn(); if(!btn) return {stop:()=>{}};
+    const original = btn.getAttribute('data-label') || btn.textContent;
+    btn.setAttribute('data-label', original);
+    const t0 = performance.now();
+    const id = setInterval(()=>{
+      const s = ((performance.now()-t0)/1000);
+      btn.textContent = original + ' · ⏱ ' + (s>=10? s.toFixed(0): s.toFixed(1)) + 's';
+    }, 120);
+    return { stop(){ clearInterval(id); btn.textContent = btn.getAttribute('data-label') || 'Enviar'; } };
+  }
+  // attach around text submit
+  document.addEventListener('DOMContentLoaded', function(){
+    const form = document.getElementById('homeInputForm');
+    if(form && !form.__timerWrapped){
+      form.addEventListener('submit', function(){
+        const t = startBtnTimer();
+        const stop = ()=>{ try{ t.stop(); }catch(e){} };
+        setTimeout(stop, TIMEOUT_MS+200); // safety stop
+        window.addEventListener('unhandledrejection', stop, {once:true});
+      }, true);
+      form.__timerWrapped = True = true;
+    }
+  });
+})();
+</script>
+
+
+<script>
+// PATCH: status bar LS/LSX padronizado
+(function(){
+  function formatSize(bytes){
+    if(bytes<1024) return bytes+' B';
+    if(bytes<1048576) return (bytes/1024).toFixed(1)+' KB';
+    return (bytes/1048576).toFixed(1)+' MB';
+  }
+  async function getIDBUsage(){
+    if(!('indexedDB' in window)) return 'IDB: não suportado';
+    // tentativa de calcular uso aproximado (nem sempre disponível)
+    try{
+      if(navigator.storage && navigator.storage.estimate){
+        const est = await navigator.storage.estimate();
+        return 'IDB usado: '+formatSize(est.usage||0)+' / '+formatSize(est.quota||0);
+      }
+    }catch(e){}
+    return 'IDB: sem dados';
+  }
+  function refreshStats(bar){
+    try{
+      const keys = Object.keys(localStorage||{});
+      let bytes=0;
+      for(const k of keys){
+        try{ bytes += (localStorage.getItem(k)||'').length + k.length; }catch(e){}
+      }
+      bar.querySelector('.lsx-stats-text').textContent =
+        'Chaves: '+keys.length+' · localStorage: '+formatSize(bytes);
+      getIDBUsage().then(txt=>{
+        bar.querySelector('.lsx-stats-idb').textContent = txt;
+      });
+    }catch(e){}
+  }
+  function attach(panelSel){
+    const panel = document.querySelector(panelSel);
+    if(!panel) return;
+    let bar = panel.querySelector('.lsx-statusbar');
+    if(!bar){
+      bar = document.createElement('div');
+      bar.className='lsx-statusbar';
+      Object.assign(bar.style, {
+        padding:'4px 6px',
+        fontSize:'11px',
+        background:'#111',
+        color:'#0f0',
+        borderBottom:'1px solid #333'
+      });
+      bar.innerHTML='<span class="lsx-stats-text"></span> <span class="lsx-stats-idb"></span>';
+      panel.insertBefore(bar, panel.firstChild);
+    }
+    refreshStats(bar);
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    attach('#lsx-panel');
+    attach('#ls-panel');
+    setInterval(function(){
+      attach('#lsx-panel');
+      attach('#ls-panel');
+    }, 15000);
+  });
+})();
+</script>
+
+
+<style>
+/* PATCH: LS/LSX unified status */
+.ls-statusbar{font:12px/1.3 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color:#cfd6e4; background:#1118; border:1px solid #222; border-radius:8px; padding:6px 8px; display:flex; gap:10px; align-items:center}
+.ls-statusbar b{color:#fff}
+.ls-statusbar .dot{width:6px;height:6px;border-radius:50%;background:#6cf;box-shadow:0 0 8px #6cf}
+</style>
+<script>
+// PATCH: LS/LSX unified status (keys, size, IDB count)
+(function(){
+  const $=(q,r=document)=>r.querySelector(q);
+  function bytesOfString(s){ try{ return (s||'').length*2; }catch(e){ return 0; } }
+  function calcLocalStorageBytes(){
+    let total=0; try{
+      for (let i=0;i<localStorage.length;i++){
+        const k = localStorage.key(i);
+        total += bytesOfString(k) + bytesOfString(localStorage.getItem(k));
+      }
+    }catch(e){}
+    return total;
+  }
+  function fmtBytes(n){
+    const u=['B','KB','MB','GB']; let i=0, x=n;
+    while(x>=1024 && i<u.length-1){ x/=1024; i++; }
+    return (x>=10? x.toFixed(0): x.toFixed(1))+' '+u[i];
+  }
+  async function getIDBDatabasesCount(){
+    try{
+      if (indexedDB && indexedDB.databases){ const list = await indexedDB.databases(); return (list||[]).length; }
+    }catch(e){}
+    // fallback: registry opcional
+    try{ if (Array.isArray(window.__IDB_REGISTRY)) return window.__IDB_REGISTRY.length; }catch(e){}
+    return 0;
+  }
+  function ensureStatus(panel){
+    if(!panel) return null;
+    let bar = panel.querySelector('.ls-statusbar');
+    if(!bar){
+      bar = document.createElement('div');
+      bar.className = 'ls-statusbar';
+      bar.innerHTML = '<span class=\"dot\"></span><span id=\"_ls_keys\">Chaves: <b>0</b></span><span id=\"_ls_size\">Tamanho: <b>0 B</b></span><span id=\"_ls_idb\">IDB: <b>0 db</b></span>';
+      panel.prepend(bar);
+    }
+    return bar;
+  }
+  async function refreshStatus(panel){
+    const bar = ensureStatus(panel); if(!bar) return;
+    const keys = (function(){ try{ return localStorage.length; }catch(e){ return 0; } })();
+    const size = calcLocalStorageBytes();
+    const idb = await getIDBDatabasesCount();
+    bar.querySelector('#_ls_keys b').textContent = String(keys);
+    bar.querySelector('#_ls_size b').textContent = fmtBytes(size);
+    bar.querySelector('#_ls_idb b').textContent = String(idb)+' db';
+  }
+  async function refreshBoth(){
+    await Promise.all([refreshStatus($('#lsx-panel')), refreshStatus($('#ls-panel'))]);
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    // cria/atualiza agora
+    refreshBoth();
+
+    // atualiza quando algo muda
+    window.addEventListener('storage', refreshBoth);
+    // ganchos em botões conhecidos (se existirem)
+    ['#lsx-refresh','#lsx-export','#lsx-import-btn','#lsx-clear-all','#lsx-clear-idb',
+     '#ls-refresh','#ls-export','#ls-import-btn','#ls-clear-all','#ls-clear-idb']
+      .forEach(sel=>{
+        const el = $(sel); if(!el) return;
+        el.addEventListener('click', function(){ setTimeout(refreshBoth, 60); }, true);
+      });
+  });
+  // API opcional para outros módulos chamarem
+  window.refreshLSStatus = refreshBoth;
+})();
+</script>
+
 </body></html>
