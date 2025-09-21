@@ -46,6 +46,8 @@
  /* --arch-overlay: rgba(0,0,0,0); */
   /*    --ease: cubic-bezier(.22, .61, .36, 1); */
     }
+    header.mast{flex-wrap:wrap}
+    header.mast .ib{flex:0 0 auto}
 
     /* Tema alternativo: medium gray / glasmorfismo. Quando body[data-theme="medium"] estiver definido, estas variáveis substituem as originais. */
     body[data-theme="medium"] {
@@ -707,7 +709,44 @@ body::after {
       padding-right: calc(78px + 14px);
       padding-bottom: calc(env(safe-area-inset-bottom, 0) + 12px);
     }
-  </style>
+  
+/* === LS header button: square badge === */
+#btnLS{position:relative; background:linear-gradient(180deg,#11162a,#0b1122)}
+#btnLS .ls-badge{
+  display:grid; place-items:center;
+  width:24px;height:24px; border-radius:8px;
+  background:linear-gradient(180deg,#1a2240,#10162b);
+  border:1px solid rgba(255,255,255,.16);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.06), 0 4px 14px rgba(0,0,0,.35);
+  font:800 12px/1 ui-monospace,monospace; color:#e6eeff; letter-spacing:.06em;
+}
+
+/* === LS panel polish === */
+#ls-panel header{gap:8px}
+#ls-title{font-weight:900; letter-spacing:.04em}
+#ls-actions button{border-radius:12px}
+#ls-stats .stat{border-radius:12px}
+#ls-new{grid-template-columns: 220px 1fr auto}
+.ls-group{scroll-margin: 12px}
+.ls-head,.ls-row{border-bottom:1px dashed rgba(255,255,255,.12)}
+.ls-row{background: rgba(255,255,255,.02); border-radius:12px; padding:10px 8px}
+.ls-k{font-weight:800}
+.ls-preview{border-radius:12px}
+.ls-a .icon-btn{border-radius:12px}
+/* compact spacing between groups */
+.group-body{display:grid; gap:8px}
+
+/* Highlight search matches */
+mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
+
+/* Mobile refinements */
+@media (max-width: 480px){
+  #ls-new{grid-template-columns:1fr; gap:6px}
+  .group-body{gap:6px}
+  .ls-row{padding:8px}
+  #ls-stats .stat{padding:6px 8px}
+}
+</style>
 </head>
 <body>
   <!-- ===== Header ===== -->
@@ -732,6 +771,13 @@ body::after {
 <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/brain.svg" alt="Brain" width="20" height="20" onerror="this.onerror=null;this.src='icons/brain.svg'">
       <span class="ripple"></span>
     </button>
+  
+    <!-- LS • Brain button (glass) -->
+    <button class="ib fx-trans fx-press ring" id="btnLS" title="Local Storage (Brain)" aria-label="Local Storage">
+      <span class="ls-badge">LS</span>
+      <span class="ripple"></span>
+    </button>
+
   </header>
 
   <!-- Âncora para sessões abertas quando o usuário optar por abrir dentro da página -->
@@ -2664,5 +2710,402 @@ body::after {
   })();
 })();
 </script>
+
+<!-- ===== Dual • Debug & UX Kit v2 (routing + toaster + LS viewer) ===== -->
+<style>
+  #dual-toaster{position:fixed;left:50%;top:14px;transform:translateX(-50%);
+    background:rgba(16,24,33,.92);color:#e6f1ff;border:1px solid rgba(255,255,255,.12);
+    padding:10px 14px;border-radius:12px;backdrop-filter:blur(10px);
+    font:600 13px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;z-index:99999;
+    max-width:80vw;box-shadow:0 10px 30px rgba(0,0,0,.35);display:none}
+  #dual-toaster.show{display:block;animation:dualToastFade .25s ease}
+  @keyframes dualToastFade{from{opacity:0;transform:translate(-50%,-6px)}to{opacity:1;transform:translate(-50%,0)}}
+
+  #arch-bubble{position:fixed;right:16px;bottom:92px;z-index:99998;max-width:60ch}
+  #arch-bubble .bubble{background:rgba(0,0,0,.6);color:#e6f1ff;border:1px solid rgba(255,255,255,.14);
+    padding:10px 12px;border-radius:14px;backdrop-filter:blur(8px);font:500 13px/1.35 system-ui;opacity:0;transform:translateY(6px)}
+  #arch-bubble .bubble.show{opacity:1;transform:translateY(0);transition:opacity .2s ease, transform .2s ease}
+
+  /* LocalStorage Brain Viewer */
+  #ls-panel-btn{position:fixed;bottom:16px;left:16px;z-index:99997;
+    width:34px;height:34px;border-radius:12px;border:1px solid rgba(255,255,255,.14);
+    background:rgba(12,16,22,.7);color:#bfe3ff;backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;
+    cursor:pointer}
+  #ls-panel{position:fixed;inset:auto 16px 16px auto;right:16px;bottom:16px;max-width:min(680px,90vw);max-height:60vh;overflow:auto;
+    z-index:99996;background:rgba(10,14,20,.85);border:1px solid rgba(255,255,255,.12);border-radius:16px;backdrop-filter:blur(8px);
+    display:none}
+  #ls-panel header{display:flex;align-items:center;gap:12px;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.08);color:#cfe6ff}
+  #ls-panel .grid{display:grid;grid-template-columns:240px 1fr auto;gap:8px;padding:12px}
+  #ls-panel .grid div{border-bottom:1px dashed rgba(255,255,255,.08);padding:6px 4px;color:#d9e6ff;font:12px/1.3 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;word-break:break-all}
+  #ls-panel .grid div.k{color:#a9c7ff}
+  #ls-panel .actions{margin-left:auto;display:flex;gap:8px}
+  #ls-panel button{background:#0d1b2a;border:1px solid #254b70;color:#cfe6ff;border-radius:10px;padding:6px 10px;cursor:pointer}
+</style>
+<div id="dual-toaster"></div>
+<div id="arch-bubble" aria-live="polite"></div>
+<div id="ls-panel" role="dialog" aria-label="LocalStorage Viewer">
+  <header>
+    <strong>LocalStorage • Brain</strong>
+    <div class="actions">
+      <button id="ls-refresh">Atualizar</button>
+      <button id="ls-clear-all">Limpar tudo</button>
+      <button id="ls-hide">Fechar</button>
+    </div>
+  </header>
+  <div class="grid" id="ls-grid"></div>
+</div>
+<script>
+(function(){
+  const $ = (q,r=document)=>r.querySelector(q);
+  const $$ = (q,r=document)=>Array.from(r.querySelectorAll(q));
+  const LS = {
+    get:(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},
+    set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},
+    raw:(k)=>localStorage.getItem(k)||'',
+    del:(k)=>{try{localStorage.removeItem(k)}catch(e){}},
+    clear:()=>{try{localStorage.clear()}catch(e){}}
+  };
+  const isROM = ()=>/rom/i.test(location.hash)||/\\brom\\b/i.test(document.title)||/\\brom\\b/i.test((document.body.getAttribute('data-page')||''));
+
+  // ===== Toaster =====
+  let toastTimer=null;
+  function showToast(msg, ms=2800){
+    const el = $('#dual-toaster');
+    if(!el) return;
+    el.textContent = String(msg);
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>{ el.classList.remove('show'); }, ms);
+  }
+  window.DualToast = showToast;
+
+  // ===== Archetype bubble (ROM) =====
+  let bubbleTimer=null;
+  function showArchBubble(msg, ms=4500){
+    const host = $('#arch-bubble'); if(!host) return;
+    host.innerHTML = '<div class="bubble"></div>';
+    const b = host.firstElementChild;
+    b.textContent = String(msg);
+    requestAnimationFrame(()=>{
+      b.classList.add('show');
+      clearTimeout(bubbleTimer);
+      bubbleTimer = setTimeout(()=>{ b.classList.remove('show'); }, ms);
+    });
+  }
+
+  // ===== LocalStorage Brain Viewer =====
+  function renderLS(){
+    const grid = $('#ls-grid'); if(!grid) return;
+    grid.innerHTML = '';
+    Object.keys(localStorage).sort().forEach(k=>{
+      const v = LS.raw(k);
+      const rowK = document.createElement('div'); rowK.className='k'; rowK.textContent=k;
+      const rowV = document.createElement('div'); rowV.textContent = v.length>200? (v.slice(0,200)+'…'): v;
+      const rowA = document.createElement('div');
+      const del = document.createElement('button'); del.textContent='apagar';
+      del.addEventListener('click', ()=>{ LS.del(k); renderLS(); });
+      rowA.appendChild(del);
+      grid.appendChild(rowK); grid.appendChild(rowV); grid.appendChild(rowA);
+    });
+  }
+  const panel = $('#ls-panel');
+  $('#ls-panel-btn')?.addEventListener('click', ()=>{ panel.style.display='block'; renderLS(); });
+  $('#ls-hide')?.addEventListener('click', ()=>{ panel.style.display='none'; });
+  $('#ls-refresh')?.addEventListener('click', renderLS);
+  $('#ls-clear-all')?.addEventListener('click', ()=>{
+    if(confirm('Limpar TODO o LocalStorage? Esta ação é irreversível.')){
+      LS.clear(); renderLS(); showToast('LocalStorage limpo.');
+    }
+  });
+
+  // ===== Message routing =====
+  // If chatPush exists, wrap it so AI messages are routed: ROM -> archetype bubble; other pages -> toaster.
+  const _chatPush = window.chatPush;
+  if(typeof _chatPush === 'function'){
+    window.chatPush = function(type, text){
+      try{
+        if(type==='ai'){
+          if(isROM()) showArchBubble(text);
+          else showToast(text);
+          // Não duplicar na timeline original quando for AI
+          return;
+        }
+      }catch(e){}
+      return _chatPush.apply(this, arguments);
+    };
+  }
+
+  // If your code dispatches window events instead of chatPush, you can use these:
+  window.dispatchEvent(new CustomEvent('dual:assistant:message',{detail:{text:'(hook pronto)'}}));
+  window.addEventListener('dual:assistant:message', (ev)=>{
+    const text = (ev && ev.detail && ev.detail.text) ? ev.detail.text : '';
+    if(!text) return;
+    if(isROM()) showArchBubble(text); else showToast(text);
+  });
+
+  // ===== Ensure ROM speaks via archetype (signal) =====
+  // Fire a lightweight signal any time we land on ROM; your archetype code can listen and speak.
+  function pingROM(){
+    if(isROM()){
+      window.dispatchEvent(new CustomEvent('dual:rom:entered', {detail:{archetype: localStorage.getItem('archetype:active')||''}}));
+    }
+  }
+  window.addEventListener('hashchange', pingROM);
+  document.addEventListener('DOMContentLoaded', pingROM);
+})();
+</script>
+
+<!-- LocalStorage Brain Viewer — v3.2 (enhanced) -->
+<style>
+  /* Panel core */
+  #ls-panel{position:fixed;right:16px;bottom:16px;max-width:min(1040px,96vw);max-height:82vh;overflow:hidden;z-index:2147483646;background:rgba(10,14,20,.97);border:1px solid #ffffff26;border-radius:16px;backdrop-filter:blur(12px);display:none;box-shadow:0 18px 48px rgba(0,0,0,.6)}
+  #ls-panel header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid #ffffff18;color:#cfe6ff}
+  #ls-title{font-weight:800;margin-right:auto}
+  #ls-search{min-width:200px;background:#0e1724;border:1px solid #294461;border-radius:10px;color:#d9e6ff;padding:8px 10px;font:12px ui-monospace,monospace}
+  #ls-actions{display:flex;gap:8px;flex-wrap:wrap}
+  #ls-actions button{display:inline-flex;align-items:center;gap:6px;background:#0d1b2a;border:1px solid #254b70;color:#cfe6ff;border-radius:10px;padding:6px 10px;cursor:pointer}
+  #ls-body{display:grid;grid-template-rows:auto auto 1fr;border-top:1px solid #ffffff10}
+  #ls-stats{display:flex;gap:10px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid #ffffff10}
+  .stat{background:#0e1724;border:1px solid #294461;border-radius:10px;padding:8px 10px;color:#cfe6ff;font:12px ui-monospace,monospace}
+  .stat b{color:#a9c7ff}
+  #ls-new{display:grid;grid-template-columns:260px 1fr auto;gap:8px;padding:10px 14px;border-bottom:1px solid #ffffff10}
+  #ls-new input,#ls-new textarea{background:#0e1724;border:1px solid #294461;border-radius:10px;color:#d9e6ff;padding:8px 10px;font:12px ui-monospace,monospace}
+  #ls-new textarea{resize:vertical;min-height:40px;max-height:120px}
+  #ls-new button{display:inline-flex;align-items:center;gap:6px;background:#114d2f;border:1px solid #2c7a58;color:#bfffe0;border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer}
+  #ls-grid{overflow:auto;max-height:54vh;padding:6px 0}
+  details.ls-group{border-top:1px dashed #ffffff14}
+  details.ls-group>summary{list-style:none;cursor:pointer;padding:10px 14px;color:#d7e7ff;display:flex;align-items:center;gap:8px}
+  .badge{background:#0d1b2a;border:1px solid #254b70;border-radius:999px;padding:2px 8px;color:#cfe6ff;font:11px ui-monospace,monospace}
+  .group-body{padding:0 8px 8px}
+  .ls-head,.ls-row{display:grid;grid-template-columns:280px 1fr 170px;gap:8px;padding:8px 6px 8px 8px}
+  .ls-head{position:sticky;top:0;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,0));backdrop-filter:blur(6px);z-index:1;border-bottom:1px solid #ffffff10}
+  .ls-head div{color:#a9c7ff;font:700 11px/1 ui-monospace,monospace;text-transform:uppercase;letter-spacing:.08em}
+  .ls-row{border-bottom:1px dashed #ffffff10;align-items:start}
+  .ls-k{color:#a9c7ff;font:12px/1.35 ui-monospace,monospace;word-break:break-all}
+  .ls-v{display:flex;flex-direction:column;gap:6px}
+  .ls-preview{background:#0e1724;border:1px solid #294461;border-radius:10px;color:#d9e6ff;padding:8px 10px;font:12px/1.35 ui-monospace,monospace;white-space:pre-wrap;word-break:break-word;max-height:60px;overflow:auto}
+  .ls-expand{display:none;width:100%}
+  .ls-expand textarea{width:100%;min-height:120px;background:#0e1724;border:1px solid #294461;border-radius:10px;color:#d9e6ff;padding:8px 10px;font:12px/1.35 ui-monospace,monospace;white-space:pre-wrap;word-break:break-word;resize:vertical}
+  .ls-a{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+  .icon-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;background:#0d1b2a;border:1px solid #254b70;color:#cfe6ff;cursor:pointer}
+  .icon-btn.warn{background:#2a1212;border-color:#703333;color:#ffd0d0}
+  .icon-btn.ok{background:#0f2a1e;border-color:#2f7a56;color:#c9ffe7}
+  .icon-btn svg{width:18px;height:18px;fill:currentColor}
+  .mut{color:#93a7bf;font-size:11px}
+  @media (max-width:960px){ .ls-head,.ls-row,#ls-new{grid-template-columns:220px 1fr 150px} }
+  @media (max-width:720px){ #ls-panel{left:16px;right:16px;max-width:unset} .ls-head,.ls-row,#ls-new{grid-template-columns:160px 1fr 120px} }
+  /* Mini dock */
+  #ls-mini{position:fixed;right:12px;bottom:12px;z-index:2147483647;display:none}
+  #ls-mini .dock{background:rgba(10,14,20,.98);border:1px solid #ffffff24;border-radius:14px;padding:8px;display:flex;gap:8px;align-items:center;box-shadow:0 12px 32px rgba(0,0,0,.5)}
+  #ls-mini .icon{width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;background:#0d1b2a;border:1px solid #254b70;color:#cfe6ff;cursor:pointer}
+  #ls-mini .icon.warn{background:#2a1212;border-color:#703333;color:#ffd0d0}
+  #ls-mini .icon.ok{background:#0f2a1e;border-color:#2f7a56;color:#c9ffe7}
+  #ls-mini svg{width:18px;height:18px;fill:currentColor}
+  #ls-mini .sep{width:1px;height:26px;background:#ffffff18;margin:0 4px}
+  #ls-mini .pill{font:11px ui-monospace,monospace;color:#a9c7ff;background:#0e1724;border:1px solid #294461;border-radius:999px;padding:4px 8px}
+
+  /* === Mobile tuning (iPhone, narrow) === */
+  @media (max-width: 480px){
+    #ls-panel{left: 10px; right: 10px; bottom: 10px; border-radius: 14px; max-height: 80vh;}
+    #ls-actions button{padding:8px 10px; font-size:12px}
+    .ls-head,.ls-row{grid-template-columns: 1fr; gap:6px; padding:8px}
+    .ls-head{display:none}
+    .ls-k{font-weight:800}
+    .ls-a{justify-content:flex-start}
+    .icon-btn{width:40px;height:40px;border-radius:12px}
+    .ls-preview{max-height:84px}
+  }
+  /* fix overflow when nested containers have transforms */
+  #ls-panel *{min-width:0}
+  /* Keep panel above any glass layers */
+  #ls-panel{z-index:2147483647}
+    
+</style>
+
+<!-- Symbols -->
+<svg width="0" height="0" style="position:absolute;left:-9999px;top:-9999px" aria-hidden="true">
+  <defs>
+    <symbol id="ic-copy" viewBox="0 0 24 24"><path d="M16 1H4a2 2 0 0 0-2 2v12h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></symbol>
+    <symbol id="ic-save" viewBox="0 0 24 24"><path d="M17 3H5a2 2 0 0 0-2 2v14h18V7l-4-4zm0 2l2 2v10H5V5h12zM7 7h8v4H7V7zM7 13h10v4H7v-4z"/></symbol>
+    <symbol id="ic-trash" viewBox="0 0 24 24"><path d="M9 3h6l1 2h5v2H3V5h5l1-2zm1 7h2v8h-2v-8zm4 0h2v8h-2v-8z"/></symbol>
+    <symbol id="ic-expand" viewBox="0 0 24 24"><path d="M7 10h10v4H7z"/></symbol>
+    <symbol id="ic-download" viewBox="0 0 24 24"><path d="M12 3v10l4-4 1.4 1.4L12 16.8 6.6 10.4 8 9l4 4V3h0zM5 19h14v2H5z"/></symbol>
+    <symbol id="ic-upload" viewBox="0 0 24 24"><path d="M12 21V11l4 4 1.4-1.4L12 7.2 6.6 13.6 8 15l4-4v10h0zM5 3h14v2H5z"/></symbol>
+    <symbol id="ic-close" viewBox="0 0 24 24"><path d="M18.3 5.7L12 12l6.3 6.3-1.4 1.4L10.6 13.4 4.3 19.7 2.9 18.3 9.2 12 2.9 5.7 4.3 4.3l6.3 6.3 6.3-6.3z"/></symbol>
+    <symbol id="ic-broom" viewBox="0 0 24 24"><path d="M3 17l4 4 12-12-4-4L3 17zm14-10l2 2-1 1-2-2 1-1z"/></symbol>
+  </defs>
+</svg>
+
+<!-- Panel -->
+<div id="ls-panel" role="dialog" aria-label="LocalStorage Viewer">
+  <header>
+    <strong id="ls-title">LocalStorage • Brain</strong>
+    <input id="ls-search" placeholder="buscar chave/valor…"><span id="ls-count" class="mut" style="font-size:11px;margin-left:6px"></span>
+    <div id="ls-actions">
+      <button id="ls-export"><svg><use href="#ic-download"/></svg>Exportar</button>
+      <button id="ls-import-btn"><svg><use href="#ic-upload"/></svg>Importar</button>
+      <input id="ls-import" type="file" accept="application/json" style="display:none">
+      <button id="ls-clear-all"><svg><use href="#ic-broom"/></svg>Limpar LS</button>
+      <button id="ls-clear-idb"><svg><use href="#ic-trash"/></svg>Limpar IDB</button>
+      <button id="ls-hide"><svg><use href="#ic-close"/></svg>Fechar</button>
+    </div>
+  </header>
+  <div id="ls-body">
+    <div id="ls-stats">
+      <div class="stat">chaves: <b id="st-keys">0</b></div>
+      <div class="stat">localStorage: <b id="st-bytes">0 KB</b></div>
+      <div class="stat">pesados(>50KB): <b id="st-heavy">0</b></div>
+      <div class="stat">origem (quota/uso): <b id="st-usage">—</b> <span class="mut">(inclui IndexedDB)</span></div>
+      <div class="stat">usuário: <b id="st-user">—</b></div>
+    </div>
+    <div id="ls-new">
+      <input id="ls-new-k" placeholder="nova chave (ex.: infodose:userName)">
+      <textarea id="ls-new-v" placeholder="valor (texto ou JSON)"></textarea>
+      <button id="ls-add"><svg><use href="#ic-save"/></svg>Salvar novo</button>
+    </div>
+    <div id="ls-grid"></div>
+  </div>
+</div>
+
+<!-- Mini dock (ativar com #ls-min) -->
+<div id="ls-mini">
+  <div class="dock">
+    <div class="pill" id="ls-mini-keys">0</div>
+    <div class="pill" id="ls-mini-bytes">0 KB</div>
+    <div class="sep"></div>
+    <div class="icon" title="Abrir painel" id="ls-mini-open"><svg><use href="#ic-expand"/></svg></div>
+    <div class="icon" title="Exportar" id="ls-mini-exp"><svg><use href="#ic-download"/></svg></div>
+    <div class="icon ok" title="Salvar (novo vazio)" id="ls-mini-add"><svg><use href="#ic-save"/></svg></div>
+    <div class="icon warn" title="Limpar LS (backup)" id="ls-mini-cls"><svg><use href="#ic-broom"/></svg></div>
+    <div class="icon warn" title="Limpar IDB" id="ls-mini-idb"><svg><use href="#ic-trash"/></svg></div>
+  </div>
+</div>
+
+<script>(function(){'use strict';
+  const $=(q,r=document)=>r.querySelector(q);
+  const panel=$('#ls-panel'), grid=$('#ls-grid'), search=$('#ls-search');
+  const stats={keys:$('#st-keys'),bytes:$('#st-bytes'),heavy:$('#st-heavy'),usage:$('#st-usage'),user:$('#st-user')};
+  const HEAVY=50*1024;
+
+  function utf8Bytes(s){try{return new Blob([s]).size}catch(e){return (new TextEncoder()).encode(s).length}}
+  function fmtBytes(n){return n<1024? n+' B' : n<1048576? (n/1024).toFixed(1)+' KB' : (n/1048576).toFixed(2)+' MB'}
+  function lsSize(){let t=0,h=0; for(const k of Object.keys(localStorage)){const v=localStorage.getItem(k)||''; const b=utf8Bytes(k)+utf8Bytes(v); t+=b; if(b>HEAVY) h++;} return {t,h}}
+  function estimate(){ if(navigator.storage?.estimate) return navigator.storage.estimate().then(({usage,quota})=>{stats.usage.textContent=(usage&&quota)?`${fmtBytes(usage)} / ${fmtBytes(quota)}`:'—'}); stats.usage.textContent='—' }
+  function groupKey(k){ if(k.includes(':')) return k.split(':')[0]; if(k.includes('.')) return k.split('.')[0]; return 'geral' }
+  function preview(v){ const s=String(v||''); return s.length>240? s.slice(0,240)+'…' : s }
+  function hilite(text, q){
+    if(!q) return text;
+    try{
+      const re = new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','ig');
+      return text.replace(re, '<mark class="ls-hit">$1</mark>');
+    }catch(e){ return text; }
+  }
+
+  function render(filter=''){
+    const countEl = document.getElementById('ls-count'); if(countEl) countEl.textContent='';
+    grid.innerHTML='';
+    const f=(filter||'').toLowerCase();
+    const keys=Object.keys(localStorage).sort();
+    const groups={};
+    for(const k of keys){
+      const v=localStorage.getItem(k)||'';
+      if(f && !(k.toLowerCase().includes(f)||v.toLowerCase().includes(f))) continue;
+      (groups[groupKey(k)] ||= []).push({k,v});
+    }
+    const ordered=Object.keys(groups).sort((a,b)=>a.localeCompare(b));
+    let i=0; (function next(){ const chunk=ordered.slice(i,i+4); chunk.forEach(g=> addGroup(g,groups[g])); i+=4; if(i<ordered.length) requestAnimationFrame(next); })();
+  }
+  function addGroup(name, items){
+    const det=document.createElement('details'); det.className='ls-group'; det.open=true;
+    const sum=document.createElement('summary'); sum.innerHTML=`<strong>${name}</strong> <span class="badge">${items.length}</span>`; det.appendChild(sum);
+    const body=document.createElement('div'); body.className='group-body';
+    const head=document.createElement('div'); head.className='ls-head'; head.innerHTML='<div>Chave</div><div>Valor</div><div>Ações</div>'; body.appendChild(head);
+    items.forEach(({k,v})=> body.appendChild(makeRow(k,v)));
+    det.appendChild(body); grid.appendChild(det);
+  }
+  function makeRow(k,vRaw){
+    const row=document.createElement('div'); row.className='ls-row';
+    const colK=document.createElement('div'); colK.className='ls-k'; colK.textContent=k;
+    const colV=document.createElement('div'); colV.className='ls-v';
+    const prev=document.createElement('div'); prev.className='ls-preview'; prev.innerHTML=hilite(preview(vRaw), (search && search.value||''));
+    const hint=document.createElement('div'); hint.className='mut'; hint.textContent=(utf8Bytes(vRaw)>HEAVY?'⚠ pesado ':'')+(vRaw.length>200?` • ${vRaw.length} chars`:' ');
+    const expand=document.createElement('div'); expand.className='ls-expand'; const ta=document.createElement('textarea'); ta.value=vRaw; expand.appendChild(ta);
+    colV.append(prev,hint,expand);
+    const colA=document.createElement('div'); colA.className='ls-a';
+    const mk=(href,title,cls)=>{const b=document.createElement('button'); b.className='icon-btn'+(cls?(' '+cls):''); b.title=title; b.innerHTML=`<svg><use href="${href}"/></svg>`; return b;}
+    const bEx=mk('#ic-expand','expandir'); bEx.onclick=()=>{ expand.style.display=expand.style.display==='block'?'none':'block' };
+    const bCp=mk('#ic-copy','copiar'); bCp.onclick=()=> navigator.clipboard.writeText(vRaw);
+    const bSv=mk('#ic-save','salvar','ok'); bSv.onclick=()=>{ const nv=expand.style.display==='block'? ta.value : vRaw; localStorage.setItem(k,nv); prev.textContent=preview(nv); hint.textContent=(utf8Bytes(nv)>HEAVY?'⚠ pesado ':'')+(nv.length>200?` • ${nv.length} chars`:' '); refresh(); };
+    const bDl=mk('#ic-trash','apagar','warn'); bDl.onclick=()=>{ if(!confirm(`Apagar “${k}”?`)) return; localStorage.removeItem(k); row.remove(); refresh(); };
+    colA.append(bEx,bCp,bSv,bDl);
+    row.append(colK,colV,colA);
+    return row;
+  }
+  function refresh(){
+    const {t,h}=lsSize(); stats.keys.textContent=String(localStorage.length); stats.bytes.textContent=fmtBytes(t); stats.heavy.textContent=String(h);
+    const user = localStorage.getItem('infodose:userName') || localStorage.getItem('user') || localStorage.getItem('usuario') || '—';
+    stats.user.textContent = user || '—'; estimate();
+  }
+
+  // Top actions
+  $('#ls-refresh')?.addEventListener('click', ()=>{ render(search.value); refresh(); });
+  $('#ls-add')?.addEventListener('click', ()=>{ const k=$('#ls-new-k').value.trim(), v=$('#ls-new-v').value; if(!k) return; if(localStorage.getItem(k)&&!confirm('Sobrescrever?')) return; localStorage.setItem(k,v); $('#ls-new-k').value=''; $('#ls-new-v').value=''; render(search.value); refresh(); });
+  $('#ls-export')?.addEventListener('click', ()=>{ const dump={}; Object.keys(localStorage).forEach(k=> dump[k]=localStorage.getItem(k)); const blob=new Blob([JSON.stringify(dump,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`ls-backup-${new Date().toISOString().replace(/[:.]/g,'-')}.json`; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),400); });
+  const impBtn=$('#ls-import-btn'), impInput=$('#ls-import'); impBtn?.addEventListener('click', ()=> impInput.click());
+  impInput?.addEventListener('change', (ev)=>{ const f=ev.target.files&&ev.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ try{ const obj=JSON.parse(String(r.result||'')); Object.keys(obj).forEach(k=> localStorage.setItem(k, String(obj[k]))); render(search.value); refresh(); alert('Importação concluída.'); }catch(e){ alert('JSON inválido.'); } }; r.readAsText(f); ev.target.value=''; });
+  $('#ls-clear-all')?.addEventListener('click', ()=>{ if(!confirm('Backup automático será criado. Confirmar LIMPAR LocalStorage?')) return; const snap={}; Object.keys(localStorage).forEach(k=> snap[k]=localStorage.getItem(k)); const stamp=new Date().toISOString().replace(/[:.]/g,'-'); try{ localStorage.setItem(`ls:backup:${stamp}`, JSON.stringify(snap)); }catch(e){} const blob=new Blob([JSON.stringify(snap,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`ls-backup-${stamp}.json`; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),500); localStorage.clear(); render(''); refresh(); alert('LocalStorage limpo. Backup salvo.'); });
+  $('#ls-clear-idb')?.addEventListener('click', async()=>{ if(!confirm('Limpar TODOS os bancos IndexedDB deste domínio?')) return; try{ if(indexedDB.databases){ const dbs=await indexedDB.databases(); await Promise.all(dbs.map(d=> new Promise(res=>{ const name=d.name; if(!name) return res(); const req=indexedDB.deleteDatabase(name); req.onsuccess=req.onerror=req.onblocked=()=>res(); }))); alert('IndexedDB limpo (quando suportado).'); } else alert('Navegador não expõe indexedDB.databases().'); }catch(e){ alert('Falha ao limpar IndexedDB: '+e); } refresh(); });
+  $('#ls-hide')?.addEventListener('click', ()=> panel.style.display='none');
+
+  // Open from header button
+  document.getElementById('btnLS')?.addEventListener('click', ()=>{ panel.style.display='block'; render(''); refresh(); search.value=''; });
+
+  // Mini dock (#ls-min)
+  (function(){
+    const mini=document.getElementById('ls-mini');
+    function refreshMini(){
+      const keys=Object.keys(localStorage).length;
+      let t=0; try{ for(const k of Object.keys(localStorage)){ const v=localStorage.getItem(k)||''; t += (new Blob([k]).size + new Blob([v]).size); } }catch(e){}
+      const fmt = t<1024? t+' B' : t<1048576? (t/1024).toFixed(1)+' KB' : (t/1048576).toFixed(2)+' MB';
+      document.getElementById('ls-mini-keys').textContent=String(keys);
+      document.getElementById('ls-mini-bytes').textContent=fmt;
+    }
+    function toggle(){ if(location.hash==='#ls-min'){ mini.style.display='block'; refreshMini(); } else mini.style.display='none'; }
+    document.getElementById('ls-mini-open').onclick=()=>{ panel.style.display='block'; render(''); refresh(); };
+    document.getElementById('ls-mini-exp').onclick=()=>{
+      const dump={}; Object.keys(localStorage).forEach(k=> dump[k]=localStorage.getItem(k));
+      const blob=new Blob([JSON.stringify(dump,null,2)],{type:'application/json'});
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ls-backup.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),400);
+    };
+    document.getElementById('ls-mini-add').onclick=()=>{
+      const k=prompt('Chave nova:'); if(!k) return;
+      const v=prompt('Valor (texto/JSON):') ?? ''; if(localStorage.getItem(k) && !confirm('Sobrescrever?')) return;
+      localStorage.setItem(k,v); refreshMini();
+    };
+    document.getElementById('ls-mini-cls').onclick=()=>{
+      if(!confirm('Backup será criado. Limpar LocalStorage?')) return;
+      const snap={}; Object.keys(localStorage).forEach(k=> snap[k]=localStorage.getItem(k));
+      const stamp=new Date().toISOString().replace(/[:.]/g,'-');
+      try{ localStorage.setItem('ls:backup:'+stamp, JSON.stringify(snap)); }catch(e){}
+      const blob=new Blob([JSON.stringify(snap,null,2)],{type:'application/json'});
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ls-backup-'+stamp+'.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),400);
+      localStorage.clear(); refreshMini();
+    };
+    document.getElementById('ls-mini-idb').onclick=async()=>{
+      if(!confirm('Limpar TODOS os bancos IndexedDB deste domínio?')) return;
+      try{
+        if(indexedDB.databases){
+          const dbs=await indexedDB.databases();
+          await Promise.all(dbs.map(d=> new Promise(res=>{ const name=d.name; if(!name) return res(); const req=indexedDB.deleteDatabase(name); req.onsuccess=req.onerror=req.onblocked=()=>res(); })));
+          alert('IndexedDB limpo (quando suportado).');
+        }else{
+          alert('Navegador não expõe indexedDB.databases().');
+        }
+      }catch(e){ alert('Falha ao limpar IndexedDB: '+e); }
+    };
+    window.addEventListener('hashchange', toggle); toggle();
+  })();
+})();</script>
+
 </body>
 </html>
