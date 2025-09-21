@@ -1,21 +1,4 @@
-<!--
-  Esta é a versão final unificada do HUB UNO e do Hub Revo.
-  Ela se baseia no arquivo “unificado 3.html” (Monólito UNO) e incorpora
-  uma nova aba chamada “Revo”, que carrega o Hub Infodose Ultra em um
-  iframe.  O código do Revo foi copiado para “index-100_revo_mod.html” e
-  levemente modificado para buscar a lista de apps diretamente do
-  elemento <script id="APPS_JSON"> presente nesta página.  Isso
-  assegura que ambos os hubs compartilham o mesmo catálogo de apps sem
-  depender de arquivos externos ausentes.
--->
-<!doctype html>
-<html lang="pt-BR">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
-  <title>HUB UNO</title>
-  <meta name="theme-color" content="#0b0f14" />
-  <style>
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" /><title>HUB UNO</title><meta name="theme-color" content="#0b0f14" /><style>
     :root {
       /* Paleta padrão (rosa/azul) */
       --grad-a: #ff52e5;
@@ -746,10 +729,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
   .ls-row{padding:8px}
   #ls-stats .stat{padding:6px 8px}
 }
-</style>
-
-<!-- ===== LS Panel Compact UI Styles ===== -->
-<style>
+</style><style>
 /* Make LS panels column-flex so header/actions don't steal space */
 #ls-panel, #lsx-panel{
   display: flex;
@@ -830,404 +810,14 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
 #lsx-panel.ls-compact .ls-data{
   max-height: 78vh;
 }
-</style>
-<!-- ===== /LS Panel Compact UI Styles ===== -->
-
-</head>
-<body>
-  <!-- ===== Header ===== -->
-  <header class="mast">
-    <button class="ib fx-trans fx-press ring" id="btnBack" title="Voltar" aria-label="Voltar">
-    <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/arrow-left.svg" alt="Voltar" width="20" height="20" onerror="this.onerror=null;this.src='icons/arrow-left.svg'">
-      <span class="ripple"></span>
-    </button>
-    <div class="title">
-      <h1>HUB UNO</h1>
-      <small>Dual · Trinity</small>
-    </div>
-    <button class="ib fx-trans fx-press ring" id="btnDownload" title="Baixar HTML">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/download.svg" alt="Download" width="20" height="20" onerror="this.onerror=null;this.src='icons/download.svg'">
-      <span class="ripple"></span>
-    </button>
-    <button class="ib fx-trans fx-press ring" id="btnHelp" title="Ajuda / Atalhos">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/question-circle.svg" alt="Ajuda" width="20" height="20" onerror="this.onerror=null;this.src='icons/question-circle.svg'">
-      <span class="ripple"></span>
-    </button>
-    <button class="ib fx-trans fx-press ring" id="btnBrain" title="Brain">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/brain.svg" alt="Brain" width="20" height="20" onerror="this.onerror=null;this.src='icons/brain.svg'">
-      <span class="ripple"></span>
-    </button>
-  
-    <!-- LS • Brain button (glass) -->
-    <button class="ib fx-trans fx-press ring" id="btnLS" title="Local Storage (Brain)" aria-label="Local Storage">
-      <span class="ls-badge">LS</span>
-      <span class="ripple"></span>
-    </button>
-
-  </header>
-
-  <!-- Âncora para sessões abertas quando o usuário optar por abrir dentro da página -->
-  <section id="sessionsAnchor"></section>
-
-  <!-- Container para fundo personalizado (imagem ou vídeo).  Será preenchido via JS quando o usuário escolher
-       um tema customizado.  Fica no início do body para garantir que fique abaixo de todos os conteúdos -->
-  <div id="custom-bg" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;overflow:hidden;pointer-events:none"></div>
-
-  <!-- ===== Views ===== -->
-  <main>
-    <!-- HOME -->
-    <section id="v-home" class="view active">
-      <div class="grid">
-          <!-- Saudação / chamada para cadastro. Visível quando o usuário precisa ativar a Dual Infodose ou quando já houver nome salvo -->
-          <div id="greetingCard" class="card fx-trans fx-lift" style="display:none">
-            <div id="greetingMsg" style="font-weight:800"></div>
-          </div>
-        <div id="unoCard" class="card fx-trans fx-lift" style="display:none">
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%">
-            <div>
-              <div style="font-weight:900;letter-spacing:.08em">UNO • foco e velocidade</div>
-              <div class="mut">Monólito: Apps embutidos + Viewer + Dock + Atalhos</div>
-            </div>
-            <div class="ico">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/bolt.svg" alt="Energia" width="24" height="24" onerror="this.onerror=null;this.src='icons/bolt.svg'">
-            </div>
-          </div>
-        </div>
-        <!-- Área de Arquétipos incorporada -->
-        <div class="arch-container">
-          <!-- Mover o seletor de arquétipos para fora do círculo.  Ele ficará acima
-               da bolinha e seguirá o layout vertical da arch-container. -->
-          <div class="arch-switcher">
-            <button class="btn fx-trans fx-press ring" id="arch-prev" title="Anterior">
-              <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/chevron-left.svg" alt="Anterior" width="16" height="16" onerror="this.onerror=null;this.src='icons/chevron-left.svg'">
-            </button>
-            <select id="arch-select" title="Escolher arquétipo"></select>
-            <button class="btn fx-trans fx-press ring" id="arch-next" title="Próximo">
-              <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/chevron-right.svg" alt="Próximo" width="16" height="16" onerror="this.onerror=null;this.src='icons/chevron-right.svg'">
-            </button>
-          </div>
-          <div class="arch-circle">
-            <div id="arch-fadeCover"></div>
-            <!-- Camada de ripple auditivo fica sobre o conteúdo do círculo -->
-            <div id="audioRipple" class="audio-ripple"></div>
-            <iframe id="arch-frame" title="Archetype Core" sandbox="allow-scripts" referrerpolicy="no-referrer"></iframe>
-          </div>
-          <!-- Mensagem de feedback aparece fora da bolinha, logo abaixo dela -->
-          <div id="archMsg" class="arch-msg"></div>
-          <!-- Menu de arquétipos: permite acessar Apps, Stack, Usuário, Revo e Home -->
-          <div id="archMenu" class="arch-menu">
-            <button data-nav="apps">
-              <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg" alt="Apps" width="20" height="20" onerror="this.onerror=null;this.src='icons/folder-open.svg'">
-              <span>Apps</span>
-            </button>
-            <button data-nav="stack">
-              <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/layer-group.svg" alt="Stack" width="20" height="20" onerror="this.onerror=null;this.src='icons/layer-group.svg'">
-              <span>Stack</span>
-            </button>
-            <button data-nav="brain">
-              <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/user.svg" alt="Usuário" width="20" height="20" onerror="this.onerror=null;this.src='icons/user.svg'">
-              <span>Usuário</span>
-            </button>
-            <button data-nav="home">
-              <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/yin-yang.svg" alt="Arquétipo" width="20" height="20" onerror="this.onerror=null;this.src='icons/yin-yang.svg'">
-              <span>Arquétipo</span>
-            </button>
-            <button data-nav="chat">
-              <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/comments.svg" alt="Chat" width="20" height="20" onerror="this.onerror=null;this.src='icons/comments.svg'">
-              <span>Chat</span>
-            </button>
-          <button data-audio="true" id="archAudioBtn">
-            <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/microphone-lines.svg" alt="Áudio" width="20" height="20" onerror="this.onerror=null;this.src='icons/microphone-lines.svg'">
-            <span>Áudio</span>
-          </button>
-          </div>
-        </div>
-        <!-- Feed de texto da IA -->
-        <div id="iaFeed" aria-live="polite" aria-atomic="false">
-          <div class="status">Toque a bolinha para falar com a IA.</div>
-        </div>
-        <div class="cards">
-          <button class="card fx-trans fx-press ring" data-nav="apps">
-            <div class="ico">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg" alt="Apps" width="24" height="24" onerror="this.onerror=null;this.src='icons/folder-open.svg'">
-            </div>
-            <div>
-              <div style="font-weight:800">Apps</div>
-              <div class="mut" id="homeAppsStatus">–</div>
-            </div>
-            <span class="ripple"></span>
-          </button>
-          <button class="card fx-trans fx-press ring" data-nav="stack">
-            <div class="ico">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/layer-group.svg" alt="Stack" width="24" height="24" onerror="this.onerror=null;this.src='icons/layer-group.svg'">
-            </div>
-            <div>
-              <div style="font-weight:800">Stack</div>
-              <div class="mut" id="homeStackStatus">–</div>
-            </div>
-            <span class="ripple"></span>
-          </button>
-          <button class="card fx-trans fx-press ring" data-nav="brain">
-            <div class="ico">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/user.svg" alt="Usuário" width="24" height="24" onerror="this.onerror=null;this.src='icons/user.svg'">
-            </div>
-            <div>
-              <div style="font-weight:800">Usuário</div>
-              <div class="mut" id="homeUserStatus">–</div>
-            </div>
-            <span class="ripple"></span>
-          </button>
-          <button class="card fx-trans fx-press ring" data-nav="home">
-            <div class="ico">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/yin-yang.svg" alt="Arquétipo" width="24" height="24" onerror="this.onerror=null;this.src='icons/yin-yang.svg'">
-            </div>
-            <div>
-              <div style="font-weight:800">Arquétipo</div>
-              <div class="mut" id="homeArchStatus">–</div>
-            </div>
-            <span class="ripple"></span>
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <!-- APPS -->
-    <section id="v-apps" class="view">
-      <div class="grid">
-        <div class="card fx-trans fx-lift" style="display:block">
-          <div class="grid" style="gap:8px">
-            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-              <!-- Removemos a busca e o sort. Agora apenas a opção de abrir dentro e o botão para mostrar locais -->
-              <label class="mut" style="display:inline-flex;gap:6px;align-items:center">
-                <input id="openInside" type="checkbox" /> abrir dentro
-              </label>
-              <button id="btnToggleLocal" class="btn fx-trans fx-press ring">
-                <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg" alt="Locais" width="16" height="16" onerror="this.onerror=null;this.src='icons/folder-open.svg'" style="margin-right:4px">
-                Mostrar Locais<span class="ripple"></span>
-              </button>
-            </div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-              <!-- Aceita arquivos .json além de HTML/TXT para permitir upload de catálogos personalizados -->
-              <input id="fileLocal" type="file" accept=".html,.htm,.txt,.json" multiple class="input ring" />
-              <button id="btnImport" class="btn fx-trans fx-press ring">
-                <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/plus-circle.svg" alt="Adicionar" width="16" height="16" onerror="this.onerror=null;this.src='icons/plus-circle.svg'" style="margin-right:4px">
-                Adicionar Locais<span class="ripple"></span>
-              </button>
-              <button id="btnExport" class="btn fx-trans fx-press ring">
-                <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/file-export.svg" alt="Exportar" width="16" height="16" onerror="this.onerror=null;this.src='icons/file-export.svg'" style="margin-right:4px">
-                Exportar Locais<span class="ripple"></span>
-              </button>
-              <button id="btnClear" class="btn fx-trans fx-press ring">
-                <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/trash.svg" alt="Limpar" width="16" height="16" onerror="this.onerror=null;this.src='icons/trash.svg'" style="margin-right:4px">
-                Limpar Locais<span class="ripple"></span>
-              </button>
-            </div>
-            <div id="appsCount" class="mut">—</div>
-          </div>
-        </div>
-        <div id="appsWrap" class="apps-wrap"></div>
-      </div>
-    </section>
-
-    <!-- STACK -->
-    <section id="v-stack" class="view">
-      <div class="grid">
-        <div class="card fx-trans fx-lift" style="display:block">
-          <div style="font-weight:800; display:flex; align-items:center; gap:8px">
+</style></head><body><header class="mast"><button class="ib fx-trans fx-press ring" id="btnBack" title="Voltar" aria-label="Voltar"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/arrow-left.svg" alt="Voltar" width="20" height="20" onerror="this.onerror=null;this.src='icons/arrow-left.svg'"><span class="ripple"></span></button><div class="title"><h1>HUB UNO</h1><small>Dual · Trinity</small></div><button class="ib fx-trans fx-press ring" id="btnDownload" title="Baixar HTML"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/download.svg" alt="Download" width="20" height="20" onerror="this.onerror=null;this.src='icons/download.svg'"><span class="ripple"></span></button><button class="ib fx-trans fx-press ring" id="btnHelp" title="Ajuda / Atalhos"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/question-circle.svg" alt="Ajuda" width="20" height="20" onerror="this.onerror=null;this.src='icons/question-circle.svg'"><span class="ripple"></span></button><button class="ib fx-trans fx-press ring" id="btnBrain" title="Brain"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/brain.svg" alt="Brain" width="20" height="20" onerror="this.onerror=null;this.src='icons/brain.svg'"><span class="ripple"></span></button><button class="ib fx-trans fx-press ring" id="btnLS" title="Local Storage (Brain)" aria-label="Local Storage"><span class="ls-badge">LS</span><span class="ripple"></span></button></header><section id="sessionsAnchor"></section><div id="custom-bg" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;overflow:hidden;pointer-events:none"></div><main><section id="v-home" class="view active"><div class="grid"><div id="greetingCard" class="card fx-trans fx-lift" style="display:none"><div id="greetingMsg" style="font-weight:800"></div></div><div id="unoCard" class="card fx-trans fx-lift" style="display:none"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%"><div><div style="font-weight:900;letter-spacing:.08em">UNO • foco e velocidade</div><div class="mut">Monólito: Apps embutidos + Viewer + Dock + Atalhos</div></div><div class="ico"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/bolt.svg" alt="Energia" width="24" height="24" onerror="this.onerror=null;this.src='icons/bolt.svg'"></div></div></div><div class="arch-container"><div class="arch-switcher"><button class="btn fx-trans fx-press ring" id="arch-prev" title="Anterior"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/chevron-left.svg" alt="Anterior" width="16" height="16" onerror="this.onerror=null;this.src='icons/chevron-left.svg'"></button><select id="arch-select" title="Escolher arquétipo"></select><button class="btn fx-trans fx-press ring" id="arch-next" title="Próximo"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/chevron-right.svg" alt="Próximo" width="16" height="16" onerror="this.onerror=null;this.src='icons/chevron-right.svg'"></button></div><div class="arch-circle"><div id="arch-fadeCover"></div><div id="audioRipple" class="audio-ripple"></div><iframe id="arch-frame" title="Archetype Core" sandbox="allow-scripts" referrerpolicy="no-referrer"></iframe></div><div id="archMsg" class="arch-msg"></div><div id="archMenu" class="arch-menu"><button data-nav="apps"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg" alt="Apps" width="20" height="20" onerror="this.onerror=null;this.src='icons/folder-open.svg'"><span>Apps</span></button><button data-nav="stack"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/layer-group.svg" alt="Stack" width="20" height="20" onerror="this.onerror=null;this.src='icons/layer-group.svg'"><span>Stack</span></button><button data-nav="brain"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/user.svg" alt="Usuário" width="20" height="20" onerror="this.onerror=null;this.src='icons/user.svg'"><span>Usuário</span></button><button data-nav="home"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/yin-yang.svg" alt="Arquétipo" width="20" height="20" onerror="this.onerror=null;this.src='icons/yin-yang.svg'"><span>Arquétipo</span></button><button data-nav="chat"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/comments.svg" alt="Chat" width="20" height="20" onerror="this.onerror=null;this.src='icons/comments.svg'"><span>Chat</span></button><button data-audio="true" id="archAudioBtn"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/microphone-lines.svg" alt="Áudio" width="20" height="20" onerror="this.onerror=null;this.src='icons/microphone-lines.svg'"><span>Áudio</span></button></div></div><div id="iaFeed" aria-live="polite" aria-atomic="false"><div class="status">Toque a bolinha para falar com a IA.</div></div><div class="cards"><button class="card fx-trans fx-press ring" data-nav="apps"><div class="ico"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg" alt="Apps" width="24" height="24" onerror="this.onerror=null;this.src='icons/folder-open.svg'"></div><div><div style="font-weight:800">Apps</div><div class="mut" id="homeAppsStatus">–</div></div><span class="ripple"></span></button><button class="card fx-trans fx-press ring" data-nav="stack"><div class="ico"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/layer-group.svg" alt="Stack" width="24" height="24" onerror="this.onerror=null;this.src='icons/layer-group.svg'"></div><div><div style="font-weight:800">Stack</div><div class="mut" id="homeStackStatus">–</div></div><span class="ripple"></span></button><button class="card fx-trans fx-press ring" data-nav="brain"><div class="ico"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/user.svg" alt="Usuário" width="24" height="24" onerror="this.onerror=null;this.src='icons/user.svg'"></div><div><div style="font-weight:800">Usuário</div><div class="mut" id="homeUserStatus">–</div></div><span class="ripple"></span></button><button class="card fx-trans fx-press ring" data-nav="home"><div class="ico"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/yin-yang.svg" alt="Arquétipo" width="24" height="24" onerror="this.onerror=null;this.src='icons/yin-yang.svg'"></div><div><div style="font-weight:800">Arquétipo</div><div class="mut" id="homeArchStatus">–</div></div><span class="ripple"></span></button></div></div></section><section id="v-apps" class="view"><div class="grid"><div class="card fx-trans fx-lift" style="display:block"><div class="grid" style="gap:8px"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><label class="mut" style="display:inline-flex;gap:6px;align-items:center"><input id="openInside" type="checkbox" /> abrir dentro
+              </label><button id="btnToggleLocal" class="btn fx-trans fx-press ring"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg" alt="Locais" width="16" height="16" onerror="this.onerror=null;this.src='icons/folder-open.svg'" style="margin-right:4px">
+                Mostrar Locais<span class="ripple"></span></button></div><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="fileLocal" type="file" accept=".html,.htm,.txt,.json" multiple class="input ring" /><button id="btnImport" class="btn fx-trans fx-press ring"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/plus-circle.svg" alt="Adicionar" width="16" height="16" onerror="this.onerror=null;this.src='icons/plus-circle.svg'" style="margin-right:4px">
+                Adicionar Locais<span class="ripple"></span></button><button id="btnExport" class="btn fx-trans fx-press ring"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/file-export.svg" alt="Exportar" width="16" height="16" onerror="this.onerror=null;this.src='icons/file-export.svg'" style="margin-right:4px">
+                Exportar Locais<span class="ripple"></span></button><button id="btnClear" class="btn fx-trans fx-press ring"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/trash.svg" alt="Limpar" width="16" height="16" onerror="this.onerror=null;this.src='icons/trash.svg'" style="margin-right:4px">
+                Limpar Locais<span class="ripple"></span></button></div><div id="appsCount" class="mut">—</div></div></div><div id="appsWrap" class="apps-wrap"></div></div></section><section id="v-stack" class="view"><div class="grid"><div class="card fx-trans fx-lift" style="display:block"><div style="font-weight:800; display:flex; align-items:center; gap:8px">
             Sessões
-            <button id="btnCloseAll" class="btn fx-trans fx-press ring" title="Fechar todas">Fechar todas<span class="ripple"></span></button>
-          </div>
-          <div class="mut">Reabra rápido pelo dock abaixo.</div>
-        </div>
-        <div id="stackWrap" class="grid"></div>
-      </div>
-    </section>
-
-    <!-- BRAIN -->
-    <section id="v-brain" class="view">
-      <div class="grid">
-        <div class="card fx-trans fx-lift" style="display:block">
-          <div style="font-weight:800">Usuário</div>
-          <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
-            <input id="userName" class="input ring" placeholder="Seu nome" />
-            <button id="saveName" class="btn prime fx-trans fx-press ring">Salvar<span class="ripple"></span></button>
-          </div>
-        </div>
-        <div class="card fx-trans fx-lift" style="display:block">
-          <div style="font-weight:800">OpenRouter</div>
-          <div style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap">
-            <select id="model" class="input ring" style="max-width:260px"></select>
-            <input id="sk" class="input ring" placeholder="sk-or-v1-…" />
-            <button id="saveSK" class="btn fx-trans fx-press ring">Salvar<span class="ripple"></span></button>
-          </div>
-
-          <!-- Modelo personalizado e treino -->
-          <div style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap">
-            <input id="customModel" class="input ring" placeholder="Modelo personalizado (ex: openai/gpt-4-custom)" style="flex:1" />
-            <button id="addModel" class="btn fx-trans fx-press ring">Adicionar Modelo<span class="ripple"></span></button>
-          </div>
-          <div style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap">
-            <input id="trainingFile" type="file" accept=".json,.txt,.dxt" class="input ring" style="max-width:260px" />
-            <span class="mut" style="font-size:11px">Treinamento (DXT)</span>
-          </div>
-        </div>
-
-          <!-- Tema e Fundo personalizados -->
-          <div class="card fx-trans fx-lift" style="display:block">
-            <div style="font-weight:800">Tema &amp; Fundo</div>
-            <div style="margin-top:8px;display:flex;flex-direction:column;gap:12px">
-              <label style="display:flex;align-items:center;gap:8px">
-                <span>Escolha o tema:</span>
-                <select id="themeSelect" class="input ring" style="max-width:200px">
-                  <option value="default">Padrão (colorido)</option>
-                  <option value="medium">Cinza médio (tecnológico)</option>
-                  <option value="custom">Personalizado (sua imagem/vídeo)</option>
-                </select>
-              </label>
-              <label style="display:flex;align-items:center;gap:8px">
-                <span>Fundo personalizado:</span>
-                <input id="bgUpload" type="file" accept="image/*,video/*" class="input ring" style="max-width:260px" />
-              </label>
-              <div class="mut" style="font-size:11px">Envie uma imagem ou vídeo para usar como plano de fundo quando o tema personalizado estiver selecionado. O fundo será salvo automaticamente no seu navegador.</div>
-            </div>
-          </div>
-
-          <!-- CSS personalizado -->
-          <div class="card fx-trans fx-lift" style="display:block">
-            <div style="font-weight:800">CSS Personalizado</div>
-            <div style="margin-top:8px">
-              <textarea id="cssCustom" class="input ring" placeholder="CSS personalizado..." rows="4"></textarea>
-              <div style="margin-top:6px; display:flex; gap:8px; flex-wrap:wrap">
-                <button id="applyCSS" class="btn fx-trans fx-press ring">Aplicar CSS<span class="ripple"></span></button>
-                <button id="clearCSS" class="btn fx-trans fx-press ring">Limpar CSS<span class="ripple"></span></button>
-                <button id="downloadCSS" class="btn fx-trans fx-press ring">Baixar CSS<span class="ripple"></span></button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Vozes dos Arquétipos -->
-          <div class="card fx-trans fx-lift" style="display:block">
-            <div style="font-weight:800; margin-bottom:6px">Vozes dos Arquétipos</div>
-            <!-- Área de seleção de voz por arquétipo.  Cada arquétipo possui
-                 um seletor de voz e um botão de teste.  Essa grade será
-                 preenchida dinamicamente pelo código em initVoices(). -->
-            <div id="voicesWrap" style="display:grid; gap:10px"></div>
-
-          <!-- Preferências de Performance -->
-          <div class="card fx-trans fx-lift" style="display:block">
-            <div style="font-weight:800">Performance</div>
-            <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
-              <select id="selPerf" class="input ring" style="max-width:200px">
-                <option value="low">Low</option>
-                <option value="med">Med</option>
-                <option value="high">High</option>
-              </select>
-              <button id="btnPerf" class="btn fx-trans fx-press ring">Aplicar<span class="ripple"></span></button>
-            </div>
-          </div>
-
-          <!-- Preferências de Voz -->
-          <div class="card fx-trans fx-lift" style="display:block">
-            <div style="font-weight:800">Voz</div>
-            <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
-              <select id="selVoice" class="input ring" style="max-width:200px">
-                <option>Nova</option>
-                <option>Elysha</option>
-                <option>Kaion</option>
-                <option>Serena</option>
-              </select>
-              <button id="btnVoice" class="btn fx-trans fx-press ring">Salvar<span class="ripple"></span></button>
-            </div>
-          </div>
-
-          <!-- Logs -->
-          <div class="card fx-trans fx-lift" style="display:block">
-            <div style="font-weight:800">Logs</div>
-            <div class="mut" style="font-size:11px;margin-bottom:4px">Eventos recentes</div>
-            <pre id="logs" style="margin:0;font:12px/1.4 ui-monospace,monospace;color:var(--mut);max-height:140px;overflow:auto"></pre>
-          </div>
-          </div>
-      </div>
-    </section>
-
-    <!-- CHAT (Dual • Chat) -->
-    <section id="v-chat" class="view">
-      <!-- Feed de mensagens do chat -->
-      <div id="chatFeed"></div>
-    </section>
-  </main>
-
-  <!-- DOCK & TABS -->
-  <div id="dock" class="dock"></div>
-  <nav class="tabbar">
-    <div class="inner">
-      <button class="tab fx-trans fx-press ring active" data-nav="home">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/house.svg" alt="Home" width="18" height="18" onerror="this.onerror=null;this.src='icons/house.svg'">
-        <span style="display:none">Home</span><span class="ripple"></span>
-      </button>
-      <button class="tab fx-trans fx-press ring" data-nav="apps">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg" alt="Apps" width="18" height="18" onerror="this.onerror=null;this.src='icons/folder-open.svg'">
-        <span style="display:none">Apps</span><span class="ripple"></span>
-      </button>
-      <button class="tab fx-trans fx-press ring" data-nav="stack">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/layer-group.svg" alt="Stack" width="18" height="18" onerror="this.onerror=null;this.src='icons/layer-group.svg'">
-        <span style="display:none">Stack</span><span class="ripple"></span>
-      </button>
-      <button class="tab fx-trans fx-press ring" data-nav="brain">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/brain.svg" alt="Brain" width="18" height="18" onerror="this.onerror=null;this.src='icons/brain.svg'">
-        <span style="display:none">Brain</span><span class="ripple"></span>
-      </button>
-      <!-- Botão da nova aba Chat -->
-      <button class="tab fx-trans fx-press ring" data-nav="chat">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/comments.svg" alt="Chat" width="18" height="18" onerror="this.onerror=null;this.src='icons/comments.svg'">
-        <span style="display:none">Chat</span><span class="ripple"></span>
-      </button>
-    </div>
-  </nav>
-  <!-- Preview da última mensagem recebida (aparece na home e leva ao chat) -->
-  <div id="msgPreview"></div>
-
-  <!-- Controles de texto e voz empilhados acima da barra de navegação -->
-  <div id="homeButtons" class="home-btns">
-    <button id="homeTextBtn" class="home-btn">
-      <img src="HubAdlineChat.png" alt="Texto" width="20" height="20" onerror="this.onerror=null;this.src='icons/pen-to-square.svg'">
-    </button>
-    <button id="homeVoiceBtn" class="home-btn">
-      <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/microphone.svg" alt="Voz" width="20" height="20" onerror="this.onerror=null;this.src='icons/microphone.svg'">
-    </button>
-  </div>
-  <!-- Overlay de input para envio rápido de mensagens na Home -->
-  <div id="homeInputOverlay">
-    <form id="homeInputForm" autocomplete="off">
-      <input id="homeInput" type="text" placeholder="Escreva aqui…" autocomplete="off" />
-      <button type="submit">
-        <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/paper-plane.svg" alt="Enviar" width="18" height="18" onerror="this.onerror=null;this.src='icons/paper-plane.svg'">
-      </button>
-    </form>
-  </div>
-
-  <!-- HELP MODAL -->
-  <div id="modalHelp" class="modal" aria-hidden="true">
-    <div class="panel">
-      <div style="display:flex;align-items:center;gap:10px;justify-content:space-between">
-        <h3 style="margin:0">Ajuda & Atalhos</h3>
-        <button id="closeHelp" class="btn fx-trans fx-press ring">Fechar<span class="ripple"></span></button>
-      </div>
-      <div class="mut" style="margin-top:8px">Navegue mais rápido:</div>
-      <ul>
-        <li><span class="kbd">g</span> then <span class="kbd">h</span> → Home</li>
-        <li><span class="kbd">g</span> then <span class="kbd">a</span> → Apps</li>
-        <li><span class="kbd">g</span> then <span class="kbd">s</span> → Stack</li>
-        <li><span class="kbd">g</span> then <span class="kbd">b</span> → Brain</li>
-        <li><span class="kbd">g</span> then <span class="kbd">r</span> → Chat</li>
-        <li><span class="kbd">Ctrl / Cmd</span> + <span class="kbd">K</span> → Busca</li>
-        <li><span class="kbd">Ctrl / Cmd</span> + <span class="kbd">S</span> → Baixar este HTML</li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- ===== Catálogo Embutido (Monólito) ===== -->
-  <script id="APPS_JSON" type="application/json">
+            <button id="btnCloseAll" class="btn fx-trans fx-press ring" title="Fechar todas">Fechar todas<span class="ripple"></span></button></div><div class="mut">Reabra rápido pelo dock abaixo.</div></div><div id="stackWrap" class="grid"></div></div></section><section id="v-brain" class="view"><div class="grid"><div class="card fx-trans fx-lift" style="display:block"><div style="font-weight:800">Usuário</div><div style="display:flex;gap:8px;align-items:center;margin-top:6px"><input id="userName" class="input ring" placeholder="Seu nome" /><button id="saveName" class="btn prime fx-trans fx-press ring">Salvar<span class="ripple"></span></button></div></div><div class="card fx-trans fx-lift" style="display:block"><div style="font-weight:800">OpenRouter</div><div style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap"><select id="model" class="input ring" style="max-width:260px"></select><input id="sk" class="input ring" placeholder="sk-or-v1-…" /><button id="saveSK" class="btn fx-trans fx-press ring">Salvar<span class="ripple"></span></button></div><div style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap"><input id="customModel" class="input ring" placeholder="Modelo personalizado (ex: openai/gpt-4-custom)" style="flex:1" /><button id="addModel" class="btn fx-trans fx-press ring">Adicionar Modelo<span class="ripple"></span></button></div><div style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap"><input id="trainingFile" type="file" accept=".json,.txt,.dxt" class="input ring" style="max-width:260px" /><span class="mut" style="font-size:11px">Treinamento (DXT)</span></div></div><div class="card fx-trans fx-lift" style="display:block"><div style="font-weight:800">Tema &amp; Fundo</div><div style="margin-top:8px;display:flex;flex-direction:column;gap:12px"><label style="display:flex;align-items:center;gap:8px"><span>Escolha o tema:</span><select id="themeSelect" class="input ring" style="max-width:200px"><option value="default">Padrão (colorido)</option><option value="medium">Cinza médio (tecnológico)</option><option value="custom">Personalizado (sua imagem/vídeo)</option></select></label><label style="display:flex;align-items:center;gap:8px"><span>Fundo personalizado:</span><input id="bgUpload" type="file" accept="image/*,video/*" class="input ring" style="max-width:260px" /></label><div class="mut" style="font-size:11px">Envie uma imagem ou vídeo para usar como plano de fundo quando o tema personalizado estiver selecionado. O fundo será salvo automaticamente no seu navegador.</div></div></div><div class="card fx-trans fx-lift" style="display:block"><div style="font-weight:800">CSS Personalizado</div><div style="margin-top:8px"><textarea id="cssCustom" class="input ring" placeholder="CSS personalizado..." rows="4"></textarea><div style="margin-top:6px; display:flex; gap:8px; flex-wrap:wrap"><button id="applyCSS" class="btn fx-trans fx-press ring">Aplicar CSS<span class="ripple"></span></button><button id="clearCSS" class="btn fx-trans fx-press ring">Limpar CSS<span class="ripple"></span></button><button id="downloadCSS" class="btn fx-trans fx-press ring">Baixar CSS<span class="ripple"></span></button></div></div></div><div class="card fx-trans fx-lift" style="display:block"><div style="font-weight:800; margin-bottom:6px">Vozes dos Arquétipos</div><div id="voicesWrap" style="display:grid; gap:10px"></div><div class="card fx-trans fx-lift" style="display:block"><div style="font-weight:800">Performance</div><div style="display:flex;gap:8px;align-items:center;margin-top:6px"><select id="selPerf" class="input ring" style="max-width:200px"><option value="low">Low</option><option value="med">Med</option><option value="high">High</option></select><button id="btnPerf" class="btn fx-trans fx-press ring">Aplicar<span class="ripple"></span></button></div></div><div class="card fx-trans fx-lift" style="display:block"><div style="font-weight:800">Voz</div><div style="display:flex;gap:8px;align-items:center;margin-top:6px"><select id="selVoice" class="input ring" style="max-width:200px"><option>Nova</option><option>Elysha</option><option>Kaion</option><option>Serena</option></select><button id="btnVoice" class="btn fx-trans fx-press ring">Salvar<span class="ripple"></span></button></div></div><div class="card fx-trans fx-lift" style="display:block"><div style="font-weight:800">Logs</div><div class="mut" style="font-size:11px;margin-bottom:4px">Eventos recentes</div><pre id="logs" style="margin:0;font:12px/1.4 ui-monospace,monospace;color:var(--mut);max-height:140px;overflow:auto"></pre></div></div></div></section><section id="v-chat" class="view"><div id="chatFeed"></div></section></main><div id="dock" class="dock"></div><nav class="tabbar"><div class="inner"><button class="tab fx-trans fx-press ring active" data-nav="home"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/house.svg" alt="Home" width="18" height="18" onerror="this.onerror=null;this.src='icons/house.svg'"><span style="display:none">Home</span><span class="ripple"></span></button><button class="tab fx-trans fx-press ring" data-nav="apps"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg" alt="Apps" width="18" height="18" onerror="this.onerror=null;this.src='icons/folder-open.svg'"><span style="display:none">Apps</span><span class="ripple"></span></button><button class="tab fx-trans fx-press ring" data-nav="stack"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/layer-group.svg" alt="Stack" width="18" height="18" onerror="this.onerror=null;this.src='icons/layer-group.svg'"><span style="display:none">Stack</span><span class="ripple"></span></button><button class="tab fx-trans fx-press ring" data-nav="brain"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/brain.svg" alt="Brain" width="18" height="18" onerror="this.onerror=null;this.src='icons/brain.svg'"><span style="display:none">Brain</span><span class="ripple"></span></button><button class="tab fx-trans fx-press ring" data-nav="chat"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/comments.svg" alt="Chat" width="18" height="18" onerror="this.onerror=null;this.src='icons/comments.svg'"><span style="display:none">Chat</span><span class="ripple"></span></button></div></nav><div id="msgPreview"></div><div id="homeButtons" class="home-btns"><button id="homeTextBtn" class="home-btn"><img src="HubAdlineChat.png" alt="Texto" width="20" height="20" onerror="this.onerror=null;this.src='icons/pen-to-square.svg'"></button><button id="homeVoiceBtn" class="home-btn"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/microphone.svg" alt="Voz" width="20" height="20" onerror="this.onerror=null;this.src='icons/microphone.svg'"></button></div><div id="homeInputOverlay"><form id="homeInputForm" autocomplete="off"><input id="homeInput" type="text" placeholder="Escreva aqui…" autocomplete="off" /><button type="submit"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/paper-plane.svg" alt="Enviar" width="18" height="18" onerror="this.onerror=null;this.src='icons/paper-plane.svg'"></button></form></div><div id="modalHelp" class="modal" aria-hidden="true"><div class="panel"><div style="display:flex;align-items:center;gap:10px;justify-content:space-between"><h3 style="margin:0">Ajuda & Atalhos</h3><button id="closeHelp" class="btn fx-trans fx-press ring">Fechar<span class="ripple"></span></button></div><div class="mut" style="margin-top:8px">Navegue mais rápido:</div><ul><li><span class="kbd">g</span> then <span class="kbd">h</span> → Home</li><li><span class="kbd">g</span> then <span class="kbd">a</span> → Apps</li><li><span class="kbd">g</span> then <span class="kbd">s</span> → Stack</li><li><span class="kbd">g</span> then <span class="kbd">b</span> → Brain</li><li><span class="kbd">g</span> then <span class="kbd">r</span> → Chat</li><li><span class="kbd">Ctrl / Cmd</span> + <span class="kbd">K</span> → Busca</li><li><span class="kbd">Ctrl / Cmd</span> + <span class="kbd">S</span> → Baixar este HTML</li></ul></div></div><script id="APPS_JSON" type="application/json">
   {
     "apps": [
       {"key":"atlas","title":"Atlas · Cartesius","desc":"Planejador estratégico com cronogramas e checklists.","url":"about:blank","icon":"atlas"},
@@ -1244,9 +834,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
       {"key":"aion","title":"Aion · Evolutia","desc":"Microações estratégicas e evolução.","url":"about:blank","icon":"aion"}
     ]
   }
-  </script>
-
-  <script>
+  </script><script>
     /* ===================== Helpers ===================== */
     const $ = (q, r = document) => r.querySelector(q);
     const $$ = (q, r = document) => Array.from(r.querySelectorAll(q));
@@ -2408,25 +1996,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
       const isLocal = String(a.url || '').startsWith('local:'); const lr = isLocal ? getLocal(String(a.url).slice(6)) : null; const url = lr ? blobURL(lr) : a.url;
       const card = document.createElement('div'); card.className = 'session fx-trans fx-lift'; card.dataset.sid = sid; card.dataset.meta = JSON.stringify({ title: a.title || 'App', url: a.url || '' });
       card.innerHTML = `
-        <div class="hdr">
-          <div class="title">${(a.title || 'App')}</div>
-          <div class="tools">
-            <button class="btn ring fx-trans fx-press" data-act="min" title="Minimizar">
-              <span style="font-size:16px;line-height:1">&minus;</span>
-              <span class="ripple"></span>
-            </button>
-            <button class="btn ring fx-trans fx-press" data-act="ref" title="Recarregar">
-              <span style="font-size:16px;line-height:1">&#8635;</span>
-              <span class="ripple"></span>
-            </button>
-            <button class="btn ring fx-trans fx-press" data-act="close" title="Fechar">
-              <span style="font-size:16px;line-height:1">&times;</span>
-              <span class="ripple"></span>
-            </button>
-          </div>
-        </div>
-        <iframe src="${url || 'about:blank'}" allow="autoplay; clipboard-read; clipboard-write; picture-in-picture; fullscreen"></iframe>
-        <div class="resize-handle" title="Arraste para ajustar a altura"></div>`;
+        <div class="hdr"><div class="title">${(a.title || 'App')}</div><div class="tools"><button class="btn ring fx-trans fx-press" data-act="min" title="Minimizar"><span style="font-size:16px;line-height:1">&minus;</span><span class="ripple"></span></button><button class="btn ring fx-trans fx-press" data-act="ref" title="Recarregar"><span style="font-size:16px;line-height:1">&#8635;</span><span class="ripple"></span></button><button class="btn ring fx-trans fx-press" data-act="close" title="Fechar"><span style="font-size:16px;line-height:1">&times;</span><span class="ripple"></span></button></div></div><iframe src="${url || 'about:blank'}" allow="autoplay; clipboard-read; clipboard-write; picture-in-picture; fullscreen"></iframe><div class="resize-handle" title="Arraste para ajustar a altura"></div>`;
       // Redimensionar altura do iframe arrastando o handle
       (function bindResize(){
         const handle = card.querySelector('.resize-handle');
@@ -2653,10 +2223,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
       }
     })();
     $$('button').forEach(addRipple);
-  </script>
-
-<!-- ===== Dual • Upgrade Kit v1 (Archetypes + BG storage fix) ===== -->
-<script>
+  </script><script>
 (function(){
   const $ = (q,r=document)=>r.querySelector(q);
   const LS = {
@@ -2795,41 +2362,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     }
   })();
 })();
-</script>
-
-  </header>
-  <div id="ls-body">
-    <div id="ls-stats">
-      <div class="stat">chaves: <b id="st-keys">0</b></div>
-      <div class="stat">localStorage: <b id="st-bytes">0 KB</b></div>
-      <div class="stat">pesados(>50KB): <b id="st-heavy">0</b></div>
-      <div class="stat">origem (quota/uso): <b id="st-usage">—</b> <span class="mut">(inclui IndexedDB)</span></div>
-      <div class="stat">usuário: <b id="st-user">—</b></div>
-    </div>
-    <div id="ls-new">
-      <input id="ls-new-k" placeholder="nova chave (ex.: infodose:userName)">
-      <textarea id="ls-new-v" placeholder="valor (texto ou JSON)"></textarea>
-      <button id="ls-add"><svg><use href="#ic-save"/></svg>Salvar novo</button>
-    </div>
-    
-  </div>
-</div>
-
-<!-- Mini dock (ativar com #ls-min) -->
-<div id="ls-mini">
-  <div class="dock">
-    <div class="pill" id="ls-mini-keys">0</div>
-    <div class="pill" id="ls-mini-bytes">0 KB</div>
-    <div class="sep"></div>
-    <div class="icon" title="Abrir painel" id="ls-mini-open"><svg><use href="#ic-expand"/></svg></div>
-    <div class="icon" title="Exportar" id="ls-mini-exp"><svg><use href="#ic-download"/></svg></div>
-    <div class="icon ok" title="Salvar (novo vazio)" id="ls-mini-add"><svg><use href="#ic-save"/></svg></div>
-    <div class="icon warn" title="Limpar LS (backup)" id="ls-mini-cls"><svg><use href="#ic-broom"/></svg></div>
-    <div class="icon warn" title="Limpar IDB" id="ls-mini-idb"><svg><use href="#ic-trash"/></svg></div>
-  </div>
-</div>
-
-<script>(function(){'use strict';
+</script></header><div id="ls-body"><div id="ls-stats"><div class="stat">chaves: <b id="st-keys">0</b></div><div class="stat">localStorage: <b id="st-bytes">0 KB</b></div><div class="stat">pesados(>50KB): <b id="st-heavy">0</b></div><div class="stat">origem (quota/uso): <b id="st-usage">—</b><span class="mut">(inclui IndexedDB)</span></div><div class="stat">usuário: <b id="st-user">—</b></div></div><div id="ls-new"><input id="ls-new-k" placeholder="nova chave (ex.: infodose:userName)"><textarea id="ls-new-v" placeholder="valor (texto ou JSON)"></textarea><button id="ls-add"><svg><use href="#ic-save"/></svg>Salvar novo</button></div></div></div><div id="ls-mini"><div class="dock"><div class="pill" id="ls-mini-keys">0</div><div class="pill" id="ls-mini-bytes">0 KB</div><div class="sep"></div><div class="icon" title="Abrir painel" id="ls-mini-open"><svg><use href="#ic-expand"/></svg></div><div class="icon" title="Exportar" id="ls-mini-exp"><svg><use href="#ic-download"/></svg></div><div class="icon ok" title="Salvar (novo vazio)" id="ls-mini-add"><svg><use href="#ic-save"/></svg></div><div class="icon warn" title="Limpar LS (backup)" id="ls-mini-cls"><svg><use href="#ic-broom"/></svg></div><div class="icon warn" title="Limpar IDB" id="ls-mini-idb"><svg><use href="#ic-trash"/></svg></div></div></div><script>(function(){'use strict';
   const $=(q,r=document)=>r.querySelector(q);
   const panel=$('#ls-panel'), grid=$('#ls-grid'), search=$('#ls-search');
   const stats={keys:$('#st-keys'),bytes:$('#st-bytes'),heavy:$('#st-heavy'),usage:$('#st-usage'),user:$('#st-user')};
@@ -2865,7 +2398,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
   }
   function addGroup(name, items){
     const det=document.createElement('details'); det.className='ls-group'; det.open=true;
-    const sum=document.createElement('summary'); sum.innerHTML=`<strong>${name}</strong> <span class="badge">${items.length}</span>`; det.appendChild(sum);
+    const sum=document.createElement('summary'); sum.innerHTML=`<strong>${name}</strong><span class="badge">${items.length}</span>`; det.appendChild(sum);
     const body=document.createElement('div'); body.className='group-body';
     const head=document.createElement('div'); head.className='ls-head'; head.innerHTML='<div>Chave</div><div>Valor</div><div>Ações</div>'; body.appendChild(head);
     items.forEach(({k,v})=> body.appendChild(makeRow(k,v)));
@@ -2953,10 +2486,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     };
     window.addEventListener('hashchange', toggle); toggle();
   })();
-})();</script>
-
-<!-- ===== LSX Modular Panel (namespaced) • v4.1 ===== -->
-<style>
+})();</script><style>
   #lsx-mount{position:fixed;inset:auto 12px 12px auto;z-index:2147483000}
   #lsx-panel{position:fixed;right:12px;bottom:12px;max-width:min(1040px,96vw);max-height:86vh;display:none;
     overflow:hidden;background:rgba(12,16,24,.98);border:1px solid #ffffff26;border-radius:16px;backdrop-filter:blur(12px);
@@ -3002,49 +2532,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
   #lsx-logger pre{margin:0;max-height:46vh;overflow:auto;font:12px/1.35 ui-monospace,monospace;color:#a9b7d0}
   #lsx-toastBox{position:fixed;right:14px;bottom:calc(68px + env(safe-area-inset-bottom));display:grid;gap:8px;z-index:2147483002}
   .lsx-toast{background:linear-gradient(90deg,#1b2a2a,#123c2e);color:#eaf0ff;border:1px solid #ffffff22;padding:.6rem .8rem;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
-</style>
-<div id="lsx-mount"></div>
-<template id="tpl-lsx-panel">
-  <div id="lsx-panel" role="dialog" aria-label="LocalStorage • Brain">
-    <header>
-      <strong id="lsx-title">LocalStorage • Brain</strong>
-      <input id="lsx-search" type="search" placeholder="filtrar (chave/valor)">
-      <div id="lsx-actions">
-        <button class="btn" id="lsx-refresh">Atualizar</button>
-        <button class="btn" id="lsx-export">Exportar</button>
-        <button class="btn" id="lsx-import-btn">Importar</button><input id="lsx-import" type="file" accept="application/json" style="display:none">
-        <button class="btn" id="lsx-clear-all">Limpar tudo</button>
-        <button class="btn" id="lsx-clear-idb">Limpar IDB</button>
-        <button class="btn" id="lsx-hide">Fechar</button>
-      </div>
-    </header>
-    <div id="lsx-body">
-      <div id="lsx-stats">
-        <div class="stat">chaves: <b id="lsx-st-keys">0</b></div>
-        <div class="stat">localStorage: <b id="lsx-st-bytes">0 KB</b></div>
-        <div class="stat">pesados(>50KB): <b id="lsx-st-heavy">0</b></div>
-        <div class="stat">origem (quota/uso): <b id="lsx-st-usage">—</b></div>
-      </div>
-      <div id="lsx-new">
-        <input id="lsx-new-k" placeholder="nova chave (ex.: infodose:userName)">
-        <textarea id="lsx-new-v" placeholder="valor (texto ou JSON)"></textarea>
-        <button id="lsx-add">Salvar novo</button>
-      </div>
-      <div id="lsx-grid"></div>
-    </div>
-  </div>
-</template>
-<template id="tpl-lsx-logger">
-  <div class="panel">
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px">
-      <strong>Logs</strong>
-      <button id="lsx-log-close" class="btn">Fechar</button>
-    </div>
-    <pre id="lsx-logs"></pre>
-  </div>
-</template>
-<template id="tpl-lsx-toast"><div class="lsx-toast"></div></template>
-<script>
+</style><div id="lsx-mount"></div><template id="tpl-lsx-panel"><div id="lsx-panel" role="dialog" aria-label="LocalStorage • Brain"><header><strong id="lsx-title">LocalStorage • Brain</strong><input id="lsx-search" type="search" placeholder="filtrar (chave/valor)"><div id="lsx-actions"><button class="btn" id="lsx-refresh">Atualizar</button><button class="btn" id="lsx-export">Exportar</button><button class="btn" id="lsx-import-btn">Importar</button><input id="lsx-import" type="file" accept="application/json" style="display:none"><button class="btn" id="lsx-clear-all">Limpar tudo</button><button class="btn" id="lsx-clear-idb">Limpar IDB</button><button class="btn" id="lsx-hide">Fechar</button></div></header><div id="lsx-body"><div id="lsx-stats"><div class="stat">chaves: <b id="lsx-st-keys">0</b></div><div class="stat">localStorage: <b id="lsx-st-bytes">0 KB</b></div><div class="stat">pesados(>50KB): <b id="lsx-st-heavy">0</b></div><div class="stat">origem (quota/uso): <b id="lsx-st-usage">—</b></div></div><div id="lsx-new"><input id="lsx-new-k" placeholder="nova chave (ex.: infodose:userName)"><textarea id="lsx-new-v" placeholder="valor (texto ou JSON)"></textarea><button id="lsx-add">Salvar novo</button></div><div id="lsx-grid"></div></div></div></template><template id="tpl-lsx-logger"><div class="panel"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px"><strong>Logs</strong><button id="lsx-log-close" class="btn">Fechar</button></div><pre id="lsx-logs"></pre></div></template><template id="tpl-lsx-toast"><div class="lsx-toast"></div></template><script>
 (function(){
   const $=(q,r=document)=>r.querySelector(q);
   const $$=(q,r=document)=>Array.from(r.querySelectorAll(q));
@@ -3095,7 +2583,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
       const groups={}; Object.keys(localStorage).sort().forEach(k=>{ const v=localStorage.getItem(k)||''; if(f && !(k.toLowerCase().includes(f)||v.toLowerCase().includes(f))) return; const grp=k.includes(':')?k.split(':')[0]:(k.includes('.')?k.split('.')[0]:'geral'); (groups[grp] ||= []).push({k,v}); });
       const ordered=Object.keys(groups).sort((a,b)=>a.localeCompare(b));
       const headHTML='<div>Chave</div><div>Valor</div><div>Ações</div>';
-      ordered.forEach(name=>{ const det=document.createElement('details'); det.className='lsx-group'; det.open=true; const sum=document.createElement('summary'); sum.innerHTML=`<span class="chev">›</span> <strong>${name}</strong> <span class="lsx-badge">${groups[name].length}</span>`; det.appendChild(sum); const body=document.createElement('div'); body.className='lsx-body-inner'; const head=document.createElement('div'); head.className='lsx-head'; head.innerHTML=headHTML; body.appendChild(head); groups[name].forEach(({k,v})=> body.appendChild(makeRow(k,v))); det.appendChild(body); grid.appendChild(det); });
+      ordered.forEach(name=>{ const det=document.createElement('details'); det.className='lsx-group'; det.open=true; const sum=document.createElement('summary'); sum.innerHTML=`<span class="chev">›</span><strong>${name}</strong><span class="lsx-badge">${groups[name].length}</span>`; det.appendChild(sum); const body=document.createElement('div'); body.className='lsx-body-inner'; const head=document.createElement('div'); head.className='lsx-head'; head.innerHTML=headHTML; body.appendChild(head); groups[name].forEach(({k,v})=> body.appendChild(makeRow(k,v))); det.appendChild(body); grid.appendChild(det); });
       function makeRow(k,vRaw){ const row=document.createElement('div'); row.className='lsx-row'; const colK=document.createElement('div'); colK.className='lsx-k'; colK.textContent=k; const colV=document.createElement('div'); colV.className='lsx-v'; const prev=document.createElement('div'); prev.className='lsx-preview'; prev.textContent=vRaw.length>240?(vRaw.slice(0,240)+'…'):vRaw; const expand=document.createElement('div'); expand.className='lsx-expand'; const ta=document.createElement('textarea'); ta.value=vRaw; expand.appendChild(ta); colV.append(prev,expand); const colA=document.createElement('div'); colA.className='lsx-a'; const mk=(title,cls,cb,svg)=>{const b=document.createElement('button'); b.className='ic-btn'+(cls?(' '+cls):''); b.title=title; b.innerHTML=svg||title; b.onclick=cb; return b;}; const Bx=mk('expandir','',()=>{ expand.style.display=expand.style.display==='block'?'none':'block'; },'<svg width="18" height="18" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="2" fill="currentColor"/></svg>'); const Bc=mk('copiar','',()=> navigator.clipboard.writeText(vRaw),'<svg width="18" height="18" viewBox="0 0 24 24"><path d="M16 1H4a2 2 0 0 0-2 2v12h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z" fill="currentColor"/></svg>'); const Bs=mk('salvar','ok',()=>{ const nv=expand.style.display==='block'? ta.value : vRaw; localStorage.setItem(k,nv); prev.textContent=nv.length>240?(nv.slice(0,240)+'…'):nv; DualLS.refresh(); Toast.show('Salvo'); Logger.push('LS: salvou '+k); },'<svg width="18" height="18" viewBox="0 0 24 24"><path d="M17 3H5a2 2 0 0 0-2 2v14h18V7l-4-4z" fill="currentColor"/></svg>'); const Bd=mk('apagar','warn',()=>{ if(!confirm('Apagar “'+k+'”?')) return; localStorage.removeItem(k); row.remove(); DualLS.refresh(); Toast.show('Apagado','warn'); Logger.push('LS: apagou '+k); },'<svg width="18" height="18" viewBox="0 0 24 24"><path d="M9 3h6l1 2h5v2H3V5h5l1-2zm1 7h2v8h-2v-8zm4 0h2v8h-2v-8z" fill="currentColor"/></svg>'); colA.append(Bx,Bc,Bs,Bd); row.append(colK,colV,colA); return row; }
     },
     refresh(){ const {t,h}=lsSize(); $('#lsx-st-keys').textContent=String(localStorage.length); $('#lsx-st-bytes').textContent=fmtBytes(t); $('#lsx-st-heavy').textContent=String(h); estimateUsage($('#lsx-st-usage')); }
@@ -3107,12 +2595,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
 
   document.addEventListener('DOMContentLoaded',()=>{ Logger.init(); Toast.init(); DualLS.initPanel({ mount:'#lsx-mount' }); if(location.hash==='#lsx'){ DualLS.open(); } });
 })();
-</script>
-<!-- ===== /LSX Modular Panel ===== -->
-
-
-<!-- ===== TTS Enhancer • LS + Brain Actions ===== -->
-<script>
+</script><script>
 (function(){
   const $ = (q,r=document)=>r.querySelector(q);
   const $$ = (q,r=document)=>Array.from(r.querySelectorAll(q));
@@ -3286,12 +2769,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     wireHeaderLS();
   });
 })();
-</script>
-<!-- ===== /TTS Enhancer ===== -->
-
-
-<!-- ===== LS Panel Compact UI Script ===== -->
-<script>
+</script><script>
 (function(){
   const $ = (q,r=document)=>r.querySelector(q);
   const $$ = (q,r=document)=>Array.from(r.querySelectorAll(q));
@@ -3366,12 +2844,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     window.addEventListener('resize', resizeListArea);
   });
 })();
-</script>
-<!-- ===== /LS Panel Compact UI Script ===== -->
-
-
-<!-- ===== PowerAI Unifier + TTS de-dup (append) ===== -->
-<script>
+</script><script>
 (function(){
   // ---------- Speech de-dup & filter ----------
   const _oldSpeak = (typeof speakWithActiveArch === 'function') ? speakWithActiveArch : null;
@@ -3557,8 +3030,4 @@ ${training}` : '';
     setTimeout(persistCompactMode, 500);
   });
 })();
-</script>
-<!-- ===== /PowerAI Unifier + TTS de-dup ===== -->
-
-</body>
-</html>
+</script></body></html>
