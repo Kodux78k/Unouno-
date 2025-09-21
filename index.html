@@ -1,4 +1,21 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" /><title>HUB UNO</title><meta name="theme-color" content="#0b0f14" /><style>
+<!--
+  Esta é a versão final unificada do HUB UNO e do Hub Revo.
+  Ela se baseia no arquivo “unificado 3.html” (Monólito UNO) e incorpora
+  uma nova aba chamada “Revo”, que carrega o Hub Infodose Ultra em um
+  iframe.  O código do Revo foi copiado para “index-100_revo_mod.html” e
+  levemente modificado para buscar a lista de apps diretamente do
+  elemento <script id="APPS_JSON"> presente nesta página.  Isso
+  assegura que ambos os hubs compartilham o mesmo catálogo de apps sem
+  depender de arquivos externos ausentes.
+-->
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+  <title>HUB UNO</title>
+  <meta name="theme-color" content="#0b0f14" />
+  <style>
     :root {
       /* Paleta padrão (rosa/azul) */
       --grad-a: #ff52e5;
@@ -29,8 +46,6 @@
  /* --arch-overlay: rgba(0,0,0,0); */
   /*    --ease: cubic-bezier(.22, .61, .36, 1); */
     }
-    header.mast{flex-wrap:wrap}
-    header.mast .ib{flex:0 0 auto}
 
     /* Tema alternativo: medium gray / glasmorfismo. Quando body[data-theme="medium"] estiver definido, estas variáveis substituem as originais. */
     body[data-theme="medium"] {
@@ -692,136 +707,395 @@ body::after {
       padding-right: calc(78px + 14px);
       padding-bottom: calc(env(safe-area-inset-bottom, 0) + 12px);
     }
-  
-/* === LS header button: square badge === */
-#btnLS{position:relative; background:linear-gradient(180deg,#11162a,#0b1122)}
-#btnLS .ls-badge{
-  display:grid; place-items:center;
-  width:24px;height:24px; border-radius:8px;
-  background:linear-gradient(180deg,#1a2240,#10162b);
-  border:1px solid rgba(255,255,255,.16);
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.06), 0 4px 14px rgba(0,0,0,.35);
-  font:800 12px/1 ui-monospace,monospace; color:#e6eeff; letter-spacing:.06em;
-}
+  </style>
+</head>
+<body>
+  <!-- ===== Header ===== -->
+  <header class="mast">
+    <button class="ib fx-trans fx-press ring" id="btnBack" title="Voltar" aria-label="Voltar">
+    <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/arrow-left.svg" alt="Voltar" width="20" height="20" onerror="this.onerror=null;this.src='icons/arrow-left.svg'">
+      <span class="ripple"></span>
+    </button>
+    <div class="title">
+      <h1>HUB UNO</h1>
+      <small>Dual · Trinity</small>
+    </div>
+    <button class="ib fx-trans fx-press ring" id="btnDownload" title="Baixar HTML">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/download.svg" alt="Download" width="20" height="20" onerror="this.onerror=null;this.src='icons/download.svg'">
+      <span class="ripple"></span>
+    </button>
+    <button class="ib fx-trans fx-press ring" id="btnHelp" title="Ajuda / Atalhos">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/question-circle.svg" alt="Ajuda" width="20" height="20" onerror="this.onerror=null;this.src='icons/question-circle.svg'">
+      <span class="ripple"></span>
+    </button>
+    <button class="ib fx-trans fx-press ring" id="btnBrain" title="Brain">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/brain.svg" alt="Brain" width="20" height="20" onerror="this.onerror=null;this.src='icons/brain.svg'">
+      <span class="ripple"></span>
+    </button>
+  </header>
 
-/* === LS panel polish === */
-#ls-panel header{gap:8px}
-#ls-title{font-weight:900; letter-spacing:.04em}
-#ls-actions button{border-radius:12px}
-#ls-stats .stat{border-radius:12px}
-#ls-new{grid-template-columns: 220px 1fr auto}
-.ls-group{scroll-margin: 12px}
-.ls-head,.ls-row{border-bottom:1px dashed rgba(255,255,255,.12)}
-.ls-row{background: rgba(255,255,255,.02); border-radius:12px; padding:10px 8px}
-.ls-k{font-weight:800}
-.ls-preview{border-radius:12px}
-.ls-a .icon-btn{border-radius:12px}
-/* compact spacing between groups */
-.group-body{display:grid; gap:8px}
+  <!-- Âncora para sessões abertas quando o usuário optar por abrir dentro da página -->
+  <section id="sessionsAnchor"></section>
 
-/* Highlight search matches */
-mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
+  <!-- Container para fundo personalizado (imagem ou vídeo).  Será preenchido via JS quando o usuário escolher
+       um tema customizado.  Fica no início do body para garantir que fique abaixo de todos os conteúdos -->
+  <div id="custom-bg" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;overflow:hidden;pointer-events:none"></div>
 
-/* Mobile refinements */
-@media (max-width: 480px){
-  #ls-new{grid-template-columns:1fr; gap:6px}
-  .group-body{gap:6px}
-  .ls-row{padding:8px}
-  #ls-stats .stat{padding:6px 8px}
-}
-</style><style>
-/* Make LS panels column-flex so header/actions don't steal space */
-#ls-panel, #lsx-panel{
-  display: flex;
-  flex-direction: column;
-  max-height: 90vh;
-}
-/* Assume there is a header/actions row; keep it sticky-ish */
-#ls-actions, #lsx-actions, #ls-header, #lsx-header{
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  background: var(--glass, rgba(0,0,0,.35));
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  padding-top: .25rem;
-  padding-bottom: .25rem;
-}
+  <!-- ===== Views ===== -->
+  <main>
+    <!-- HOME -->
+    <section id="v-home" class="view active">
+      <div class="grid">
+          <!-- Saudação / chamada para cadastro. Visível quando o usuário precisa ativar a Dual Infodose ou quando já houver nome salvo -->
+          <div id="greetingCard" class="card fx-trans fx-lift" style="display:none">
+            <div id="greetingMsg" style="font-weight:800"></div>
+          </div>
+        <div id="unoCard" class="card fx-trans fx-lift" style="display:none">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%">
+            <div>
+              <div style="font-weight:900;letter-spacing:.08em">UNO • foco e velocidade</div>
+              <div class="mut">Monólito: Apps embutidos + Viewer + Dock + Atalhos</div>
+            </div>
+            <div class="ico">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/bolt.svg" alt="Energia" width="24" height="24" onerror="this.onerror=null;this.src='icons/bolt.svg'">
+            </div>
+          </div>
+        </div>
+        <!-- Área de Arquétipos incorporada -->
+        <div class="arch-container">
+          <!-- Mover o seletor de arquétipos para fora do círculo.  Ele ficará acima
+               da bolinha e seguirá o layout vertical da arch-container. -->
+          <div class="arch-switcher">
+            <button class="btn fx-trans fx-press ring" id="arch-prev" title="Anterior">
+              <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/chevron-left.svg" alt="Anterior" width="16" height="16" onerror="this.onerror=null;this.src='icons/chevron-left.svg'">
+            </button>
+            <select id="arch-select" title="Escolher arquétipo"></select>
+            <button class="btn fx-trans fx-press ring" id="arch-next" title="Próximo">
+              <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/chevron-right.svg" alt="Próximo" width="16" height="16" onerror="this.onerror=null;this.src='icons/chevron-right.svg'">
+            </button>
+          </div>
+          <div class="arch-circle">
+            <div id="arch-fadeCover"></div>
+            <!-- Camada de ripple auditivo fica sobre o conteúdo do círculo -->
+            <div id="audioRipple" class="audio-ripple"></div>
+            <iframe id="arch-frame" title="Archetype Core" sandbox="allow-scripts" referrerpolicy="no-referrer"></iframe>
+          </div>
+          <!-- Mensagem de feedback aparece fora da bolinha, logo abaixo dela -->
+          <div id="archMsg" class="arch-msg"></div>
+          <!-- Menu de arquétipos: permite acessar Apps, Stack, Usuário, Revo e Home -->
+          <div id="archMenu" class="arch-menu">
+            <button data-nav="apps">
+              <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg" alt="Apps" width="20" height="20" onerror="this.onerror=null;this.src='icons/folder-open.svg'">
+              <span>Apps</span>
+            </button>
+            <button data-nav="stack">
+              <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/layer-group.svg" alt="Stack" width="20" height="20" onerror="this.onerror=null;this.src='icons/layer-group.svg'">
+              <span>Stack</span>
+            </button>
+            <button data-nav="brain">
+              <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/user.svg" alt="Usuário" width="20" height="20" onerror="this.onerror=null;this.src='icons/user.svg'">
+              <span>Usuário</span>
+            </button>
+            <button data-nav="home">
+              <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/yin-yang.svg" alt="Arquétipo" width="20" height="20" onerror="this.onerror=null;this.src='icons/yin-yang.svg'">
+              <span>Arquétipo</span>
+            </button>
+            <button data-nav="chat">
+              <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/comments.svg" alt="Chat" width="20" height="20" onerror="this.onerror=null;this.src='icons/comments.svg'">
+              <span>Chat</span>
+            </button>
+          <button data-audio="true" id="archAudioBtn">
+            <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/microphone-lines.svg" alt="Áudio" width="20" height="20" onerror="this.onerror=null;this.src='icons/microphone-lines.svg'">
+            <span>Áudio</span>
+          </button>
+          </div>
+        </div>
+        <!-- Feed de texto da IA -->
+        <div id="iaFeed" aria-live="polite" aria-atomic="false">
+          <div class="status">Toque a bolinha para falar com a IA.</div>
+        </div>
+        <div class="cards">
+          <button class="card fx-trans fx-press ring" data-nav="apps">
+            <div class="ico">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg" alt="Apps" width="24" height="24" onerror="this.onerror=null;this.src='icons/folder-open.svg'">
+            </div>
+            <div>
+              <div style="font-weight:800">Apps</div>
+              <div class="mut" id="homeAppsStatus">–</div>
+            </div>
+            <span class="ripple"></span>
+          </button>
+          <button class="card fx-trans fx-press ring" data-nav="stack">
+            <div class="ico">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/layer-group.svg" alt="Stack" width="24" height="24" onerror="this.onerror=null;this.src='icons/layer-group.svg'">
+            </div>
+            <div>
+              <div style="font-weight:800">Stack</div>
+              <div class="mut" id="homeStackStatus">–</div>
+            </div>
+            <span class="ripple"></span>
+          </button>
+          <button class="card fx-trans fx-press ring" data-nav="brain">
+            <div class="ico">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/user.svg" alt="Usuário" width="24" height="24" onerror="this.onerror=null;this.src='icons/user.svg'">
+            </div>
+            <div>
+              <div style="font-weight:800">Usuário</div>
+              <div class="mut" id="homeUserStatus">–</div>
+            </div>
+            <span class="ripple"></span>
+          </button>
+          <button class="card fx-trans fx-press ring" data-nav="home">
+            <div class="ico">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/yin-yang.svg" alt="Arquétipo" width="24" height="24" onerror="this.onerror=null;this.src='icons/yin-yang.svg'">
+            </div>
+            <div>
+              <div style="font-weight:800">Arquétipo</div>
+              <div class="mut" id="homeArchStatus">–</div>
+            </div>
+            <span class="ripple"></span>
+          </button>
+        </div>
+      </div>
+    </section>
 
-/* Buttons as compact chips */
-#ls-actions button, #lsx-actions button{
-  gaps: .25rem;
-  margin: .125rem;
-  padding: .4rem .55rem;
-  border-radius: .6rem;
-  font-size: .82rem;
-}
+    <!-- APPS -->
+    <section id="v-apps" class="view">
+      <div class="grid">
+        <div class="card fx-trans fx-lift" style="display:block">
+          <div class="grid" style="gap:8px">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+              <!-- Removemos a busca e o sort. Agora apenas a opção de abrir dentro e o botão para mostrar locais -->
+              <label class="mut" style="display:inline-flex;gap:6px;align-items:center">
+                <input id="openInside" type="checkbox" /> abrir dentro
+              </label>
+              <button id="btnToggleLocal" class="btn fx-trans fx-press ring">
+                <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg" alt="Locais" width="16" height="16" onerror="this.onerror=null;this.src='icons/folder-open.svg'" style="margin-right:4px">
+                Mostrar Locais<span class="ripple"></span>
+              </button>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+              <!-- Aceita arquivos .json além de HTML/TXT para permitir upload de catálogos personalizados -->
+              <input id="fileLocal" type="file" accept=".html,.htm,.txt,.json" multiple class="input ring" />
+              <button id="btnImport" class="btn fx-trans fx-press ring">
+                <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/plus-circle.svg" alt="Adicionar" width="16" height="16" onerror="this.onerror=null;this.src='icons/plus-circle.svg'" style="margin-right:4px">
+                Adicionar Locais<span class="ripple"></span>
+              </button>
+              <button id="btnExport" class="btn fx-trans fx-press ring">
+                <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/file-export.svg" alt="Exportar" width="16" height="16" onerror="this.onerror=null;this.src='icons/file-export.svg'" style="margin-right:4px">
+                Exportar Locais<span class="ripple"></span>
+              </button>
+              <button id="btnClear" class="btn fx-trans fx-press ring">
+                <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/trash.svg" alt="Limpar" width="16" height="16" onerror="this.onerror=null;this.src='icons/trash.svg'" style="margin-right:4px">
+                Limpar Locais<span class="ripple"></span>
+              </button>
+            </div>
+            <div id="appsCount" class="mut">—</div>
+          </div>
+        </div>
+        <div id="appsWrap" class="apps-wrap"></div>
+      </div>
+    </section>
 
-/* The compact toggle button style */
-.ls-compact-toggle{
-  margin-left: .25rem;
-  padding: .35rem .55rem;
-  font-size: .8rem;
-  border-radius: .6rem;
-  opacity: .9;
-}
-
-/* Hide advanced controls when in compact mode */
-#ls-panel.ls-compact #ls-add,
-#ls-panel.ls-compact #ls-export,
-#ls-panel.ls-compact #ls-import-btn,
-#ls-panel.ls-compact #ls-search,
-#ls-panel.ls-compact #ls-stats,
-#ls-panel.ls-compact #ls-clear-idb,
-#lsx-panel.ls-compact #lsx-add,
-#lsx-panel.ls-compact #lsx-export,
-#lsx-panel.ls-compact #lsx-import-btn,
-#lsx-panel.ls-compact #lsx-search,
-#lsx-panel.ls-compact #lsx-stats,
-#lsx-panel.ls-compact #lsx-clear-idb{
-  display: none !important;
-}
-
-/* Always keep these visible in compact mode */
-#ls-panel.ls-compact #ls-refresh,
-#ls-panel.ls-compact #ls-clear-all,
-#ls-panel.ls-compact #ls-hide,
-#lsx-panel.ls-compact #lsx-refresh,
-#lsx-panel.ls-compact #lsx-clear-all,
-#lsx-panel.ls-compact #lsx-hide{
-  display: inline-flex !important;
-}
-
-/* Data/List area candidates get generous height and scrolling */
-#ls-list, #lsx-list, #ls-keys, .ls-list, .ls-keys, .ls-data{
-  max-height: 70vh;
-  overflow: auto;
-}
-
-/* When compact, give even more space to the list */
-#ls-panel.ls-compact #ls-list,
-#ls-panel.ls-compact #ls-keys,
-#ls-panel.ls-compact .ls-list,
-#ls-panel.ls-compact .ls-keys,
-#ls-panel.ls-compact .ls-data,
-#lsx-panel.ls-compact #lsx-list,
-#lsx-panel.ls-compact .ls-list,
-#lsx-panel.ls-compact .ls-keys,
-#lsx-panel.ls-compact .ls-data{
-  max-height: 78vh;
-}
-</style>
-<style>/* PATCH: ocultar logs do Brain */
-#logs{display:none!important}
-</style>
-</head><body><header class="mast"><button class="ib fx-trans fx-press ring" id="btnBack" title="Voltar" aria-label="Voltar"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/arrow-left.svg" alt="Voltar" width="20" height="20" onerror="this.onerror=null;this.src='icons/arrow-left.svg'"><span class="ripple"></span></button><div class="title"><h1>HUB UNO</h1><small>Dual · Trinity</small></div><button class="ib fx-trans fx-press ring" id="btnDownload" title="Baixar HTML"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/download.svg" alt="Download" width="20" height="20" onerror="this.onerror=null;this.src='icons/download.svg'"><span class="ripple"></span></button><button class="ib fx-trans fx-press ring" id="btnHelp" title="Ajuda / Atalhos"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/question-circle.svg" alt="Ajuda" width="20" height="20" onerror="this.onerror=null;this.src='icons/question-circle.svg'"><span class="ripple"></span></button><button class="ib fx-trans fx-press ring" id="btnBrain" title="Brain"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/brain.svg" alt="Brain" width="20" height="20" onerror="this.onerror=null;this.src='icons/brain.svg'"><span class="ripple"></span></button><button class="ib fx-trans fx-press ring" id="btnLS" title="Local Storage (Brain)" aria-label="Local Storage"><span class="ls-badge">LS</span><span class="ripple"></span></button></header><section id="sessionsAnchor"></section><div id="custom-bg" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;overflow:hidden;pointer-events:none"></div><main><section id="v-home" class="view active"><div class="grid"><div id="greetingCard" class="card fx-trans fx-lift" style="display:none"><div id="greetingMsg" style="font-weight:800"></div></div><div id="unoCard" class="card fx-trans fx-lift" style="display:none"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%"><div><div style="font-weight:900;letter-spacing:.08em">UNO • foco e velocidade</div><div class="mut">Monólito: Apps embutidos + Viewer + Dock + Atalhos</div></div><div class="ico"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/bolt.svg" alt="Energia" width="24" height="24" onerror="this.onerror=null;this.src='icons/bolt.svg'"></div></div></div><div class="arch-container"><div class="arch-switcher"><button class="btn fx-trans fx-press ring" id="arch-prev" title="Anterior"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/chevron-left.svg" alt="Anterior" width="16" height="16" onerror="this.onerror=null;this.src='icons/chevron-left.svg'"></button><select id="arch-select" title="Escolher arquétipo"></select><button class="btn fx-trans fx-press ring" id="arch-next" title="Próximo"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/chevron-right.svg" alt="Próximo" width="16" height="16" onerror="this.onerror=null;this.src='icons/chevron-right.svg'"></button></div><div class="arch-circle"><div id="arch-fadeCover"></div><div id="audioRipple" class="audio-ripple"></div><iframe id="arch-frame" title="Archetype Core" sandbox="allow-scripts" referrerpolicy="no-referrer"></iframe></div><div id="archMsg" class="arch-msg"></div><div id="archMenu" class="arch-menu"><button data-nav="apps"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg" alt="Apps" width="20" height="20" onerror="this.onerror=null;this.src='icons/folder-open.svg'"><span>Apps</span></button><button data-nav="stack"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/layer-group.svg" alt="Stack" width="20" height="20" onerror="this.onerror=null;this.src='icons/layer-group.svg'"><span>Stack</span></button><button data-nav="brain"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/user.svg" alt="Usuário" width="20" height="20" onerror="this.onerror=null;this.src='icons/user.svg'"><span>Usuário</span></button><button data-nav="home"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/yin-yang.svg" alt="Arquétipo" width="20" height="20" onerror="this.onerror=null;this.src='icons/yin-yang.svg'"><span>Arquétipo</span></button><button data-nav="chat"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/comments.svg" alt="Chat" width="20" height="20" onerror="this.onerror=null;this.src='icons/comments.svg'"><span>Chat</span></button><button data-audio="true" id="archAudioBtn"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/microphone-lines.svg" alt="Áudio" width="20" height="20" onerror="this.onerror=null;this.src='icons/microphone-lines.svg'"><span>Áudio</span></button></div></div><div id="iaFeed" aria-live="polite" aria-atomic="false"><div class="status">Toque a bolinha para falar com a IA.</div></div><div class="cards"><button class="card fx-trans fx-press ring" data-nav="apps"><div class="ico"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg" alt="Apps" width="24" height="24" onerror="this.onerror=null;this.src='icons/folder-open.svg'"></div><div><div style="font-weight:800">Apps</div><div class="mut" id="homeAppsStatus">–</div></div><span class="ripple"></span></button><button class="card fx-trans fx-press ring" data-nav="stack"><div class="ico"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/layer-group.svg" alt="Stack" width="24" height="24" onerror="this.onerror=null;this.src='icons/layer-group.svg'"></div><div><div style="font-weight:800">Stack</div><div class="mut" id="homeStackStatus">–</div></div><span class="ripple"></span></button><button class="card fx-trans fx-press ring" data-nav="brain"><div class="ico"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/user.svg" alt="Usuário" width="24" height="24" onerror="this.onerror=null;this.src='icons/user.svg'"></div><div><div style="font-weight:800">Usuário</div><div class="mut" id="homeUserStatus">–</div></div><span class="ripple"></span></button><button class="card fx-trans fx-press ring" data-nav="home"><div class="ico"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/yin-yang.svg" alt="Arquétipo" width="24" height="24" onerror="this.onerror=null;this.src='icons/yin-yang.svg'"></div><div><div style="font-weight:800">Arquétipo</div><div class="mut" id="homeArchStatus">–</div></div><span class="ripple"></span></button></div></div></section><section id="v-apps" class="view"><div class="grid"><div class="card fx-trans fx-lift" style="display:block"><div class="grid" style="gap:8px"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><label class="mut" style="display:inline-flex;gap:6px;align-items:center"><input id="openInside" type="checkbox" /> abrir dentro
-              </label><button id="btnToggleLocal" class="btn fx-trans fx-press ring"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg" alt="Locais" width="16" height="16" onerror="this.onerror=null;this.src='icons/folder-open.svg'" style="margin-right:4px">
-                Mostrar Locais<span class="ripple"></span></button></div><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="fileLocal" type="file" accept=".html,.htm,.txt,.json" multiple class="input ring" /><button id="btnImport" class="btn fx-trans fx-press ring"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/plus-circle.svg" alt="Adicionar" width="16" height="16" onerror="this.onerror=null;this.src='icons/plus-circle.svg'" style="margin-right:4px">
-                Adicionar Locais<span class="ripple"></span></button><button id="btnExport" class="btn fx-trans fx-press ring"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/file-export.svg" alt="Exportar" width="16" height="16" onerror="this.onerror=null;this.src='icons/file-export.svg'" style="margin-right:4px">
-                Exportar Locais<span class="ripple"></span></button><button id="btnClear" class="btn fx-trans fx-press ring"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/trash.svg" alt="Limpar" width="16" height="16" onerror="this.onerror=null;this.src='icons/trash.svg'" style="margin-right:4px">
-                Limpar Locais<span class="ripple"></span></button></div><div id="appsCount" class="mut">—</div></div></div><div id="appsWrap" class="apps-wrap"></div></div></section><section id="v-stack" class="view"><div class="grid"><div class="card fx-trans fx-lift" style="display:block"><div style="font-weight:800; display:flex; align-items:center; gap:8px">
+    <!-- STACK -->
+    <section id="v-stack" class="view">
+      <div class="grid">
+        <div class="card fx-trans fx-lift" style="display:block">
+          <div style="font-weight:800; display:flex; align-items:center; gap:8px">
             Sessões
-            <button id="btnCloseAll" class="btn fx-trans fx-press ring" title="Fechar todas">Fechar todas<span class="ripple"></span></button></div><div class="mut">Reabra rápido pelo dock abaixo.</div></div><div id="stackWrap" class="grid"></div></div></section><section id="v-brain" class="view"><div class="grid"><div class="card fx-trans fx-lift" style="display:block"><div style="font-weight:800">Usuário</div><div style="display:flex;gap:8px;align-items:center;margin-top:6px"><input id="userName" class="input ring" placeholder="Seu nome" /><button id="saveName" class="btn prime fx-trans fx-press ring">Salvar<span class="ripple"></span></button></div></div><div class="card fx-trans fx-lift" style="display:block"><div style="font-weight:800">OpenRouter</div><div style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap"><select id="model" class="input ring" style="max-width:260px"></select><input id="sk" class="input ring" placeholder="sk-or-v1-…" /><button id="saveSK" class="btn fx-trans fx-press ring">Salvar<span class="ripple"></span></button></div><div style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap"><input id="customModel" class="input ring" placeholder="Modelo personalizado (ex: openai/gpt-4-custom)" style="flex:1" /><button id="addModel" class="btn fx-trans fx-press ring">Adicionar Modelo<span class="ripple"></span></button></div><div style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap"><input id="trainingFile" type="file" accept=".json,.txt,.dxt" class="input ring" style="max-width:260px" /><span class="mut" style="font-size:11px">Treinamento (DXT)</span></div></div><div class="card fx-trans fx-lift" style="display:block"><div style="font-weight:800">Tema &amp; Fundo</div><div style="margin-top:8px;display:flex;flex-direction:column;gap:12px"><label style="display:flex;align-items:center;gap:8px"><span>Escolha o tema:</span><select id="themeSelect" class="input ring" style="max-width:200px"><option value="default">Padrão (colorido)</option><option value="medium">Cinza médio (tecnológico)</option><option value="custom">Personalizado (sua imagem/vídeo)</option></select></label><label style="display:flex;align-items:center;gap:8px"><span>Fundo personalizado:</span><input id="bgUpload" type="file" accept="image/*,video/*" class="input ring" style="max-width:260px" /></label><div class="mut" style="font-size:11px">Envie uma imagem ou vídeo para usar como plano de fundo quando o tema personalizado estiver selecionado. O fundo será salvo automaticamente no seu navegador.</div></div></div><div class="card fx-trans fx-lift" style="display:block"><div style="font-weight:800">CSS Personalizado</div><div style="margin-top:8px"><textarea id="cssCustom" class="input ring" placeholder="CSS personalizado..." rows="4"></textarea><div style="margin-top:6px; display:flex; gap:8px; flex-wrap:wrap"><button id="applyCSS" class="btn fx-trans fx-press ring">Aplicar CSS<span class="ripple"></span></button><button id="clearCSS" class="btn fx-trans fx-press ring">Limpar CSS<span class="ripple"></span></button><button id="downloadCSS" class="btn fx-trans fx-press ring">Baixar CSS<span class="ripple"></span></button></div></div></div><div class="card fx-trans fx-lift" style="display:block"><div style="font-weight:800; margin-bottom:6px">Vozes dos Arquétipos</div><div id="voicesWrap" style="display:grid; gap:10px"></div><div class="card fx-trans fx-lift" style="display:block"><div style="font-weight:800">Performance</div><div style="display:flex;gap:8px;align-items:center;margin-top:6px"><select id="selPerf" class="input ring" style="max-width:200px"><option value="low">Low</option><option value="med">Med</option><option value="high">High</option></select><button id="btnPerf" class="btn fx-trans fx-press ring">Aplicar<span class="ripple"></span></button></div></div><div class="card fx-trans fx-lift" style="display:block"><div style="font-weight:800">Voz</div><div style="display:flex;gap:8px;align-items:center;margin-top:6px"><select id="selVoice" class="input ring" style="max-width:200px"><option>Nova</option><option>Elysha</option><option>Kaion</option><option>Serena</option></select><button id="btnVoice" class="btn fx-trans fx-press ring">Salvar<span class="ripple"></span></button></div></div><div class="card fx-trans fx-lift" style="display:block"><div style="font-weight:800">Logs</div><div class="mut" style="font-size:11px;margin-bottom:4px">Eventos recentes</div><pre id="logs" style="margin:0;font:12px/1.4 ui-monospace,monospace;color:var(--mut);max-height:140px;overflow:auto"></pre></div></div></div></section><section id="v-chat" class="view"><div id="chatFeed"></div></section></main><div id="dock" class="dock"></div><nav class="tabbar"><div class="inner"><button class="tab fx-trans fx-press ring active" data-nav="home"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/house.svg" alt="Home" width="18" height="18" onerror="this.onerror=null;this.src='icons/house.svg'"><span style="display:none">Home</span><span class="ripple"></span></button><button class="tab fx-trans fx-press ring" data-nav="apps"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg" alt="Apps" width="18" height="18" onerror="this.onerror=null;this.src='icons/folder-open.svg'"><span style="display:none">Apps</span><span class="ripple"></span></button><button class="tab fx-trans fx-press ring" data-nav="stack"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/layer-group.svg" alt="Stack" width="18" height="18" onerror="this.onerror=null;this.src='icons/layer-group.svg'"><span style="display:none">Stack</span><span class="ripple"></span></button><button class="tab fx-trans fx-press ring" data-nav="brain"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/brain.svg" alt="Brain" width="18" height="18" onerror="this.onerror=null;this.src='icons/brain.svg'"><span style="display:none">Brain</span><span class="ripple"></span></button><button class="tab fx-trans fx-press ring" data-nav="chat"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/comments.svg" alt="Chat" width="18" height="18" onerror="this.onerror=null;this.src='icons/comments.svg'"><span style="display:none">Chat</span><span class="ripple"></span></button></div></nav><div id="msgPreview"></div><div id="homeButtons" class="home-btns"><button id="homeTextBtn" class="home-btn"><img src="HubAdlineChat.png" alt="Texto" width="20" height="20" onerror="this.onerror=null;this.src='icons/pen-to-square.svg'"></button><button id="homeVoiceBtn" class="home-btn"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/microphone.svg" alt="Voz" width="20" height="20" onerror="this.onerror=null;this.src='icons/microphone.svg'"></button></div><div id="homeInputOverlay"><form id="homeInputForm" autocomplete="off"><input id="homeInput" type="text" placeholder="Escreva aqui…" autocomplete="off" /><button type="submit"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/paper-plane.svg" alt="Enviar" width="18" height="18" onerror="this.onerror=null;this.src='icons/paper-plane.svg'"></button></form></div><div id="modalHelp" class="modal" aria-hidden="true"><div class="panel"><div style="display:flex;align-items:center;gap:10px;justify-content:space-between"><h3 style="margin:0">Ajuda & Atalhos</h3><button id="closeHelp" class="btn fx-trans fx-press ring">Fechar<span class="ripple"></span></button></div><div class="mut" style="margin-top:8px">Navegue mais rápido:</div><ul><li><span class="kbd">g</span> then <span class="kbd">h</span> → Home</li><li><span class="kbd">g</span> then <span class="kbd">a</span> → Apps</li><li><span class="kbd">g</span> then <span class="kbd">s</span> → Stack</li><li><span class="kbd">g</span> then <span class="kbd">b</span> → Brain</li><li><span class="kbd">g</span> then <span class="kbd">r</span> → Chat</li><li><span class="kbd">Ctrl / Cmd</span> + <span class="kbd">K</span> → Busca</li><li><span class="kbd">Ctrl / Cmd</span> + <span class="kbd">S</span> → Baixar este HTML</li></ul></div></div><script id="APPS_JSON" type="application/json">
+            <button id="btnCloseAll" class="btn fx-trans fx-press ring" title="Fechar todas">Fechar todas<span class="ripple"></span></button>
+          </div>
+          <div class="mut">Reabra rápido pelo dock abaixo.</div>
+        </div>
+        <div id="stackWrap" class="grid"></div>
+      </div>
+    </section>
+
+    <!-- BRAIN -->
+    <section id="v-brain" class="view">
+      <div class="grid">
+        <div class="card fx-trans fx-lift" style="display:block">
+          <div style="font-weight:800">Usuário</div>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
+            <input id="userName" class="input ring" placeholder="Seu nome" />
+            <button id="saveName" class="btn prime fx-trans fx-press ring">Salvar<span class="ripple"></span></button>
+          </div>
+        </div>
+        <div class="card fx-trans fx-lift" style="display:block">
+          <div style="font-weight:800">OpenRouter</div>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap">
+            <select id="model" class="input ring" style="max-width:260px"></select>
+            <input id="sk" class="input ring" placeholder="sk-or-v1-…" />
+            <button id="saveSK" class="btn fx-trans fx-press ring">Salvar<span class="ripple"></span></button>
+          </div>
+
+          <!-- Modelo personalizado e treino -->
+          <div style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap">
+            <input id="customModel" class="input ring" placeholder="Modelo personalizado (ex: openai/gpt-4-custom)" style="flex:1" />
+            <button id="addModel" class="btn fx-trans fx-press ring">Adicionar Modelo<span class="ripple"></span></button>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap">
+            <input id="trainingFile" type="file" accept=".json,.txt,.dxt" class="input ring" style="max-width:260px" />
+            <span class="mut" style="font-size:11px">Treinamento (DXT)</span>
+          </div>
+        </div>
+
+          <!-- Tema e Fundo personalizados -->
+          <div class="card fx-trans fx-lift" style="display:block">
+            <div style="font-weight:800">Tema &amp; Fundo</div>
+            <div style="margin-top:8px;display:flex;flex-direction:column;gap:12px">
+              <label style="display:flex;align-items:center;gap:8px">
+                <span>Escolha o tema:</span>
+                <select id="themeSelect" class="input ring" style="max-width:200px">
+                  <option value="default">Padrão (colorido)</option>
+                  <option value="medium">Cinza médio (tecnológico)</option>
+                  <option value="custom">Personalizado (sua imagem/vídeo)</option>
+                </select>
+              </label>
+              <label style="display:flex;align-items:center;gap:8px">
+                <span>Fundo personalizado:</span>
+                <input id="bgUpload" type="file" accept="image/*,video/*" class="input ring" style="max-width:260px" />
+              </label>
+              <div class="mut" style="font-size:11px">Envie uma imagem ou vídeo para usar como plano de fundo quando o tema personalizado estiver selecionado. O fundo será salvo automaticamente no seu navegador.</div>
+            </div>
+          </div>
+
+          <!-- CSS personalizado -->
+          <div class="card fx-trans fx-lift" style="display:block">
+            <div style="font-weight:800">CSS Personalizado</div>
+            <div style="margin-top:8px">
+              <textarea id="cssCustom" class="input ring" placeholder="CSS personalizado..." rows="4"></textarea>
+              <div style="margin-top:6px; display:flex; gap:8px; flex-wrap:wrap">
+                <button id="applyCSS" class="btn fx-trans fx-press ring">Aplicar CSS<span class="ripple"></span></button>
+                <button id="clearCSS" class="btn fx-trans fx-press ring">Limpar CSS<span class="ripple"></span></button>
+                <button id="downloadCSS" class="btn fx-trans fx-press ring">Baixar CSS<span class="ripple"></span></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Vozes dos Arquétipos -->
+          <div class="card fx-trans fx-lift" style="display:block">
+            <div style="font-weight:800; margin-bottom:6px">Vozes dos Arquétipos</div>
+            <!-- Área de seleção de voz por arquétipo.  Cada arquétipo possui
+                 um seletor de voz e um botão de teste.  Essa grade será
+                 preenchida dinamicamente pelo código em initVoices(). -->
+            <div id="voicesWrap" style="display:grid; gap:10px"></div>
+
+          <!-- Preferências de Performance -->
+          <div class="card fx-trans fx-lift" style="display:block">
+            <div style="font-weight:800">Performance</div>
+            <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
+              <select id="selPerf" class="input ring" style="max-width:200px">
+                <option value="low">Low</option>
+                <option value="med">Med</option>
+                <option value="high">High</option>
+              </select>
+              <button id="btnPerf" class="btn fx-trans fx-press ring">Aplicar<span class="ripple"></span></button>
+            </div>
+          </div>
+
+          <!-- Preferências de Voz -->
+          <div class="card fx-trans fx-lift" style="display:block">
+            <div style="font-weight:800">Voz</div>
+            <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
+              <select id="selVoice" class="input ring" style="max-width:200px">
+                <option>Nova</option>
+                <option>Elysha</option>
+                <option>Kaion</option>
+                <option>Serena</option>
+              </select>
+              <button id="btnVoice" class="btn fx-trans fx-press ring">Salvar<span class="ripple"></span></button>
+            </div>
+          </div>
+
+          <!-- Logs -->
+          <div class="card fx-trans fx-lift" style="display:block">
+            <div style="font-weight:800">Logs</div>
+            <div class="mut" style="font-size:11px;margin-bottom:4px">Eventos recentes</div>
+            <pre id="logs" style="margin:0;font:12px/1.4 ui-monospace,monospace;color:var(--mut);max-height:140px;overflow:auto"></pre>
+          </div>
+          </div>
+      </div>
+    </section>
+
+    <!-- CHAT (Dual • Chat) -->
+    <section id="v-chat" class="view">
+      <!-- Feed de mensagens do chat -->
+      <div id="chatFeed"></div>
+    </section>
+  </main>
+
+  <!-- DOCK & TABS -->
+  <div id="dock" class="dock"></div>
+  <nav class="tabbar">
+    <div class="inner">
+      <button class="tab fx-trans fx-press ring active" data-nav="home">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/house.svg" alt="Home" width="18" height="18" onerror="this.onerror=null;this.src='icons/house.svg'">
+        <span style="display:none">Home</span><span class="ripple"></span>
+      </button>
+      <button class="tab fx-trans fx-press ring" data-nav="apps">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/folder-open.svg" alt="Apps" width="18" height="18" onerror="this.onerror=null;this.src='icons/folder-open.svg'">
+        <span style="display:none">Apps</span><span class="ripple"></span>
+      </button>
+      <button class="tab fx-trans fx-press ring" data-nav="stack">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/layer-group.svg" alt="Stack" width="18" height="18" onerror="this.onerror=null;this.src='icons/layer-group.svg'">
+        <span style="display:none">Stack</span><span class="ripple"></span>
+      </button>
+      <button class="tab fx-trans fx-press ring" data-nav="brain">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/brain.svg" alt="Brain" width="18" height="18" onerror="this.onerror=null;this.src='icons/brain.svg'">
+        <span style="display:none">Brain</span><span class="ripple"></span>
+      </button>
+      <!-- Botão da nova aba Chat -->
+      <button class="tab fx-trans fx-press ring" data-nav="chat">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/comments.svg" alt="Chat" width="18" height="18" onerror="this.onerror=null;this.src='icons/comments.svg'">
+        <span style="display:none">Chat</span><span class="ripple"></span>
+      </button>
+    </div>
+  </nav>
+  <!-- Preview da última mensagem recebida (aparece na home e leva ao chat) -->
+  <div id="msgPreview"></div>
+
+  <!-- Controles de texto e voz empilhados acima da barra de navegação -->
+  <div id="homeButtons" class="home-btns">
+    <button id="homeTextBtn" class="home-btn">
+      <img src="HubAdlineChat.png" alt="Texto" width="20" height="20" onerror="this.onerror=null;this.src='icons/pen-to-square.svg'">
+    </button>
+    <button id="homeVoiceBtn" class="home-btn">
+      <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/microphone.svg" alt="Voz" width="20" height="20" onerror="this.onerror=null;this.src='icons/microphone.svg'">
+    </button>
+  </div>
+  <!-- Overlay de input para envio rápido de mensagens na Home -->
+  <div id="homeInputOverlay">
+    <form id="homeInputForm" autocomplete="off">
+      <input id="homeInput" type="text" placeholder="Escreva aqui…" autocomplete="off" />
+      <button type="submit">
+        <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/paper-plane.svg" alt="Enviar" width="18" height="18" onerror="this.onerror=null;this.src='icons/paper-plane.svg'">
+      </button>
+    </form>
+  </div>
+
+  <!-- HELP MODAL -->
+  <div id="modalHelp" class="modal" aria-hidden="true">
+    <div class="panel">
+      <div style="display:flex;align-items:center;gap:10px;justify-content:space-between">
+        <h3 style="margin:0">Ajuda & Atalhos</h3>
+        <button id="closeHelp" class="btn fx-trans fx-press ring">Fechar<span class="ripple"></span></button>
+      </div>
+      <div class="mut" style="margin-top:8px">Navegue mais rápido:</div>
+      <ul>
+        <li><span class="kbd">g</span> then <span class="kbd">h</span> → Home</li>
+        <li><span class="kbd">g</span> then <span class="kbd">a</span> → Apps</li>
+        <li><span class="kbd">g</span> then <span class="kbd">s</span> → Stack</li>
+        <li><span class="kbd">g</span> then <span class="kbd">b</span> → Brain</li>
+        <li><span class="kbd">g</span> then <span class="kbd">r</span> → Chat</li>
+        <li><span class="kbd">Ctrl / Cmd</span> + <span class="kbd">K</span> → Busca</li>
+        <li><span class="kbd">Ctrl / Cmd</span> + <span class="kbd">S</span> → Baixar este HTML</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===== Catálogo Embutido (Monólito) ===== -->
+  <script id="APPS_JSON" type="application/json">
   {
     "apps": [
       {"key":"atlas","title":"Atlas · Cartesius","desc":"Planejador estratégico com cronogramas e checklists.","url":"about:blank","icon":"atlas"},
@@ -838,7 +1112,9 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
       {"key":"aion","title":"Aion · Evolutia","desc":"Microações estratégicas e evolução.","url":"about:blank","icon":"aion"}
     ]
   }
-  </script><script>
+  </script>
+
+  <script>
     /* ===================== Helpers ===================== */
     const $ = (q, r = document) => r.querySelector(q);
     const $$ = (q, r = document) => Array.from(r.querySelectorAll(q));
@@ -860,14 +1136,14 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
       const entry = '[' + new Date().toLocaleTimeString() + '] ' + msg;
       dualState.logs.unshift(entry);
       const logsEl = document.getElementById('logs');
-      if(logsEl) logsEl.textContent = dualState.logs.slice(0, 60).join('\n');
+      if (logsEl) logsEl.textContent = dualState.logs.slice(0, 60).join('\n');
     }
 
     /* Ripple */
     function addRipple(el) {
-      if(!el) return;
+      if (!el) return;
       // Ensure a ripple host exists on the element. The global ripple handler will create dots on pointerdown.
-      if(!el.querySelector('.ripple')) {
+      if (!el.querySelector('.ripple')) {
         const slot = document.createElement('span');
         slot.className = 'ripple';
         el.appendChild(slot);
@@ -891,10 +1167,10 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     function displayGreeting() {
       const card = document.getElementById('greetingCard');
       // Não exibir o cartão de saudação; usamos mensagens na bolinha
-      if(card) card.style.display = 'none';
+      if (card) card.style.display = 'none';
       const name = (localStorage.getItem('infodose:userName') || '').trim();
       const sessions = document.querySelectorAll('.session').length;
-      if(!name) {
+      if (!name) {
         showArchMessage('Salve! Ative sua Dual Infodose registrando seu nome na seção Brain.', 'warn');
       } else {
         showArchMessage(`Bem-vindo de volta, ${name}. UNO está ao seu lado. Você tem ${sessions} sessão(ões) ativa(s).`, 'ok');
@@ -908,24 +1184,24 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     function applyTheme() {
       const theme = LS.get('uno:theme', 'medium');
       // Limpe qualquer dataset para que CSS default seja aplicado quando 'default'
-      if(theme === 'default') {
+      if (theme === 'default') {
         delete document.body.dataset.theme;
       } else {
         document.body.dataset.theme = theme;
       }
       // Gerenciar fundo personalizado
       const bgContainer = document.getElementById('custom-bg');
-      if(!bgContainer) return;
-      if(theme !== 'custom') {
+      if (!bgContainer) return;
+      if (theme !== 'custom') {
         bgContainer.innerHTML = '';
         return;
       }
       // Carregar dados do fundo
       const bgData = LS.get('uno:bg', '');
       bgContainer.innerHTML = '';
-      if(!bgData) return;
+      if (!bgData) return;
       // Determine se é vídeo ou imagem
-      if(/^data:video\//.test(bgData)) {
+      if (/^data:video\//.test(bgData)) {
         const vid = document.createElement('video');
         vid.src = bgData;
         vid.autoplay = true;
@@ -951,7 +1227,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     // Aplica o CSS salvo em localStorage (chave 'infodose:cssCustom')
     function applyCSS() {
       let styleEl = document.getElementById('customStyle');
-      if(!styleEl) {
+      if (!styleEl) {
         styleEl = document.createElement('style');
         styleEl.id = 'customStyle';
         document.head.appendChild(styleEl);
@@ -963,7 +1239,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     // Inicializa seleção de vozes para cada arquétipo
     function initVoices() {
       const wrap = document.getElementById('voicesWrap');
-      if(!wrap) return;
+      if (!wrap) return;
       wrap.innerHTML = '';
       const archList = [ 'Luxara','Rhea','Aion','Atlas','Nova','Genus','Lumine','Kaion','Kaos','Horus','Elysha','Serena' ];
       function populateVoices() {
@@ -973,10 +1249,10 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
         voices = filtered.length ? filtered : voices;
         const saved = LS.get('infodose:voices', {}) || {};
         // Se ainda não houver vozes salvas, defina um mapeamento padrão
-        if(Object.keys(saved).length === 0 && voices.length) {
+        if (Object.keys(saved).length === 0 && voices.length) {
           archList.forEach((name, idx) => {
             const v = voices[idx % voices.length];
-            if(v) saved[name] = v.name;
+            if (v) saved[name] = v.name;
           });
           LS.set('infodose:voices', saved);
         }
@@ -999,7 +1275,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
             opt.textContent = `${v.name} (${v.lang})`;
             sel.appendChild(opt);
           });
-          if(saved[name]) sel.value = saved[name];
+          if (saved[name]) sel.value = saved[name];
           sel.onchange = () => {
             saved[name] = sel.value;
             LS.set('infodose:voices', saved);
@@ -1013,7 +1289,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
             const utter = new SpeechSynthesisUtterance(`Olá, eu sou ${name}`);
             const voiceName = saved[name] || sel.value;
             const voice = voices.find(v => v.name === voiceName);
-            if(voice) utter.voice = voice;
+            if (voice) utter.voice = voice;
             speechSynthesis.cancel();
             speechSynthesis.speak(utter);
           };
@@ -1035,14 +1311,14 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
         const saved = LS.get('infodose:voices', {});
         const voices = speechSynthesis.getVoices();
         let voice = null;
-        if(saved && saved[archName]) {
+        if (saved && saved[archName]) {
           voice = voices.find(v => v.name === saved[archName]);
         }
-        if(!voice) {
+        if (!voice) {
           voice = voices.find(v => v.lang && (v.lang.startsWith('pt') || v.lang.startsWith('en')));
         }
-        if(!voice && voices.length) voice = voices[0];
-        if(!voice) return;
+        if (!voice && voices.length) voice = voices[0];
+        if (!voice) return;
         const utter = new SpeechSynthesisUtterance(`Olá, eu sou ${archName}`);
         utter.voice = voice;
         speechSynthesis.cancel();
@@ -1062,14 +1338,14 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
         const saved = LS.get('infodose:voices', {}) || {};
         const voices = speechSynthesis.getVoices();
         let voice = null;
-        if(saved[key]) {
+        if (saved[key]) {
           voice = voices.find(v => v.name === saved[key]);
         }
-        if(!voice) {
+        if (!voice) {
           voice = voices.find(v => v.lang && (v.lang.startsWith('pt') || v.lang.startsWith('en')));
         }
-        if(!voice && voices.length) voice = voices[0];
-        if(!voice) return;
+        if (!voice && voices.length) voice = voices[0];
+        if (!voice) return;
         const utter = new SpeechSynthesisUtterance(text);
         utter.voice = voice;
         speechSynthesis.cancel();
@@ -1081,16 +1357,16 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     function showArchMessage(text, type = 'info') {
       try {
         const el = document.getElementById('archMsg');
-        if(!el) return;
+        if (!el) return;
         el.textContent = text;
         // Ajuste a cor de fundo conforme o tipo
-        if(type === 'ok') {
+        if (type === 'ok') {
           el.style.background = 'rgba(57,255,182,0.75)';
           el.style.color = '#0b0f14';
-        } else if(type === 'warn') {
+        } else if (type === 'warn') {
           el.style.background = 'rgba(255,184,107,0.78)';
           el.style.color = '#0b0f14';
-        } else if(type === 'err') {
+        } else if (type === 'err') {
           el.style.background = 'rgba(255,107,107,0.78)';
           el.style.color = '#0b0f14';
         } else {
@@ -1112,7 +1388,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     function initAudioRipple() {
       const clickLayer = document.getElementById('audioRipple');
       const archCircleEl = document.querySelector('.arch-circle');
-      if(!clickLayer || !archCircleEl) return;
+      if (!clickLayer || !archCircleEl) return;
       let enabled = false;
       let audioCtx = null;
       let analyser = null;
@@ -1136,11 +1412,11 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
       }
       // Para a captura de áudio e reseta a camada
       function stop() {
-        if(micStream) {
+        if (micStream) {
           micStream.getTracks().forEach(t => t.stop());
           micStream = null;
         }
-        if(audioCtx) {
+        if (audioCtx) {
           try { audioCtx.close(); } catch {}
           audioCtx = null;
         }
@@ -1149,7 +1425,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
       }
       // Atualiza a opacidade da camada conforme o volume (RMS)
       function animate() {
-        if(!enabled || !analyser) return;
+        if (!enabled || !analyser) return;
         const buf = new Uint8Array(analyser.fftSize);
         analyser.getByteTimeDomainData(buf);
         let sum = 0;
@@ -1176,7 +1452,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
       window.toggleAudio = function () {
         enabled = !enabled;
         archCircleEl.classList.toggle('audio-on', enabled);
-        if(enabled) {
+        if (enabled) {
           start();
         } else {
           stop();
@@ -1187,7 +1463,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     // Mensagem de boas-vindas/ativação
     function welcome() {
       const name = (localStorage.getItem('infodose:userName') || '').trim();
-      if(!name) {
+      if (!name) {
         const msg = 'Salve! Ative sua Dual Infodose registrando seu nome na seção Brain.';
         showArchMessage(msg, 'warn');
         try { speakWithActiveArch(msg); } catch {}
@@ -1204,39 +1480,39 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     (function() {
       try {
         const home = document.getElementById('v-home');
-        if(!home) return;
+        if (!home) return;
         const arch = home.querySelector('.arch-container');
         const cards = home.querySelector('.cards');
         // Se ambos existirem, garanta que as cartas apareçam depois do círculo de arquétipos.
-        if(arch && cards) {
+        if (arch && cards) {
           arch.insertAdjacentElement('afterend', cards);
         }
       } catch (e) {
         console.warn('Falha ao reposicionar arquétipo:', e);
       }
     })();
-    const obs = new MutationObserver((muts) => { muts.forEach(m => m.addedNodes && m.addedNodes.forEach(n => { if(n.nodeType === 1) { if(n.matches?.('button')) addRipple(n); n.querySelectorAll?.('button').forEach(addRipple); } })) });
+    const obs = new MutationObserver((muts) => { muts.forEach(m => m.addedNodes && m.addedNodes.forEach(n => { if (n.nodeType === 1) { if (n.matches?.('button')) addRipple(n); n.querySelectorAll?.('button').forEach(addRipple); } })) });
     obs.observe(document.body, { childList: true, subtree: true });
 
     /* ===================== Navegação + Estado ===================== */
     function nav(key) {
       // Remapeia a antiga aba 'revo' para 'chat'
-      if(key === 'revo') key = 'chat';
+      if (key === 'revo') key = 'chat';
       // Adicionamos 'chat' à lista de abas para suportar a nova seção
       const tabs = ['home', 'apps', 'stack', 'brain', 'chat'];
       tabs.forEach(k => {
         const viewEl = document.getElementById('v-' + k);
-        if(viewEl) viewEl.classList.toggle('active', k === key);
+        if (viewEl) viewEl.classList.toggle('active', k === key);
         const tabEl = document.querySelector(`.tab[data-nav="${k}"]`);
-        if(tabEl) tabEl.classList.toggle('active', k === key);
+        if (tabEl) tabEl.classList.toggle('active', k === key);
       });
       LS.set('uno:lastTab', key);
       // Quando entrar na aba Home, apresente mensagem de saudação / última sessão
-      if(key === 'home') {
+      if (key === 'home') {
         try { displayGreeting(); } catch (e) { console.warn(e); }
         try {
           const nameG = (localStorage.getItem('infodose:userName') || '').trim();
-          if(!nameG) {
+          if (!nameG) {
             toast('Salve! Ative sua Dual Infodose registrando seu nome na seção Brain.', 'warn');
           } else {
             // Saudação rápida na forma de toast quando o usuário retorna ao home.
@@ -1253,21 +1529,21 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
         let phrase = '';
         let type = 'info';
         switch (key) {
-          case 'home': phrase = ''; break;
+          case 'home': phrase = 'Página inicial'; break;
           case 'apps': phrase = 'Abrindo apps'; break;
           case 'stack': phrase = 'Abrindo stack'; break;
           case 'brain': phrase = 'Abrindo usuário'; break;
           case 'chat': phrase = 'Abrindo chat'; break;
           default: phrase = '';
         }
-        if(phrase) {
+        if (phrase) {
           speakWithActiveArch(phrase);
           showArchMessage(phrase, type);
         }
         // Mostrar o preview laranja somente na Home; escondê-lo nas outras abas
         try {
           const prev = document.getElementById('msgPreview');
-          if(prev) {
+          if (prev) {
             prev.style.display = (key === 'home' && prev.textContent) ? 'block' : 'none';
           }
         } catch (e) { console.warn(e); }
@@ -1279,7 +1555,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     // helper é chamado por initAudioRipple().
     function toggleArchMenu() {
       const menu = document.getElementById('archMenu');
-      if(!menu) return;
+      if (!menu) return;
       menu.classList.toggle('show');
     }
 
@@ -1295,7 +1571,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
      */
     function startDualInteraction() {
       const archCircle = document.querySelector('.arch-circle');
-      if(!archCircle) return;
+      if (!archCircle) return;
       // Animação de clique: adiciona classe 'pressed' brevemente
       archCircle.classList.add('pressed');
       setTimeout(() => archCircle.classList.remove('pressed'), 180);
@@ -1308,7 +1584,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
         const sk = localStorage.getItem('dual.keys.openrouter') || '';
         const userName = (localStorage.getItem('infodose:userName') || '').trim();
         const model = LS.get('dual.openrouter.model');
-        if(!sk || !userName || !model) {
+        if (!sk || !userName || !model) {
           const warn = 'Configure nome, chave e modelo no Brain para conversar.';
           showArchMessage(warn, 'warn');
           return;
@@ -1332,14 +1608,14 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     function feedPush(type, text) {
       // Adiciona mensagem ao feed de IA se existir (mantido para compatibilidade)
       const box = document.getElementById('iaFeed');
-      if(box) {
+      if (box) {
         const div = document.createElement('div');
         div.className = 'msg ' + (type || 'status');
         div.textContent = text;
         box.appendChild(div);
         const msgs = box.querySelectorAll('.msg');
         const limit = 10;
-        if(msgs.length > limit) {
+        if (msgs.length > limit) {
           box.removeChild(msgs[0]);
         }
         box.scrollTop = box.scrollHeight;
@@ -1347,20 +1623,20 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
       // Envia a mensagem também ao feed de chat e atualiza o preview
       try {
         chatPush(type, text);
-        if(type === 'ai') updatePreview(text);
+        if (type === 'ai') updatePreview(text);
       } catch (e) { console.warn(e); }
     }
     // Função auxiliar para adicionar mensagens ao feed de chat
     function chatPush(type, text) {
       const feed = document.getElementById('chatFeed');
-      if(!feed) return;
+      if (!feed) return;
       const div = document.createElement('div');
       div.className = 'msg ' + (type || 'status');
       div.textContent = text;
       feed.appendChild(div);
       const msgs = feed.querySelectorAll('.msg');
       const limit = 50;
-      if(msgs.length > limit) {
+      if (msgs.length > limit) {
         feed.removeChild(msgs[0]);
       }
       feed.scrollTop = feed.scrollHeight;
@@ -1368,7 +1644,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     // Atualiza o preview laranja com a última resposta da IA
     function updatePreview(text) {
       const prev = document.getElementById('msgPreview');
-      if(!prev) return;
+      if (!prev) return;
       prev.textContent = text.replace(/\s+/g, ' ').trim();
       // Exibe o preview apenas se a página Home estiver ativa.  Caso
       // contrário, mantenha-o oculto para não interferir na visualização
@@ -1379,7 +1655,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     }
     function startSpeechConversation(userName, sk, model) {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if(!SpeechRecognition) {
+      if (!SpeechRecognition) {
         showArchMessage('Reconhecimento de fala não suportado neste navegador.', 'err');
         return;
       }
@@ -1393,12 +1669,11 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
       };
       recognition.onresult = (event) => {
         const transcript = event.results[0][0].transcript.trim();
-        if(transcript) {
+        if (transcript) {
           feedPush('user', 'Você: ' + transcript);
           showArchMessage('Pulso enviado. Recebendo intenção…', 'ok');
-try{ speakWithActiveArch('Pulso enviado, recebendo intenção.'); }catch(e){}
-feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
-handleUserMessage(transcript, userName, sk, model);
+          feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
+          handleUserMessage(transcript, userName, sk, model);
         }
       };
       recognition.onerror = (e) => {
@@ -1430,7 +1705,7 @@ handleUserMessage(transcript, userName, sk, model);
         console.error('Falha ao consultar IA:', err);
         reply = 'Desculpe, não consegui responder no momento.';
       }
-      if(reply) {
+      if (reply) {
         // Determine o arquétipo ativo para prefixar as respostas no feed
         let archName = 'Dual';
         try {
@@ -1474,7 +1749,7 @@ handleUserMessage(transcript, userName, sk, model);
         },
         body: JSON.stringify(payload)
       });
-      if(!res.ok) {
+      if (!res.ok) {
         throw new Error('Erro na API: ' + res.status);
       }
       const data = await res.json();
@@ -1485,18 +1760,18 @@ handleUserMessage(transcript, userName, sk, model);
     // Delegue cliques dentro do menu para a função de navegação.
     document.addEventListener('DOMContentLoaded', () => {
       const menu = document.getElementById('archMenu');
-      if(menu) {
+      if (menu) {
       menu.addEventListener('click', (e) => {
         // Primeiro verifique se o botão de áudio foi clicado
         const audioBtn = e.target.closest('button[data-audio]');
-        if(audioBtn) {
+        if (audioBtn) {
           // Alterna modo áudio usando a função global
-          if(typeof toggleAudio === 'function') {
+          if (typeof toggleAudio === 'function') {
             toggleAudio();
           }
           // Atualize o estado visual do botão
           const archCircle = document.querySelector('.arch-circle');
-          if(archCircle) {
+          if (archCircle) {
             audioBtn.classList.toggle('on', archCircle.classList.contains('audio-on'));
           }
           // Não feche o menu ao alternar áudio
@@ -1504,7 +1779,7 @@ handleUserMessage(transcript, userName, sk, model);
         }
         // Caso contrário, delegue a navegação para botões com data-nav
         const btn = e.target.closest('button[data-nav]');
-        if(btn) {
+        if (btn) {
           nav(btn.getAttribute('data-nav'));
           menu.classList.remove('show');
         }
@@ -1512,7 +1787,7 @@ handleUserMessage(transcript, userName, sk, model);
       }
       // Clique no preview direciona ao chat
       const mp = document.getElementById('msgPreview');
-      if(mp) mp.addEventListener('click', () => nav('chat'));
+      if (mp) mp.addEventListener('click', () => nav('chat'));
 
       /* Formulário de chat removido: a captura de mensagens é feita via
          overlay de entrada. */
@@ -1527,38 +1802,37 @@ handleUserMessage(transcript, userName, sk, model);
       const hiForm = document.getElementById('homeInputForm');
       const hiInput = document.getElementById('homeInput');
       // Exibe/oculta o overlay ao tocar no botão de texto
-      if(textBtn && hiOverlay && hiForm && hiInput) {
+      if (textBtn && hiOverlay && hiForm && hiInput) {
         textBtn.addEventListener('click', () => {
           const show = hiOverlay.style.display !== 'block';
           hiOverlay.style.display = show ? 'block' : 'none';
           textBtn.classList.toggle('active', show);
-          if(show) setTimeout(() => hiInput.focus(), 60);
+          if (show) setTimeout(() => hiInput.focus(), 60);
         });
         hiForm.addEventListener('submit', (ev) => {
           ev.preventDefault();
           const msg = hiInput.value.trim();
-          if(!msg) return;
+          if (!msg) return;
           feedPush('user', 'Você: ' + msg);
           showArchMessage('Pulso enviado. Recebendo intenção…', 'ok');
-try{ speakWithActiveArch('Pulso enviado, recebendo intenção.'); }catch(e){}
-feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
+          feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
           const userName = (localStorage.getItem('dual.name') || localStorage.getItem('infodose:userName') || '').trim();
           const sk = (localStorage.getItem('dual.keys.openrouter') || localStorage.getItem('infodose:sk') || '').trim();
           let mdl = LS.get('dual.openrouter.model');
-          if(!mdl) mdl = (localStorage.getItem('infodose:model') || '').trim() || 'openrouter/auto';
+          if (!mdl) mdl = (localStorage.getItem('infodose:model') || '').trim() || 'openrouter/auto';
           try { handleUserMessage(msg, userName, sk, mdl); } catch (e) { console.warn(e); }
           hiInput.value = '';
         });
       }
       // Inicia conversa por voz ao tocar no botão de voz
-      if(voiceBtn) {
+      if (voiceBtn) {
         voiceBtn.addEventListener('click', () => {
           const userName = (localStorage.getItem('dual.name') || localStorage.getItem('infodose:userName') || '').trim();
           const sk = (localStorage.getItem('dual.keys.openrouter') || localStorage.getItem('infodose:sk') || '').trim();
           let mdl = LS.get('dual.openrouter.model');
-          if(!mdl) mdl = (localStorage.getItem('infodose:model') || '').trim() || 'openrouter/auto';
-          if(hiOverlay) hiOverlay.style.display = 'none';
-          if(typeof startSpeechConversation === 'function') {
+          if (!mdl) mdl = (localStorage.getItem('infodose:model') || '').trim() || 'openrouter/auto';
+          if (hiOverlay) hiOverlay.style.display = 'none';
+          if (typeof startSpeechConversation === 'function') {
             startSpeechConversation(userName, sk, mdl);
           }
         });
@@ -1577,28 +1851,28 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
     // Restaurar última aba
     let last = LS.get('uno:lastTab', 'home');
     // Se o último tab salvo for 'revo', redirecione para home para evitar páginas vazias
-    if(last === 'revo') last = 'home';
+    if (last === 'revo') last = 'home';
     nav(last);
     // Se a aba inicial for home, exibir saudação
-    if(last === 'home') {
+    if (last === 'home') {
       try { displayGreeting(); } catch(e) {}
     }
 
     // Atalhos
     let gPressed = false;
     window.addEventListener('keydown', (e) => {
-      if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); downloadSelf(); return; }
-      if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); $('#appSearch')?.focus(); return; }
-      if(e.key.toLowerCase() === 'g') { gPressed = true; setTimeout(() => gPressed = false, 600); return; }
-      if(!gPressed) return; const k = e.key.toLowerCase();
-      if(k === 'h') nav('home'); if(k === 'a') nav('apps'); if(k === 's') nav('stack'); if(k === 'b') nav('brain'); if(k === 'r') nav('chat'); gPressed = false;
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); downloadSelf(); return; }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); $('#appSearch')?.focus(); return; }
+      if (e.key.toLowerCase() === 'g') { gPressed = true; setTimeout(() => gPressed = false, 600); return; }
+      if (!gPressed) return; const k = e.key.toLowerCase();
+      if (k === 'h') nav('home'); if (k === 'a') nav('apps'); if (k === 's') nav('stack'); if (k === 'b') nav('brain'); if (k === 'r') nav('chat'); gPressed = false;
     });
 
     // Ajuda modal
     const modalHelp = $('#modalHelp');
     $('#btnHelp').onclick = () => { modalHelp.classList.add('open'); modalHelp.setAttribute('aria-hidden', 'false'); };
     $('#closeHelp').onclick = () => { modalHelp.classList.remove('open'); modalHelp.setAttribute('aria-hidden', 'true'); };
-    modalHelp.addEventListener('click', (e) => { if(e.target === modalHelp) $('#closeHelp').click(); });
+    modalHelp.addEventListener('click', (e) => { if (e.target === modalHelp) $('#closeHelp').click(); });
 
     // Baixar HTML
     function downloadSelf() {
@@ -1606,7 +1880,7 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
         const clone = document.documentElement.cloneNode(true);
         const html = '<!doctype html>\n' + clone.outerHTML;
         const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'HUB-UNO.html'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 500);
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'HUB-UNO-Revo.html'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 500);
         toast('HTML exportado', 'ok');
       } catch (e) { alert('Falha ao exportar: ' + e.message); }
     }
@@ -1629,10 +1903,10 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
       // Permitir adicionar modelo personalizado
       const addBtn = $('#addModel');
       const customInput = $('#customModel');
-      if(addBtn && customInput) {
+      if (addBtn && customInput) {
         addBtn.onclick = () => {
           const val = (customInput.value || '').trim();
-          if(!val) return;
+          if (!val) return;
           const opt = document.createElement('option');
           opt.value = val; opt.textContent = val;
           sel.appendChild(opt);
@@ -1644,10 +1918,10 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
       }
       // Permitir carregamento de arquivo de treino
       const trainInp = $('#trainingFile');
-      if(trainInp) {
+      if (trainInp) {
         trainInp.addEventListener('change', (ev) => {
           const file = ev.target.files && ev.target.files[0];
-          if(!file) return;
+          if (!file) return;
           const reader = new FileReader();
           reader.onload = () => {
             try {
@@ -1663,14 +1937,14 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
     /* ===================== Inicialização do tema & personalização de fundo ===================== */
     (function initThemeSettings() {
       // Se o usuário nunca selecionou um tema antes, defina o padrão como "medium" (cinza).
-      if(!LS.get('uno:theme')) {
+      if (!LS.get('uno:theme')) {
         LS.set('uno:theme', 'medium');
       }
       // Aplique o tema salvo imediatamente
       applyTheme();
       // Configure o seletor de tema
       const sel = document.getElementById('themeSelect');
-      if(sel) {
+      if (sel) {
         sel.value = LS.get('uno:theme', 'medium');
         sel.addEventListener('change', () => {
           LS.set('uno:theme', sel.value);
@@ -1680,16 +1954,16 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
         });
       }
       const upload = document.getElementById('bgUpload');
-      if(upload) {
+      if (upload) {
         upload.addEventListener('change', (e) => {
           const f = e.target.files && e.target.files[0];
-          if(!f) return;
+          if (!f) return;
           const reader = new FileReader();
           reader.onload = () => {
             try {
               LS.set('uno:bg', reader.result);
               LS.set('uno:theme', 'custom');
-              if(sel) sel.value = 'custom';
+              if (sel) sel.value = 'custom';
               applyTheme();
               toast('Fundo personalizado salvo', 'ok');
               try { updateHomeStatus(); } catch {}
@@ -1753,7 +2027,7 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
      */
     function toggleFav(key) {
       const idx = favoriteKeys.indexOf(key);
-      if(idx >= 0) {
+      if (idx >= 0) {
         favoriteKeys.splice(idx, 1);
       } else {
         favoriteKeys.push(key);
@@ -1800,14 +2074,14 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
         const localCount = locals().length;
         const txtApps = showOnlyLocal ? (localCount + ' local' + (localCount === 1 ? '' : 's')) : (total + ' app' + (total === 1 ? '' : 's'));
         const elApps = document.getElementById('homeAppsStatus');
-        if(elApps) elApps.textContent = txtApps;
+        if (elApps) elApps.textContent = txtApps;
       } catch (e) {}
       try {
         // Sessões abertas (Stack)
         const sess = document.querySelectorAll('#stackWrap .session').length;
         const txtSess = sess + ' sessão' + (sess === 1 ? '' : 's');
         const elStack = document.getElementById('homeStackStatus');
-        if(elStack) elStack.textContent = txtSess;
+        if (elStack) elStack.textContent = txtSess;
       } catch (e) {}
       try {
         // Usuário: nome + tema atual (mapa)
@@ -1817,18 +2091,18 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
         let txtUser = name || 'Usuário';
         txtUser += ' · ' + themeLabel;
         const elUser = document.getElementById('homeUserStatus');
-        if(elUser) elUser.textContent = txtUser;
+        if (elUser) elUser.textContent = txtUser;
       } catch (e) {}
       try {
         // Arquétipo ativo: obtém o nome sem extensão
         const sel = document.getElementById('arch-select');
         let archName = '';
-        if(sel && sel.options.length > 0) {
+        if (sel && sel.options.length > 0) {
           const opt = sel.options[sel.selectedIndex] || null;
-          if(opt) archName = opt.textContent.replace(/\.html$/i, '');
+          if (opt) archName = opt.textContent.replace(/\.html$/i, '');
         }
         const elArch = document.getElementById('homeArchStatus');
-        if(elArch) elArch.textContent = archName || 'Nenhum';
+        if (elArch) elArch.textContent = archName || 'Nenhum';
       } catch (e) {}
     }
 
@@ -1848,7 +2122,7 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
       favImg.src = 'icons/star.svg';
       fav.appendChild(favImg);
       // Marque como favoritado se a chave estiver na lista
-      if(isFav(a.key)) fav.classList.add('fav');
+      if (isFav(a.key)) fav.classList.add('fav');
       fav.onclick = (e) => { e.stopPropagation(); toggleFav(a.key); };
       el.appendChild(fav);
       const ic = document.createElement('div'); ic.className = 'app-icon';
@@ -1882,17 +2156,17 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
       // Combine apps embutidos e locais
       let L = normalize(RAW.apps).concat(locals());
       // Filtrar apenas locais se ativado
-      if(showOnlyLocal) {
+      if (showOnlyLocal) {
         L = L.filter(a => String(a.url || '').startsWith('local:'));
       }
       // Aplicar busca (mantendo compatibilidade se o usuário ainda possuir o campo)
-      if(q) {
+      if (q) {
         L = L.filter(a => (a.title + ' ' + a.desc + ' ' + a.key + ' ' + a.url + ' ' + (a.tags || []).join(' ')).toLowerCase().includes(q));
       }
       // Ordenar: favoritos primeiro, depois título A-Z ou Z-A conforme o select (padrão A-Z)
       L.sort((a, b) => {
         const favA = isFav(a.key); const favB = isFav(b.key);
-        if(favA !== favB) return favB - favA; // true=1, false=0 => favoritos no topo
+        if (favA !== favB) return favB - favA; // true=1, false=0 => favoritos no topo
         const dir = mode === 'za' ? -1 : 1;
         return dir * String(a.title || '').localeCompare(b.title || '');
       });
@@ -1919,9 +2193,9 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
       // Sempre envie o catálogo atualizado ao iframe do Revo após carregar os apps embutidos.
       try {
         const iframe = document.getElementById('revoEmbed');
-        if(iframe) {
+        if (iframe) {
           const apps = RAW && Array.isArray(RAW.apps) ? RAW.apps : [];
-          const send = () => { if(iframe.contentWindow) iframe.contentWindow.postMessage({ type: 'apps', apps }, '*'); };
+          const send = () => { if (iframe.contentWindow) iframe.contentWindow.postMessage({ type: 'apps', apps }, '*'); };
           // Envie após pequeno atraso para garantir que o iframe esteja pronto
           setTimeout(send, 100);
           // E também quando o iframe terminar de carregar
@@ -1935,13 +2209,13 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
     // Locais
     $('#btnImport').onclick = async () => {
       const fs = Array.from($('#fileLocal').files || []);
-      if(!fs.length) return;
+      if (!fs.length) return;
       const tasks = fs.map(f => new Promise(res => {
         const r = new FileReader();
         r.onload = () => {
           const content = String(r.result || '');
           // Se for um arquivo JSON, tente carregá-lo como catálogo de apps
-          if(/\.json$/i.test(f.name)) {
+          if (/\.json$/i.test(f.name)) {
             try {
               const obj = JSON.parse(content);
               const apps = Array.isArray(obj.apps) ? obj.apps : (Array.isArray(obj) ? obj : []);
@@ -1967,15 +2241,15 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
       list.forEach(x => cur.unshift(x));
       localStorage.setItem('infodose:locals:v1', JSON.stringify(cur));
       renderApps();
-      if(list.length) toast('HTMLs locais adicionados', 'ok');
+      if (list.length) toast('HTMLs locais adicionados', 'ok');
     };
     $('#btnExport').onclick = () => { const data = { v: 1, when: Date.now(), items: JSON.parse(LS.raw('infodose:locals:v1') || '[]') }; const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); a.download = 'locals_pack.json'; a.click(); };
-    $('#btnClear').onclick = () => { if(confirm('Limpar HTMLs locais salvos?')) { localStorage.removeItem('infodose:locals:v1'); renderApps(); toast('Locais limpos', 'warn'); } };
+    $('#btnClear').onclick = () => { if (confirm('Limpar HTMLs locais salvos?')) { localStorage.removeItem('infodose:locals:v1'); renderApps(); toast('Locais limpos', 'warn'); } };
 
     // Alterna exibição de apps locais/apenas locais
     try {
       const btnToggleLocal = document.getElementById('btnToggleLocal');
-      if(btnToggleLocal) {
+      if (btnToggleLocal) {
         btnToggleLocal.onclick = () => {
           showOnlyLocal = !showOnlyLocal;
           // Atualize o texto do botão conforme o modo
@@ -1987,7 +2261,7 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
 
     /* ===================== Stack ===================== */
     const stackWrap = $('#stackWrap'), dock = $('#dock');
-    function badge(item) { const b = document.createElement('button'); b.className = 'badge fx-trans fx-press ring'; b.textContent = item.title || 'App'; b.title = 'Reabrir ' + (item.title || 'App'); const rp = document.createElement('span'); rp.className = 'ripple'; b.appendChild(rp); addRipple(b); b.onclick = () => { const s = document.querySelector('[data-sid="' + item.sid + '"]'); if(s) { s.scrollIntoView({ behavior: 'smooth' }); s.classList.remove('min'); } }; return b }
+    function badge(item) { const b = document.createElement('button'); b.className = 'badge fx-trans fx-press ring'; b.textContent = item.title || 'App'; b.title = 'Reabrir ' + (item.title || 'App'); const rp = document.createElement('span'); rp.className = 'ripple'; b.appendChild(rp); addRipple(b); b.onclick = () => { const s = document.querySelector('[data-sid="' + item.sid + '"]'); if (s) { s.scrollIntoView({ behavior: 'smooth' }); s.classList.remove('min'); } }; return b }
     function updateDock() {
       dock.innerHTML = '';
       $$('.session').forEach(s => {
@@ -2002,7 +2276,25 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
       const isLocal = String(a.url || '').startsWith('local:'); const lr = isLocal ? getLocal(String(a.url).slice(6)) : null; const url = lr ? blobURL(lr) : a.url;
       const card = document.createElement('div'); card.className = 'session fx-trans fx-lift'; card.dataset.sid = sid; card.dataset.meta = JSON.stringify({ title: a.title || 'App', url: a.url || '' });
       card.innerHTML = `
-        <div class="hdr"><div class="title">${(a.title || 'App')}</div><div class="tools"><button class="btn ring fx-trans fx-press" data-act="min" title="Minimizar"><span style="font-size:16px;line-height:1">&minus;</span><span class="ripple"></span></button><button class="btn ring fx-trans fx-press" data-act="ref" title="Recarregar"><span style="font-size:16px;line-height:1">&#8635;</span><span class="ripple"></span></button><button class="btn ring fx-trans fx-press" data-act="close" title="Fechar"><span style="font-size:16px;line-height:1">&times;</span><span class="ripple"></span></button></div></div><iframe src="${url || 'about:blank'}" allow="autoplay; clipboard-read; clipboard-write; picture-in-picture; fullscreen"></iframe><div class="resize-handle" title="Arraste para ajustar a altura"></div>`;
+        <div class="hdr">
+          <div class="title">${(a.title || 'App')}</div>
+          <div class="tools">
+            <button class="btn ring fx-trans fx-press" data-act="min" title="Minimizar">
+              <span style="font-size:16px;line-height:1">&minus;</span>
+              <span class="ripple"></span>
+            </button>
+            <button class="btn ring fx-trans fx-press" data-act="ref" title="Recarregar">
+              <span style="font-size:16px;line-height:1">&#8635;</span>
+              <span class="ripple"></span>
+            </button>
+            <button class="btn ring fx-trans fx-press" data-act="close" title="Fechar">
+              <span style="font-size:16px;line-height:1">&times;</span>
+              <span class="ripple"></span>
+            </button>
+          </div>
+        </div>
+        <iframe src="${url || 'about:blank'}" allow="autoplay; clipboard-read; clipboard-write; picture-in-picture; fullscreen"></iframe>
+        <div class="resize-handle" title="Arraste para ajustar a altura"></div>`;
       // Redimensionar altura do iframe arrastando o handle
       (function bindResize(){
         const handle = card.querySelector('.resize-handle');
@@ -2028,7 +2320,7 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
       // Prepend the session card dependendo do modo de abertura. Se "abrir dentro" estiver marcado,
       // insira a sessão no topo da página (sessionsAnchor); caso contrário, use o stackWrap padrão.
       const anchor = document.getElementById('sessionsAnchor');
-      if($('#openInside').checked && anchor) {
+      if ($('#openInside').checked && anchor) {
         anchor.prepend(card);
       } else {
         stackWrap.prepend(card);
@@ -2046,12 +2338,12 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
         dualLog('Sessão fechada: ' + (a.title || 'App'));
       };
       // Navegue para a view Stack apenas quando não estiver abrindo dentro da página.
-      if(!$('#openInside').checked) nav('stack');
+      if (!$('#openInside').checked) nav('stack');
       updateDock();
       toast('App aberto: ' + (a.title || 'App'), 'ok');
       dualLog('Sessão aberta: ' + (a.title || 'App'));
     }
-    $('#btnCloseAll').onclick = () => { if(!confirm('Fechar todas as sessões abertas?')) return; $$('.session').forEach(s => s.remove()); updateDock(); toast('Todas as sessões fechadas', 'warn'); };
+    $('#btnCloseAll').onclick = () => { if (!confirm('Fechar todas as sessões abertas?')) return; $$('.session').forEach(s => s.remove()); updateDock(); toast('Todas as sessões fechadas', 'warn'); };
 
     /* ===================== Archetypes (Central Circle) ===================== */
     (function () {
@@ -2109,7 +2401,7 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
         });
       }
       function setSrcByIndex(idx) {
-        if(!archList.length) return;
+        if (!archList.length) return;
         const n = (idx + archList.length) % archList.length;
         select.selectedIndex = n;
         const file = archList[n];
@@ -2132,7 +2424,7 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
       }
       let current = 0;
       populate();
-      if(archList.length) setSrcByIndex(0);
+      if (archList.length) setSrcByIndex(0);
       document.getElementById('arch-prev').addEventListener('click', () => {
         current = (current - 1 + archList.length) % archList.length;
         fade.classList.add('show');
@@ -2172,7 +2464,7 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
     const btnApplyCSS = document.getElementById('applyCSS');
     const btnClearCSS = document.getElementById('clearCSS');
     const btnDownloadCSS = document.getElementById('downloadCSS');
-    if(btnApplyCSS) {
+    if (btnApplyCSS) {
       btnApplyCSS.addEventListener('click', () => {
         const textarea = document.getElementById('cssCustom');
         const css = (textarea && textarea.value || '').trim();
@@ -2181,16 +2473,16 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
         toast('CSS aplicado', 'ok');
       });
     }
-    if(btnClearCSS) {
+    if (btnClearCSS) {
       btnClearCSS.addEventListener('click', () => {
         localStorage.removeItem('infodose:cssCustom');
         const textarea = document.getElementById('cssCustom');
-        if(textarea) textarea.value = '';
+        if (textarea) textarea.value = '';
         applyCSS();
         toast('CSS removido', 'warn');
       });
     }
-    if(btnDownloadCSS) {
+    if (btnDownloadCSS) {
       btnDownloadCSS.addEventListener('click', () => {
         const css = localStorage.getItem('infodose:cssCustom') || '';
         const blob = new Blob([css], { type: 'text/css' });
@@ -2207,11 +2499,11 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
     (function initDualPrefs(){
       const perfSel = document.getElementById('selPerf');
       const voiceSel = document.getElementById('selVoice');
-      if(perfSel) perfSel.value = dualState.perf;
-      if(voiceSel) voiceSel.value = dualState.voice;
+      if (perfSel) perfSel.value = dualState.perf;
+      if (voiceSel) voiceSel.value = dualState.voice;
       const perfBtn = document.getElementById('btnPerf');
       const voiceBtn = document.getElementById('btnVoice');
-      if(perfBtn && perfSel) {
+      if (perfBtn && perfSel) {
         perfBtn.addEventListener('click', () => {
           dualState.perf = perfSel.value;
           localStorage.setItem('hub.perf', dualState.perf);
@@ -2219,7 +2511,7 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
           toast('Performance atualizada', 'ok');
         });
       }
-      if(voiceBtn && voiceSel) {
+      if (voiceBtn && voiceSel) {
         voiceBtn.addEventListener('click', () => {
           dualState.voice = voiceSel.value;
           localStorage.setItem('hub.voice', dualState.voice);
@@ -2229,7 +2521,10 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
       }
     })();
     $$('button').forEach(addRipple);
-  </script><script>
+  </script>
+
+<!-- ===== Dual • Upgrade Kit v1 (Archetypes + BG storage fix) ===== -->
+<script>
 (function(){
   const $ = (q,r=document)=>r.querySelector(q);
   const LS = {
@@ -2369,935 +2664,5 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
   })();
 })();
 </script>
-
-<style>
-  #lsx-mount{position:fixed;inset:auto 12px 12px auto;z-index:2147483000}
-  #lsx-panel{position:fixed;right:12px;bottom:12px;max-width:min(1040px,96vw);max-height:86vh;display:none;
-    overflow:hidden;background:rgba(12,16,24,.98);border:1px solid #ffffff26;border-radius:16px;backdrop-filter:blur(12px);
-    box-shadow:0 18px 48px rgba(0,0,0,.6)}
-  #lsx-panel *{box-sizing:border-box}
-  #lsx-panel header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid #ffffff18;color:#cfe6ff}
-  #lsx-title{font-weight:900;margin-right:auto;letter-spacing:.04em}
-  #lsx-search{min-width:220px;background:#0e1724;border:1px solid #294461;border-radius:10px;color:#d9e6ff;padding:8px 10px;font:12px ui-monospace,monospace}
-  #lsx-actions{display:flex;gap:8px;flex-wrap:wrap}
-  #lsx-actions .btn{all:unset;font:600 12px/1.2 system-ui;color:#cfe6ff;background:#0d1b2a;border:1px solid #254b70;border-radius:10px;padding:6px 10px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
-  #lsx-body{display:grid;grid-template-rows:auto auto 1fr}
-  #lsx-stats{display:flex;gap:10px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid #ffffff10}
-  #lsx-stats .stat{background:#0e1724;border:1px solid #294461;border-radius:10px;padding:8px 10px;color:#cfe6ff;font:12px ui-monospace,monospace}
-  #lsx-new{display:grid;grid-template-columns:260px 1fr auto;gap:8px;padding:10px 14px;border-bottom:1px solid #ffffff10}
-  #lsx-new input,#lsx-new textarea{background:#0e1724;border:1px solid #294461;border-radius:10px;color:#d9e6ff;padding:8px 10px;font:12px ui-monospace,monospace}
-  #lsx-new textarea{resize:vertical;min-height:40px;max-height:120px}
-  #lsx-new button{all:unset;display:inline-flex;align-items:center;gap:6px;background:#114d2f;border:1px solid #2c7a58;color:#bfffe0;border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer}
-  #lsx-grid{overflow:auto;max-height:56vh;padding:6px 0}
-  details.lsx-group{border-top:1px dashed #ffffff14}
-  details.lsx-group>summary{list-style:none;cursor:pointer;padding:10px 14px;color:#d7e7ff;display:flex;align-items:center;gap:8px}
-  details.lsx-group>summary .chev{width:12px;height:12px;border:1px solid #567;display:inline-grid;place-items:center;border-radius:4px}
-  .lsx-badge{background:#0d1b2a;border:1px solid #254b70;border-radius:999px;padding:2px 8px;color:#cfe6ff;font:11px ui-monospace,monospace}
-  .lsx-body-inner{padding:0 8px 8px}
-  .lsx-head,.lsx-row{display:grid;grid-template-columns:280px 1fr 170px;gap:8px;padding:8px 6px 8px 8px}
-  .lsx-head{position:sticky;top:0;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,0));backdrop-filter:blur(6px);z-index:1;border-bottom:1px solid #ffffff10}
-  .lsx-head div{color:#a9c7ff;font:700 11px/1 ui-monospace,monospace;text-transform:uppercase;letter-spacing:.08em}
-  .lsx-row{border-bottom:1px dashed #ffffff10;align-items:start}
-  .lsx-k{color:#a9c7ff;font:12px/1.35 ui-monospace,monospace;word-break:break-all}
-  .lsx-v{display:flex;flex-direction:column;gap:6px}
-  .lsx-preview{background:#0e1724;border:1px solid #294461;border-radius:10px;color:#d9e6ff;padding:8px 10px;font:12px/1.35 ui-monospace,monospace;white-space:pre-wrap;word-break:break-word;max-height:60px;overflow:auto}
-  .lsx-expand{display:none;width:100%}
-  .lsx-expand textarea{width:100%;min-height:120px;background:#0e1724;border:1px solid #294461;border-radius:10px;color:#d9e6ff;padding:8px 10px;font:12px/1.35 ui-monospace,monospace;resize:vertical}
-  .lsx-a{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-  .ic-btn{all:unset;display:inline-grid;place-items:center;width:34px;height:34px;border-radius:10px;background:#0d1b2a;border:1px solid #254b70;color:#cfe6ff;cursor:pointer}
-  .ic-btn.warn{background:#2a1212;border-color:#703333;color:#ffd0d0}
-  .ic-btn.ok{background:#0f2a1e;border-color:#2f7a56;color:#c9ffe7}
-  mark.lsx-hit{background:#3b82f6;color:#0b0f14;border-radius:4px;padding:0 2px}
-  @media (max-width:960px){ .lsx-head,.lsx-row,#lsx-new{grid-template-columns:220px 1fr 150px} }
-  @media (max-width:720px){ #lsx-panel{left:12px;right:12px;max-width:unset} .lsx-head,.lsx-row,#lsx-new{grid-template-columns:1fr} }
-  /* Logger & Toast */
-  #lsx-logger{position:fixed;left:12px;bottom:12px;max-width:min(420px,92vw);display:none;z-index:2147483001}
-  #lsx-logger .panel{background:rgba(12,16,24,.96);border:1px solid #ffffff26;border-radius:12px;backdrop-filter:blur(10px);padding:10px;box-shadow:0 14px 36px rgba(0,0,0,.5)}
-  #lsx-logger pre{margin:0;max-height:46vh;overflow:auto;font:12px/1.35 ui-monospace,monospace;color:#a9b7d0}
-  #lsx-toastBox{position:fixed;right:14px;bottom:calc(68px + env(safe-area-inset-bottom));display:grid;gap:8px;z-index:2147483002}
-  .lsx-toast{background:linear-gradient(90deg,#1b2a2a,#123c2e);color:#eaf0ff;border:1px solid #ffffff22;padding:.6rem .8rem;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
-</style><div id="lsx-mount"></div><template id="tpl-lsx-panel"><div id="lsx-panel" role="dialog" aria-label="LocalStorage • Brain"><header><strong id="lsx-title">LocalStorage • Brain</strong><input id="lsx-search" type="search" placeholder="filtrar (chave/valor)"><div id="lsx-actions"><button class="btn" id="lsx-refresh">Atualizar</button><button class="btn" id="lsx-export">Exportar</button><button class="btn" id="lsx-import-btn">Importar</button><input id="lsx-import" type="file" accept="application/json" style="display:none"><button class="btn" id="lsx-clear-all">Limpar tudo</button><button class="btn" id="lsx-clear-idb">Limpar IDB</button><button class="btn" id="lsx-hide">Fechar</button></div></header><div id="lsx-body"><div id="lsx-stats"><div class="stat">chaves: <b id="lsx-st-keys">0</b></div><div class="stat">localStorage: <b id="lsx-st-bytes">0 KB</b></div><div class="stat">pesados(>50KB): <b id="lsx-st-heavy">0</b></div><div class="stat">origem (quota/uso): <b id="lsx-st-usage">—</b></div></div><div id="lsx-new"><input id="lsx-new-k" placeholder="nova chave (ex.: infodose:userName)"><textarea id="lsx-new-v" placeholder="valor (texto ou JSON)"></textarea><button id="lsx-add">Salvar novo</button></div><div id="lsx-grid"></div></div></div></template><template id="tpl-lsx-logger"><div class="panel"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px"><strong>Logs</strong><button id="lsx-log-close" class="btn">Fechar</button></div><pre id="lsx-logs"></pre></div></template><template id="tpl-lsx-toast"><div class="lsx-toast"></div></template><script>
-(function(){
-  const $=(q,r=document)=>r.querySelector(q);
-  const $$=(q,r=document)=>Array.from(r.querySelectorAll(q));
-  const LS={raw:(k)=>localStorage.getItem(k)||''};
-  function utf8Bytes(s){try{return new Blob([s]).size}catch(e){return (new TextEncoder()).encode(s).length}}
-  function fmtBytes(n){return n<1024? n+' B' : n<1048576? (n/1024).toFixed(1)+' KB' : (n/1048576).toFixed(2)+' MB'}
-  function lsSize(){let t=0,h=0;const HEAVY=50*1024; for(const k of Object.keys(localStorage)){const v=localStorage.getItem(k)||''; const b=utf8Bytes(k)+utf8Bytes(v); t+=b; if(b>HEAVY) h++;} return {t,h}}
-  function estimateUsage(el){ if(navigator.storage?.estimate){ navigator.storage.estimate().then(({usage,quota})=>{ el.textContent=(usage&&quota)?`${fmtBytes(usage)} / ${fmtBytes(quota)}`:'—' }); } else { el.textContent='—'; } }
-
-  const Toast={
-    init(){ this.host = $('#lsx-toastBox') || document.body.appendChild(Object.assign(document.createElement('div'),{id:'lsx-toastBox'})); },
-    show(msg,type='ok',ms=1600){ if(!this.host) this.init(); const el=$('#tpl-lsx-toast').content.firstElementChild.cloneNode(true); if(type==='warn') el.style.background='linear-gradient(90deg,#2f261b,#3c2d12)'; if(type==='err') el.style.background='linear-gradient(90deg,#2f1b1b,#3c1212)'; el.textContent=msg; this.host.appendChild(el); setTimeout(()=>{ el.style.opacity=.0; el.style.transform='translateY(6px)'; setTimeout(()=>el.remove(),220); }, ms); }
-  };
-
-  const Logger={
-    init(){ const host = $('#lsx-logger') || document.body.appendChild(Object.assign(document.createElement('div'),{id:'lsx-logger'})); host.innerHTML=''; host.appendChild($('#tpl-lsx-logger').content.cloneNode(true)); $('#lsx-log-close').addEventListener('click',()=> host.style.display='none'); this.host=host; this.pre=$('#lsx-logs'); },
-    push(m){ if(!this.pre) this.init(); const line='['+new Date().toLocaleTimeString()+'] '+m; const arr=(this.pre.textContent||'').split('\\n'); arr.unshift(line); this.pre.textContent=arr.slice(0,120).join('\\n'); this.host.style.display='block'; }
-  };
-
-  const DualLS={
-    open(){ const p=$('#lsx-panel'); if(p){ p.style.display='block'; this.render(); this.refresh(); }},
-    close(){ const p=$('#lsx-panel'); if(p){ p.style.display='none'; }},
-    toggle(){ const p=$('#lsx-panel'); if(!p) return; p.style.display = (p.style.display==='block'?'none':'block'); if(p.style.display==='block'){ this.render($('#lsx-search').value); this.refresh(); }},
-    initPanel({mount='#lsx-mount'}={}){
-      const host=$(mount)||document.body; if(!$('#lsx-panel')){ host.appendChild($('#tpl-lsx-panel').content.cloneNode(true));
-        // binds
-        $('#lsx-hide').addEventListener('click',()=> this.close());
-        $('#lsx-refresh').addEventListener('click',()=>{ this.render($('#lsx-search').value); this.refresh(); });
-        $('#lsx-search').addEventListener('input',ev=> this.render(ev.target.value));
-        $('#lsx-add').addEventListener('click',()=>{ const k=$('#lsx-new-k').value.trim(), v=$('#lsx-new-v').value; if(!k) return; if(localStorage.getItem(k)&&!confirm('Sobrescrever?')) return; localStorage.setItem(k,v); $('#lsx-new-k').value=''; $('#lsx-new-v').value=''; this.render($('#lsx-search').value); this.refresh(); Toast.show('Chave salva','ok'); Logger.push('LS: gravou '+k); });
-        $('#lsx-export').addEventListener('click',()=>{ const dump={}; Object.keys(localStorage).forEach(k=> dump[k]=localStorage.getItem(k)); const blob=new Blob([JSON.stringify(dump,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ls-backup-'+new Date().toISOString().replace(/[:.]/g,'-')+'.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),400); Toast.show('Backup exportado'); Logger.push('LS: exportou backup'); });
-        const impBtn=$('#lsx-import-btn'), impInput=$('#lsx-import'); impBtn.addEventListener('click',()=> impInput.click()); impInput.addEventListener('change',(ev)=>{ const f=ev.target.files&&ev.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ try{ const obj=JSON.parse(String(r.result||'')); Object.keys(obj).forEach(k=> localStorage.setItem(k,String(obj[k]))); this.render($('#lsx-search').value); this.refresh(); Toast.show('Importação concluída'); Logger.push('LS: importou backup'); }catch(e){ alert('JSON inválido.'); } }; r.readAsText(f); ev.target.value=''; });
-        $('#lsx-clear-all').addEventListener('click',()=>{ if(!confirm('Backup automático será criado. Confirmar LIMPAR LocalStorage?')) return; const snap={}; Object.keys(localStorage).forEach(k=> snap[k]=localStorage.getItem(k)); const stamp=new Date().toISOString().replace(/[:.]/g,'-'); try{ localStorage.setItem('ls:backup:'+stamp, JSON.stringify(snap)); }catch(e){} const blob=new Blob([JSON.stringify(snap,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ls-backup-'+stamp+'.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),500); localStorage.clear(); this.render(''); this.refresh(); Toast.show('LocalStorage limpo','warn'); Logger.push('LS: limpou tudo'); });
-        $('#lsx-clear-idb').addEventListener('click', async()=>{ if(!confirm('Limpar TODOS os bancos IndexedDB deste domínio?')) return; try{ if(indexedDB.databases){ const dbs=await indexedDB.databases(); await Promise.all(dbs.map(d=> new Promise(res=>{ const name=d.name; if(!name) return res(); const req=indexedDB.deleteDatabase(name); req.onsuccess=req.onerror=req.onblocked=()=>res(); }))); alert('IndexedDB limpo (quando suportado).'); } else alert('Navegador não expõe indexedDB.databases().'); }catch(e){ alert('Falha ao limpar IndexedDB: '+e); } this.refresh(); Logger.push('LS: solicitou limpeza IDB'); });
-      }
-      this.wireHeader();
-    },
-    wireHeader(){
-      const self=this;
-      const say=(t)=>{ try{ if(typeof speakWithActiveArch==='function') speakWithActiveArch(t); }catch(e){} };
-      document.getElementById('btnLS') && document.getElementById('btnLS').addEventListener('click',()=> self.toggle());
-      document.getElementById('btnToggleLocal') && document.getElementById('btnToggleLocal').addEventListener('click',()=>{ const state=(localStorage.getItem('uno:showLocal')==='1'); localStorage.setItem('uno:showLocal', state?'0':'1'); Toast.show(state?'Mostrando todos':'Mostrando Locais'); Logger.push('Header: toggle Locais = '+(!state)); say('Ok'); });
-      ['saveName','saveSK','applyCSS','clearCSS','btnPerf','btnVoice','btnImport'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('click',()=> say('Ok')); });
-    },
-    render(filter=''){
-      const grid=$('#lsx-grid'); if(!grid) return;
-      const f=(filter||'').toLowerCase(); grid.innerHTML='';
-      const groups={}; Object.keys(localStorage).sort().forEach(k=>{ const v=localStorage.getItem(k)||''; if(f && !(k.toLowerCase().includes(f)||v.toLowerCase().includes(f))) return; const grp=k.includes(':')?k.split(':')[0]:(k.includes('.')?k.split('.')[0]:'geral'); (groups[grp] ||= []).push({k,v}); });
-      const ordered=Object.keys(groups).sort((a,b)=>a.localeCompare(b));
-      const headHTML='<div>Chave</div><div>Valor</div><div>Ações</div>';
-      ordered.forEach(name=>{ const det=document.createElement('details'); det.className='lsx-group'; det.open=true; const sum=document.createElement('summary'); sum.innerHTML=`<span class="chev">›</span><strong>${name}</strong><span class="lsx-badge">${groups[name].length}</span>`; det.appendChild(sum); const body=document.createElement('div'); body.className='lsx-body-inner'; const head=document.createElement('div'); head.className='lsx-head'; head.innerHTML=headHTML; body.appendChild(head); groups[name].forEach(({k,v})=> body.appendChild(makeRow(k,v))); det.appendChild(body); grid.appendChild(det); });
-      function makeRow(k,vRaw){ const row=document.createElement('div'); row.className='lsx-row'; const colK=document.createElement('div'); colK.className='lsx-k'; colK.textContent=k; const colV=document.createElement('div'); colV.className='lsx-v'; const prev=document.createElement('div'); prev.className='lsx-preview'; prev.textContent=vRaw.length>240?(vRaw.slice(0,240)+'…'):vRaw; const expand=document.createElement('div'); expand.className='lsx-expand'; const ta=document.createElement('textarea'); ta.value=vRaw; expand.appendChild(ta); colV.append(prev,expand); const colA=document.createElement('div'); colA.className='lsx-a'; const mk=(title,cls,cb,svg)=>{const b=document.createElement('button'); b.className='ic-btn'+(cls?(' '+cls):''); b.title=title; b.innerHTML=svg||title; b.onclick=cb; return b;}; const Bx=mk('expandir','',()=>{ expand.style.display=expand.style.display==='block'?'none':'block'; },'<svg width="18" height="18" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="2" fill="currentColor"/></svg>'); const Bc=mk('copiar','',()=> navigator.clipboard.writeText(vRaw),'<svg width="18" height="18" viewBox="0 0 24 24"><path d="M16 1H4a2 2 0 0 0-2 2v12h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z" fill="currentColor"/></svg>'); const Bs=mk('salvar','ok',()=>{ const nv=expand.style.display==='block'? ta.value : vRaw; localStorage.setItem(k,nv); prev.textContent=nv.length>240?(nv.slice(0,240)+'…'):nv; DualLS.refresh(); Toast.show('Salvo'); Logger.push('LS: salvou '+k); },'<svg width="18" height="18" viewBox="0 0 24 24"><path d="M17 3H5a2 2 0 0 0-2 2v14h18V7l-4-4z" fill="currentColor"/></svg>'); const Bd=mk('apagar','warn',()=>{ if(!confirm('Apagar “'+k+'”?')) return; localStorage.removeItem(k); row.remove(); DualLS.refresh(); Toast.show('Apagado','warn'); Logger.push('LS: apagou '+k); },'<svg width="18" height="18" viewBox="0 0 24 24"><path d="M9 3h6l1 2h5v2H3V5h5l1-2zm1 7h2v8h-2v-8zm4 0h2v8h-2v-8z" fill="currentColor"/></svg>'); colA.append(Bx,Bc,Bs,Bd); row.append(colK,colV,colA); return row; }
-    },
-    refresh(){ const {t,h}=lsSize(); $('#lsx-st-keys').textContent=String(localStorage.length); $('#lsx-st-bytes').textContent=fmtBytes(t); $('#lsx-st-heavy').textContent=String(h); estimateUsage($('#lsx-st-usage')); }
-  };
-  // Expor sob o mesmo nome para compat com seus binds existentes
-  window.DualLS = DualLS;
-  window.DualToast = Toast;
-  window.DualLSLogger = Logger;
-
-  document.addEventListener('DOMContentLoaded',()=>{ Logger.init(); Toast.init(); DualLS.initPanel({ mount:'#lsx-mount' }); if(location.hash==='#lsx'){ DualLS.open(); } });
-})();
-</script><script>
-(function(){
-  const $ = (q,r=document)=>r.querySelector(q);
-  const $$ = (q,r=document)=>Array.from(r.querySelectorAll(q));
-
-  function sayLS(text){
-    try{
-      if(typeof speakWithActiveArch === 'function'){
-        speakWithActiveArch(text);
-      }else if(window.speechSynthesis){
-        const u = new SpeechSynthesisUtterance(text);
-        const vs = speechSynthesis.getVoices();
-        const v = vs.find(v=>v.lang && (v.lang.startsWith('pt')||v.lang.startsWith('en'))) || vs[0];
-        if(v) u.voice = v;
-        speechSynthesis.cancel();
-        speechSynthesis.speak(u);
-      }
-    }catch(e){}
-  }
-
-  // Patch DualLS open/close/toggle to speak
-  function patchDualLS(){
-    if(!window.DualLS) return;
-    const origOpen = window.DualLS.open?.bind(window.DualLS);
-    const origClose = window.DualLS.close?.bind(window.DualLS);
-    const origToggle = window.DualLS.toggle?.bind(window.DualLS);
-
-    if(origOpen){
-      window.DualLS.open = function(){
-        const r = origOpen?.();
-        sayLS('Local Storage aberto');
-        return r;
-      };
-    }
-    if(origClose){
-      window.DualLS.close = function(){
-        sayLS('Local Storage fechado');
-        return origClose?.();
-      };
-    }
-    if(origToggle){
-      window.DualLS.toggle = function(){
-        const p = $('#lsx-panel');
-        const willOpen = !(p && p.style.display==='block');
-        const r = origToggle?.();
-        sayLS(willOpen ? 'Local Storage aberto' : 'Local Storage fechado');
-        return r;
-      };
-    }
-  }
-
-  // Add listeners to LSX panel controls (namespaced UI)
-  function wireLSX(){
-    const map = [
-      ['#lsx-add',        ()=>{
-        const k = ($('#lsx-new-k')?.value || '').trim();
-        sayLS(k ? `Chave ${k} salva no Local Storage` : 'Chave salva no Local Storage');
-      }],
-      ['#lsx-export',     ()=> sayLS('Backup exportado')],
-      ['#lsx-import-btn', ()=> sayLS('Importar backup. Selecione o arquivo')],
-      ['#lsx-clear-all',  ()=> sayLS('Limpar Local Storage. Confirme sua escolha')],
-      ['#lsx-clear-idb',  ()=> sayLS('Limpar IndexedDB. Confirme sua escolha')],
-      ['#lsx-refresh',    ()=> sayLS('Atualizando visão do Local Storage')],
-      ['#lsx-hide',       ()=> sayLS('Fechando painel do Local Storage')],
-    ];
-    map.forEach(([sel,fn])=>{
-      const el = $(sel);
-      if(el) el.addEventListener('click', fn, {passive:true});
-    });
-
-    // Reflect row-level actions via logger hook (save/delete etc.)
-    if(window.DualLSLogger){
-      const origPush = window.DualLSLogger.push?.bind(window.DualLSLogger);
-      if(origPush){
-        window.DualLSLogger.push = function(msg){
-          try{
-            const m = String(msg||'').toLowerCase();
-            if(m.includes('ls: salvou'))      sayLS('Chave salva');
-            if(m.includes('ls: apagou'))      sayLS('Chave apagada');
-            if(m.includes('limpou tudo'))     sayLS('Local Storage limpo');
-            if(m.includes('importou backup')) sayLS('Backup importado com sucesso');
-            if(m.includes('exportou backup')) sayLS('Backup exportado com sucesso');
-          }catch(e){}
-          return origPush(msg);
-        };
-      }
-    }
-  }
-
-  // Add listeners to legacy LS panel controls (if present)
-  function wireLegacyLS(){
-    const map = [
-      ['#ls-add',        ()=>{
-        const k = ($('#ls-new-k')?.value || '').trim();
-        sayLS(k ? `Chave ${k} salva no Local Storage` : 'Chave salva no Local Storage');
-      }],
-      ['#ls-export',     ()=> sayLS('Backup exportado')],
-      ['#ls-import-btn', ()=> sayLS('Importar backup. Selecione o arquivo')],
-      ['#ls-clear-all',  ()=> sayLS('Limpar Local Storage. Confirme sua escolha')],
-      ['#ls-clear-idb',  ()=> sayLS('Limpar IndexedDB. Confirme sua escolha')],
-      ['#ls-refresh',    ()=> sayLS('Atualizando visão do Local Storage')],
-      ['#ls-hide',       ()=> sayLS('Fechando painel do Local Storage')],
-      ['#btnLS',         ()=> sayLS('Abrindo painel do Local Storage')],
-    ];
-    map.forEach(([sel,fn])=>{
-      const el = $(sel);
-      if(el) el.addEventListener('click', fn, {passive:true});
-    });
-  }
-
-  // Theme & background announcements
-  function wireThemeBG(){
-    const themeSel = $('#themeSelect');
-    if(themeSel){
-      themeSel.addEventListener('change', ()=>{
-        const v = themeSel.value;
-        const label = ({default:'padrão', medium:'cinza médio', custom:'personalizado'}[v]||v);
-        sayLS(`Tema ${label} aplicado`);
-      }, {passive:true});
-    }
-    const bgInput = $('#bgUpload');
-    if(bgInput){
-      bgInput.addEventListener('change', ()=>{
-        sayLS('Fundo personalizado salvo');
-      }, {passive:true});
-    }
-  }
-
-  // CSS custom announcements
-  function wireCSS(){
-    const apply = $('#applyCSS');
-    const clear = $('#clearCSS');
-    const down  = $('#downloadCSS');
-    if(apply)  apply.addEventListener('click', ()=> sayLS('CSS aplicado'), {passive:true});
-    if(clear)  clear.addEventListener('click', ()=> sayLS('CSS removido'), {passive:true});
-    if(down)   down .addEventListener('click', ()=> sayLS('Baixando CSS'), {passive:true});
-  }
-
-  // Brain basic saves (name, SK, perf/voice)
-  function wireBrain(){
-    const map = [
-      ['#saveName', ()=> sayLS('Nome salvo')],
-      ['#saveSK',   ()=> sayLS('Configurações de modelo salvas')],
-      ['#btnPerf',  ()=> sayLS('Preferência de performance atualizada')],
-      ['#btnVoice', ()=> sayLS('Preferência de voz atualizada')],
-    ];
-    map.forEach(([sel,fn])=>{
-      const el = $(sel);
-      if(el) el.addEventListener('click', fn, {passive:true});
-    });
-  }
-
-  // Speak when LS header "LS" badge is clicked
-  function wireHeaderLS(){
-    const btn = $('#btnLS');
-    if(btn){
-      btn.addEventListener('click', ()=>{
-        // DualLS.toggle may also speak; this is fallback
-        sayLS('Abrindo painel do Local Storage');
-      }, {passive:true});
-    }
-  }
-
-  // Init once DOM is ready
-  document.addEventListener('DOMContentLoaded', ()=>{
-    patchDualLS();
-    wireLSX();
-    wireLegacyLS();
-    wireThemeBG();
-    wireCSS();
-    wireBrain();
-    wireHeaderLS();
-  });
-})();
-</script><script>
-(function(){
-  const $ = (q,r=document)=>r.querySelector(q);
-  const $$ = (q,r=document)=>Array.from(r.querySelectorAll(q));
-
-  function ensureCompactButton(panelId, actionsId, ids){
-    const panel = $(panelId);
-    const actions = $(actionsId);
-    if(!panel || !actions) return;
-
-    // Create toggle button (once)
-    let btn = actions.querySelector('.ls-compact-toggle');
-    if(!btn){
-      btn = document.createElement('button');
-      btn.className = 'ls-compact-toggle';
-      btn.type = 'button';
-      btn.id = ids.toggleId;
-      btn.title = 'Alternar modo compacto do painel LS';
-      btn.textContent = 'Compactar';
-      actions.appendChild(btn);
-    }
-
-    // Initial state: compact ON (to liberar espaço)
-    if(!panel.classList.contains('ls-compact')){
-      panel.classList.add('ls-compact');
-    }
-
-    // Toggle logic
-    btn.addEventListener('click', ()=>{
-      const compact = panel.classList.toggle('ls-compact');
-      btn.textContent = compact ? 'Expandir' : 'Compactar';
-      // Optional: announce via TTS if available
-      try{
-        if(typeof speakWithActiveArch === 'function'){
-          speakWithActiveArch(compact ? 'Modo compacto ativado' : 'Modo compacto desativado');
-        }
-      }catch(e){}
-      // After toggling, recompute list height
-      setTimeout(resizeListArea, 10);
-    }, {passive:true});
-  }
-
-  function pickListCandidate(root){
-    const sels = ['#lsx-list','#ls-list','#ls-keys','.ls-list','.ls-keys','.ls-data'];
-    for(const s of sels){
-      const el = root.querySelector(s);
-      if(el) return el;
-    }
-    return null;
-  }
-
-  function resizeListArea(){
-    const panels = ['#lsx-panel','#ls-panel'];
-    panels.forEach(pid=>{
-      const p = $(pid);
-      if(!p) return;
-      const actions = p.querySelector('#lsx-actions, #ls-actions, #ls-header, #lsx-header');
-      const list = pickListCandidate(p);
-      if(!list) return;
-      const rect = p.getBoundingClientRect();
-      const topY = actions ? actions.getBoundingClientRect().bottom : rect.top;
-      const available = Math.max(160, window.innerHeight - topY - 24);
-      list.style.maxHeight = available + 'px';
-      list.style.overflow = 'auto';
-    });
-  }
-
-  // Wire up both legacy and namespaced panels
-  document.addEventListener('DOMContentLoaded', ()=>{
-    ensureCompactButton('#lsx-panel', '#lsx-actions', {toggleId:'lsx-compact-toggle'});
-    ensureCompactButton('#ls-panel',  '#ls-actions',  {toggleId:'ls-compact-toggle'});
-    resizeListArea();
-    window.addEventListener('resize', resizeListArea);
-  });
-})();
-</script><script>
-(function(){
-  // ---------- Speech de-dup & filter ----------
-  const _oldSpeak = (typeof speakWithActiveArch === 'function') ? speakWithActiveArch : null;
-  let _lastUtter = { text: '', t: 0 };
-  function shouldSpeak(text){
-    const now = Date.now();
-    // Normalize to lower-case & trim
-    const norm = String(text||'').trim().toLowerCase();
-    // Drop empty or very short
-    if(!norm || norm.length < 2) return false;
-    // Drop repeats within 1200ms
-    if(norm === (_lastUtter.text||'') && (now - _lastUtter.t) < 1200) return false;
-    // If it's about Local Storage panel, prefer "abrindo/fechando" phrasing only.
-    if(/local storage/.test(norm)){
-      if(/aberto|fechado/.test(norm) && !/abrindo|fechando/.test(norm)) return false;
-    }
-    _lastUtter = { text: norm, t: now };
-    return true;
-  }
-  window.speakWithActiveArch = function(text){
-    try{
-      if(!shouldSpeak(text)) return;
-      if(_oldSpeak) return _oldSpeak(text);
-      // Minimal fallback if original doesn't exist
-      if(window.speechSynthesis){
-        const u = new SpeechSynthesisUtterance(String(text));
-        const vs = speechSynthesis.getVoices();
-        const v = vs.find(v=>v.lang && (v.lang.startsWith('pt')||v.lang.startsWith('es'))) || vs[0];
-        if(v) u.voice = v;
-        speechSynthesis.cancel();
-        speechSynthesis.speak(u);
-      }
-    }catch(e){}
-  };
-
-  // ---------- DualLS patches: say just once ("Abrindo..." / "Fechando...") ----------
-  function patchDualLS_A11y(){
-    const LSAPI = window.DualLS;
-    if(!LSAPI) return;
-    const oOpen = LSAPI.open?.bind(LSAPI);
-    const oClose = LSAPI.close?.bind(LSAPI);
-    const oToggle = LSAPI.toggle?.bind(LSAPI);
-    if(oOpen){
-      LSAPI.open = function(){
-        try{ speakWithActiveArch('Abrindo painel do Local Storage'); }catch(e){}
-        return oOpen();
-      };
-    }
-    if(oClose){
-      LSAPI.close = function(){
-        try{ speakWithActiveArch('Fechando painel do Local Storage'); }catch(e){}
-        return oClose();
-      };
-    }
-    if(oToggle){
-      LSAPI.toggle = function(){
-        const p = document.querySelector('#lsx-panel');
-        const willOpen = !(p && p.style.display==='block');
-        try{ speakWithActiveArch(willOpen ? 'Abrindo painel do Local Storage' : 'Fechando painel do Local Storage'); }catch(e){}
-        return oToggle();
-      };
-    }
-  }
-
-  // ---------- Persist Compact Mode for LS panels ----------
-  function persistCompactMode(){
-    const KEY = 'ls:compact:on';
-    const lsPanel = document.querySelector('#ls-panel');
-    const lsxPanel = document.querySelector('#lsx-panel');
-    const desired = localStorage.getItem(KEY) === '1';
-    [lsPanel, lsxPanel].forEach(p => {
-      if(!p) return;
-      if(desired) p.classList.add('ls-compact'); else p.classList.remove('ls-compact');
-      const btn = p.querySelector('.ls-compact-toggle');
-      if(btn && !btn._boundPersist){
-        btn._boundPersist = true;
-        btn.addEventListener('click', ()=>{
-          const on = p.classList.contains('ls-compact');
-          localStorage.setItem(KEY, on ? '1' : '0');
-        });
-      }
-    });
-  }
-
-  // ---------- PowerAI: unify chat calls & inject Role/System training ----------
-  // Reads optional DXT training from localStorage key 'dual.openrouter.training' ({name,data:dataURL})
-  async function loadDXTTraining(){
-    try{
-      const raw = localStorage.getItem('dual.openrouter.training');
-      if(!raw) return '';
-      const obj = JSON.parse(raw);
-      if(!obj || !obj.data) return '';
-      const dataUrl = String(obj.data);
-      const base64 = dataUrl.split(',')[1] || '';
-      if(!base64) return '';
-      const bytes = atob(base64);
-      // Limit to ~64KB to avoid huge prompts
-      if(bytes.length > 64*1024) return bytes.slice(0, 64*1024);
-      return bytes;
-    }catch(e){ return ''; }
-  }
-
-  function activeArchetypePair(){
-    // Primary = selected archetype in #arch-select
-    let primary = 'Dual';
-    try{
-      const sel = document.getElementById('arch-select');
-      if(sel && sel.value){
-        primary = sel.value.replace(/\.html$/i,'').toLowerCase();
-      }
-    }catch{}
-    // Secondary from user preference (array) or fallback
-    const pair = JSON.parse(localStorage.getItem('dual.arch.pair')||'[]');
-    let secondary = pair.find(x=>x && x.toLowerCase() !== primary) || 'horus';
-    // Capitalize
-    function cap(s){ s = String(s||'Dual'); return s.charAt(0).toUpperCase()+s.slice(1).toLowerCase(); }
-    return [cap(primary), cap(secondary)];
-  }
-
-  const oldSend = window.sendAIMessage;
-  window.PowerAI = {
-    async chat(userContent, sk, model){
-      const [archA, archB] = activeArchetypePair();
-      const sysIdentity =
-        `Você é o Assistente Dual Infodose — codinome "Horus". 
-Conectado simultaneamente aos arquétipos ${archA} e ${archB}. 
-Fale sempre em português do Brasil, direto e gentil. 
-Use o contexto do app (UNO • Brain • Stack • Apps) quando útil.`;
-
-      let training = await loadDXTTraining();
-      // Normalize training to text (it may be JSON string)
-      if(training && training.trim().startsWith('{')){
-        try{
-          const j = JSON.parse(training);
-          training = (j.system || j.prompt || JSON.stringify(j));
-        }catch{}
-      }
-      const sysTraining = training ? `# Treinamento DXT
-${training}` : '';
-
-      const payload = {
-        model: model,
-        messages: [
-          { role: 'system', content: sysIdentity + (sysTraining? '
-
-' + sysTraining : '') },
-          { role: 'user', content: String(userContent||'') }
-        ],
-        max_tokens: 350,
-        temperature: 0.7
-      };
-
-      const url = 'https://openrouter.ai/api/v1/chat/completions';
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${sk}`
-        },
-        body: JSON.stringify(payload)
-      });
-      if(!res.ok){
-        throw new Error('Erro na API: ' + res.status);
-      }
-      const data = await res.json();
-      const reply = data?.choices?.[0]?.message?.content || '';
-      return reply;
-    }
-  };
-
-  // Override legacy sendAIMessage to call PowerAI
-  if(typeof oldSend === 'function'){
-    window.sendAIMessage = async function(content, sk, model){
-      return await window.PowerAI.chat(content, sk, model);
-    };
-  }
-
-  // After DOM ready, run patches
-  document.addEventListener('DOMContentLoaded', ()=>{
-    patchDualLS_A11y();
-    persistCompactMode();
-    // Re-apply persist on panel (if it was not in the DOM at first render)
-    setTimeout(persistCompactMode, 500);
-  });
-})();
-</script>
-<script>
-// === TTS Navegação: toggle no Brain (sem editar código existente) ======================
-(function(){
-  const LS_KEY = 'uno:tts.nav'; // 'on' | 'off'
-  function getNavTTS(){ return (localStorage.getItem(LS_KEY) || 'on') !== 'off'; }
-  function setNavTTS(on){ localStorage.setItem(LS_KEY, on ? 'on' : 'off'); updateBtn(); }
-
-  // Monkey-patch: suprimir speak() quando em contexto de navegação e toggle OFF
-  function patchSpeakAndNav(){
-    const origSpeak = window.speak;
-    if (origSpeak && !origSpeak.__patchedForNavTTS){
-      const wrapped = function(text, opts){
-        try{
-          if (window._navContext === true && !getNavTTS()){
-            // bloqueia falas de navegação
-            return;
-          }
-        }catch(e){}
-        return origSpeak.apply(this, arguments);
-      };
-      wrapped.__patchedForNavTTS = true;
-      window.speak = wrapped;
-    }
-    const origNav = window.nav;
-    if (typeof origNav === 'function' && !origNav.__patchedForNavTTS){
-      const wrappedNav = function(){
-        window._navContext = true;
-        try { return origNav.apply(this, arguments); }
-        finally { window._navContext = false; }
-      };
-      wrappedNav.__patchedForNavTTS = true;
-      window.nav = wrappedNav;
-    }
-  }
-
-  // criar UI: botão pequeno ON/OFF
-  let btn;
-  function updateBtn(){
-    if(!btn) return;
-    const on = getNavTTS();
-    btn.setAttribute('aria-pressed', String(on));
-    btn.textContent = on ? 'TTS Nav: ON' : 'TTS Nav: OFF';
-    btn.classList.toggle('on', on);
-  }
-
-  function makeButton(){
-    btn = document.createElement('button');
-    btn.id = 'btnTTSNavToggle';
-    btn.type = 'button';
-    btn.className = 'btn-ttsnav';
-    btn.title = 'Alternar TTS de navegação';
-    btn.addEventListener('click', ()=> setNavTTS(!getNavTTS()));
-    updateBtn();
-    return btn;
-  }
-
-  function mountButton(){
-    const targets = [
-      '#brain .tools', '#brain .header', '#brain',
-      '#brainPanel', '#brain-header', '#brain-tools',
-      '#lsx-actions', '#lsx-panel .header',
-      '#header .right', '#header .tools', '#header'
-    ];
-    const el = targets.map(q=>document.querySelector(q)).find(Boolean) || document.body;
-    el.appendChild(makeButton());
-  }
-
-  function addStyles(){
-    const css = document.createElement('style');
-    css.textContent = `
-      .btn-ttsnav{
-        font: 500 11px/1.1 system-ui, -apple-system, Segoe UI, Roboto, Inter, sans-serif;
-        padding: 6px 8px;
-        border-radius: 999px;
-        border: 1px solid var(--line, #2a2f39);
-        background: rgba(255,255,255,0.04);
-        color: var(--fg, #e7ecf5);
-        margin-left: 8px;
-        vertical-align: middle;
-        cursor: pointer;
-        opacity: 0.9;
-        transition: box-shadow .2s var(--ease), opacity .2s var(--ease), transform .08s var(--ease);
-      }
-      .btn-ttsnav:hover{ opacity:1; }
-      .btn-ttsnav:active{ transform: translateY(1px); }
-      .btn-ttsnav.on{
-        box-shadow: 0 0 0 2px rgba(0,255,170,.2), 0 0 14px rgba(0,255,170,.25);
-        background: radial-gradient(100% 100% at 50% 0%, rgba(0,255,170,.18), rgba(0,0,0,0));
-        border-color: rgba(0,255,170,.35);
-      }
-      @media (max-width: 420px){
-        .btn-ttsnav{ padding: 5px 7px; font-size: 10px; }
-      }
-    `;
-    document.head.appendChild(css);
-  }
-
-  function init(){
-    try{ patchSpeakAndNav(); }catch(e){}
-    addStyles();
-    mountButton();
-    // Observa mudanças externas no localStorage e reflete no botão
-    window.addEventListener('storage', (ev)=>{
-      if(ev.key === LS_KEY) updateBtn();
-    });
-  }
-  if (document.readyState === 'loading')
-    document.addEventListener('DOMContentLoaded', init);
-  else
-    init();
-})();
-</script>
-
-<script>
-// PATCH: LS/LSX keep-open + mover botões soltos pro header de ações
-(function(){
-  const $=(q,r=document)=>r.querySelector(q);
-  function keepOpen(ev){
-    try{
-      const p = $('#lsx-panel') || $('#ls-panel');
-      if(p) p.style.display='block';
-      // Não bloqueie os handlers originais
-    }catch(e){}
-  }
-  function bindKeep(sel){
-    const el = $(sel);
-    if(!el) return;
-    // avoid form submit or anchor navigation
-    if(el.tagName==='BUTTON') el.type='button';
-    if(el.tagName==='A') el.removeAttribute('href');
-    el.addEventListener('click', keepOpen, false);
-  }
-  function moveIntoActions(panelSel, actionsSel, ids){
-    const panel=$(panelSel), actions=$(actionsSel);
-    if(!panel || !actions) return;
-    ids.forEach(id=>{
-      const el = document.getElementById(id);
-      if(el && !actions.contains(el)){
-        try{ actions.appendChild(el); }catch(e){}
-      }
-    });
-  }
-  document.addEventListener('DOMContentLoaded', function(){
-    const ids = ['lsx-refresh','lsx-export','lsx-import-btn','lsx-clear-all','lsx-clear-idb','lsx-hide','ls-refresh','ls-export','ls-import-btn','ls-clear-all','ls-clear-idb','ls-hide'];
-    ids.forEach(id=> bindKeep('#'+id));
-    moveIntoActions('#lsx-panel','#lsx-actions', ids);
-    moveIntoActions('#ls-panel','#ls-actions', ids);
-  });
-})();
-</script>
-
-
-<script>
-// PATCH: busy-guard + voice-guard + timeout(20s) + timer + AbortController
-(function(){
-  // busy guard
-  if(typeof window.handleUserMessage==='function' && !window.__patchedHandleGuard){
-    const __origHandle = window.handleUserMessage;
-    let __busy = false;
-    window.__chatBusy = ()=>__busy;
-    window.handleUserMessage = async function(){
-      if(__busy){ try{ window.toast && toast('Aguarde a resposta terminar','warn'); }catch(e){} return; }
-      __busy = true;
-      try { return await __origHandle.apply(this, arguments); }
-      finally { __busy = false; }
-    };
-    window.__patchedHandleGuard = true;
-  }
-  // voice guard
-  document.addEventListener('DOMContentLoaded', function(){
-    const vb = document.getElementById('homeVoiceBtn');
-    if(vb && !vb.__guarded){
-      const old = vb.onclick;
-      vb.addEventListener('click', function(ev){
-        if(window.__chatBusy && window.__chatBusy()){
-          ev.preventDefault(); ev.stopPropagation();
-          try{ speakWithActiveArch('Aguarde o pulso anterior finalizar.'); }catch(e){}
-          return false;
-        }
-        if(typeof old==='function') return old.call(this, ev);
-      }, true);
-      vb.__guarded = true;
-    }
-  });
-  // timeout + abort
-  const TIMEOUT_MS = 20000;
-  function timeoutPromise(ms){ return new Promise((_,rej)=> setTimeout(()=>rej(new Error('timeout')), ms)); }
-  if(typeof window.sendAIMessage==='function' && !window.__wrappedSendTimeoutSignal){
-    const __origSend = window.sendAIMessage;
-    window.sendAIMessage = async function(){
-      // Inject AbortSignal as last arg options if possible
-      try{
-        window.__activeSendController?.abort?.('superseded');
-        window.__activeSendController = new AbortController();
-        const args = Array.from(arguments);
-        const last = args[args.length-1];
-        if(last && typeof last==='object' && !Array.isArray(last)){
-          if(!('signal' in last)) last.signal = window.__activeSendController.signal;
-        } else {
-          args.push({ signal: window.__activeSendController.signal });
-        }
-        const p = __origSend.apply(this, args);
-        return await Promise.race([p, timeoutPromise(TIMEOUT_MS)]);
-      }finally{ /* noop */ }
-    };
-    window.__wrappedSendTimeoutSignal = true;
-    window.addEventListener('unhandledrejection', function(ev){
-      const msg = (ev && ev.reason && (ev.reason.message||ev.reason)) || '';
-      if(String(msg).toLowerCase().includes('timeout')){
-        try{ window.__activeSendController && window.__activeSendController.abort('timeout'); }catch(e){}
-        try{ window.toast && toast('Tempo esgotado (20s). Tente novamente.','warn'); }catch(e){}
-        try{ window.speakWithActiveArch && speakWithActiveArch('Tempo esgotado. Reenvie quando quiser.'); }catch(e){}
-      }
-    });
-  }
-  // button timer
-  function findSendBtn(){ return document.querySelector('#homeInputForm button[type="submit"]'); }
-  function startBtnTimer(){
-    const btn = findSendBtn(); if(!btn) return {stop:()=>{}};
-    const original = btn.getAttribute('data-label') || btn.textContent;
-    btn.setAttribute('data-label', original);
-    const t0 = performance.now();
-    const id = setInterval(()=>{
-      const s = ((performance.now()-t0)/1000);
-      btn.textContent = original + ' · ⏱ ' + (s>=10? s.toFixed(0): s.toFixed(1)) + 's';
-    }, 120);
-    return { stop(){ clearInterval(id); btn.textContent = btn.getAttribute('data-label') || 'Enviar'; } };
-  }
-  // attach around text submit
-  document.addEventListener('DOMContentLoaded', function(){
-    const form = document.getElementById('homeInputForm');
-    if(form && !form.__timerWrapped){
-      form.addEventListener('submit', function(){
-        const t = startBtnTimer();
-        const stop = ()=>{ try{ t.stop(); }catch(e){} };
-        setTimeout(stop, TIMEOUT_MS+200); // safety stop
-        window.addEventListener('unhandledrejection', stop, {once:true});
-      }, true);
-      form.__timerWrapped = true;
-    }
-  });
-})();
-</script>
-
-
-<script>
-// PATCH: status bar LS/LSX padronizado
-(function(){
-  function formatSize(bytes){
-    if(bytes<1024) return bytes+' B';
-    if(bytes<1048576) return (bytes/1024).toFixed(1)+' KB';
-    return (bytes/1048576).toFixed(1)+' MB';
-  }
-  async function getIDBUsage(){
-    if(!('indexedDB' in window)) return 'IDB: não suportado';
-    // tentativa de calcular uso aproximado (nem sempre disponível)
-    try{
-      if(navigator.storage && navigator.storage.estimate){
-        const est = await navigator.storage.estimate();
-        return 'IDB usado: '+formatSize(est.usage||0)+' / '+formatSize(est.quota||0);
-      }
-    }catch(e){}
-    return 'IDB: sem dados';
-  }
-  function refreshStats(bar){
-    try{
-      const keys = Object.keys(localStorage||{});
-      let bytes=0;
-      for(const k of keys){
-        try{ bytes += (localStorage.getItem(k)||'').length + k.length; }catch(e){}
-      }
-      bar.querySelector('.lsx-stats-text').textContent =
-        'Chaves: '+keys.length+' · localStorage: '+formatSize(bytes);
-      getIDBUsage().then(txt=>{
-        bar.querySelector('.lsx-stats-idb').textContent = txt;
-      });
-    }catch(e){}
-  }
-  function attach(panelSel){
-    const panel = document.querySelector(panelSel);
-    if(!panel) return;
-    let bar = panel.querySelector('.lsx-statusbar');
-    if(!bar){
-      bar = document.createElement('div');
-      bar.className='lsx-statusbar';
-      Object.assign(bar.style, {
-        padding:'4px 6px',
-        fontSize:'11px',
-        background:'#111',
-        color:'#0f0',
-        borderBottom:'1px solid #333'
-      });
-      bar.innerHTML='<span class="lsx-stats-text"></span> <span class="lsx-stats-idb"></span>';
-      panel.insertBefore(bar, panel.firstChild);
-    }
-    refreshStats(bar);
-  }
-  document.addEventListener('DOMContentLoaded', function(){
-    attach('#lsx-panel');
-    attach('#ls-panel');
-    setInterval(function(){
-      attach('#lsx-panel');
-      attach('#ls-panel');
-    }, 15000);
-  });
-})();
-</script>
-
-
-<style>
-/* PATCH: LS/LSX unified status */
-.ls-statusbar{font:12px/1.3 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color:#cfd6e4; background:#1118; border:1px solid #222; border-radius:8px; padding:6px 8px; display:flex; gap:10px; align-items:center}
-.ls-statusbar b{color:#fff}
-.ls-statusbar .dot{width:6px;height:6px;border-radius:50%;background:#6cf;box-shadow:0 0 8px #6cf}
-</style>
-<script>
-// PATCH: LS/LSX unified status (keys, size, IDB count)
-(function(){
-  const $=(q,r=document)=>r.querySelector(q);
-  function bytesOfString(s){ try{ return (s||'').length*2; }catch(e){ return 0; } }
-  function calcLocalStorageBytes(){
-    let total=0; try{
-      for (let i=0;i<localStorage.length;i++){
-        const k = localStorage.key(i);
-        total += bytesOfString(k) + bytesOfString(localStorage.getItem(k));
-      }
-    }catch(e){}
-    return total;
-  }
-  function fmtBytes(n){
-    const u=['B','KB','MB','GB']; let i=0, x=n;
-    while(x>=1024 && i<u.length-1){ x/=1024; i++; }
-    return (x>=10? x.toFixed(0): x.toFixed(1))+' '+u[i];
-  }
-  async function getIDBDatabasesCount(){
-    try{
-      if (indexedDB && indexedDB.databases){ const list = await indexedDB.databases(); return (list||[]).length; }
-    }catch(e){}
-    // fallback: registry opcional
-    try{ if (Array.isArray(window.__IDB_REGISTRY)) return window.__IDB_REGISTRY.length; }catch(e){}
-    return 0;
-  }
-  function ensureStatus(panel){
-    if(!panel) return null;
-    let bar = panel.querySelector('.ls-statusbar');
-    if(!bar){
-      bar = document.createElement('div');
-      bar.className = 'ls-statusbar';
-      bar.innerHTML = '<span class=\"dot\"></span><span id=\"_ls_keys\">Chaves: <b>0</b></span><span id=\"_ls_size\">Tamanho: <b>0 B</b></span><span id=\"_ls_idb\">IDB: <b>0 db</b></span>';
-      panel.prepend(bar);
-    }
-    return bar;
-  }
-  async function refreshStatus(panel){
-    const bar = ensureStatus(panel); if(!bar) return;
-    const keys = (function(){ try{ return localStorage.length; }catch(e){ return 0; } })();
-    const size = calcLocalStorageBytes();
-    const idb = await getIDBDatabasesCount();
-    bar.querySelector('#_ls_keys b').textContent = String(keys);
-    bar.querySelector('#_ls_size b').textContent = fmtBytes(size);
-    bar.querySelector('#_ls_idb b').textContent = String(idb)+' db';
-  }
-  async function refreshBoth(){
-    await Promise.all([refreshStatus($('#lsx-panel')), refreshStatus($('#ls-panel'))]);
-  }
-
-  document.addEventListener('DOMContentLoaded', function(){
-    // cria/atualiza agora
-    refreshBoth();
-
-    // atualiza quando algo muda
-    window.addEventListener('storage', refreshBoth);
-    // ganchos em botões conhecidos (se existirem)
-    ['#lsx-refresh','#lsx-export','#lsx-import-btn','#lsx-clear-all','#lsx-clear-idb',
-     '#ls-refresh','#ls-export','#ls-import-btn','#ls-clear-all','#ls-clear-idb']
-      .forEach(sel=>{
-        const el = $(sel); if(!el) return;
-        el.addEventListener('click', function(){ setTimeout(refreshBoth, 60); }, true);
-      });
-  });
-  // API opcional para outros módulos chamarem
-  window.refreshLSStatus = refreshBoth;
-})();
-</script>
-
-</body></html>
+</body>
+</html>
