@@ -2711,244 +2711,6 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
 })();
 </script>
 
-<!-- ===== Dual • Debug & UX Kit v2 (routing + toaster + LS viewer) ===== -->
-<style>
-  #dual-toaster{position:fixed;left:50%;top:14px;transform:translateX(-50%);
-    background:rgba(16,24,33,.92);color:#e6f1ff;border:1px solid rgba(255,255,255,.12);
-    padding:10px 14px;border-radius:12px;backdrop-filter:blur(10px);
-    font:600 13px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;z-index:99999;
-    max-width:80vw;box-shadow:0 10px 30px rgba(0,0,0,.35);display:none}
-  #dual-toaster.show{display:block;animation:dualToastFade .25s ease}
-  @keyframes dualToastFade{from{opacity:0;transform:translate(-50%,-6px)}to{opacity:1;transform:translate(-50%,0)}}
-
-  #arch-bubble{position:fixed;right:16px;bottom:92px;z-index:99998;max-width:60ch}
-  #arch-bubble .bubble{background:rgba(0,0,0,.6);color:#e6f1ff;border:1px solid rgba(255,255,255,.14);
-    padding:10px 12px;border-radius:14px;backdrop-filter:blur(8px);font:500 13px/1.35 system-ui;opacity:0;transform:translateY(6px)}
-  #arch-bubble .bubble.show{opacity:1;transform:translateY(0);transition:opacity .2s ease, transform .2s ease}
-
-  /* LocalStorage Brain Viewer */
-  #ls-panel-btn{position:fixed;bottom:16px;left:16px;z-index:99997;
-    width:34px;height:34px;border-radius:12px;border:1px solid rgba(255,255,255,.14);
-    background:rgba(12,16,22,.7);color:#bfe3ff;backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;
-    cursor:pointer}
-  #ls-panel{position:fixed;inset:auto 16px 16px auto;right:16px;bottom:16px;max-width:min(680px,90vw);max-height:60vh;overflow:auto;
-    z-index:99996;background:rgba(10,14,20,.85);border:1px solid rgba(255,255,255,.12);border-radius:16px;backdrop-filter:blur(8px);
-    display:none}
-  #ls-panel header{display:flex;align-items:center;gap:12px;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.08);color:#cfe6ff}
-  #ls-panel .grid{display:grid;grid-template-columns:240px 1fr auto;gap:8px;padding:12px}
-  #ls-panel .grid div{border-bottom:1px dashed rgba(255,255,255,.08);padding:6px 4px;color:#d9e6ff;font:12px/1.3 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;word-break:break-all}
-  #ls-panel .grid div.k{color:#a9c7ff}
-  #ls-panel .actions{margin-left:auto;display:flex;gap:8px}
-  #ls-panel button{background:#0d1b2a;border:1px solid #254b70;color:#cfe6ff;border-radius:10px;padding:6px 10px;cursor:pointer}
-</style>
-<div id="dual-toaster"></div>
-<div id="arch-bubble" aria-live="polite"></div>
-<div id="ls-panel" role="dialog" aria-label="LocalStorage Viewer">
-  <header>
-    <strong>LocalStorage • Brain</strong>
-    <div class="actions">
-      <button id="ls-refresh">Atualizar</button>
-      <button id="ls-clear-all">Limpar tudo</button>
-      <button id="ls-hide">Fechar</button>
-    </div>
-  </header>
-  <div class="grid" id="ls-grid"></div>
-</div>
-<script>
-(function(){
-  const $ = (q,r=document)=>r.querySelector(q);
-  const $$ = (q,r=document)=>Array.from(r.querySelectorAll(q));
-  const LS = {
-    get:(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},
-    set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},
-    raw:(k)=>localStorage.getItem(k)||'',
-    del:(k)=>{try{localStorage.removeItem(k)}catch(e){}},
-    clear:()=>{try{localStorage.clear()}catch(e){}}
-  };
-  const isROM = ()=>/rom/i.test(location.hash)||/\\brom\\b/i.test(document.title)||/\\brom\\b/i.test((document.body.getAttribute('data-page')||''));
-
-  // ===== Toaster =====
-  let toastTimer=null;
-  function showToast(msg, ms=2800){
-    const el = $('#dual-toaster');
-    if(!el) return;
-    el.textContent = String(msg);
-    el.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(()=>{ el.classList.remove('show'); }, ms);
-  }
-  window.DualToast = showToast;
-
-  // ===== Archetype bubble (ROM) =====
-  let bubbleTimer=null;
-  function showArchBubble(msg, ms=4500){
-    const host = $('#arch-bubble'); if(!host) return;
-    host.innerHTML = '<div class="bubble"></div>';
-    const b = host.firstElementChild;
-    b.textContent = String(msg);
-    requestAnimationFrame(()=>{
-      b.classList.add('show');
-      clearTimeout(bubbleTimer);
-      bubbleTimer = setTimeout(()=>{ b.classList.remove('show'); }, ms);
-    });
-  }
-
-  // ===== LocalStorage Brain Viewer =====
-  function renderLS(){
-    const grid = $('#ls-grid'); if(!grid) return;
-    grid.innerHTML = '';
-    Object.keys(localStorage).sort().forEach(k=>{
-      const v = LS.raw(k);
-      const rowK = document.createElement('div'); rowK.className='k'; rowK.textContent=k;
-      const rowV = document.createElement('div'); rowV.textContent = v.length>200? (v.slice(0,200)+'…'): v;
-      const rowA = document.createElement('div');
-      const del = document.createElement('button'); del.textContent='apagar';
-      del.addEventListener('click', ()=>{ LS.del(k); renderLS(); });
-      rowA.appendChild(del);
-      grid.appendChild(rowK); grid.appendChild(rowV); grid.appendChild(rowA);
-    });
-  }
-  const panel = $('#ls-panel');
-  $('#ls-panel-btn')?.addEventListener('click', ()=>{ panel.style.display='block'; renderLS(); });
-  $('#ls-hide')?.addEventListener('click', ()=>{ panel.style.display='none'; });
-  $('#ls-refresh')?.addEventListener('click', renderLS);
-  $('#ls-clear-all')?.addEventListener('click', ()=>{
-    if(confirm('Limpar TODO o LocalStorage? Esta ação é irreversível.')){
-      LS.clear(); renderLS(); showToast('LocalStorage limpo.');
-    }
-  });
-
-  // ===== Message routing =====
-  // If chatPush exists, wrap it so AI messages are routed: ROM -> archetype bubble; other pages -> toaster.
-  const _chatPush = window.chatPush;
-  if(typeof _chatPush === 'function'){
-    window.chatPush = function(type, text){
-      try{
-        if(type==='ai'){
-          if(isROM()) showArchBubble(text);
-          else showToast(text);
-          // Não duplicar na timeline original quando for AI
-          return;
-        }
-      }catch(e){}
-      return _chatPush.apply(this, arguments);
-    };
-  }
-
-  // If your code dispatches window events instead of chatPush, you can use these:
-  window.dispatchEvent(new CustomEvent('dual:assistant:message',{detail:{text:'(hook pronto)'}}));
-  window.addEventListener('dual:assistant:message', (ev)=>{
-    const text = (ev && ev.detail && ev.detail.text) ? ev.detail.text : '';
-    if(!text) return;
-    if(isROM()) showArchBubble(text); else showToast(text);
-  });
-
-  // ===== Ensure ROM speaks via archetype (signal) =====
-  // Fire a lightweight signal any time we land on ROM; your archetype code can listen and speak.
-  function pingROM(){
-    if(isROM()){
-      window.dispatchEvent(new CustomEvent('dual:rom:entered', {detail:{archetype: localStorage.getItem('archetype:active')||''}}));
-    }
-  }
-  window.addEventListener('hashchange', pingROM);
-  document.addEventListener('DOMContentLoaded', pingROM);
-})();
-</script>
-
-<!-- LocalStorage Brain Viewer — v3.2 (enhanced) -->
-<style>
-  /* Panel core */
-  #ls-panel{position:fixed;right:16px;bottom:16px;max-width:min(1040px,96vw);max-height:82vh;overflow:hidden;z-index:2147483646;background:rgba(10,14,20,.97);border:1px solid #ffffff26;border-radius:16px;backdrop-filter:blur(12px);display:none;box-shadow:0 18px 48px rgba(0,0,0,.6)}
-  #ls-panel header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid #ffffff18;color:#cfe6ff}
-  #ls-title{font-weight:800;margin-right:auto}
-  #ls-search{min-width:200px;background:#0e1724;border:1px solid #294461;border-radius:10px;color:#d9e6ff;padding:8px 10px;font:12px ui-monospace,monospace}
-  #ls-actions{display:flex;gap:8px;flex-wrap:wrap}
-  #ls-actions button{display:inline-flex;align-items:center;gap:6px;background:#0d1b2a;border:1px solid #254b70;color:#cfe6ff;border-radius:10px;padding:6px 10px;cursor:pointer}
-  #ls-body{display:grid;grid-template-rows:auto auto 1fr;border-top:1px solid #ffffff10}
-  #ls-stats{display:flex;gap:10px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid #ffffff10}
-  .stat{background:#0e1724;border:1px solid #294461;border-radius:10px;padding:8px 10px;color:#cfe6ff;font:12px ui-monospace,monospace}
-  .stat b{color:#a9c7ff}
-  #ls-new{display:grid;grid-template-columns:260px 1fr auto;gap:8px;padding:10px 14px;border-bottom:1px solid #ffffff10}
-  #ls-new input,#ls-new textarea{background:#0e1724;border:1px solid #294461;border-radius:10px;color:#d9e6ff;padding:8px 10px;font:12px ui-monospace,monospace}
-  #ls-new textarea{resize:vertical;min-height:40px;max-height:120px}
-  #ls-new button{display:inline-flex;align-items:center;gap:6px;background:#114d2f;border:1px solid #2c7a58;color:#bfffe0;border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer}
-  #ls-grid{overflow:auto;max-height:54vh;padding:6px 0}
-  details.ls-group{border-top:1px dashed #ffffff14}
-  details.ls-group>summary{list-style:none;cursor:pointer;padding:10px 14px;color:#d7e7ff;display:flex;align-items:center;gap:8px}
-  .badge{background:#0d1b2a;border:1px solid #254b70;border-radius:999px;padding:2px 8px;color:#cfe6ff;font:11px ui-monospace,monospace}
-  .group-body{padding:0 8px 8px}
-  .ls-head,.ls-row{display:grid;grid-template-columns:280px 1fr 170px;gap:8px;padding:8px 6px 8px 8px}
-  .ls-head{position:sticky;top:0;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,0));backdrop-filter:blur(6px);z-index:1;border-bottom:1px solid #ffffff10}
-  .ls-head div{color:#a9c7ff;font:700 11px/1 ui-monospace,monospace;text-transform:uppercase;letter-spacing:.08em}
-  .ls-row{border-bottom:1px dashed #ffffff10;align-items:start}
-  .ls-k{color:#a9c7ff;font:12px/1.35 ui-monospace,monospace;word-break:break-all}
-  .ls-v{display:flex;flex-direction:column;gap:6px}
-  .ls-preview{background:#0e1724;border:1px solid #294461;border-radius:10px;color:#d9e6ff;padding:8px 10px;font:12px/1.35 ui-monospace,monospace;white-space:pre-wrap;word-break:break-word;max-height:60px;overflow:auto}
-  .ls-expand{display:none;width:100%}
-  .ls-expand textarea{width:100%;min-height:120px;background:#0e1724;border:1px solid #294461;border-radius:10px;color:#d9e6ff;padding:8px 10px;font:12px/1.35 ui-monospace,monospace;white-space:pre-wrap;word-break:break-word;resize:vertical}
-  .ls-a{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-  .icon-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;background:#0d1b2a;border:1px solid #254b70;color:#cfe6ff;cursor:pointer}
-  .icon-btn.warn{background:#2a1212;border-color:#703333;color:#ffd0d0}
-  .icon-btn.ok{background:#0f2a1e;border-color:#2f7a56;color:#c9ffe7}
-  .icon-btn svg{width:18px;height:18px;fill:currentColor}
-  .mut{color:#93a7bf;font-size:11px}
-  @media (max-width:960px){ .ls-head,.ls-row,#ls-new{grid-template-columns:220px 1fr 150px} }
-  @media (max-width:720px){ #ls-panel{left:16px;right:16px;max-width:unset} .ls-head,.ls-row,#ls-new{grid-template-columns:160px 1fr 120px} }
-  /* Mini dock */
-  #ls-mini{position:fixed;right:12px;bottom:12px;z-index:2147483647;display:none}
-  #ls-mini .dock{background:rgba(10,14,20,.98);border:1px solid #ffffff24;border-radius:14px;padding:8px;display:flex;gap:8px;align-items:center;box-shadow:0 12px 32px rgba(0,0,0,.5)}
-  #ls-mini .icon{width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;background:#0d1b2a;border:1px solid #254b70;color:#cfe6ff;cursor:pointer}
-  #ls-mini .icon.warn{background:#2a1212;border-color:#703333;color:#ffd0d0}
-  #ls-mini .icon.ok{background:#0f2a1e;border-color:#2f7a56;color:#c9ffe7}
-  #ls-mini svg{width:18px;height:18px;fill:currentColor}
-  #ls-mini .sep{width:1px;height:26px;background:#ffffff18;margin:0 4px}
-  #ls-mini .pill{font:11px ui-monospace,monospace;color:#a9c7ff;background:#0e1724;border:1px solid #294461;border-radius:999px;padding:4px 8px}
-
-  /* === Mobile tuning (iPhone, narrow) === */
-  @media (max-width: 480px){
-    #ls-panel{left: 10px; right: 10px; bottom: 10px; border-radius: 14px; max-height: 80vh;}
-    #ls-actions button{padding:8px 10px; font-size:12px}
-    .ls-head,.ls-row{grid-template-columns: 1fr; gap:6px; padding:8px}
-    .ls-head{display:none}
-    .ls-k{font-weight:800}
-    .ls-a{justify-content:flex-start}
-    .icon-btn{width:40px;height:40px;border-radius:12px}
-    .ls-preview{max-height:84px}
-  }
-  /* fix overflow when nested containers have transforms */
-  #ls-panel *{min-width:0}
-  /* Keep panel above any glass layers */
-  #ls-panel{z-index:2147483647}
-    
-</style>
-
-<!-- Symbols -->
-<svg width="0" height="0" style="position:absolute;left:-9999px;top:-9999px" aria-hidden="true">
-  <defs>
-    <symbol id="ic-copy" viewBox="0 0 24 24"><path d="M16 1H4a2 2 0 0 0-2 2v12h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></symbol>
-    <symbol id="ic-save" viewBox="0 0 24 24"><path d="M17 3H5a2 2 0 0 0-2 2v14h18V7l-4-4zm0 2l2 2v10H5V5h12zM7 7h8v4H7V7zM7 13h10v4H7v-4z"/></symbol>
-    <symbol id="ic-trash" viewBox="0 0 24 24"><path d="M9 3h6l1 2h5v2H3V5h5l1-2zm1 7h2v8h-2v-8zm4 0h2v8h-2v-8z"/></symbol>
-    <symbol id="ic-expand" viewBox="0 0 24 24"><path d="M7 10h10v4H7z"/></symbol>
-    <symbol id="ic-download" viewBox="0 0 24 24"><path d="M12 3v10l4-4 1.4 1.4L12 16.8 6.6 10.4 8 9l4 4V3h0zM5 19h14v2H5z"/></symbol>
-    <symbol id="ic-upload" viewBox="0 0 24 24"><path d="M12 21V11l4 4 1.4-1.4L12 7.2 6.6 13.6 8 15l4-4v10h0zM5 3h14v2H5z"/></symbol>
-    <symbol id="ic-close" viewBox="0 0 24 24"><path d="M18.3 5.7L12 12l6.3 6.3-1.4 1.4L10.6 13.4 4.3 19.7 2.9 18.3 9.2 12 2.9 5.7 4.3 4.3l6.3 6.3 6.3-6.3z"/></symbol>
-    <symbol id="ic-broom" viewBox="0 0 24 24"><path d="M3 17l4 4 12-12-4-4L3 17zm14-10l2 2-1 1-2-2 1-1z"/></symbol>
-  </defs>
-</svg>
-
-<!-- Panel -->
-<div id="ls-panel" role="dialog" aria-label="LocalStorage Viewer">
-  <header>
-    <strong id="ls-title">LocalStorage • Brain</strong>
-    <input id="ls-search" placeholder="buscar chave/valor…"><span id="ls-count" class="mut" style="font-size:11px;margin-left:6px"></span>
-    <div id="ls-actions">
-      <button id="ls-export"><svg><use href="#ic-download"/></svg>Exportar</button>
-      <button id="ls-import-btn"><svg><use href="#ic-upload"/></svg>Importar</button>
-      <input id="ls-import" type="file" accept="application/json" style="display:none">
-      <button id="ls-clear-all"><svg><use href="#ic-broom"/></svg>Limpar LS</button>
-      <button id="ls-clear-idb"><svg><use href="#ic-trash"/></svg>Limpar IDB</button>
-      <button id="ls-hide"><svg><use href="#ic-close"/></svg>Fechar</button>
-    </div>
   </header>
   <div id="ls-body">
     <div id="ls-stats">
@@ -2963,7 +2725,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
       <textarea id="ls-new-v" placeholder="valor (texto ou JSON)"></textarea>
       <button id="ls-add"><svg><use href="#ic-save"/></svg>Salvar novo</button>
     </div>
-    <div id="ls-grid"></div>
+    
   </div>
 </div>
 
@@ -3107,150 +2869,160 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
   })();
 })();</script>
 
-
-<style id="dual-patch-ls">
-/* ==== Dual Patch • LS panel + nav-right fit ==== */
-@media (max-width: 540px){
-  #ls-panel .ls-head,
-  #ls-panel .ls-row{ grid-template-columns: 1fr; }
-  #ls-panel .ls-a{ justify-content: flex-start; }
-}
-body.nav-right #ls-panel{
-  right: calc(78px + 16px);
-}
-#ls-panel{ 
-  max-width: min(96vw, 1080px);
-}
-#ls-grid .ls-row{ 
-  grid-template-columns: minmax(180px, 280px) minmax(0,1fr) 170px;
-}
-#ls-grid .ls-preview{ 
-  overflow-wrap:anywhere;
-}
-
+<!-- ===== LSX Modular Panel (namespaced) • v4.1 ===== -->
+<style>
+  #lsx-mount{position:fixed;inset:auto 12px 12px auto;z-index:2147483000}
+  #lsx-panel{position:fixed;right:12px;bottom:12px;max-width:min(1040px,96vw);max-height:86vh;display:none;
+    overflow:hidden;background:rgba(12,16,24,.98);border:1px solid #ffffff26;border-radius:16px;backdrop-filter:blur(12px);
+    box-shadow:0 18px 48px rgba(0,0,0,.6)}
+  #lsx-panel *{box-sizing:border-box}
+  #lsx-panel header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid #ffffff18;color:#cfe6ff}
+  #lsx-title{font-weight:900;margin-right:auto;letter-spacing:.04em}
+  #lsx-search{min-width:220px;background:#0e1724;border:1px solid #294461;border-radius:10px;color:#d9e6ff;padding:8px 10px;font:12px ui-monospace,monospace}
+  #lsx-actions{display:flex;gap:8px;flex-wrap:wrap}
+  #lsx-actions .btn{all:unset;font:600 12px/1.2 system-ui;color:#cfe6ff;background:#0d1b2a;border:1px solid #254b70;border-radius:10px;padding:6px 10px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+  #lsx-body{display:grid;grid-template-rows:auto auto 1fr}
+  #lsx-stats{display:flex;gap:10px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid #ffffff10}
+  #lsx-stats .stat{background:#0e1724;border:1px solid #294461;border-radius:10px;padding:8px 10px;color:#cfe6ff;font:12px ui-monospace,monospace}
+  #lsx-new{display:grid;grid-template-columns:260px 1fr auto;gap:8px;padding:10px 14px;border-bottom:1px solid #ffffff10}
+  #lsx-new input,#lsx-new textarea{background:#0e1724;border:1px solid #294461;border-radius:10px;color:#d9e6ff;padding:8px 10px;font:12px ui-monospace,monospace}
+  #lsx-new textarea{resize:vertical;min-height:40px;max-height:120px}
+  #lsx-new button{all:unset;display:inline-flex;align-items:center;gap:6px;background:#114d2f;border:1px solid #2c7a58;color:#bfffe0;border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer}
+  #lsx-grid{overflow:auto;max-height:56vh;padding:6px 0}
+  details.lsx-group{border-top:1px dashed #ffffff14}
+  details.lsx-group>summary{list-style:none;cursor:pointer;padding:10px 14px;color:#d7e7ff;display:flex;align-items:center;gap:8px}
+  details.lsx-group>summary .chev{width:12px;height:12px;border:1px solid #567;display:inline-grid;place-items:center;border-radius:4px}
+  .lsx-badge{background:#0d1b2a;border:1px solid #254b70;border-radius:999px;padding:2px 8px;color:#cfe6ff;font:11px ui-monospace,monospace}
+  .lsx-body-inner{padding:0 8px 8px}
+  .lsx-head,.lsx-row{display:grid;grid-template-columns:280px 1fr 170px;gap:8px;padding:8px 6px 8px 8px}
+  .lsx-head{position:sticky;top:0;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,0));backdrop-filter:blur(6px);z-index:1;border-bottom:1px solid #ffffff10}
+  .lsx-head div{color:#a9c7ff;font:700 11px/1 ui-monospace,monospace;text-transform:uppercase;letter-spacing:.08em}
+  .lsx-row{border-bottom:1px dashed #ffffff10;align-items:start}
+  .lsx-k{color:#a9c7ff;font:12px/1.35 ui-monospace,monospace;word-break:break-all}
+  .lsx-v{display:flex;flex-direction:column;gap:6px}
+  .lsx-preview{background:#0e1724;border:1px solid #294461;border-radius:10px;color:#d9e6ff;padding:8px 10px;font:12px/1.35 ui-monospace,monospace;white-space:pre-wrap;word-break:break-word;max-height:60px;overflow:auto}
+  .lsx-expand{display:none;width:100%}
+  .lsx-expand textarea{width:100%;min-height:120px;background:#0e1724;border:1px solid #294461;border-radius:10px;color:#d9e6ff;padding:8px 10px;font:12px/1.35 ui-monospace,monospace;resize:vertical}
+  .lsx-a{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+  .ic-btn{all:unset;display:inline-grid;place-items:center;width:34px;height:34px;border-radius:10px;background:#0d1b2a;border:1px solid #254b70;color:#cfe6ff;cursor:pointer}
+  .ic-btn.warn{background:#2a1212;border-color:#703333;color:#ffd0d0}
+  .ic-btn.ok{background:#0f2a1e;border-color:#2f7a56;color:#c9ffe7}
+  mark.lsx-hit{background:#3b82f6;color:#0b0f14;border-radius:4px;padding:0 2px}
+  @media (max-width:960px){ .lsx-head,.lsx-row,#lsx-new{grid-template-columns:220px 1fr 150px} }
+  @media (max-width:720px){ #lsx-panel{left:12px;right:12px;max-width:unset} .lsx-head,.lsx-row,#lsx-new{grid-template-columns:1fr} }
+  /* Logger & Toast */
+  #lsx-logger{position:fixed;left:12px;bottom:12px;max-width:min(420px,92vw);display:none;z-index:2147483001}
+  #lsx-logger .panel{background:rgba(12,16,24,.96);border:1px solid #ffffff26;border-radius:12px;backdrop-filter:blur(10px);padding:10px;box-shadow:0 14px 36px rgba(0,0,0,.5)}
+  #lsx-logger pre{margin:0;max-height:46vh;overflow:auto;font:12px/1.35 ui-monospace,monospace;color:#a9b7d0}
+  #lsx-toastBox{position:fixed;right:14px;bottom:calc(68px + env(safe-area-inset-bottom));display:grid;gap:8px;z-index:2147483002}
+  .lsx-toast{background:linear-gradient(90deg,#1b2a2a,#123c2e);color:#eaf0ff;border:1px solid #ffffff22;padding:.6rem .8rem;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
 </style>
-<script id="dual-patch-voice">
-/* ==== Dual Patch • Archetype Voice Hooks v1 ==== */
+<div id="lsx-mount"></div>
+<template id="tpl-lsx-panel">
+  <div id="lsx-panel" role="dialog" aria-label="LocalStorage • Brain">
+    <header>
+      <strong id="lsx-title">LocalStorage • Brain</strong>
+      <input id="lsx-search" type="search" placeholder="filtrar (chave/valor)">
+      <div id="lsx-actions">
+        <button class="btn" id="lsx-refresh">Atualizar</button>
+        <button class="btn" id="lsx-export">Exportar</button>
+        <button class="btn" id="lsx-import-btn">Importar</button><input id="lsx-import" type="file" accept="application/json" style="display:none">
+        <button class="btn" id="lsx-clear-all">Limpar tudo</button>
+        <button class="btn" id="lsx-clear-idb">Limpar IDB</button>
+        <button class="btn" id="lsx-hide">Fechar</button>
+      </div>
+    </header>
+    <div id="lsx-body">
+      <div id="lsx-stats">
+        <div class="stat">chaves: <b id="lsx-st-keys">0</b></div>
+        <div class="stat">localStorage: <b id="lsx-st-bytes">0 KB</b></div>
+        <div class="stat">pesados(>50KB): <b id="lsx-st-heavy">0</b></div>
+        <div class="stat">origem (quota/uso): <b id="lsx-st-usage">—</b></div>
+      </div>
+      <div id="lsx-new">
+        <input id="lsx-new-k" placeholder="nova chave (ex.: infodose:userName)">
+        <textarea id="lsx-new-v" placeholder="valor (texto ou JSON)"></textarea>
+        <button id="lsx-add">Salvar novo</button>
+      </div>
+      <div id="lsx-grid"></div>
+    </div>
+  </div>
+</template>
+<template id="tpl-lsx-logger">
+  <div class="panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px">
+      <strong>Logs</strong>
+      <button id="lsx-log-close" class="btn">Fechar</button>
+    </div>
+    <pre id="lsx-logs"></pre>
+  </div>
+</template>
+<template id="tpl-lsx-toast"><div class="lsx-toast"></div></template>
+<script>
 (function(){
-  const $ = (q,r=document)=>r.querySelector(q);
-  const $$ = (q,r=document)=>Array.from(r.querySelectorAll(q));
-  function say(text){
-    try{
-      if(typeof speakWithActiveArch === 'function'){ speakWithActiveArch(String(text)); }
-    }catch(e){}
-  }
-  function bubble(text, type){
-    try{
-      if(typeof showArchMessage === 'function'){ showArchMessage(String(text), type||'ok'); }
-    }catch(e){}
-  }
+  const $=(q,r=document)=>r.querySelector(q);
+  const $$=(q,r=document)=>Array.from(r.querySelectorAll(q));
+  const LS={raw:(k)=>localStorage.getItem(k)||''};
+  function utf8Bytes(s){try{return new Blob([s]).size}catch(e){return (new TextEncoder()).encode(s).length}}
+  function fmtBytes(n){return n<1024? n+' B' : n<1048576? (n/1024).toFixed(1)+' KB' : (n/1048576).toFixed(2)+' MB'}
+  function lsSize(){let t=0,h=0;const HEAVY=50*1024; for(const k of Object.keys(localStorage)){const v=localStorage.getItem(k)||''; const b=utf8Bytes(k)+utf8Bytes(v); t+=b; if(b>HEAVY) h++;} return {t,h}}
+  function estimateUsage(el){ if(navigator.storage?.estimate){ navigator.storage.estimate().then(({usage,quota})=>{ el.textContent=(usage&&quota)?`${fmtBytes(usage)} / ${fmtBytes(quota)}`:'—' }); } else { el.textContent='—'; } }
 
-  // 1) Upload de HTML (btnImport)
-  const btnImport = document.getElementById('btnImport');
-  if(btnImport){
-    btnImport.addEventListener('click', ()=>{
-      // O handler original fará o trabalho; depois de um pequeno atraso, falamos
-      setTimeout(()=>{
-        try{
-          const fs = (document.getElementById('fileLocal')?.files||[]);
-          if(fs.length){ say(`Adicionei ${fs.length} arquivo${fs.length>1?'s':''} local${fs.length>1?'s':''}.`); bubble('Locais adicionados.', 'ok'); }
-        }catch(e){}
-      }, 800);
-    });
-  }
+  const Toast={
+    init(){ this.host = $('#lsx-toastBox') || document.body.appendChild(Object.assign(document.createElement('div'),{id:'lsx-toastBox'})); },
+    show(msg,type='ok',ms=1600){ if(!this.host) this.init(); const el=$('#tpl-lsx-toast').content.firstElementChild.cloneNode(true); if(type==='warn') el.style.background='linear-gradient(90deg,#2f261b,#3c2d12)'; if(type==='err') el.style.background='linear-gradient(90deg,#2f1b1b,#3c1212)'; el.textContent=msg; this.host.appendChild(el); setTimeout(()=>{ el.style.opacity=.0; el.style.transform='translateY(6px)'; setTimeout(()=>el.remove(),220); }, ms); }
+  };
 
-  // 2) Preferências do usuário (nome, modelo, SK, tema, fundo, CSS, performance, voz)
-  const saveName = document.getElementById('saveName');
-  if(saveName){
-    saveName.addEventListener('click', ()=>{
-      const name = (document.getElementById('userName')?.value || '').trim();
-      if(name){
-        try{ localStorage.setItem('dual.name', name); }catch(e){}
-        say(`Salvo. Bem-vindo, ${name}.`);
-        bubble('Nome salvo.', 'ok');
+  const Logger={
+    init(){ const host = $('#lsx-logger') || document.body.appendChild(Object.assign(document.createElement('div'),{id:'lsx-logger'})); host.innerHTML=''; host.appendChild($('#tpl-lsx-logger').content.cloneNode(true)); $('#lsx-log-close').addEventListener('click',()=> host.style.display='none'); this.host=host; this.pre=$('#lsx-logs'); },
+    push(m){ if(!this.pre) this.init(); const line='['+new Date().toLocaleTimeString()+'] '+m; const arr=(this.pre.textContent||'').split('\\n'); arr.unshift(line); this.pre.textContent=arr.slice(0,120).join('\\n'); this.host.style.display='block'; }
+  };
+
+  const DualLS={
+    open(){ const p=$('#lsx-panel'); if(p){ p.style.display='block'; this.render(); this.refresh(); }},
+    close(){ const p=$('#lsx-panel'); if(p){ p.style.display='none'; }},
+    toggle(){ const p=$('#lsx-panel'); if(!p) return; p.style.display = (p.style.display==='block'?'none':'block'); if(p.style.display==='block'){ this.render($('#lsx-search').value); this.refresh(); }},
+    initPanel({mount='#lsx-mount'}={}){
+      const host=$(mount)||document.body; if(!$('#lsx-panel')){ host.appendChild($('#tpl-lsx-panel').content.cloneNode(true));
+        // binds
+        $('#lsx-hide').addEventListener('click',()=> this.close());
+        $('#lsx-refresh').addEventListener('click',()=>{ this.render($('#lsx-search').value); this.refresh(); });
+        $('#lsx-search').addEventListener('input',ev=> this.render(ev.target.value));
+        $('#lsx-add').addEventListener('click',()=>{ const k=$('#lsx-new-k').value.trim(), v=$('#lsx-new-v').value; if(!k) return; if(localStorage.getItem(k)&&!confirm('Sobrescrever?')) return; localStorage.setItem(k,v); $('#lsx-new-k').value=''; $('#lsx-new-v').value=''; this.render($('#lsx-search').value); this.refresh(); Toast.show('Chave salva','ok'); Logger.push('LS: gravou '+k); });
+        $('#lsx-export').addEventListener('click',()=>{ const dump={}; Object.keys(localStorage).forEach(k=> dump[k]=localStorage.getItem(k)); const blob=new Blob([JSON.stringify(dump,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ls-backup-'+new Date().toISOString().replace(/[:.]/g,'-')+'.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),400); Toast.show('Backup exportado'); Logger.push('LS: exportou backup'); });
+        const impBtn=$('#lsx-import-btn'), impInput=$('#lsx-import'); impBtn.addEventListener('click',()=> impInput.click()); impInput.addEventListener('change',(ev)=>{ const f=ev.target.files&&ev.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ try{ const obj=JSON.parse(String(r.result||'')); Object.keys(obj).forEach(k=> localStorage.setItem(k,String(obj[k]))); this.render($('#lsx-search').value); this.refresh(); Toast.show('Importação concluída'); Logger.push('LS: importou backup'); }catch(e){ alert('JSON inválido.'); } }; r.readAsText(f); ev.target.value=''; });
+        $('#lsx-clear-all').addEventListener('click',()=>{ if(!confirm('Backup automático será criado. Confirmar LIMPAR LocalStorage?')) return; const snap={}; Object.keys(localStorage).forEach(k=> snap[k]=localStorage.getItem(k)); const stamp=new Date().toISOString().replace(/[:.]/g,'-'); try{ localStorage.setItem('ls:backup:'+stamp, JSON.stringify(snap)); }catch(e){} const blob=new Blob([JSON.stringify(snap,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ls-backup-'+stamp+'.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),500); localStorage.clear(); this.render(''); this.refresh(); Toast.show('LocalStorage limpo','warn'); Logger.push('LS: limpou tudo'); });
+        $('#lsx-clear-idb').addEventListener('click', async()=>{ if(!confirm('Limpar TODOS os bancos IndexedDB deste domínio?')) return; try{ if(indexedDB.databases){ const dbs=await indexedDB.databases(); await Promise.all(dbs.map(d=> new Promise(res=>{ const name=d.name; if(!name) return res(); const req=indexedDB.deleteDatabase(name); req.onsuccess=req.onerror=req.onblocked=()=>res(); }))); alert('IndexedDB limpo (quando suportado).'); } else alert('Navegador não expõe indexedDB.databases().'); }catch(e){ alert('Falha ao limpar IndexedDB: '+e); } this.refresh(); Logger.push('LS: solicitou limpeza IDB'); });
       }
-    });
-  }
-  const saveSK = document.getElementById('saveSK');
-  if(saveSK){
-    saveSK.addEventListener('click', ()=>{
-      say('Chave e modelo salvos.');
-      bubble('Configurações do OpenRouter salvas.', 'ok');
-    });
-  }
-  const themeSelect = document.getElementById('themeSelect');
-  if(themeSelect){
-    themeSelect.addEventListener('change', ()=>{
-      const map = {default:'padrão', medium:'cinza', custom:'personalizado'};
-      say('Tema ' + (map[themeSelect.value]||themeSelect.value) + ' aplicado.');
-    });
-  }
-  const bgUpload = document.getElementById('bgUpload');
-  if(bgUpload){
-    bgUpload.addEventListener('change', (e)=>{
-      const f = e.target.files && e.target.files[0];
-      if(f){ say('Fundo personalizado salvo.'); bubble('Fundo salvo.', 'ok'); }
-    });
-  }
-  const btnApplyCSS = document.getElementById('applyCSS');
-  if(btnApplyCSS){
-    btnApplyCSS.addEventListener('click', ()=>{ say('CSS personalizado aplicado.'); });
-  }
-  const btnClearCSS = document.getElementById('clearCSS');
-  if(btnClearCSS){
-    btnClearCSS.addEventListener('click', ()=>{ say('CSS personalizado removido.'); });
-  }
-  const btnPerf = document.getElementById('btnPerf');
-  if(btnPerf){
-    btnPerf.addEventListener('click', ()=>{ say('Performance atualizada.'); });
-  }
-  const btnVoice = document.getElementById('btnVoice');
-  if(btnVoice){
-    btnVoice.addEventListener('click', ()=>{ say('Voz preferida salva.'); });
-  }
+      this.wireHeader();
+    },
+    wireHeader(){
+      const self=this;
+      const say=(t)=>{ try{ if(typeof speakWithActiveArch==='function') speakWithActiveArch(t); }catch(e){} };
+      document.getElementById('btnLS') && document.getElementById('btnLS').addEventListener('click',()=> self.toggle());
+      document.getElementById('btnToggleLocal') && document.getElementById('btnToggleLocal').addEventListener('click',()=>{ const state=(localStorage.getItem('uno:showLocal')==='1'); localStorage.setItem('uno:showLocal', state?'0':'1'); Toast.show(state?'Mostrando todos':'Mostrando Locais'); Logger.push('Header: toggle Locais = '+(!state)); say('Ok'); });
+      ['saveName','saveSK','applyCSS','clearCSS','btnPerf','btnVoice','btnImport'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('click',()=> say('Ok')); });
+    },
+    render(filter=''){
+      const grid=$('#lsx-grid'); if(!grid) return;
+      const f=(filter||'').toLowerCase(); grid.innerHTML='';
+      const groups={}; Object.keys(localStorage).sort().forEach(k=>{ const v=localStorage.getItem(k)||''; if(f && !(k.toLowerCase().includes(f)||v.toLowerCase().includes(f))) return; const grp=k.includes(':')?k.split(':')[0]:(k.includes('.')?k.split('.')[0]:'geral'); (groups[grp] ||= []).push({k,v}); });
+      const ordered=Object.keys(groups).sort((a,b)=>a.localeCompare(b));
+      const headHTML='<div>Chave</div><div>Valor</div><div>Ações</div>';
+      ordered.forEach(name=>{ const det=document.createElement('details'); det.className='lsx-group'; det.open=true; const sum=document.createElement('summary'); sum.innerHTML=`<span class="chev">›</span> <strong>${name}</strong> <span class="lsx-badge">${groups[name].length}</span>`; det.appendChild(sum); const body=document.createElement('div'); body.className='lsx-body-inner'; const head=document.createElement('div'); head.className='lsx-head'; head.innerHTML=headHTML; body.appendChild(head); groups[name].forEach(({k,v})=> body.appendChild(makeRow(k,v))); det.appendChild(body); grid.appendChild(det); });
+      function makeRow(k,vRaw){ const row=document.createElement('div'); row.className='lsx-row'; const colK=document.createElement('div'); colK.className='lsx-k'; colK.textContent=k; const colV=document.createElement('div'); colV.className='lsx-v'; const prev=document.createElement('div'); prev.className='lsx-preview'; prev.textContent=vRaw.length>240?(vRaw.slice(0,240)+'…'):vRaw; const expand=document.createElement('div'); expand.className='lsx-expand'; const ta=document.createElement('textarea'); ta.value=vRaw; expand.appendChild(ta); colV.append(prev,expand); const colA=document.createElement('div'); colA.className='lsx-a'; const mk=(title,cls,cb,svg)=>{const b=document.createElement('button'); b.className='ic-btn'+(cls?(' '+cls):''); b.title=title; b.innerHTML=svg||title; b.onclick=cb; return b;}; const Bx=mk('expandir','',()=>{ expand.style.display=expand.style.display==='block'?'none':'block'; },'<svg width="18" height="18" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="2" fill="currentColor"/></svg>'); const Bc=mk('copiar','',()=> navigator.clipboard.writeText(vRaw),'<svg width="18" height="18" viewBox="0 0 24 24"><path d="M16 1H4a2 2 0 0 0-2 2v12h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z" fill="currentColor"/></svg>'); const Bs=mk('salvar','ok',()=>{ const nv=expand.style.display==='block'? ta.value : vRaw; localStorage.setItem(k,nv); prev.textContent=nv.length>240?(nv.slice(0,240)+'…'):nv; DualLS.refresh(); Toast.show('Salvo'); Logger.push('LS: salvou '+k); },'<svg width="18" height="18" viewBox="0 0 24 24"><path d="M17 3H5a2 2 0 0 0-2 2v14h18V7l-4-4z" fill="currentColor"/></svg>'); const Bd=mk('apagar','warn',()=>{ if(!confirm('Apagar “'+k+'”?')) return; localStorage.removeItem(k); row.remove(); DualLS.refresh(); Toast.show('Apagado','warn'); Logger.push('LS: apagou '+k); },'<svg width="18" height="18" viewBox="0 0 24 24"><path d="M9 3h6l1 2h5v2H3V5h5l1-2zm1 7h2v8h-2v-8zm4 0h2v8h-2v-8z" fill="currentColor"/></svg>'); colA.append(Bx,Bc,Bs,Bd); row.append(colK,colV,colA); return row; }
+    },
+    refresh(){ const {t,h}=lsSize(); $('#lsx-st-keys').textContent=String(localStorage.length); $('#lsx-st-bytes').textContent=fmtBytes(t); $('#lsx-st-heavy').textContent=String(h); estimateUsage($('#lsx-st-usage')); }
+  };
+  // Expor sob o mesmo nome para compat com seus binds existentes
+  window.DualLS = DualLS;
+  window.DualToast = Toast;
+  window.DualLSLogger = Logger;
 
-  // 3) Painel de LocalStorage — falar em ações principais
-  function hookLSPanel(){
-    const p = document.getElementById('ls-panel');
-    if(!p) return;
-    const exp = document.getElementById('ls-export');
-    const impBtn = document.getElementById('ls-import-btn');
-    const add = document.getElementById('ls-add');
-    const clearAll = document.getElementById('ls-clear-all');
-    const clearIDB = document.getElementById('ls-clear-idb');
-    if(exp) exp.addEventListener('click', ()=> say('Backup do LocalStorage exportado.'));
-    if(impBtn) impBtn.addEventListener('click', ()=> say('Importar backup do LocalStorage.'));
-    if(add) add.addEventListener('click', ()=> setTimeout(()=> say('Chave salva no LocalStorage.'), 300));
-    if(clearAll) clearAll.addEventListener('click', ()=> setTimeout(()=> say('LocalStorage limpo.'), 600));
-    if(clearIDB) clearIDB.addEventListener('click', ()=> setTimeout(()=> say('IndexedDB limpo.'), 600));
-  }
-  hookLSPanel();
-
-  // 4) Quando abrir o painel via botão LS no header, garantir que fala uma frase curta
-  const btnLS = document.getElementById('btnLS');
-  if(btnLS){
-    btnLS.addEventListener('click', ()=>{
-      setTimeout(()=>{
-        bubble('Painel de LocalStorage aberto.', 'ok');
-        say('Abrindo painel do LocalStorage.');
-      }, 120);
-    });
-  }
-
-  // 5) Garantir que respostas da IA no feed também atualizam um preview falado curto (já rotea via chatPush)
-  // (Sem alteração: já existe integração com speakWithActiveArch(reply) na handleUserMessage.)
-
-  // 6) Pequeno ajuste: se CODUX estiver setado como nome, sincronizar com dual.name ao carregar
-  document.addEventListener('DOMContentLoaded', ()=>{
-    try{
-      const nm = (localStorage.getItem('infodose:userName')||'').trim();
-      if(nm && localStorage.getItem('dual.name')!==nm){
-        localStorage.setItem('dual.name', nm);
-      }
-    }catch(e){}
-  });
+  document.addEventListener('DOMContentLoaded',()=>{ Logger.init(); Toast.init(); DualLS.initPanel({ mount:'#lsx-mount' }); if(location.hash==='#lsx'){ DualLS.open(); } });
 })();
-
 </script>
+<!-- ===== /LSX Modular Panel ===== -->
+
 </body>
 </html>
