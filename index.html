@@ -507,6 +507,31 @@ body.nav-right .tabbar .tab{
   width: 56px; height: 56px; border-radius: 16px;
   display: grid; place-items: center;
 }
+    /* === CHAT (ex-Revo) === */
+#v-chat { padding: 0; display: grid; grid-template-rows: 1fr auto; }
+.chat-feed { padding: 12px 14px; overflow: auto; display: flex; flex-direction: column; gap: 8px; }
+.chat-msg { margin: 0; padding: 10px 12px; border-radius: 16px; max-width: 75%; word-wrap: break-word; }
+.chat-msg.user { align-self: flex-end; background: rgba(255,255,255,.10); border-radius: 16px 16px 0 16px; }
+.chat-msg.ai   { align-self: flex-start; background: rgba(57,255,182,.12); border-radius: 16px 16px 16px 0; }
+.chat-status { color: var(--mut); font-size: 12px; align-self: center; }
+.chat-inputbar { display: flex; gap: 8px; padding: 10px 14px; background: var(--surface); border-top: var(--bd); }
+.chat-inputbar textarea { flex: 1; min-height: 42px; max-height: 36vh; resize: vertical; }
+
+/* === Right FAB buttons (texto/voz) === */
+.right-fab { position: fixed; right: 14px; bottom: calc(var(--tabsH) + 90px + env(safe-area-inset-bottom)); z-index: 110; display: grid; gap: 10px; }
+.right-fab .fab { width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; border: var(--bd); background: var(--surface-strong); box-shadow: var(--shadow); }
+.right-fab .fab:hover { box-shadow: 0 12px 30px rgba(0,0,0,.5) }
+
+/* === Modal de input rápido de chat === */
+#modalChatInput .panel { display: grid; gap: 10px; }
+#modalChatInput textarea { width: 100%; min-height: 96px; }
+
+/* === Brain: viewer de fundos === */
+.bg-viewer { display: grid; grid-template-columns: repeat(auto-fill,minmax(140px,1fr)); gap: 10px; }
+.bg-item { background: var(--surface); border: var(--bd); border-radius: 12px; overflow: hidden; display: grid; grid-template-rows: 100px auto; }
+.bg-item .thumb { width: 100%; height: 100px; object-fit: cover; display: block; background:#000; }
+.bg-item .actions { display: flex; gap: 6px; padding: 8px; }
+.bg-item small { color: var(--mut); display:block; padding: 0 8px 8px; }
 </style>
 </head>
 <body>
@@ -600,10 +625,10 @@ body.nav-right .tabbar .tab{
               <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/yin-yang.svg" alt="Arquétipo" width="20" height="20" onerror="this.onerror=null;this.src='icons/yin-yang.svg'">
               <span>Arquétipo</span>
             </button>
-            <button data-nav="revo">
-              <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/globe.svg" alt="Revo" width="20" height="20" onerror="this.onerror=null;this.src='icons/globe.svg'">
-              <span>Revo</span>
-            </button>
+            <button class="tab fx-trans fx-press ring" data-nav="chat">
+  <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/message.svg" alt="Chat" width="18" height="18" onerror="this.onerror=null;this.src='icons/message.svg'">
+  <span style="display:none">Chat</span><span class="ripple"></span>
+</button>
           <button data-audio="true" id="archAudioBtn">
             <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/microphone-lines.svg" alt="Áudio" width="20" height="20" onerror="this.onerror=null;this.src='icons/microphone-lines.svg'">
             <span>Áudio</span>
@@ -747,6 +772,9 @@ body.nav-right .tabbar .tab{
                 <input id="bgUpload" type="file" accept="image/*,video/*" class="input ring" style="max-width:260px" />
               </label>
               <div class="mut" style="font-size:11px">Envie uma imagem ou vídeo para usar como plano de fundo quando o tema personalizado estiver selecionado. O fundo será salvo automaticamente no seu navegador.</div>
+              <!-- Viewer dos fundos salvos -->
+<div style="font-weight:800; margin-top:10px">Backgrounds salvos</div>
+<div id="bgViewer" class="bg-viewer"></div>
             </div>
           </div>
 
@@ -808,11 +836,16 @@ body.nav-right .tabbar .tab{
       </div>
     </section>
 
-    <!-- REVO (Infodose Hub Ultra) -->
-    <section id="v-revo" class="view">
-      <!-- Carrega o conteúdo do Hub Ultra modificado via iframe.  O arquivo index-100_revo_mod.html está no mesmo diretório -->
-      <iframe id="revoEmbed" src="index-100_revo_mod.html" allow="autoplay; clipboard-read; clipboard-write; picture-in-picture; fullscreen" referrerpolicy="no-referrer"></iframe>
-    </section>
+    <!-- CHAT (ex-Revo) -->
+<section id="v-chat" class="view">
+  <div id="chatFeed" class="chat-feed" aria-live="polite">
+    <div class="chat-status">Abra a conversa: envie um texto (🅣) ou voz (🎙️).</div>
+  </div>
+  <div class="chat-inputbar">
+    <textarea id="chatInput" class="input ring" placeholder="Escreva sua mensagem..."></textarea>
+    <button id="btnChatSend" class="btn prime fx-trans fx-press ring">Enviar<span class="ripple"></span></button>
+  </div>
+</section>
   </main>
 
   <!-- DOCK & TABS -->
@@ -2312,5 +2345,169 @@ function dualEnrich(node){
   });
 }
 </script>
+  <script>
+    /* ===================== CHAT CORE (ex-Revo) ===================== */
+function chatPush(type, text){
+  const box = document.getElementById('chatFeed'); if(!box) return;
+  const div = document.createElement('div');
+  div.className = type==='user' ? 'chat-msg user' : (type==='ai' ? 'chat-msg ai' : 'chat-status');
+  div.textContent = text;
+  box.appendChild(div);
+  // limitar a 60 msgs
+  const msgs = box.querySelectorAll('.chat-msg,.chat-status');
+  if(msgs.length>60) box.removeChild(msgs[0]);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function chatSendText(raw){
+  const text = String(raw||'').trim();
+  if(!text) return;
+  const sk = localStorage.getItem('dual.keys.openrouter') || '';
+  const userName = (localStorage.getItem('infodose:userName') || '').trim();
+  const model = LS.get('dual.openrouter.model');
+  chatPush('user', 'Você: ' + text);
+  try{
+    const reply = await sendAIMessage(`${userName ? userName+' disse: ' : ''}${text}`, sk, model);
+    let arch = 'Dual';
+    try{
+      const sel = document.getElementById('arch-select');
+      let base = (sel?.value||'').replace(/\.html$/i,'');
+      arch = base ? (base[0].toUpperCase()+base.slice(1).toLowerCase()) : 'Dual';
+    }catch(_){}
+    chatPush('ai', `${arch}: ${reply||'...'}`);
+    try{ speakWithActiveArch(reply) }catch(_){}
+  }catch(e){
+    console.error(e);
+    chatPush('status','❌ Falha ao enviar.');
+  }
+}
+
+// Wire chat input bar
+(function initChatUI(){
+  const input = document.getElementById('chatInput');
+  const btnSend = document.getElementById('btnChatSend');
+  if(btnSend && input){
+    btnSend.onclick = ()=>{ const v = input.value; input.value=''; chatSendText(v); };
+    input.addEventListener('keydown', (e)=>{ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); btnSend.click(); }});
+  }
+})();
+
+/* ===================== FLOATING BUTTONS (texto/voz) ===================== */
+(function initFAB(){
+  const modal = document.getElementById('modalChatInput');
+  const ta = document.getElementById('modalText');
+  const open = (txt='')=>{ if(ta) ta.value = txt; modal?.classList.add('open'); modal?.setAttribute('aria-hidden','false'); };
+  const close = ()=>{ modal?.classList.remove('open'); modal?.setAttribute('aria-hidden','true'); };
+  const send = ()=>{ const v = ta?.value||''; close(); chatSendText(v); };
+
+  const fabText = document.getElementById('fabText');
+  const fabVoice = document.getElementById('fabVoice');
+  const btnSend = document.getElementById('btnModalSend');
+  const btnClose= document.getElementById('btnModalClose');
+
+  fabText && (fabText.onclick = ()=>open());
+  fabVoice && (fabVoice.onclick = ()=>{
+    // inicia a mesma conversa por voz usada na bolinha
+    const sk = localStorage.getItem('dual.keys.openrouter') || '';
+    const userName = (localStorage.getItem('infodose:userName') || '').trim();
+    const model = LS.get('dual.openrouter.model');
+    if(!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)){
+      toast('Seu navegador não suporta reconhecimento de fala.', 'err');
+      return;
+    }
+    // Aproveita startSpeechConversation() existente, mas direciona saída ao chat também
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const rec = new SpeechRecognition();
+    rec.lang = 'pt-BR'; rec.interimResults = false; rec.maxAlternatives = 1;
+    chatPush('chat-status','🎙️ Ouvindo…');
+    rec.onresult = (ev)=>{
+      const t = ev.results[0][0].transcript.trim();
+      if(t){ chatSendText(t); }
+    };
+    rec.onerror = ()=> chatPush('chat-status','❌ Erro no reconhecimento.');
+    rec.start();
+  });
+
+  btnSend && (btnSend.onclick = send);
+  btnClose && (btnClose.onclick = close);
+  modal && modal.addEventListener('click',(e)=>{ if(e.target===modal) close(); });
+})();
+
+/* ===================== NAV ajustes: 'revo' -> 'chat' ===================== */
+// Atualize o handler de navegação para conhecer a aba 'chat' em vez de 'revo'
+(function patchNav(){
+  const _nav = window.nav;
+  window.nav = function(key){
+    if(key==='revo') key='chat';
+    _nav(key);
+    if(key==='chat'){ try{ chatPush('chat-status','Conversa pronta.'); }catch(_){} }
+  };
+})();
+
+/* ===================== BACKGROUND VIEWER (Brain) ===================== */
+// Guardar histórico dos fundos: 'uno:bg:list' como array de {id,type,data,ts}
+function bgListGet(){ try{ return JSON.parse(localStorage.getItem('uno:bg:list')||'[]') }catch(_){ return [] } }
+function bgListSet(arr){ localStorage.setItem('uno:bg:list', JSON.stringify(arr||[])); }
+
+function renderBgViewer(){
+  const box = document.getElementById('bgViewer'); if(!box) return;
+  const list = bgListGet();
+  box.innerHTML = '';
+  // Também exponha o atual 'uno:bg' se não estiver no histórico
+  const cur = LS.get('uno:bg','');
+  if(cur && !list.find(x=>x.data===cur)){
+    list.unshift({id:'current', type: /^data:video\//.test(cur)?'video':'image', data: cur, ts: Date.now()});
+  }
+  if(!list.length){
+    box.innerHTML = '<div class="mut">Nenhum background salvo ainda.</div>';
+    return;
+  }
+  list.forEach((item,i)=>{
+    const card = document.createElement('div'); card.className='bg-item';
+    let el;
+    if(/^data:video\//.test(item.data)){
+      el = document.createElement('video'); el.src=item.data; el.muted=true; el.loop=true; el.autoplay=true; el.playsInline=true; el.className='thumb';
+    } else {
+      el = document.createElement('img'); el.src=item.data; el.alt=''; el.className='thumb';
+    }
+    const actions = document.createElement('div'); actions.className='actions';
+    const bApply = document.createElement('button'); bApply.className='btn fx-trans fx-press ring'; bApply.textContent='Aplicar';
+    const bDel   = document.createElement('button'); bDel.className='btn fx-trans fx-press ring';  bDel.textContent='Excluir';
+    actions.appendChild(bApply); actions.appendChild(bDel);
+    const meta = document.createElement('small'); meta.textContent = new Date(item.ts||Date.now()).toLocaleString();
+    card.appendChild(el); card.appendChild(actions); card.appendChild(meta);
+    box.appendChild(card);
+
+    bApply.onclick = ()=>{ LS.set('uno:bg', item.data); LS.set('uno:theme','custom'); try{ document.getElementById('themeSelect').value='custom' }catch(_){};
+      applyTheme(); toast('Fundo aplicado','ok'); };
+    bDel.onclick = ()=>{ const arr = bgListGet().filter(x=>x!==item && x.data!==item.data); bgListSet(arr); renderBgViewer(); toast('Fundo removido','warn'); };
+  });
+}
+renderBgViewer();
+
+/* Hook no upload existente para salvar no histórico também */
+(function hookBgUpload(){
+  const upload = document.getElementById('bgUpload');
+  if(!upload) return;
+  const old = upload.onchange;
+  upload.onchange = (e)=>{
+    const f = e.target.files && e.target.files[0];
+    if(!f){ old && old(e); return; }
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      try{
+        const data = reader.result;
+        const list = bgListGet(); 
+        list.unshift({ id: 'bg_'+Date.now().toString(36), type: /^data:video\//.test(data)?'video':'image', data, ts: Date.now() });
+        bgListSet(list.slice(0,50)); // limita histórico
+        renderBgViewer();
+      }catch(_){}
+    };
+    reader.readAsDataURL(f);
+    // chama o handler original (que já salva uno:bg e aplica)
+    if(typeof old === 'function'){ try{ old.call(upload, e) }catch(_){ } }
+  };
+})();
+  </script>
 </body>
 </html>
