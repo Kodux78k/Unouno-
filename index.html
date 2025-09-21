@@ -13,10 +13,6 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
-
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
   <title>HUB UNO</title>
   <meta name="theme-color" content="#0b0f14" />
   <style>
@@ -38,7 +34,17 @@
       --tabsH: 74px;
       --hdrH: 64px;
       --blur: 24px;
-      --ease: cubic-bezier(.22, .61, .36, 1);
+  /* Deslocamento opcional para o cabeçalho.  Ajuste este valor para
+     empurrar o cabeçalho (header.mast) alguns pixels para baixo.  O
+     padding superior do main será ajustado automaticamente. */
+  --hdrOffset: 0px;
+
+  /* Cor de overlay por arquétipo (gradiente sólido).  Esta variável
+     será atualizada dinamicamente via script conforme o arquétipo
+     ativo.  O valor padrão é transparente para não interferir na
+     estética quando nenhum arquétipo estiver selecionado. */
+ /* --arch-overlay: rgba(0,0,0,0); */
+  /*    --ease: cubic-bezier(.22, .61, .36, 1); */
     }
 
     /* Tema alternativo: medium gray / glasmorfismo. Quando body[data-theme="medium"] estiver definido, estas variáveis substituem as originais. */
@@ -56,7 +62,7 @@
       --ok: #68d391;
       --warn: #f6ad55;
       --err: #fc8181;
-      --blur: 24px;
+      --blur: 36px;
     }
 
     * { box-sizing: border-box }
@@ -64,14 +70,28 @@
 
     body {
       margin: 0;
-      min-height: 100dvh;
       color: var(--fg);
       background: linear-gradient(42deg, var(--grad-a), var(--grad-b)) fixed;
       font: 14px/1.45 Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
       overflow: hidden;
+  /* Permite que o pseudo-elemento ::after fique posicionado em relação ao corpo */
+  position: relative;
     }
+
+/* Overlay de cor do arquétipo ativo.  Usa a variável --arch-overlay definida no
+   :root e atualizada via script.  O overlay cobre toda a tela, tem pointer-events
+   desativado e fica atrás dos demais elementos (z-index: 0). */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: var(--arch-overlay);
+  pointer-events: none;
+  z-index: 0;
+ 
+}
 
     /* ===== Micro-interações base ===== */
     .fx-trans { transition: transform .16s var(--ease), background .25s var(--ease), box-shadow .25s var(--ease), border-color .25s var(--ease), color .25s var(--ease), opacity .25s var(--ease) }
@@ -95,7 +115,7 @@
     @keyframes ripple { from { opacity: .55; width: 0; height: 0 } to { opacity: 0; width: 260px; height: 260px } }
 
     /* ===== Header ===== */
-    header.mast { position: relative; inset: 0 0 auto 0; height: var(--hdrH); z-index: 100; display: flex; align-items: center; gap: 10px; padding: 0 12px; backdrop-filter: blur(var(--blur)) saturate(130%); background: linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,0)) }
+    header.mast { position: relative; inset: 0 0 auto 0; height: var(--hdrH); z-index: 100; display: flex; align-items: center; gap: 10px; padding: 0 12px; backdrop-filter: blur(var(--blur)) saturate(130%); background: linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,0)); margin-top: var(--hdrOffset); }
     .ib { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; box-shadow: var(--shadow) }
     .ib.fx-trans:hover { box-shadow: 0 10px 28px rgba(0,0,0,.5), 0 0 0 2px rgba(255,255,255,.10) inset }
     .title { flex: 1; text-align: center; line-height: 1 }
@@ -103,7 +123,7 @@
     .title small { display: block; color: var(--mut); letter-spacing: .1em }
 
     /* ===== Layout ===== */
-    main { position: relative; height: 100%; padding-top: calc(var(--hdrH) + env(safe-area-inset-top)); padding-bottom: calc(var(--tabsH) + env(safe-area-inset-bottom)); overflow: hidden }
+    main { position: relative; height: 100%; padding-top: calc(var(--hdrH) + env(safe-area-inset-top) + var(--hdrOffset)); padding-bottom: calc(var(--tabsH) + env(safe-area-inset-bottom)); overflow: hidden }
     .view { position: absolute; inset: 0; padding: 12px 14px; overflow: auto; display: none }
     .view.active { display: block; animation: fade .18s var(--ease) }
     @keyframes fade { from { opacity: 0; transform: translateY(6px) } }
@@ -123,6 +143,11 @@
 
     /* Esconde a grade de cards na Home e abre espaço para o feed de IA */
     #v-home .cards {
+      display: none !important;
+    }
+
+    /* O feed de IA na Home foi substituído pelo preview laranja; esconda o feed original */
+    #v-home #iaFeed {
       display: none !important;
     }
 
@@ -272,6 +297,21 @@
     .session .tools .btn:hover { box-shadow: 0 0 0 1px rgba(255,255,255,.18) inset, 0 8px 22px rgba(0,0,0,.35) }
     .session iframe { display: block; width: 100%; height: 60vh; border: 0; background: #000 }
     .session.min iframe { display: none }
+
+    /* Permite redimensionar a altura do iframe dentro das sessões arrastando o canto inferior esquerdo */
+    .session { position: relative; }
+    .session .resize-handle {
+      position: absolute;
+      left: 8px;
+      bottom: 8px;
+      width: 16px;
+      height: 16px;
+      cursor: ns-resize;
+      border-radius: 4px;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.25);
+    }
+    .session .resize-handle:hover { background: rgba(255,255,255,.25); }
 
     /* ===== Dock + Tabs ===== */
     .dock { position: fixed; left: 10px; right: 10px; bottom: calc(var(--tabsH) + 8px + env(safe-area-inset-bottom)); display: flex; gap: 8px; flex-wrap: wrap; z-index: 80 }
@@ -448,7 +488,7 @@
       background: var(--bg, #0b0f14);
       opacity: 0;
       pointer-events: none;
-      transition: opacity .3s ease;
+
     }
     #arch-fadeCover.show { opacity: 1; }
 
@@ -473,66 +513,201 @@
     .modal .panel { width: min(720px, 92vw); background: var(--surface-strong); border: var(--bd); border-radius: 16px; box-shadow: var(--shadow); padding: 16px }
     .kbd { border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.06); padding: 2px 6px; border-radius: 6px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px }
 
-    /* ===== REVO view styling ===== */
-    /* Remove default padding for the new Revo section and ensure the iframe fills the space */
-    #v-revo { padding: 0; }
-    #v-revo iframe { width: 100%; height: 100%; border: 0; background: transparent; }
-  
-/* === Dual adjustments (Kodux request) === */
-/* Feed no topo do portal e com tamanho máximo */
-#v-home #iaFeed{
-  max-height: 260px;
-  overflow: auto;
-  margin: 8px auto 10px;
-  z-index: 90;
-}
-/* Quando body.nav-right: barra de navegação vertical à direita */
-body.nav-right .tabbar{
-  position: fixed;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 56px;
-  height: auto;
-  background: transparent;
-  border: 0;
-  box-shadow: none;
-  padding: 0;
-}
-body.nav-right .tabbar .inner{
-  display: grid;
-  gap: 10px;
-}
-body.nav-right .tabbar .tab{
-  width: 56px; height: 56px; border-radius: 16px;
-  display: grid; place-items: center;
-}
-    /* === CHAT (ex-Revo) === */
-#v-chat { padding: 0; display: grid; grid-template-rows: 1fr auto; }
-.chat-feed { padding: 12px 14px; overflow: auto; display: flex; flex-direction: column; gap: 8px; }
-.chat-msg { margin: 0; padding: 10px 12px; border-radius: 16px; max-width: 75%; word-wrap: break-word; }
-.chat-msg.user { align-self: flex-end; background: rgba(255,255,255,.10); border-radius: 16px 16px 0 16px; }
-.chat-msg.ai   { align-self: flex-start; background: rgba(57,255,182,.12); border-radius: 16px 16px 16px 0; }
-.chat-status { color: var(--mut); font-size: 12px; align-self: center; }
-.chat-inputbar { display: flex; gap: 8px; padding: 10px 14px; background: var(--surface); border-top: var(--bd); }
-.chat-inputbar textarea { flex: 1; min-height: 42px; max-height: 36vh; resize: vertical; }
+    /* ===== Chat (Dual • Chat) ===== */
+    /* Configuração da seção de chat */
+    #v-chat {
+      padding: 0;
+      /* Não defina display aqui; ele será controlado pela classe .view e .active */
+      flex-direction: column;
+      gap: 12px;
+    }
 
-/* === Right FAB buttons (texto/voz) === */
-.right-fab { position: fixed; right: 14px; bottom: calc(var(--tabsH) + 90px + env(safe-area-inset-bottom)); z-index: 110; display: grid; gap: 10px; }
-.right-fab .fab { width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; border: var(--bd); background: var(--surface-strong); box-shadow: var(--shadow); }
-.right-fab .fab:hover { box-shadow: 0 12px 30px rgba(0,0,0,.5) }
+    /* Certifique-se de que a seção de chat seja exibida somente quando ativa.
+       A classe .view define display:none; quando .active é adicionada, tornamos flex para layout vertical. */
+    #v-chat.view.active, #v-chat.active {
+      display: flex;
+    }
+    #chatFeed {
+      /* Mantenha um tamanho mínimo para que mensagens apareçam mesmo sem altura flex */
+      min-height: 120px;
+      overflow-y: auto;
+      max-height: 46svh;
+      background: var(--surface);
+      border: var(--bd);
+      border-radius: var(--r2);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    #chatFeed .msg {
+      max-width: 75%;
+      margin: 0;
+      padding: 8px 12px;
+      border-radius: 16px;
+      word-wrap: break-word;
+    }
+    #chatFeed .msg.user {
+      align-self: flex-end;
+      background: rgba(255,255,255,0.10);
+      border-radius: 16px 16px 0 16px;
+    }
+    #chatFeed .msg.ai {
+      align-self: flex-start;
+      background: rgba(57,255,182,0.12);
+      border-radius: 16px 16px 16px 0;
+    }
+    #chatFeed .msg.status {
+      align-self: center;
+      color: var(--mut);
+      font-size: 12px;
+    }
+    /* O formulário #chatForm e o campo #chatInput foram removidos.  O envio
+       de mensagens é feito exclusivamente pelo overlay de texto fixo. */
+    #msgPreview {
+      position: fixed;
+      left: 14px;
+      right: 14px;
+      bottom: calc(var(--tabsH) + 20px + env(safe-area-inset-bottom, 0));
+      background: var(--warn);
+      color: #0b0f14;
+      border-radius: 18px;
+      padding: 10px 14px;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      box-shadow: var(--shadow);
+      z-index: 95;
+      cursor: pointer;
+      display: none;
+  /* Limite de altura para o preview; evita estourar o layout e permite arrastar no chat */
+  max-height: 33px;
+  overflow: hidden;
+    }
+    /* Ajuste para preview quando nav está na lateral direita */
+    body.nav-right #msgPreview {
+      right: calc(88px + 14px);
+      bottom: 14px;
+    }
 
-/* === Modal de input rápido de chat === */
-#modalChatInput .panel { display: grid; gap: 10px; }
-#modalChatInput textarea { width: 100%; min-height: 96px; }
+    /* ===== Overlay de entrada rápida na Home ===== */
+    /* Removido: o botão #homeInputToggle não é mais utilizado; os controles
+       de texto/voz são representados pelas bolinhas de ação. */
+    #homeInputOverlay {
+      position: fixed;
+      left: 14px;
+      right: 14px;
+      bottom: calc(var(--tabsH) + env(safe-area-inset-bottom, 0));
+      background: var(--surface-strong);
+      border-radius: 18px 18px 0 0;
+      border: var(--bd);
+      padding: 12px;
+      box-shadow: var(--shadow);
+      z-index: 97;
+      display: none;
+    }
+    #homeInputOverlay form {
+      display: flex;
+      gap: 8px;
+    }
+    #homeInputOverlay input {
+      flex: 1;
+      background: #0f1426;
+      color: var(--fg);
+      border: var(--bd);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 18px;
+    }
+    #homeInputOverlay input::placeholder {
+      color: var(--mut);
+    }
+    #homeInputOverlay button {
+      background: var(--ok);
+      border: none;
+      border-radius: 12px;
+      padding: 0 16px;
+      color: #0b0f14;
+      font-weight: 700;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    /* Ajustes quando a navegação está na direita: reposicione o botão e overlay para não colidir com a barra */
+    /* body.nav-right #homeInputToggle removido */
+    body.nav-right #homeInputOverlay {
+      left: 14px;
+      right: calc(88px + 14px);
+      bottom: calc(14px + env(safe-area-inset-bottom, 0));
+    }
 
-/* === Brain: viewer de fundos === */
-.bg-viewer { display: grid; grid-template-columns: repeat(auto-fill,minmax(140px,1fr)); gap: 10px; }
-.bg-item { background: var(--surface); border: var(--bd); border-radius: 12px; overflow: hidden; display: grid; grid-template-rows: 100px auto; }
-.bg-item .thumb { width: 100%; height: 100px; object-fit: cover; display: block; background:#000; }
-.bg-item .actions { display: flex; gap: 6px; padding: 8px; }
-.bg-item small { color: var(--mut); display:block; padding: 0 8px 8px; }
-</style>
+    /* ===== Botões duplos (texto/voz) na Home ===== */
+    /* Variante lateral empilhada: os botões ficam no canto direito,
+       empilhados um sobre o outro (coluna) para indicar ações distintas
+       (texto e voz).  Ajustamos a posição para cima da barra de
+       navegação. */
+    .home-btns {
+      position: fixed;
+      right: 14px;
+      left: auto;
+      transform: none;
+      bottom: calc(var(--tabsH) + 30px + env(safe-area-inset-bottom, 0));
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 10px;
+      z-index: 97;
+    }
+    .home-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 21px;
+      background: var(--surface);
+      border: var(--bd);
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .home-btn img {
+      width: 20px;
+      height: 20px;
+    }
+    .home-btn.active {
+      background: var(--ok);
+      color: #0b0f14;
+    }
+    /* Layout da barra de abas no modo nav-right */
+    body.nav-right nav.tabbar {
+      left: auto;
+      right: 0;
+      top: var(--hdrH);
+      bottom: env(safe-area-inset-bottom, 0);
+      width: 78px;
+      height: auto;
+      display: flex;
+      justify-content: flex-start;
+      padding: 6px 6px;
+    }
+    body.nav-right .tabbar .inner {
+      width: 100%;
+      max-width: none;
+      flex-direction: column;
+      align-items: center;
+    }
+    body.nav-right .tab {
+      flex: none;
+      width: 100%;
+      margin: 4px 0;
+    }
+    body.nav-right main {
+      padding-right: calc(78px + 14px);
+      padding-bottom: calc(env(safe-area-inset-bottom, 0) + 12px);
+    }
+  </style>
 </head>
 <body>
   <!-- ===== Header ===== -->
@@ -625,10 +800,10 @@ body.nav-right .tabbar .tab{
               <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/yin-yang.svg" alt="Arquétipo" width="20" height="20" onerror="this.onerror=null;this.src='icons/yin-yang.svg'">
               <span>Arquétipo</span>
             </button>
-            <button class="tab fx-trans fx-press ring" data-nav="chat">
-  <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/message.svg" alt="Chat" width="18" height="18" onerror="this.onerror=null;this.src='icons/message.svg'">
-  <span style="display:none">Chat</span><span class="ripple"></span>
-</button>
+            <button data-nav="chat">
+              <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/comments.svg" alt="Chat" width="20" height="20" onerror="this.onerror=null;this.src='icons/comments.svg'">
+              <span>Chat</span>
+            </button>
           <button data-audio="true" id="archAudioBtn">
             <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/microphone-lines.svg" alt="Áudio" width="20" height="20" onerror="this.onerror=null;this.src='icons/microphone-lines.svg'">
             <span>Áudio</span>
@@ -753,6 +928,16 @@ body.nav-right .tabbar .tab{
             <input id="sk" class="input ring" placeholder="sk-or-v1-…" />
             <button id="saveSK" class="btn fx-trans fx-press ring">Salvar<span class="ripple"></span></button>
           </div>
+
+          <!-- Modelo personalizado e treino -->
+          <div style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap">
+            <input id="customModel" class="input ring" placeholder="Modelo personalizado (ex: openai/gpt-4-custom)" style="flex:1" />
+            <button id="addModel" class="btn fx-trans fx-press ring">Adicionar Modelo<span class="ripple"></span></button>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap">
+            <input id="trainingFile" type="file" accept=".json,.txt,.dxt" class="input ring" style="max-width:260px" />
+            <span class="mut" style="font-size:11px">Treinamento (DXT)</span>
+          </div>
         </div>
 
           <!-- Tema e Fundo personalizados -->
@@ -772,9 +957,6 @@ body.nav-right .tabbar .tab{
                 <input id="bgUpload" type="file" accept="image/*,video/*" class="input ring" style="max-width:260px" />
               </label>
               <div class="mut" style="font-size:11px">Envie uma imagem ou vídeo para usar como plano de fundo quando o tema personalizado estiver selecionado. O fundo será salvo automaticamente no seu navegador.</div>
-              <!-- Viewer dos fundos salvos -->
-<div style="font-weight:800; margin-top:10px">Backgrounds salvos</div>
-<div id="bgViewer" class="bg-viewer"></div>
             </div>
           </div>
 
@@ -836,16 +1018,11 @@ body.nav-right .tabbar .tab{
       </div>
     </section>
 
-    <!-- CHAT (ex-Revo) -->
-<section id="v-chat" class="view">
-  <div id="chatFeed" class="chat-feed" aria-live="polite">
-    <div class="chat-status">Abra a conversa: envie um texto (🅣) ou voz (🎙️).</div>
-  </div>
-  <div class="chat-inputbar">
-    <textarea id="chatInput" class="input ring" placeholder="Escreva sua mensagem..."></textarea>
-    <button id="btnChatSend" class="btn prime fx-trans fx-press ring">Enviar<span class="ripple"></span></button>
-  </div>
-</section>
+    <!-- CHAT (Dual • Chat) -->
+    <section id="v-chat" class="view">
+      <!-- Feed de mensagens do chat -->
+      <div id="chatFeed"></div>
+    </section>
   </main>
 
   <!-- DOCK & TABS -->
@@ -868,13 +1045,34 @@ body.nav-right .tabbar .tab{
 <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/brain.svg" alt="Brain" width="18" height="18" onerror="this.onerror=null;this.src='icons/brain.svg'">
         <span style="display:none">Brain</span><span class="ripple"></span>
       </button>
-      <!-- Botão da nova aba Revo -->
-      <button class="tab fx-trans fx-press ring" data-nav="revo">
-<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/globe.svg" alt="Revo" width="18" height="18" onerror="this.onerror=null;this.src='icons/globe.svg'">
-        <span style="display:none">Revo</span><span class="ripple"></span>
+      <!-- Botão da nova aba Chat -->
+      <button class="tab fx-trans fx-press ring" data-nav="chat">
+<img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/comments.svg" alt="Chat" width="18" height="18" onerror="this.onerror=null;this.src='icons/comments.svg'">
+        <span style="display:none">Chat</span><span class="ripple"></span>
       </button>
     </div>
   </nav>
+  <!-- Preview da última mensagem recebida (aparece na home e leva ao chat) -->
+  <div id="msgPreview"></div>
+
+  <!-- Controles de texto e voz empilhados acima da barra de navegação -->
+  <div id="homeButtons" class="home-btns">
+    <button id="homeTextBtn" class="home-btn">
+      <img src="HubAdlineChat.png" alt="Texto" width="20" height="20" onerror="this.onerror=null;this.src='icons/pen-to-square.svg'">
+    </button>
+    <button id="homeVoiceBtn" class="home-btn">
+      <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/microphone.svg" alt="Voz" width="20" height="20" onerror="this.onerror=null;this.src='icons/microphone.svg'">
+    </button>
+  </div>
+  <!-- Overlay de input para envio rápido de mensagens na Home -->
+  <div id="homeInputOverlay">
+    <form id="homeInputForm" autocomplete="off">
+      <input id="homeInput" type="text" placeholder="Escreva aqui…" autocomplete="off" />
+      <button type="submit">
+        <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/paper-plane.svg" alt="Enviar" width="18" height="18" onerror="this.onerror=null;this.src='icons/paper-plane.svg'">
+      </button>
+    </form>
+  </div>
 
   <!-- HELP MODAL -->
   <div id="modalHelp" class="modal" aria-hidden="true">
@@ -889,7 +1087,7 @@ body.nav-right .tabbar .tab{
         <li><span class="kbd">g</span> then <span class="kbd">a</span> → Apps</li>
         <li><span class="kbd">g</span> then <span class="kbd">s</span> → Stack</li>
         <li><span class="kbd">g</span> then <span class="kbd">b</span> → Brain</li>
-        <li><span class="kbd">g</span> then <span class="kbd">r</span> → Revo</li>
+        <li><span class="kbd">g</span> then <span class="kbd">r</span> → Chat</li>
         <li><span class="kbd">Ctrl / Cmd</span> + <span class="kbd">K</span> → Busca</li>
         <li><span class="kbd">Ctrl / Cmd</span> + <span class="kbd">S</span> → Baixar este HTML</li>
       </ul>
@@ -1298,9 +1496,16 @@ body.nav-right .tabbar .tab{
 
     /* ===================== Navegação + Estado ===================== */
     function nav(key) {
-      // Adicionamos 'revo' à lista de abas para suportar a nova seção
-      const tabs = ['home', 'apps', 'stack', 'brain', 'revo'];
-      tabs.forEach(k => { $('#v-' + k).classList.toggle('active', k === key); $(`.tab[data-nav="${k}"]`).classList.toggle('active', k === key); });
+      // Remapeia a antiga aba 'revo' para 'chat'
+      if (key === 'revo') key = 'chat';
+      // Adicionamos 'chat' à lista de abas para suportar a nova seção
+      const tabs = ['home', 'apps', 'stack', 'brain', 'chat'];
+      tabs.forEach(k => {
+        const viewEl = document.getElementById('v-' + k);
+        if (viewEl) viewEl.classList.toggle('active', k === key);
+        const tabEl = document.querySelector(`.tab[data-nav="${k}"]`);
+        if (tabEl) tabEl.classList.toggle('active', k === key);
+      });
       LS.set('uno:lastTab', key);
       // Quando entrar na aba Home, apresente mensagem de saudação / última sessão
       if (key === 'home') {
@@ -1317,29 +1522,7 @@ body.nav-right .tabbar .tab{
         // Atualize também os status quando entrar no Home
         try { updateHomeStatus(); } catch {}
       }
-      // Quando entrar na aba Revo, envie a lista de apps ao iframe via postMessage
-      if (key === 'revo') {
-        try {
-          const apps = RAW && Array.isArray(RAW.apps) ? RAW.apps : [];
-          const iframe = document.getElementById('revoEmbed');
-          if (iframe) {
-            // If iframe already loaded, send immediately
-            const send = () => {
-              if (iframe.contentWindow) {
-                iframe.contentWindow.postMessage({ type: 'apps', apps }, '*');
-              }
-            };
-            // Always send a message after a tiny delay in case the frame is still initializing
-            setTimeout(send, 100);
-            // Also send again once the iframe loads
-            iframe.removeEventListener('load', iframe._sendApps);
-            iframe._sendApps = send;
-            iframe.addEventListener('load', send, { once: true });
-          }
-        } catch(e) {
-          console.warn('Falha ao enviar apps ao Revo:', e);
-        }
-      }
+      // Nenhuma ação especial ao entrar na aba de chat por enquanto
 
       // Falar uma frase curta ao trocar de aba, usando a voz do arquétipo ativo
       try {
@@ -1350,13 +1533,20 @@ body.nav-right .tabbar .tab{
           case 'apps': phrase = 'Abrindo apps'; break;
           case 'stack': phrase = 'Abrindo stack'; break;
           case 'brain': phrase = 'Abrindo usuário'; break;
-          case 'revo': phrase = 'Abrindo revo'; break;
+          case 'chat': phrase = 'Abrindo chat'; break;
           default: phrase = '';
         }
         if (phrase) {
           speakWithActiveArch(phrase);
           showArchMessage(phrase, type);
         }
+        // Mostrar o preview laranja somente na Home; escondê-lo nas outras abas
+        try {
+          const prev = document.getElementById('msgPreview');
+          if (prev) {
+            prev.style.display = (key === 'home' && prev.textContent) ? 'block' : 'none';
+          }
+        } catch (e) { console.warn(e); }
       } catch (e) {}
     }
 
@@ -1416,19 +1606,52 @@ body.nav-right .tabbar .tab{
 
     // Insere mensagens no feed de IA da Home. Mantém somente as últimas 10 entradas.
     function feedPush(type, text) {
+      // Adiciona mensagem ao feed de IA se existir (mantido para compatibilidade)
       const box = document.getElementById('iaFeed');
-      if (!box) return;
+      if (box) {
+        const div = document.createElement('div');
+        div.className = 'msg ' + (type || 'status');
+        div.textContent = text;
+        box.appendChild(div);
+        const msgs = box.querySelectorAll('.msg');
+        const limit = 10;
+        if (msgs.length > limit) {
+          box.removeChild(msgs[0]);
+        }
+        box.scrollTop = box.scrollHeight;
+      }
+      // Envia a mensagem também ao feed de chat e atualiza o preview
+      try {
+        chatPush(type, text);
+        if (type === 'ai') updatePreview(text);
+      } catch (e) { console.warn(e); }
+    }
+    // Função auxiliar para adicionar mensagens ao feed de chat
+    function chatPush(type, text) {
+      const feed = document.getElementById('chatFeed');
+      if (!feed) return;
       const div = document.createElement('div');
       div.className = 'msg ' + (type || 'status');
       div.textContent = text;
-      box.appendChild(div);
-      // Limita o número de mensagens exibidas
-      const msgs = box.querySelectorAll('.msg');
-      const limit = 10;
+      feed.appendChild(div);
+      const msgs = feed.querySelectorAll('.msg');
+      const limit = 50;
       if (msgs.length > limit) {
-        box.removeChild(msgs[0]);
+        feed.removeChild(msgs[0]);
       }
-      box.scrollTop = box.scrollHeight;
+      feed.scrollTop = feed.scrollHeight;
+    }
+    // Atualiza o preview laranja com a última resposta da IA
+    function updatePreview(text) {
+      const prev = document.getElementById('msgPreview');
+      if (!prev) return;
+      prev.textContent = text.replace(/\s+/g, ' ').trim();
+      // Exibe o preview apenas se a página Home estiver ativa.  Caso
+      // contrário, mantenha-o oculto para não interferir na visualização
+      // das outras abas (chat, apps etc.).
+      const homeView = document.getElementById('v-home');
+      const isHomeActive = homeView && homeView.classList.contains('active');
+      prev.style.display = isHomeActive ? 'block' : 'none';
     }
     function startSpeechConversation(userName, sk, model) {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -1562,29 +1785,73 @@ body.nav-right .tabbar .tab{
         }
       });
       }
+      // Clique no preview direciona ao chat
+      const mp = document.getElementById('msgPreview');
+      if (mp) mp.addEventListener('click', () => nav('chat'));
+
+      /* Formulário de chat removido: a captura de mensagens é feita via
+         overlay de entrada. */
+
+      // Inicialização dos botões de texto e voz na Home (overlay).  Dois botões
+      // empilhados acima da barra: o superior inicia reconhecimento de voz e
+      // o inferior mostra o campo de texto. O envio do formulário do
+      // overlay dispara a mesma lógica do chat padrão.
+      const textBtn = document.getElementById('homeTextBtn');
+      const voiceBtn = document.getElementById('homeVoiceBtn');
+      const hiOverlay = document.getElementById('homeInputOverlay');
+      const hiForm = document.getElementById('homeInputForm');
+      const hiInput = document.getElementById('homeInput');
+      // Exibe/oculta o overlay ao tocar no botão de texto
+      if (textBtn && hiOverlay && hiForm && hiInput) {
+        textBtn.addEventListener('click', () => {
+          const show = hiOverlay.style.display !== 'block';
+          hiOverlay.style.display = show ? 'block' : 'none';
+          textBtn.classList.toggle('active', show);
+          if (show) setTimeout(() => hiInput.focus(), 60);
+        });
+        hiForm.addEventListener('submit', (ev) => {
+          ev.preventDefault();
+          const msg = hiInput.value.trim();
+          if (!msg) return;
+          feedPush('user', 'Você: ' + msg);
+          showArchMessage('Pulso enviado. Recebendo intenção…', 'ok');
+          feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
+          const userName = (localStorage.getItem('dual.name') || localStorage.getItem('infodose:userName') || '').trim();
+          const sk = (localStorage.getItem('dual.keys.openrouter') || localStorage.getItem('infodose:sk') || '').trim();
+          let mdl = LS.get('dual.openrouter.model');
+          if (!mdl) mdl = (localStorage.getItem('infodose:model') || '').trim() || 'openrouter/auto';
+          try { handleUserMessage(msg, userName, sk, mdl); } catch (e) { console.warn(e); }
+          hiInput.value = '';
+        });
+      }
+      // Inicia conversa por voz ao tocar no botão de voz
+      if (voiceBtn) {
+        voiceBtn.addEventListener('click', () => {
+          const userName = (localStorage.getItem('dual.name') || localStorage.getItem('infodose:userName') || '').trim();
+          const sk = (localStorage.getItem('dual.keys.openrouter') || localStorage.getItem('infodose:sk') || '').trim();
+          let mdl = LS.get('dual.openrouter.model');
+          if (!mdl) mdl = (localStorage.getItem('infodose:model') || '').trim() || 'openrouter/auto';
+          if (hiOverlay) hiOverlay.style.display = 'none';
+          if (typeof startSpeechConversation === 'function') {
+            startSpeechConversation(userName, sk, mdl);
+          }
+        });
+      }
     });
 
     // Helper: se a aba Revo estiver ativa, envia a lista atual de apps ao iframe.  
     function maybeSendAppsToRevo() {
-      try {
-        // Só envie se a aba Revo estiver visível
-        const view = document.getElementById('v-revo');
-        if (!view || !view.classList.contains('active')) return;
-        const iframe = document.getElementById('revoEmbed');
-        const apps = RAW && Array.isArray(RAW.apps) ? RAW.apps : [];
-        if (iframe && iframe.contentWindow) {
-          iframe.contentWindow.postMessage({ type: 'apps', apps }, '*');
-        }
-      } catch (e) {
-        console.warn('Falha ao enviar apps ao Revo (maybe):', e);
-      }
+      // Revo foi substituído pelo Chat; nenhuma mensagem precisa ser enviada
+      return;
     }
     $$('.tab,[data-nav]').forEach(b => b.addEventListener('click', () => nav(b.dataset.nav || 'home')));
     $('#btnBack').onclick = () => { try { history.length > 1 && history.back() } catch { } };
     $('#btnBrain').onclick = () => nav('brain');
 
     // Restaurar última aba
-    const last = LS.get('uno:lastTab', 'home');
+    let last = LS.get('uno:lastTab', 'home');
+    // Se o último tab salvo for 'revo', redirecione para home para evitar páginas vazias
+    if (last === 'revo') last = 'home';
     nav(last);
     // Se a aba inicial for home, exibir saudação
     if (last === 'home') {
@@ -1598,7 +1865,7 @@ body.nav-right .tabbar .tab{
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); $('#appSearch')?.focus(); return; }
       if (e.key.toLowerCase() === 'g') { gPressed = true; setTimeout(() => gPressed = false, 600); return; }
       if (!gPressed) return; const k = e.key.toLowerCase();
-      if (k === 'h') nav('home'); if (k === 'a') nav('apps'); if (k === 's') nav('stack'); if (k === 'b') nav('brain'); if (k === 'r') nav('revo'); gPressed = false;
+      if (k === 'h') nav('home'); if (k === 'a') nav('apps'); if (k === 's') nav('stack'); if (k === 'b') nav('brain'); if (k === 'r') nav('chat'); gPressed = false;
     });
 
     // Ajuda modal
@@ -1632,6 +1899,39 @@ body.nav-right .tabbar .tab{
         try { displayGreeting(); } catch (e) {}
         try { updateHomeStatus(); } catch {}
       };
+
+      // Permitir adicionar modelo personalizado
+      const addBtn = $('#addModel');
+      const customInput = $('#customModel');
+      if (addBtn && customInput) {
+        addBtn.onclick = () => {
+          const val = (customInput.value || '').trim();
+          if (!val) return;
+          const opt = document.createElement('option');
+          opt.value = val; opt.textContent = val;
+          sel.appendChild(opt);
+          sel.value = val;
+          LS.set('dual.openrouter.model', val);
+          customInput.value = '';
+          toast('Modelo adicionado', 'ok');
+        };
+      }
+      // Permitir carregamento de arquivo de treino
+      const trainInp = $('#trainingFile');
+      if (trainInp) {
+        trainInp.addEventListener('change', (ev) => {
+          const file = ev.target.files && ev.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = () => {
+            try {
+              LS.set('dual.openrouter.training', { name: file.name, data: reader.result });
+              toast('Treinamento carregado', 'ok');
+            } catch (err) { console.error(err); toast('Erro ao carregar treino', 'err'); }
+          };
+          reader.readAsDataURL(file);
+        });
+      }
     })();
 
     /* ===================== Inicialização do tema & personalização de fundo ===================== */
@@ -1993,7 +2293,30 @@ body.nav-right .tabbar .tab{
             </button>
           </div>
         </div>
-        <iframe src="${url || 'about:blank'}" allow="autoplay; clipboard-read; clipboard-write; picture-in-picture; fullscreen"></iframe>`;
+        <iframe src="${url || 'about:blank'}" allow="autoplay; clipboard-read; clipboard-write; picture-in-picture; fullscreen"></iframe>
+        <div class="resize-handle" title="Arraste para ajustar a altura"></div>`;
+      // Redimensionar altura do iframe arrastando o handle
+      (function bindResize(){
+        const handle = card.querySelector('.resize-handle');
+        const iframe = card.querySelector('iframe');
+        if(!handle || !iframe) return;
+        let startY = 0, startH = 0, dragging = false;
+        handle.addEventListener('pointerdown', (ev) => {
+          dragging = true;
+          startY = ev.clientY;
+          startH = iframe.clientHeight;
+          handle.setPointerCapture(ev.pointerId);
+        });
+        handle.addEventListener('pointermove', (ev) => {
+          if(!dragging) return;
+          const dy = ev.clientY - startY;
+          const h = Math.max(120, startH + dy);
+          iframe.style.height = h + 'px';
+        });
+        const stop = () => { dragging = false; };
+        handle.addEventListener('pointerup', stop);
+        handle.addEventListener('pointercancel', stop);
+      })();
       // Prepend the session card dependendo do modo de abertura. Se "abrir dentro" estiver marcado,
       // insira a sessão no topo da página (sessionsAnchor); caso contrário, use o stackWrap padrão.
       const anchor = document.getElementById('sessionsAnchor');
@@ -2040,6 +2363,34 @@ body.nav-right .tabbar .tab{
       const select = document.getElementById('arch-select');
       const frame = document.getElementById('arch-frame');
       const fade = document.getElementById('arch-fadeCover');
+
+      // Mapeamento de cores/gradientes por arquétipo.  Cada chave
+      // corresponde ao nome do arquivo sem a extensão .html e define
+      // um valor CSS (cor sólida ou gradiente) com opacidade baixa
+      // para aplicar como overlay.  Ajuste as cores conforme o
+      // significado simbólico de cada arquétipo.
+      const ARCH_OVERLAYS = {
+        luxara: 'rgba(181, 96, 255, 0.22)',  // roxo suave
+        rhea:   'rgba(0, 209, 178, 0.22)',  // verde-água
+        aion:   'rgba(255, 159, 67, 0.22)',  // laranja dourado
+        atlas:  'rgba(64, 158, 255, 0.22)',  // azul celeste
+        nova:   'rgba(255, 82, 177, 0.22)',  // rosa fúcsia
+        genus:  'rgba(87, 207, 112, 0.22)',  // verde esmeralda
+        lumine:'rgba(255, 213, 79, 0.22)',  // amarelo suave
+        kaion:  'rgba(0, 191, 255, 0.22)',  // azul turquesa
+        kaos:   'rgba(255, 77, 109, 0.22)', // vermelho vibrante
+        horus:  'rgba(255, 195, 0, 0.22)',  // dourado
+        elysha:'rgba(186, 130, 219, 0.22)', // lilás
+        // valores padrão para quaisquer outros arquétipos
+        default:'rgba(255, 255, 255, 0.0)'
+      };
+
+      // Aplica a cor/gradiente de overlay correspondente ao arquétipo
+      function applyArchOverlay(name) {
+        const key = (name || '').toLowerCase();
+        const color = ARCH_OVERLAYS[key] || ARCH_OVERLAYS.default;
+        document.documentElement.style.setProperty('--arch-overlay', color);
+      }
       function populate() {
         select.innerHTML = '';
         archList.forEach(name => {
@@ -2063,6 +2414,12 @@ body.nav-right .tabbar .tab{
         // Atualiza as informações da Home (cartões) quando o arquétipo muda
         try {
           updateHomeStatus();
+        } catch (e) {}
+
+        // Ajusta o overlay de cor para o arquétipo selecionado
+        try {
+          const base = file.replace(/\.html$/i, '');
+          applyArchOverlay(base);
         } catch (e) {}
       }
       let current = 0;
@@ -2164,348 +2521,6 @@ body.nav-right .tabbar .tab{
       }
     })();
     $$('button').forEach(addRipple);
-  
-// === Dual adjustments: move feed to top ===
-document.addEventListener('DOMContentLoaded', () => {
-  try{
-    const feed = document.getElementById('iaFeed');
-    const archContainer = document.querySelector('#v-home .arch-container');
-    if(feed && archContainer && archContainer.parentNode){
-      archContainer.parentNode.insertBefore(feed, archContainer);
-    }
-  }catch(e){}
-});
-
-// === Dual Voices: mapping por arquétipo com micro variações (pitch/rate) ===
-const ARCH_GENDER = {
-  "Atlas":"m","Kaion":"m","Kaos":"m","Horus":"m","Genus":"m","Aion":"m",
-  "Nova":"f","Elysha":"f","Luxara":"f","Serena":"f","Rhea":"f","Artemis":"f"
-};
-function loadVoiceMap(){
-  try{ return JSON.parse(localStorage.getItem('dual.voices.map'))||{} }catch(_){ return {} }
-}
-function saveVoiceMap(map){
-  localStorage.setItem('dual.voices.map', JSON.stringify(map||{}));
-}
-function pickVoiceByGender(voices, gender){
-  const langPref = v => /pt\-BR|Portugu[eê]s/i.test(v.lang||v.name||'');
-  const femHint = v => /(female|feminina|mulher)/i.test(v.name||'');
-  const mascHint = v => /(male|masculina|homem)/i.test(v.name||'');
-  const choose = (preds) => voices.find(v => preds.every(p=>p(v)));
-  if(gender==='f'){
-    return choose([langPref, femHint]) || choose([femHint]) || choose([langPref]) || voices[0];
-  }else{
-    return choose([langPref, mascHint]) || choose([mascHint]) || choose([langPref]) || voices[0];
-  }
-}
-function microVarFor(name){
-  // micro variação determinística por arquétipo
-  let h=0; for(const c of name) h=(h*31 + c.charCodeAt(0)) & 0xffffffff;
-  const rnd = (seed)=>((seed%1000)/1000);
-  const r = rnd(Math.abs(h));
-  const pitch = 0.95 + (r*0.2); // 0.95..1.15
-  const rate  = 0.96 + ((1-r)*0.18); // 0.96..1.14
-  return {pitch: +pitch.toFixed(2), rate: +rate.toFixed(2)};
-}
-// Override speakWithActiveArch to use mapping if available
-(function(){
-  const _orig = window.speakWithActiveArch;
-  window.speakWithActiveArch = function(text){
-    const synth = window.speechSynthesis;
-    if(!synth){ try{ _orig && _orig(text) }catch(_){}; return; }
-    const voices = synth.getVoices();
-    const select = document.getElementById('arch-select');
-    let base = (select?.value||'').replace(/\.html$/i,'');
-    const arch = base ? (base[0].toUpperCase()+base.slice(1).toLowerCase()) : 'Atlas';
-    const map = loadVoiceMap();
-    const conf = map[arch] || {};
-    const u = new SpeechSynthesisUtterance(String(text||''));
-    let v = voices.find(v=>v.name===conf.name) || pickVoiceByGender(voices, ARCH_GENDER[arch]||'m');
-    u.voice = v;
-    const mv = conf.pitch && conf.rate ? conf : microVarFor(arch);
-    u.pitch = mv.pitch; u.rate = mv.rate;
-    u.lang = (v && v.lang) || 'pt-BR';
-    synth.speak(u);
-  };
-})();
-// UI: construir painel por arquétipo no #voicesWrap (se existir)
-document.addEventListener('DOMContentLoaded', ()=>{
-  const wrap = document.getElementById('voicesWrap');
-  if(!wrap) return;
-  const synth = window.speechSynthesis;
-  function rebuild(){
-    const voices = synth.getVoices();
-    if(!voices || !voices.length){ setTimeout(rebuild, 200); return; }
-    const map = loadVoiceMap();
-    wrap.innerHTML = '';
-    const ARCHS = Object.keys(ARCH_GENDER);
-    ARCHS.forEach(arch=>{
-      const row = document.createElement('div');
-      row.style.display='grid'; row.style.gridTemplateColumns='120px 1fr auto'; row.style.gap='8px'; row.style.alignItems='center';
-      const label = document.createElement('div'); label.textContent = arch; label.style.fontWeight='800';
-      const sel = document.createElement('select'); sel.className='input ring'; sel.dataset.arch=arch;
-      voices.forEach(v=>{
-        const opt = document.createElement('option');
-        opt.value = v.name; opt.textContent = `${v.name} (${v.lang})`;
-        sel.appendChild(opt);
-      });
-      const save = document.createElement('button'); save.className='btn fx-trans fx-press ring'; save.textContent='Salvar';
-      const test = document.createElement('button'); test.className='btn fx-trans fx-press ring'; test.style.marginLeft='6px'; test.textContent='Testar';
-      const btnBox = document.createElement('div'); btnBox.appendChild(save); btnBox.appendChild(test);
-      // defaults
-      const conf = map[arch] || {};
-      const defVoice = voices.find(v=>v.name===conf.name) || pickVoiceByGender(voices, ARCH_GENDER[arch]);
-      sel.value = (defVoice && defVoice.name) || voices[0].name;
-      row.appendChild(label); row.appendChild(sel); row.appendChild(btnBox);
-      wrap.appendChild(row);
-      save.onclick = ()=>{
-        const m = loadVoiceMap();
-        const mv = microVarFor(arch);
-        m[arch] = { name: sel.value, pitch: (conf.pitch||mv.pitch), rate: (conf.rate||mv.rate) };
-        saveVoiceMap(m);
-        toast('Voz salva', 'ok');
-      };
-      test.onclick = ()=>{
-        const m = loadVoiceMap();
-        const mv = m[arch] || microVarFor(arch);
-        const u = new SpeechSynthesisUtterance(`${arch} conectado. Teste de voz.`);
-        u.voice = voices.find(v=>v.name===sel.value) || voices[0];
-        u.pitch = mv.pitch; u.rate = mv.rate; u.lang = u.voice.lang || 'pt-BR';
-        synth.speak(u);
-      };
-    });
-  }
-  rebuild();
-  // Botão global de atualizar lista
-  const perfCard = document.getElementById('voicesWrap'); // reusar card
-  const updateBtn = document.createElement('button');
-  updateBtn.id='btnVoicesUpdate'; updateBtn.className='btn fx-trans fx-press ring';
-  updateBtn.textContent='Atualizar Vozes';
-  updateBtn.style.marginTop='6px';
-  perfCard.parentNode.appendChild(updateBtn);
-  updateBtn.onclick = ()=>{ window.speechSynthesis.onvoiceschanged = null; rebuild(); toast('Lista de vozes atualizada', 'ok'); };
-  // re-popular quando o navegador carregar as vozes
-  window.speechSynthesis.onvoiceschanged = rebuild;
-});
-
-// === Enriquecimento no feed (ações, chips, links, code) ===
-function feedPushDual(type, text){
-  const box = document.getElementById('iaFeed');
-  if(!box) return;
-  const div = document.createElement('div');
-  div.className = 'msg ' + (type||'ai');
-  div.textContent = text;
-  box.appendChild(div);
-  // Limitar quantidade
-  const msgs = box.querySelectorAll('.msg');
-  const limit = 10; if (msgs.length>limit) box.removeChild(msgs[0]);
-  // Tornar interativo
-  div.classList.add('rich');
-  dualEnrich(div);
-  box.scrollTop = box.scrollHeight;
-}
-function sendMessageFromSuggestion(txt){
-  if(!txt) return;
-  // Reusar pipeline de voz → IA
-  const sk = localStorage.getItem('dual.keys.openrouter') || '';
-  const userName = (localStorage.getItem('infodose:userName') || '').trim();
-  const model = LS.get('dual.openrouter.model');
-  feedPush('user','Você: '+txt);
-  handleUserMessage(txt, userName, sk, model);
-}
-// Html → elementos interativos (simplificado)
-function dualEnrich(node){
-  const escapeHtml = s => String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-  const attr = s => String(s).replace(/"/g,'&quot;');
-  let raw = node.textContent||'';
-  let html = escapeHtml(raw);
-  // ( ... ) → ação
-  html = html.replace(/\(([^()]+)\)/g, (m,inner)=>{
-    const lab = inner.trim().replace(/\s*->\s*/g,' → ');
-    return `<button class="action" data-send="${attr(lab)}">${escapeHtml(lab)}</button>`;
-  });
-  // Emojis → chip
-  html = html.replace(/(\p{Emoji_Presentation}|\p{Extended_Pictographic}|[⚡⭕✦☆★✧✩◆◇▶️◀️⏯️⏵⏸️⏹️🎛️🎚️🎙️🎧️🎼️🎹️🗂️📎🧩🔥🌙✨💡💾🧪⭐️])/gu,
-    (m)=>`<span class="chip" data-send="${attr(m)}">${escapeHtml(m)}</span>`);
-  // Links
-  html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (m,label,url)=>`<button class="link" data-url="${attr(url)}">${escapeHtml(label)} ↗</button>`);
-  html = html.replace(/(https?:\/\/[^\s]+)/g, (m,url)=>`<button class="link" data-url="${attr(url)}">${escapeHtml(url)} ↗</button>`);
-  // Code fence
-  html = html.replace(/```([a-z0-9_\-.+#]*)\n([\s\S]*?)```/gi, (m,lang,body)=>{
-    return `<pre class="code"><button class="copy" data-code="${attr(body)}">Copiar</button><code data-lang="${attr(lang||'text')}">${escapeHtml(body)}</code><span class="lang">${escapeHtml(lang||'text')}</span></pre>`;
-  });
-  node.innerHTML = html;
-  // binds
-  node.querySelectorAll('.action,.chip').forEach(el=>el.addEventListener('click',()=>sendMessageFromSuggestion(el.getAttribute('data-send'))));
-  node.querySelectorAll('.link').forEach(el=>el.addEventListener('click',()=>{ const url=el.getAttribute('data-url'); try{ window.open(url,'_blank') }catch(e){} }));
-  node.querySelectorAll('.code .copy').forEach(btn=>btn.addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(btn.getAttribute('data-code')||''); toast('Código copiado','ok') }catch(e){ toast('Falha ao copiar','err') } }));
-  // highlight
-  node.querySelectorAll('code[data-lang]').forEach(codeEl=>{
-    try{ highlightCode(codeEl, codeEl.getAttribute('data-lang')||'text'); }catch(_){}
-  });
-}
-    /* ===================== CHAT CORE (ex-Revo) ===================== */
-function chatPush(type, text){
-  const box = document.getElementById('chatFeed'); if(!box) return;
-  const div = document.createElement('div');
-  div.className = type==='user' ? 'chat-msg user' : (type==='ai' ? 'chat-msg ai' : 'chat-status');
-  div.textContent = text;
-  box.appendChild(div);
-  // limitar a 60 msgs
-  const msgs = box.querySelectorAll('.chat-msg,.chat-status');
-  if(msgs.length>60) box.removeChild(msgs[0]);
-  box.scrollTop = box.scrollHeight;
-}
-
-async function chatSendText(raw){
-  const text = String(raw||'').trim();
-  if(!text) return;
-  const sk = localStorage.getItem('dual.keys.openrouter') || '';
-  const userName = (localStorage.getItem('infodose:userName') || '').trim();
-  const model = LS.get('dual.openrouter.model');
-  chatPush('user', 'Você: ' + text);
-  try{
-    const reply = await sendAIMessage(`${userName ? userName+' disse: ' : ''}${text}`, sk, model);
-    let arch = 'Dual';
-    try{
-      const sel = document.getElementById('arch-select');
-      let base = (sel?.value||'').replace(/\.html$/i,'');
-      arch = base ? (base[0].toUpperCase()+base.slice(1).toLowerCase()) : 'Dual';
-    }catch(_){}
-    chatPush('ai', `${arch}: ${reply||'...'}`);
-    try{ speakWithActiveArch(reply) }catch(_){}
-  }catch(e){
-    console.error(e);
-    chatPush('status','❌ Falha ao enviar.');
-  }
-}
-
-// Wire chat input bar
-(function initChatUI(){
-  const input = document.getElementById('chatInput');
-  const btnSend = document.getElementById('btnChatSend');
-  if(btnSend && input){
-    btnSend.onclick = ()=>{ const v = input.value; input.value=''; chatSendText(v); };
-    input.addEventListener('keydown', (e)=>{ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); btnSend.click(); }});
-  }
-})();
-
-/* ===================== FLOATING BUTTONS (texto/voz) ===================== */
-(function initFAB(){
-  const modal = document.getElementById('modalChatInput');
-  const ta = document.getElementById('modalText');
-  const open = (txt='')=>{ if(ta) ta.value = txt; modal?.classList.add('open'); modal?.setAttribute('aria-hidden','false'); };
-  const close = ()=>{ modal?.classList.remove('open'); modal?.setAttribute('aria-hidden','true'); };
-  const send = ()=>{ const v = ta?.value||''; close(); chatSendText(v); };
-
-  const fabText = document.getElementById('fabText');
-  const fabVoice = document.getElementById('fabVoice');
-  const btnSend = document.getElementById('btnModalSend');
-  const btnClose= document.getElementById('btnModalClose');
-
-  fabText && (fabText.onclick = ()=>open());
-  fabVoice && (fabVoice.onclick = ()=>{
-    // inicia a mesma conversa por voz usada na bolinha
-    const sk = localStorage.getItem('dual.keys.openrouter') || '';
-    const userName = (localStorage.getItem('infodose:userName') || '').trim();
-    const model = LS.get('dual.openrouter.model');
-    if(!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)){
-      toast('Seu navegador não suporta reconhecimento de fala.', 'err');
-      return;
-    }
-    // Aproveita startSpeechConversation() existente, mas direciona saída ao chat também
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const rec = new SpeechRecognition();
-    rec.lang = 'pt-BR'; rec.interimResults = false; rec.maxAlternatives = 1;
-    chatPush('chat-status','🎙️ Ouvindo…');
-    rec.onresult = (ev)=>{
-      const t = ev.results[0][0].transcript.trim();
-      if(t){ chatSendText(t); }
-    };
-    rec.onerror = ()=> chatPush('chat-status','❌ Erro no reconhecimento.');
-    rec.start();
-  });
-
-  btnSend && (btnSend.onclick = send);
-  btnClose && (btnClose.onclick = close);
-  modal && modal.addEventListener('click',(e)=>{ if(e.target===modal) close(); });
-})();
-
-/* ===================== NAV ajustes: 'revo' -> 'chat' ===================== */
-// Atualize o handler de navegação para conhecer a aba 'chat' em vez de 'revo'
-(function patchNav(){
-  const _nav = window.nav;
-  window.nav = function(key){
-    if(key==='revo') key='chat';
-    _nav(key);
-    if(key==='chat'){ try{ chatPush('chat-status','Conversa pronta.'); }catch(_){} }
-  };
-})();
-
-/* ===================== BACKGROUND VIEWER (Brain) ===================== */
-// Guardar histórico dos fundos: 'uno:bg:list' como array de {id,type,data,ts}
-function bgListGet(){ try{ return JSON.parse(localStorage.getItem('uno:bg:list')||'[]') }catch(_){ return [] } }
-function bgListSet(arr){ localStorage.setItem('uno:bg:list', JSON.stringify(arr||[])); }
-
-function renderBgViewer(){
-  const box = document.getElementById('bgViewer'); if(!box) return;
-  const list = bgListGet();
-  box.innerHTML = '';
-  // Também exponha o atual 'uno:bg' se não estiver no histórico
-  const cur = LS.get('uno:bg','');
-  if(cur && !list.find(x=>x.data===cur)){
-    list.unshift({id:'current', type: /^data:video\//.test(cur)?'video':'image', data: cur, ts: Date.now()});
-  }
-  if(!list.length){
-    box.innerHTML = '<div class="mut">Nenhum background salvo ainda.</div>';
-    return;
-  }
-  list.forEach((item,i)=>{
-    const card = document.createElement('div'); card.className='bg-item';
-    let el;
-    if(/^data:video\//.test(item.data)){
-      el = document.createElement('video'); el.src=item.data; el.muted=true; el.loop=true; el.autoplay=true; el.playsInline=true; el.className='thumb';
-    } else {
-      el = document.createElement('img'); el.src=item.data; el.alt=''; el.className='thumb';
-    }
-    const actions = document.createElement('div'); actions.className='actions';
-    const bApply = document.createElement('button'); bApply.className='btn fx-trans fx-press ring'; bApply.textContent='Aplicar';
-    const bDel   = document.createElement('button'); bDel.className='btn fx-trans fx-press ring';  bDel.textContent='Excluir';
-    actions.appendChild(bApply); actions.appendChild(bDel);
-    const meta = document.createElement('small'); meta.textContent = new Date(item.ts||Date.now()).toLocaleString();
-    card.appendChild(el); card.appendChild(actions); card.appendChild(meta);
-    box.appendChild(card);
-
-    bApply.onclick = ()=>{ LS.set('uno:bg', item.data); LS.set('uno:theme','custom'); try{ document.getElementById('themeSelect').value='custom' }catch(_){};
-      applyTheme(); toast('Fundo aplicado','ok'); };
-    bDel.onclick = ()=>{ const arr = bgListGet().filter(x=>x!==item && x.data!==item.data); bgListSet(arr); renderBgViewer(); toast('Fundo removido','warn'); };
-  });
-}
-renderBgViewer();
-
-/* Hook no upload existente para salvar no histórico também */
-(function hookBgUpload(){
-  const upload = document.getElementById('bgUpload');
-  if(!upload) return;
-  const old = upload.onchange;
-  upload.onchange = (e)=>{
-    const f = e.target.files && e.target.files[0];
-    if(!f){ old && old(e); return; }
-    const reader = new FileReader();
-    reader.onload = ()=>{
-      try{
-        const data = reader.result;
-        const list = bgListGet(); 
-        list.unshift({ id: 'bg_'+Date.now().toString(36), type: /^data:video\//.test(data)?'video':'image', data, ts: Date.now() });
-        bgListSet(list.slice(0,50)); // limita histórico
-        renderBgViewer();
-      }catch(_){}
-    };
-    reader.readAsDataURL(f);
-    // chama o handler original (que já salva uno:bg e aplica)
-    if(typeof old === 'function'){ try{ old.call(upload, e) }catch(_){ } }
-  };
-})();
   </script>
 </body>
 </html>
