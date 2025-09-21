@@ -856,14 +856,14 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
       const entry = '[' + new Date().toLocaleTimeString() + '] ' + msg;
       dualState.logs.unshift(entry);
       const logsEl = document.getElementById('logs');
-      if (logsEl) logsEl.textContent = dualState.logs.slice(0, 60).join('\n');
+      if(logsEl) logsEl.textContent = dualState.logs.slice(0, 60).join('\n');
     }
 
     /* Ripple */
     function addRipple(el) {
-      if (!el) return;
+      if(!el) return;
       // Ensure a ripple host exists on the element. The global ripple handler will create dots on pointerdown.
-      if (!el.querySelector('.ripple')) {
+      if(!el.querySelector('.ripple')) {
         const slot = document.createElement('span');
         slot.className = 'ripple';
         el.appendChild(slot);
@@ -887,10 +887,10 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     function displayGreeting() {
       const card = document.getElementById('greetingCard');
       // Não exibir o cartão de saudação; usamos mensagens na bolinha
-      if (card) card.style.display = 'none';
+      if(card) card.style.display = 'none';
       const name = (localStorage.getItem('infodose:userName') || '').trim();
       const sessions = document.querySelectorAll('.session').length;
-      if (!name) {
+      if(!name) {
         showArchMessage('Salve! Ative sua Dual Infodose registrando seu nome na seção Brain.', 'warn');
       } else {
         showArchMessage(`Bem-vindo de volta, ${name}. UNO está ao seu lado. Você tem ${sessions} sessão(ões) ativa(s).`, 'ok');
@@ -904,24 +904,24 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     function applyTheme() {
       const theme = LS.get('uno:theme', 'medium');
       // Limpe qualquer dataset para que CSS default seja aplicado quando 'default'
-      if (theme === 'default') {
+      if(theme === 'default') {
         delete document.body.dataset.theme;
       } else {
         document.body.dataset.theme = theme;
       }
       // Gerenciar fundo personalizado
       const bgContainer = document.getElementById('custom-bg');
-      if (!bgContainer) return;
-      if (theme !== 'custom') {
+      if(!bgContainer) return;
+      if(theme !== 'custom') {
         bgContainer.innerHTML = '';
         return;
       }
       // Carregar dados do fundo
       const bgData = LS.get('uno:bg', '');
       bgContainer.innerHTML = '';
-      if (!bgData) return;
+      if(!bgData) return;
       // Determine se é vídeo ou imagem
-      if (/^data:video\//.test(bgData)) {
+      if(/^data:video\//.test(bgData)) {
         const vid = document.createElement('video');
         vid.src = bgData;
         vid.autoplay = true;
@@ -947,7 +947,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     // Aplica o CSS salvo em localStorage (chave 'infodose:cssCustom')
     function applyCSS() {
       let styleEl = document.getElementById('customStyle');
-      if (!styleEl) {
+      if(!styleEl) {
         styleEl = document.createElement('style');
         styleEl.id = 'customStyle';
         document.head.appendChild(styleEl);
@@ -959,7 +959,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     // Inicializa seleção de vozes para cada arquétipo
     function initVoices() {
       const wrap = document.getElementById('voicesWrap');
-      if (!wrap) return;
+      if(!wrap) return;
       wrap.innerHTML = '';
       const archList = [ 'Luxara','Rhea','Aion','Atlas','Nova','Genus','Lumine','Kaion','Kaos','Horus','Elysha','Serena' ];
       function populateVoices() {
@@ -969,10 +969,10 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
         voices = filtered.length ? filtered : voices;
         const saved = LS.get('infodose:voices', {}) || {};
         // Se ainda não houver vozes salvas, defina um mapeamento padrão
-        if (Object.keys(saved).length === 0 && voices.length) {
+        if(Object.keys(saved).length === 0 && voices.length) {
           archList.forEach((name, idx) => {
             const v = voices[idx % voices.length];
-            if (v) saved[name] = v.name;
+            if(v) saved[name] = v.name;
           });
           LS.set('infodose:voices', saved);
         }
@@ -995,7 +995,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
             opt.textContent = `${v.name} (${v.lang})`;
             sel.appendChild(opt);
           });
-          if (saved[name]) sel.value = saved[name];
+          if(saved[name]) sel.value = saved[name];
           sel.onchange = () => {
             saved[name] = sel.value;
             LS.set('infodose:voices', saved);
@@ -1009,7 +1009,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
             const utter = new SpeechSynthesisUtterance(`Olá, eu sou ${name}`);
             const voiceName = saved[name] || sel.value;
             const voice = voices.find(v => v.name === voiceName);
-            if (voice) utter.voice = voice;
+            if(voice) utter.voice = voice;
             speechSynthesis.cancel();
             speechSynthesis.speak(utter);
           };
@@ -1031,14 +1031,14 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
         const saved = LS.get('infodose:voices', {});
         const voices = speechSynthesis.getVoices();
         let voice = null;
-        if (saved && saved[archName]) {
+        if(saved && saved[archName]) {
           voice = voices.find(v => v.name === saved[archName]);
         }
-        if (!voice) {
+        if(!voice) {
           voice = voices.find(v => v.lang && (v.lang.startsWith('pt') || v.lang.startsWith('en')));
         }
-        if (!voice && voices.length) voice = voices[0];
-        if (!voice) return;
+        if(!voice && voices.length) voice = voices[0];
+        if(!voice) return;
         const utter = new SpeechSynthesisUtterance(`Olá, eu sou ${archName}`);
         utter.voice = voice;
         speechSynthesis.cancel();
@@ -1058,14 +1058,14 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
         const saved = LS.get('infodose:voices', {}) || {};
         const voices = speechSynthesis.getVoices();
         let voice = null;
-        if (saved[key]) {
+        if(saved[key]) {
           voice = voices.find(v => v.name === saved[key]);
         }
-        if (!voice) {
+        if(!voice) {
           voice = voices.find(v => v.lang && (v.lang.startsWith('pt') || v.lang.startsWith('en')));
         }
-        if (!voice && voices.length) voice = voices[0];
-        if (!voice) return;
+        if(!voice && voices.length) voice = voices[0];
+        if(!voice) return;
         const utter = new SpeechSynthesisUtterance(text);
         utter.voice = voice;
         speechSynthesis.cancel();
@@ -1077,16 +1077,16 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     function showArchMessage(text, type = 'info') {
       try {
         const el = document.getElementById('archMsg');
-        if (!el) return;
+        if(!el) return;
         el.textContent = text;
         // Ajuste a cor de fundo conforme o tipo
-        if (type === 'ok') {
+        if(type === 'ok') {
           el.style.background = 'rgba(57,255,182,0.75)';
           el.style.color = '#0b0f14';
-        } else if (type === 'warn') {
+        } else if(type === 'warn') {
           el.style.background = 'rgba(255,184,107,0.78)';
           el.style.color = '#0b0f14';
-        } else if (type === 'err') {
+        } else if(type === 'err') {
           el.style.background = 'rgba(255,107,107,0.78)';
           el.style.color = '#0b0f14';
         } else {
@@ -1108,7 +1108,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     function initAudioRipple() {
       const clickLayer = document.getElementById('audioRipple');
       const archCircleEl = document.querySelector('.arch-circle');
-      if (!clickLayer || !archCircleEl) return;
+      if(!clickLayer || !archCircleEl) return;
       let enabled = false;
       let audioCtx = null;
       let analyser = null;
@@ -1132,11 +1132,11 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
       }
       // Para a captura de áudio e reseta a camada
       function stop() {
-        if (micStream) {
+        if(micStream) {
           micStream.getTracks().forEach(t => t.stop());
           micStream = null;
         }
-        if (audioCtx) {
+        if(audioCtx) {
           try { audioCtx.close(); } catch {}
           audioCtx = null;
         }
@@ -1145,7 +1145,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
       }
       // Atualiza a opacidade da camada conforme o volume (RMS)
       function animate() {
-        if (!enabled || !analyser) return;
+        if(!enabled || !analyser) return;
         const buf = new Uint8Array(analyser.fftSize);
         analyser.getByteTimeDomainData(buf);
         let sum = 0;
@@ -1172,7 +1172,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
       window.toggleAudio = function () {
         enabled = !enabled;
         archCircleEl.classList.toggle('audio-on', enabled);
-        if (enabled) {
+        if(enabled) {
           start();
         } else {
           stop();
@@ -1183,7 +1183,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     // Mensagem de boas-vindas/ativação
     function welcome() {
       const name = (localStorage.getItem('infodose:userName') || '').trim();
-      if (!name) {
+      if(!name) {
         const msg = 'Salve! Ative sua Dual Infodose registrando seu nome na seção Brain.';
         showArchMessage(msg, 'warn');
         try { speakWithActiveArch(msg); } catch {}
@@ -1200,39 +1200,39 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     (function() {
       try {
         const home = document.getElementById('v-home');
-        if (!home) return;
+        if(!home) return;
         const arch = home.querySelector('.arch-container');
         const cards = home.querySelector('.cards');
         // Se ambos existirem, garanta que as cartas apareçam depois do círculo de arquétipos.
-        if (arch && cards) {
+        if(arch && cards) {
           arch.insertAdjacentElement('afterend', cards);
         }
       } catch (e) {
         console.warn('Falha ao reposicionar arquétipo:', e);
       }
     })();
-    const obs = new MutationObserver((muts) => { muts.forEach(m => m.addedNodes && m.addedNodes.forEach(n => { if (n.nodeType === 1) { if (n.matches?.('button')) addRipple(n); n.querySelectorAll?.('button').forEach(addRipple); } })) });
+    const obs = new MutationObserver((muts) => { muts.forEach(m => m.addedNodes && m.addedNodes.forEach(n => { if(n.nodeType === 1) { if(n.matches?.('button')) addRipple(n); n.querySelectorAll?.('button').forEach(addRipple); } })) });
     obs.observe(document.body, { childList: true, subtree: true });
 
     /* ===================== Navegação + Estado ===================== */
     function nav(key) {
       // Remapeia a antiga aba 'revo' para 'chat'
-      if (key === 'revo') key = 'chat';
+      if(key === 'revo') key = 'chat';
       // Adicionamos 'chat' à lista de abas para suportar a nova seção
       const tabs = ['home', 'apps', 'stack', 'brain', 'chat'];
       tabs.forEach(k => {
         const viewEl = document.getElementById('v-' + k);
-        if (viewEl) viewEl.classList.toggle('active', k === key);
+        if(viewEl) viewEl.classList.toggle('active', k === key);
         const tabEl = document.querySelector(`.tab[data-nav="${k}"]`);
-        if (tabEl) tabEl.classList.toggle('active', k === key);
+        if(tabEl) tabEl.classList.toggle('active', k === key);
       });
       LS.set('uno:lastTab', key);
       // Quando entrar na aba Home, apresente mensagem de saudação / última sessão
-      if (key === 'home') {
+      if(key === 'home') {
         try { displayGreeting(); } catch (e) { console.warn(e); }
         try {
           const nameG = (localStorage.getItem('infodose:userName') || '').trim();
-          if (!nameG) {
+          if(!nameG) {
             toast('Salve! Ative sua Dual Infodose registrando seu nome na seção Brain.', 'warn');
           } else {
             // Saudação rápida na forma de toast quando o usuário retorna ao home.
@@ -1249,21 +1249,21 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
         let phrase = '';
         let type = 'info';
         switch (key) {
-          case 'home': phrase = 'Página inicial'; break;
+          case 'home': phrase = ''; break;
           case 'apps': phrase = 'Abrindo apps'; break;
           case 'stack': phrase = 'Abrindo stack'; break;
           case 'brain': phrase = 'Abrindo usuário'; break;
           case 'chat': phrase = 'Abrindo chat'; break;
           default: phrase = '';
         }
-        if (phrase) {
+        if(phrase) {
           speakWithActiveArch(phrase);
           showArchMessage(phrase, type);
         }
         // Mostrar o preview laranja somente na Home; escondê-lo nas outras abas
         try {
           const prev = document.getElementById('msgPreview');
-          if (prev) {
+          if(prev) {
             prev.style.display = (key === 'home' && prev.textContent) ? 'block' : 'none';
           }
         } catch (e) { console.warn(e); }
@@ -1275,7 +1275,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     // helper é chamado por initAudioRipple().
     function toggleArchMenu() {
       const menu = document.getElementById('archMenu');
-      if (!menu) return;
+      if(!menu) return;
       menu.classList.toggle('show');
     }
 
@@ -1291,7 +1291,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
      */
     function startDualInteraction() {
       const archCircle = document.querySelector('.arch-circle');
-      if (!archCircle) return;
+      if(!archCircle) return;
       // Animação de clique: adiciona classe 'pressed' brevemente
       archCircle.classList.add('pressed');
       setTimeout(() => archCircle.classList.remove('pressed'), 180);
@@ -1304,7 +1304,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
         const sk = localStorage.getItem('dual.keys.openrouter') || '';
         const userName = (localStorage.getItem('infodose:userName') || '').trim();
         const model = LS.get('dual.openrouter.model');
-        if (!sk || !userName || !model) {
+        if(!sk || !userName || !model) {
           const warn = 'Configure nome, chave e modelo no Brain para conversar.';
           showArchMessage(warn, 'warn');
           return;
@@ -1328,14 +1328,14 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     function feedPush(type, text) {
       // Adiciona mensagem ao feed de IA se existir (mantido para compatibilidade)
       const box = document.getElementById('iaFeed');
-      if (box) {
+      if(box) {
         const div = document.createElement('div');
         div.className = 'msg ' + (type || 'status');
         div.textContent = text;
         box.appendChild(div);
         const msgs = box.querySelectorAll('.msg');
         const limit = 10;
-        if (msgs.length > limit) {
+        if(msgs.length > limit) {
           box.removeChild(msgs[0]);
         }
         box.scrollTop = box.scrollHeight;
@@ -1343,20 +1343,20 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
       // Envia a mensagem também ao feed de chat e atualiza o preview
       try {
         chatPush(type, text);
-        if (type === 'ai') updatePreview(text);
+        if(type === 'ai') updatePreview(text);
       } catch (e) { console.warn(e); }
     }
     // Função auxiliar para adicionar mensagens ao feed de chat
     function chatPush(type, text) {
       const feed = document.getElementById('chatFeed');
-      if (!feed) return;
+      if(!feed) return;
       const div = document.createElement('div');
       div.className = 'msg ' + (type || 'status');
       div.textContent = text;
       feed.appendChild(div);
       const msgs = feed.querySelectorAll('.msg');
       const limit = 50;
-      if (msgs.length > limit) {
+      if(msgs.length > limit) {
         feed.removeChild(msgs[0]);
       }
       feed.scrollTop = feed.scrollHeight;
@@ -1364,7 +1364,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     // Atualiza o preview laranja com a última resposta da IA
     function updatePreview(text) {
       const prev = document.getElementById('msgPreview');
-      if (!prev) return;
+      if(!prev) return;
       prev.textContent = text.replace(/\s+/g, ' ').trim();
       // Exibe o preview apenas se a página Home estiver ativa.  Caso
       // contrário, mantenha-o oculto para não interferir na visualização
@@ -1375,7 +1375,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     }
     function startSpeechConversation(userName, sk, model) {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) {
+      if(!SpeechRecognition) {
         showArchMessage('Reconhecimento de fala não suportado neste navegador.', 'err');
         return;
       }
@@ -1389,7 +1389,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
       };
       recognition.onresult = (event) => {
         const transcript = event.results[0][0].transcript.trim();
-        if (transcript) {
+        if(transcript) {
           feedPush('user', 'Você: ' + transcript);
           showArchMessage('Pulso enviado. Recebendo intenção…', 'ok');
           feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
@@ -1425,7 +1425,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
         console.error('Falha ao consultar IA:', err);
         reply = 'Desculpe, não consegui responder no momento.';
       }
-      if (reply) {
+      if(reply) {
         // Determine o arquétipo ativo para prefixar as respostas no feed
         let archName = 'Dual';
         try {
@@ -1469,7 +1469,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
         },
         body: JSON.stringify(payload)
       });
-      if (!res.ok) {
+      if(!res.ok) {
         throw new Error('Erro na API: ' + res.status);
       }
       const data = await res.json();
@@ -1480,18 +1480,18 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     // Delegue cliques dentro do menu para a função de navegação.
     document.addEventListener('DOMContentLoaded', () => {
       const menu = document.getElementById('archMenu');
-      if (menu) {
+      if(menu) {
       menu.addEventListener('click', (e) => {
         // Primeiro verifique se o botão de áudio foi clicado
         const audioBtn = e.target.closest('button[data-audio]');
-        if (audioBtn) {
+        if(audioBtn) {
           // Alterna modo áudio usando a função global
-          if (typeof toggleAudio === 'function') {
+          if(typeof toggleAudio === 'function') {
             toggleAudio();
           }
           // Atualize o estado visual do botão
           const archCircle = document.querySelector('.arch-circle');
-          if (archCircle) {
+          if(archCircle) {
             audioBtn.classList.toggle('on', archCircle.classList.contains('audio-on'));
           }
           // Não feche o menu ao alternar áudio
@@ -1499,7 +1499,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
         }
         // Caso contrário, delegue a navegação para botões com data-nav
         const btn = e.target.closest('button[data-nav]');
-        if (btn) {
+        if(btn) {
           nav(btn.getAttribute('data-nav'));
           menu.classList.remove('show');
         }
@@ -1507,7 +1507,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
       }
       // Clique no preview direciona ao chat
       const mp = document.getElementById('msgPreview');
-      if (mp) mp.addEventListener('click', () => nav('chat'));
+      if(mp) mp.addEventListener('click', () => nav('chat'));
 
       /* Formulário de chat removido: a captura de mensagens é feita via
          overlay de entrada. */
@@ -1522,37 +1522,37 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
       const hiForm = document.getElementById('homeInputForm');
       const hiInput = document.getElementById('homeInput');
       // Exibe/oculta o overlay ao tocar no botão de texto
-      if (textBtn && hiOverlay && hiForm && hiInput) {
+      if(textBtn && hiOverlay && hiForm && hiInput) {
         textBtn.addEventListener('click', () => {
           const show = hiOverlay.style.display !== 'block';
           hiOverlay.style.display = show ? 'block' : 'none';
           textBtn.classList.toggle('active', show);
-          if (show) setTimeout(() => hiInput.focus(), 60);
+          if(show) setTimeout(() => hiInput.focus(), 60);
         });
         hiForm.addEventListener('submit', (ev) => {
           ev.preventDefault();
           const msg = hiInput.value.trim();
-          if (!msg) return;
+          if(!msg) return;
           feedPush('user', 'Você: ' + msg);
           showArchMessage('Pulso enviado. Recebendo intenção…', 'ok');
           feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
           const userName = (localStorage.getItem('dual.name') || localStorage.getItem('infodose:userName') || '').trim();
           const sk = (localStorage.getItem('dual.keys.openrouter') || localStorage.getItem('infodose:sk') || '').trim();
           let mdl = LS.get('dual.openrouter.model');
-          if (!mdl) mdl = (localStorage.getItem('infodose:model') || '').trim() || 'openrouter/auto';
+          if(!mdl) mdl = (localStorage.getItem('infodose:model') || '').trim() || 'openrouter/auto';
           try { handleUserMessage(msg, userName, sk, mdl); } catch (e) { console.warn(e); }
           hiInput.value = '';
         });
       }
       // Inicia conversa por voz ao tocar no botão de voz
-      if (voiceBtn) {
+      if(voiceBtn) {
         voiceBtn.addEventListener('click', () => {
           const userName = (localStorage.getItem('dual.name') || localStorage.getItem('infodose:userName') || '').trim();
           const sk = (localStorage.getItem('dual.keys.openrouter') || localStorage.getItem('infodose:sk') || '').trim();
           let mdl = LS.get('dual.openrouter.model');
-          if (!mdl) mdl = (localStorage.getItem('infodose:model') || '').trim() || 'openrouter/auto';
-          if (hiOverlay) hiOverlay.style.display = 'none';
-          if (typeof startSpeechConversation === 'function') {
+          if(!mdl) mdl = (localStorage.getItem('infodose:model') || '').trim() || 'openrouter/auto';
+          if(hiOverlay) hiOverlay.style.display = 'none';
+          if(typeof startSpeechConversation === 'function') {
             startSpeechConversation(userName, sk, mdl);
           }
         });
@@ -1571,28 +1571,28 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     // Restaurar última aba
     let last = LS.get('uno:lastTab', 'home');
     // Se o último tab salvo for 'revo', redirecione para home para evitar páginas vazias
-    if (last === 'revo') last = 'home';
+    if(last === 'revo') last = 'home';
     nav(last);
     // Se a aba inicial for home, exibir saudação
-    if (last === 'home') {
+    if(last === 'home') {
       try { displayGreeting(); } catch(e) {}
     }
 
     // Atalhos
     let gPressed = false;
     window.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); downloadSelf(); return; }
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); $('#appSearch')?.focus(); return; }
-      if (e.key.toLowerCase() === 'g') { gPressed = true; setTimeout(() => gPressed = false, 600); return; }
-      if (!gPressed) return; const k = e.key.toLowerCase();
-      if (k === 'h') nav('home'); if (k === 'a') nav('apps'); if (k === 's') nav('stack'); if (k === 'b') nav('brain'); if (k === 'r') nav('chat'); gPressed = false;
+      if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); downloadSelf(); return; }
+      if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); $('#appSearch')?.focus(); return; }
+      if(e.key.toLowerCase() === 'g') { gPressed = true; setTimeout(() => gPressed = false, 600); return; }
+      if(!gPressed) return; const k = e.key.toLowerCase();
+      if(k === 'h') nav('home'); if(k === 'a') nav('apps'); if(k === 's') nav('stack'); if(k === 'b') nav('brain'); if(k === 'r') nav('chat'); gPressed = false;
     });
 
     // Ajuda modal
     const modalHelp = $('#modalHelp');
     $('#btnHelp').onclick = () => { modalHelp.classList.add('open'); modalHelp.setAttribute('aria-hidden', 'false'); };
     $('#closeHelp').onclick = () => { modalHelp.classList.remove('open'); modalHelp.setAttribute('aria-hidden', 'true'); };
-    modalHelp.addEventListener('click', (e) => { if (e.target === modalHelp) $('#closeHelp').click(); });
+    modalHelp.addEventListener('click', (e) => { if(e.target === modalHelp) $('#closeHelp').click(); });
 
     // Baixar HTML
     function downloadSelf() {
@@ -1600,7 +1600,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
         const clone = document.documentElement.cloneNode(true);
         const html = '<!doctype html>\n' + clone.outerHTML;
         const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'HUB-UNO-Revo.html'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 500);
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'HUB-UNO.html'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 500);
         toast('HTML exportado', 'ok');
       } catch (e) { alert('Falha ao exportar: ' + e.message); }
     }
@@ -1623,10 +1623,10 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
       // Permitir adicionar modelo personalizado
       const addBtn = $('#addModel');
       const customInput = $('#customModel');
-      if (addBtn && customInput) {
+      if(addBtn && customInput) {
         addBtn.onclick = () => {
           const val = (customInput.value || '').trim();
-          if (!val) return;
+          if(!val) return;
           const opt = document.createElement('option');
           opt.value = val; opt.textContent = val;
           sel.appendChild(opt);
@@ -1638,10 +1638,10 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
       }
       // Permitir carregamento de arquivo de treino
       const trainInp = $('#trainingFile');
-      if (trainInp) {
+      if(trainInp) {
         trainInp.addEventListener('change', (ev) => {
           const file = ev.target.files && ev.target.files[0];
-          if (!file) return;
+          if(!file) return;
           const reader = new FileReader();
           reader.onload = () => {
             try {
@@ -1657,14 +1657,14 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     /* ===================== Inicialização do tema & personalização de fundo ===================== */
     (function initThemeSettings() {
       // Se o usuário nunca selecionou um tema antes, defina o padrão como "medium" (cinza).
-      if (!LS.get('uno:theme')) {
+      if(!LS.get('uno:theme')) {
         LS.set('uno:theme', 'medium');
       }
       // Aplique o tema salvo imediatamente
       applyTheme();
       // Configure o seletor de tema
       const sel = document.getElementById('themeSelect');
-      if (sel) {
+      if(sel) {
         sel.value = LS.get('uno:theme', 'medium');
         sel.addEventListener('change', () => {
           LS.set('uno:theme', sel.value);
@@ -1674,16 +1674,16 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
         });
       }
       const upload = document.getElementById('bgUpload');
-      if (upload) {
+      if(upload) {
         upload.addEventListener('change', (e) => {
           const f = e.target.files && e.target.files[0];
-          if (!f) return;
+          if(!f) return;
           const reader = new FileReader();
           reader.onload = () => {
             try {
               LS.set('uno:bg', reader.result);
               LS.set('uno:theme', 'custom');
-              if (sel) sel.value = 'custom';
+              if(sel) sel.value = 'custom';
               applyTheme();
               toast('Fundo personalizado salvo', 'ok');
               try { updateHomeStatus(); } catch {}
@@ -1747,7 +1747,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
      */
     function toggleFav(key) {
       const idx = favoriteKeys.indexOf(key);
-      if (idx >= 0) {
+      if(idx >= 0) {
         favoriteKeys.splice(idx, 1);
       } else {
         favoriteKeys.push(key);
@@ -1794,14 +1794,14 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
         const localCount = locals().length;
         const txtApps = showOnlyLocal ? (localCount + ' local' + (localCount === 1 ? '' : 's')) : (total + ' app' + (total === 1 ? '' : 's'));
         const elApps = document.getElementById('homeAppsStatus');
-        if (elApps) elApps.textContent = txtApps;
+        if(elApps) elApps.textContent = txtApps;
       } catch (e) {}
       try {
         // Sessões abertas (Stack)
         const sess = document.querySelectorAll('#stackWrap .session').length;
         const txtSess = sess + ' sessão' + (sess === 1 ? '' : 's');
         const elStack = document.getElementById('homeStackStatus');
-        if (elStack) elStack.textContent = txtSess;
+        if(elStack) elStack.textContent = txtSess;
       } catch (e) {}
       try {
         // Usuário: nome + tema atual (mapa)
@@ -1811,18 +1811,18 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
         let txtUser = name || 'Usuário';
         txtUser += ' · ' + themeLabel;
         const elUser = document.getElementById('homeUserStatus');
-        if (elUser) elUser.textContent = txtUser;
+        if(elUser) elUser.textContent = txtUser;
       } catch (e) {}
       try {
         // Arquétipo ativo: obtém o nome sem extensão
         const sel = document.getElementById('arch-select');
         let archName = '';
-        if (sel && sel.options.length > 0) {
+        if(sel && sel.options.length > 0) {
           const opt = sel.options[sel.selectedIndex] || null;
-          if (opt) archName = opt.textContent.replace(/\.html$/i, '');
+          if(opt) archName = opt.textContent.replace(/\.html$/i, '');
         }
         const elArch = document.getElementById('homeArchStatus');
-        if (elArch) elArch.textContent = archName || 'Nenhum';
+        if(elArch) elArch.textContent = archName || 'Nenhum';
       } catch (e) {}
     }
 
@@ -1842,7 +1842,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
       favImg.src = 'icons/star.svg';
       fav.appendChild(favImg);
       // Marque como favoritado se a chave estiver na lista
-      if (isFav(a.key)) fav.classList.add('fav');
+      if(isFav(a.key)) fav.classList.add('fav');
       fav.onclick = (e) => { e.stopPropagation(); toggleFav(a.key); };
       el.appendChild(fav);
       const ic = document.createElement('div'); ic.className = 'app-icon';
@@ -1876,17 +1876,17 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
       // Combine apps embutidos e locais
       let L = normalize(RAW.apps).concat(locals());
       // Filtrar apenas locais se ativado
-      if (showOnlyLocal) {
+      if(showOnlyLocal) {
         L = L.filter(a => String(a.url || '').startsWith('local:'));
       }
       // Aplicar busca (mantendo compatibilidade se o usuário ainda possuir o campo)
-      if (q) {
+      if(q) {
         L = L.filter(a => (a.title + ' ' + a.desc + ' ' + a.key + ' ' + a.url + ' ' + (a.tags || []).join(' ')).toLowerCase().includes(q));
       }
       // Ordenar: favoritos primeiro, depois título A-Z ou Z-A conforme o select (padrão A-Z)
       L.sort((a, b) => {
         const favA = isFav(a.key); const favB = isFav(b.key);
-        if (favA !== favB) return favB - favA; // true=1, false=0 => favoritos no topo
+        if(favA !== favB) return favB - favA; // true=1, false=0 => favoritos no topo
         const dir = mode === 'za' ? -1 : 1;
         return dir * String(a.title || '').localeCompare(b.title || '');
       });
@@ -1913,9 +1913,9 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
       // Sempre envie o catálogo atualizado ao iframe do Revo após carregar os apps embutidos.
       try {
         const iframe = document.getElementById('revoEmbed');
-        if (iframe) {
+        if(iframe) {
           const apps = RAW && Array.isArray(RAW.apps) ? RAW.apps : [];
-          const send = () => { if (iframe.contentWindow) iframe.contentWindow.postMessage({ type: 'apps', apps }, '*'); };
+          const send = () => { if(iframe.contentWindow) iframe.contentWindow.postMessage({ type: 'apps', apps }, '*'); };
           // Envie após pequeno atraso para garantir que o iframe esteja pronto
           setTimeout(send, 100);
           // E também quando o iframe terminar de carregar
@@ -1929,13 +1929,13 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     // Locais
     $('#btnImport').onclick = async () => {
       const fs = Array.from($('#fileLocal').files || []);
-      if (!fs.length) return;
+      if(!fs.length) return;
       const tasks = fs.map(f => new Promise(res => {
         const r = new FileReader();
         r.onload = () => {
           const content = String(r.result || '');
           // Se for um arquivo JSON, tente carregá-lo como catálogo de apps
-          if (/\.json$/i.test(f.name)) {
+          if(/\.json$/i.test(f.name)) {
             try {
               const obj = JSON.parse(content);
               const apps = Array.isArray(obj.apps) ? obj.apps : (Array.isArray(obj) ? obj : []);
@@ -1961,15 +1961,15 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
       list.forEach(x => cur.unshift(x));
       localStorage.setItem('infodose:locals:v1', JSON.stringify(cur));
       renderApps();
-      if (list.length) toast('HTMLs locais adicionados', 'ok');
+      if(list.length) toast('HTMLs locais adicionados', 'ok');
     };
     $('#btnExport').onclick = () => { const data = { v: 1, when: Date.now(), items: JSON.parse(LS.raw('infodose:locals:v1') || '[]') }; const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); a.download = 'locals_pack.json'; a.click(); };
-    $('#btnClear').onclick = () => { if (confirm('Limpar HTMLs locais salvos?')) { localStorage.removeItem('infodose:locals:v1'); renderApps(); toast('Locais limpos', 'warn'); } };
+    $('#btnClear').onclick = () => { if(confirm('Limpar HTMLs locais salvos?')) { localStorage.removeItem('infodose:locals:v1'); renderApps(); toast('Locais limpos', 'warn'); } };
 
     // Alterna exibição de apps locais/apenas locais
     try {
       const btnToggleLocal = document.getElementById('btnToggleLocal');
-      if (btnToggleLocal) {
+      if(btnToggleLocal) {
         btnToggleLocal.onclick = () => {
           showOnlyLocal = !showOnlyLocal;
           // Atualize o texto do botão conforme o modo
@@ -1981,7 +1981,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
 
     /* ===================== Stack ===================== */
     const stackWrap = $('#stackWrap'), dock = $('#dock');
-    function badge(item) { const b = document.createElement('button'); b.className = 'badge fx-trans fx-press ring'; b.textContent = item.title || 'App'; b.title = 'Reabrir ' + (item.title || 'App'); const rp = document.createElement('span'); rp.className = 'ripple'; b.appendChild(rp); addRipple(b); b.onclick = () => { const s = document.querySelector('[data-sid="' + item.sid + '"]'); if (s) { s.scrollIntoView({ behavior: 'smooth' }); s.classList.remove('min'); } }; return b }
+    function badge(item) { const b = document.createElement('button'); b.className = 'badge fx-trans fx-press ring'; b.textContent = item.title || 'App'; b.title = 'Reabrir ' + (item.title || 'App'); const rp = document.createElement('span'); rp.className = 'ripple'; b.appendChild(rp); addRipple(b); b.onclick = () => { const s = document.querySelector('[data-sid="' + item.sid + '"]'); if(s) { s.scrollIntoView({ behavior: 'smooth' }); s.classList.remove('min'); } }; return b }
     function updateDock() {
       dock.innerHTML = '';
       $$('.session').forEach(s => {
@@ -2022,7 +2022,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
       // Prepend the session card dependendo do modo de abertura. Se "abrir dentro" estiver marcado,
       // insira a sessão no topo da página (sessionsAnchor); caso contrário, use o stackWrap padrão.
       const anchor = document.getElementById('sessionsAnchor');
-      if ($('#openInside').checked && anchor) {
+      if($('#openInside').checked && anchor) {
         anchor.prepend(card);
       } else {
         stackWrap.prepend(card);
@@ -2040,12 +2040,12 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
         dualLog('Sessão fechada: ' + (a.title || 'App'));
       };
       // Navegue para a view Stack apenas quando não estiver abrindo dentro da página.
-      if (!$('#openInside').checked) nav('stack');
+      if(!$('#openInside').checked) nav('stack');
       updateDock();
       toast('App aberto: ' + (a.title || 'App'), 'ok');
       dualLog('Sessão aberta: ' + (a.title || 'App'));
     }
-    $('#btnCloseAll').onclick = () => { if (!confirm('Fechar todas as sessões abertas?')) return; $$('.session').forEach(s => s.remove()); updateDock(); toast('Todas as sessões fechadas', 'warn'); };
+    $('#btnCloseAll').onclick = () => { if(!confirm('Fechar todas as sessões abertas?')) return; $$('.session').forEach(s => s.remove()); updateDock(); toast('Todas as sessões fechadas', 'warn'); };
 
     /* ===================== Archetypes (Central Circle) ===================== */
     (function () {
@@ -2103,7 +2103,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
         });
       }
       function setSrcByIndex(idx) {
-        if (!archList.length) return;
+        if(!archList.length) return;
         const n = (idx + archList.length) % archList.length;
         select.selectedIndex = n;
         const file = archList[n];
@@ -2126,7 +2126,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
       }
       let current = 0;
       populate();
-      if (archList.length) setSrcByIndex(0);
+      if(archList.length) setSrcByIndex(0);
       document.getElementById('arch-prev').addEventListener('click', () => {
         current = (current - 1 + archList.length) % archList.length;
         fade.classList.add('show');
@@ -2166,7 +2166,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     const btnApplyCSS = document.getElementById('applyCSS');
     const btnClearCSS = document.getElementById('clearCSS');
     const btnDownloadCSS = document.getElementById('downloadCSS');
-    if (btnApplyCSS) {
+    if(btnApplyCSS) {
       btnApplyCSS.addEventListener('click', () => {
         const textarea = document.getElementById('cssCustom');
         const css = (textarea && textarea.value || '').trim();
@@ -2175,16 +2175,16 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
         toast('CSS aplicado', 'ok');
       });
     }
-    if (btnClearCSS) {
+    if(btnClearCSS) {
       btnClearCSS.addEventListener('click', () => {
         localStorage.removeItem('infodose:cssCustom');
         const textarea = document.getElementById('cssCustom');
-        if (textarea) textarea.value = '';
+        if(textarea) textarea.value = '';
         applyCSS();
         toast('CSS removido', 'warn');
       });
     }
-    if (btnDownloadCSS) {
+    if(btnDownloadCSS) {
       btnDownloadCSS.addEventListener('click', () => {
         const css = localStorage.getItem('infodose:cssCustom') || '';
         const blob = new Blob([css], { type: 'text/css' });
@@ -2201,11 +2201,11 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     (function initDualPrefs(){
       const perfSel = document.getElementById('selPerf');
       const voiceSel = document.getElementById('selVoice');
-      if (perfSel) perfSel.value = dualState.perf;
-      if (voiceSel) voiceSel.value = dualState.voice;
+      if(perfSel) perfSel.value = dualState.perf;
+      if(voiceSel) voiceSel.value = dualState.voice;
       const perfBtn = document.getElementById('btnPerf');
       const voiceBtn = document.getElementById('btnVoice');
-      if (perfBtn && perfSel) {
+      if(perfBtn && perfSel) {
         perfBtn.addEventListener('click', () => {
           dualState.perf = perfSel.value;
           localStorage.setItem('hub.perf', dualState.perf);
@@ -2213,7 +2213,7 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
           toast('Performance atualizada', 'ok');
         });
       }
-      if (voiceBtn && voiceSel) {
+      if(voiceBtn && voiceSel) {
         voiceBtn.addEventListener('click', () => {
           dualState.voice = voiceSel.value;
           localStorage.setItem('hub.voice', dualState.voice);
@@ -2362,131 +2362,9 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
     }
   })();
 })();
-</script></header><div id="ls-body"><div id="ls-stats"><div class="stat">chaves: <b id="st-keys">0</b></div><div class="stat">localStorage: <b id="st-bytes">0 KB</b></div><div class="stat">pesados(>50KB): <b id="st-heavy">0</b></div><div class="stat">origem (quota/uso): <b id="st-usage">—</b><span class="mut">(inclui IndexedDB)</span></div><div class="stat">usuário: <b id="st-user">—</b></div></div><div id="ls-new"><input id="ls-new-k" placeholder="nova chave (ex.: infodose:userName)"><textarea id="ls-new-v" placeholder="valor (texto ou JSON)"></textarea><button id="ls-add"><svg><use href="#ic-save"/></svg>Salvar novo</button></div></div></div><div id="ls-mini"><div class="dock"><div class="pill" id="ls-mini-keys">0</div><div class="pill" id="ls-mini-bytes">0 KB</div><div class="sep"></div><div class="icon" title="Abrir painel" id="ls-mini-open"><svg><use href="#ic-expand"/></svg></div><div class="icon" title="Exportar" id="ls-mini-exp"><svg><use href="#ic-download"/></svg></div><div class="icon ok" title="Salvar (novo vazio)" id="ls-mini-add"><svg><use href="#ic-save"/></svg></div><div class="icon warn" title="Limpar LS (backup)" id="ls-mini-cls"><svg><use href="#ic-broom"/></svg></div><div class="icon warn" title="Limpar IDB" id="ls-mini-idb"><svg><use href="#ic-trash"/></svg></div></div></div><script>(function(){'use strict';
-  const $=(q,r=document)=>r.querySelector(q);
-  const panel=$('#ls-panel'), grid=$('#ls-grid'), search=$('#ls-search');
-  const stats={keys:$('#st-keys'),bytes:$('#st-bytes'),heavy:$('#st-heavy'),usage:$('#st-usage'),user:$('#st-user')};
-  const HEAVY=50*1024;
+</script>
 
-  function utf8Bytes(s){try{return new Blob([s]).size}catch(e){return (new TextEncoder()).encode(s).length}}
-  function fmtBytes(n){return n<1024? n+' B' : n<1048576? (n/1024).toFixed(1)+' KB' : (n/1048576).toFixed(2)+' MB'}
-  function lsSize(){let t=0,h=0; for(const k of Object.keys(localStorage)){const v=localStorage.getItem(k)||''; const b=utf8Bytes(k)+utf8Bytes(v); t+=b; if(b>HEAVY) h++;} return {t,h}}
-  function estimate(){ if(navigator.storage?.estimate) return navigator.storage.estimate().then(({usage,quota})=>{stats.usage.textContent=(usage&&quota)?`${fmtBytes(usage)} / ${fmtBytes(quota)}`:'—'}); stats.usage.textContent='—' }
-  function groupKey(k){ if(k.includes(':')) return k.split(':')[0]; if(k.includes('.')) return k.split('.')[0]; return 'geral' }
-  function preview(v){ const s=String(v||''); return s.length>240? s.slice(0,240)+'…' : s }
-  function hilite(text, q){
-    if(!q) return text;
-    try{
-      const re = new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','ig');
-      return text.replace(re, '<mark class="ls-hit">$1</mark>');
-    }catch(e){ return text; }
-  }
-
-  function render(filter=''){
-    const countEl = document.getElementById('ls-count'); if(countEl) countEl.textContent='';
-    grid.innerHTML='';
-    const f=(filter||'').toLowerCase();
-    const keys=Object.keys(localStorage).sort();
-    const groups={};
-    for(const k of keys){
-      const v=localStorage.getItem(k)||'';
-      if(f && !(k.toLowerCase().includes(f)||v.toLowerCase().includes(f))) continue;
-      (groups[groupKey(k)] ||= []).push({k,v});
-    }
-    const ordered=Object.keys(groups).sort((a,b)=>a.localeCompare(b));
-    let i=0; (function next(){ const chunk=ordered.slice(i,i+4); chunk.forEach(g=> addGroup(g,groups[g])); i+=4; if(i<ordered.length) requestAnimationFrame(next); })();
-  }
-  function addGroup(name, items){
-    const det=document.createElement('details'); det.className='ls-group'; det.open=true;
-    const sum=document.createElement('summary'); sum.innerHTML=`<strong>${name}</strong><span class="badge">${items.length}</span>`; det.appendChild(sum);
-    const body=document.createElement('div'); body.className='group-body';
-    const head=document.createElement('div'); head.className='ls-head'; head.innerHTML='<div>Chave</div><div>Valor</div><div>Ações</div>'; body.appendChild(head);
-    items.forEach(({k,v})=> body.appendChild(makeRow(k,v)));
-    det.appendChild(body); grid.appendChild(det);
-  }
-  function makeRow(k,vRaw){
-    const row=document.createElement('div'); row.className='ls-row';
-    const colK=document.createElement('div'); colK.className='ls-k'; colK.textContent=k;
-    const colV=document.createElement('div'); colV.className='ls-v';
-    const prev=document.createElement('div'); prev.className='ls-preview'; prev.innerHTML=hilite(preview(vRaw), (search && search.value||''));
-    const hint=document.createElement('div'); hint.className='mut'; hint.textContent=(utf8Bytes(vRaw)>HEAVY?'⚠ pesado ':'')+(vRaw.length>200?` • ${vRaw.length} chars`:' ');
-    const expand=document.createElement('div'); expand.className='ls-expand'; const ta=document.createElement('textarea'); ta.value=vRaw; expand.appendChild(ta);
-    colV.append(prev,hint,expand);
-    const colA=document.createElement('div'); colA.className='ls-a';
-    const mk=(href,title,cls)=>{const b=document.createElement('button'); b.className='icon-btn'+(cls?(' '+cls):''); b.title=title; b.innerHTML=`<svg><use href="${href}"/></svg>`; return b;}
-    const bEx=mk('#ic-expand','expandir'); bEx.onclick=()=>{ expand.style.display=expand.style.display==='block'?'none':'block' };
-    const bCp=mk('#ic-copy','copiar'); bCp.onclick=()=> navigator.clipboard.writeText(vRaw);
-    const bSv=mk('#ic-save','salvar','ok'); bSv.onclick=()=>{ const nv=expand.style.display==='block'? ta.value : vRaw; localStorage.setItem(k,nv); prev.textContent=preview(nv); hint.textContent=(utf8Bytes(nv)>HEAVY?'⚠ pesado ':'')+(nv.length>200?` • ${nv.length} chars`:' '); refresh(); };
-    const bDl=mk('#ic-trash','apagar','warn'); bDl.onclick=()=>{ if(!confirm(`Apagar “${k}”?`)) return; localStorage.removeItem(k); row.remove(); refresh(); };
-    colA.append(bEx,bCp,bSv,bDl);
-    row.append(colK,colV,colA);
-    return row;
-  }
-  function refresh(){
-    const {t,h}=lsSize(); stats.keys.textContent=String(localStorage.length); stats.bytes.textContent=fmtBytes(t); stats.heavy.textContent=String(h);
-    const user = localStorage.getItem('infodose:userName') || localStorage.getItem('user') || localStorage.getItem('usuario') || '—';
-    stats.user.textContent = user || '—'; estimate();
-  }
-
-  // Top actions
-  $('#ls-refresh')?.addEventListener('click', ()=>{ render(search.value); refresh(); });
-  $('#ls-add')?.addEventListener('click', ()=>{ const k=$('#ls-new-k').value.trim(), v=$('#ls-new-v').value; if(!k) return; if(localStorage.getItem(k)&&!confirm('Sobrescrever?')) return; localStorage.setItem(k,v); $('#ls-new-k').value=''; $('#ls-new-v').value=''; render(search.value); refresh(); });
-  $('#ls-export')?.addEventListener('click', ()=>{ const dump={}; Object.keys(localStorage).forEach(k=> dump[k]=localStorage.getItem(k)); const blob=new Blob([JSON.stringify(dump,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`ls-backup-${new Date().toISOString().replace(/[:.]/g,'-')}.json`; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),400); });
-  const impBtn=$('#ls-import-btn'), impInput=$('#ls-import'); impBtn?.addEventListener('click', ()=> impInput.click());
-  impInput?.addEventListener('change', (ev)=>{ const f=ev.target.files&&ev.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ try{ const obj=JSON.parse(String(r.result||'')); Object.keys(obj).forEach(k=> localStorage.setItem(k, String(obj[k]))); render(search.value); refresh(); alert('Importação concluída.'); }catch(e){ alert('JSON inválido.'); } }; r.readAsText(f); ev.target.value=''; });
-  $('#ls-clear-all')?.addEventListener('click', ()=>{ if(!confirm('Backup automático será criado. Confirmar LIMPAR LocalStorage?')) return; const snap={}; Object.keys(localStorage).forEach(k=> snap[k]=localStorage.getItem(k)); const stamp=new Date().toISOString().replace(/[:.]/g,'-'); try{ localStorage.setItem(`ls:backup:${stamp}`, JSON.stringify(snap)); }catch(e){} const blob=new Blob([JSON.stringify(snap,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`ls-backup-${stamp}.json`; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),500); localStorage.clear(); render(''); refresh(); alert('LocalStorage limpo. Backup salvo.'); });
-  $('#ls-clear-idb')?.addEventListener('click', async()=>{ if(!confirm('Limpar TODOS os bancos IndexedDB deste domínio?')) return; try{ if(indexedDB.databases){ const dbs=await indexedDB.databases(); await Promise.all(dbs.map(d=> new Promise(res=>{ const name=d.name; if(!name) return res(); const req=indexedDB.deleteDatabase(name); req.onsuccess=req.onerror=req.onblocked=()=>res(); }))); alert('IndexedDB limpo (quando suportado).'); } else alert('Navegador não expõe indexedDB.databases().'); }catch(e){ alert('Falha ao limpar IndexedDB: '+e); } refresh(); });
-  $('#ls-hide')?.addEventListener('click', ()=> panel.style.display='none');
-
-  // Open from header button
-  document.getElementById('btnLS')?.addEventListener('click', ()=>{ panel.style.display='block'; render(''); refresh(); search.value=''; });
-
-  // Mini dock (#ls-min)
-  (function(){
-    const mini=document.getElementById('ls-mini');
-    function refreshMini(){
-      const keys=Object.keys(localStorage).length;
-      let t=0; try{ for(const k of Object.keys(localStorage)){ const v=localStorage.getItem(k)||''; t += (new Blob([k]).size + new Blob([v]).size); } }catch(e){}
-      const fmt = t<1024? t+' B' : t<1048576? (t/1024).toFixed(1)+' KB' : (t/1048576).toFixed(2)+' MB';
-      document.getElementById('ls-mini-keys').textContent=String(keys);
-      document.getElementById('ls-mini-bytes').textContent=fmt;
-    }
-    function toggle(){ if(location.hash==='#ls-min'){ mini.style.display='block'; refreshMini(); } else mini.style.display='none'; }
-    document.getElementById('ls-mini-open').onclick=()=>{ panel.style.display='block'; render(''); refresh(); };
-    document.getElementById('ls-mini-exp').onclick=()=>{
-      const dump={}; Object.keys(localStorage).forEach(k=> dump[k]=localStorage.getItem(k));
-      const blob=new Blob([JSON.stringify(dump,null,2)],{type:'application/json'});
-      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ls-backup.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),400);
-    };
-    document.getElementById('ls-mini-add').onclick=()=>{
-      const k=prompt('Chave nova:'); if(!k) return;
-      const v=prompt('Valor (texto/JSON):') ?? ''; if(localStorage.getItem(k) && !confirm('Sobrescrever?')) return;
-      localStorage.setItem(k,v); refreshMini();
-    };
-    document.getElementById('ls-mini-cls').onclick=()=>{
-      if(!confirm('Backup será criado. Limpar LocalStorage?')) return;
-      const snap={}; Object.keys(localStorage).forEach(k=> snap[k]=localStorage.getItem(k));
-      const stamp=new Date().toISOString().replace(/[:.]/g,'-');
-      try{ localStorage.setItem('ls:backup:'+stamp, JSON.stringify(snap)); }catch(e){}
-      const blob=new Blob([JSON.stringify(snap,null,2)],{type:'application/json'});
-      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ls-backup-'+stamp+'.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),400);
-      localStorage.clear(); refreshMini();
-    };
-    document.getElementById('ls-mini-idb').onclick=async()=>{
-      if(!confirm('Limpar TODOS os bancos IndexedDB deste domínio?')) return;
-      try{
-        if(indexedDB.databases){
-          const dbs=await indexedDB.databases();
-          await Promise.all(dbs.map(d=> new Promise(res=>{ const name=d.name; if(!name) return res(); const req=indexedDB.deleteDatabase(name); req.onsuccess=req.onerror=req.onblocked=()=>res(); })));
-          alert('IndexedDB limpo (quando suportado).');
-        }else{
-          alert('Navegador não expõe indexedDB.databases().');
-        }
-      }catch(e){ alert('Falha ao limpar IndexedDB: '+e); }
-    };
-    window.addEventListener('hashchange', toggle); toggle();
-  })();
-})();</script><style>
+<style>
   #lsx-mount{position:fixed;inset:auto 12px 12px auto;z-index:2147483000}
   #lsx-panel{position:fixed;right:12px;bottom:12px;max-width:min(1040px,96vw);max-height:86vh;display:none;
     overflow:hidden;background:rgba(12,16,24,.98);border:1px solid #ffffff26;border-radius:16px;backdrop-filter:blur(12px);
@@ -2976,7 +2854,7 @@ Use o contexto do app (UNO • Brain • Stack • Apps) quando útil.`;
 
       let training = await loadDXTTraining();
       // Normalize training to text (it may be JSON string)
-      if(training && training.trim().startswith('{')){
+      if(training && training.trim().startsWith('{')){
         try{
           const j = JSON.parse(training);
           training = (j.system || j.prompt || JSON.stringify(j));
@@ -3030,4 +2908,117 @@ ${training}` : '';
     setTimeout(persistCompactMode, 500);
   });
 })();
-</script></body></html>
+</script>
+<script>
+// === TTS Navegação: toggle no Brain (sem editar código existente) ======================
+(function(){
+  const LS_KEY = 'uno:tts.nav'; // 'on' | 'off'
+  function getNavTTS(){ return (localStorage.getItem(LS_KEY) || 'on') !== 'off'; }
+  function setNavTTS(on){ localStorage.setItem(LS_KEY, on ? 'on' : 'off'); updateBtn(); }
+
+  // Monkey-patch: suprimir speak() quando em contexto de navegação e toggle OFF
+  function patchSpeakAndNav(){
+    const origSpeak = window.speak;
+    if (origSpeak && !origSpeak.__patchedForNavTTS){
+      const wrapped = function(text, opts){
+        try{
+          if (window._navContext === true && !getNavTTS()){
+            // bloqueia falas de navegação
+            return;
+          }
+        }catch(e){}
+        return origSpeak.apply(this, arguments);
+      };
+      wrapped.__patchedForNavTTS = true;
+      window.speak = wrapped;
+    }
+    const origNav = window.nav;
+    if (typeof origNav === 'function' && !origNav.__patchedForNavTTS){
+      const wrappedNav = function(){
+        window._navContext = true;
+        try { return origNav.apply(this, arguments); }
+        finally { window._navContext = false; }
+      };
+      wrappedNav.__patchedForNavTTS = true;
+      window.nav = wrappedNav;
+    }
+  }
+
+  // criar UI: botão pequeno ON/OFF
+  let btn;
+  function updateBtn(){
+    if(!btn) return;
+    const on = getNavTTS();
+    btn.setAttribute('aria-pressed', String(on));
+    btn.textContent = on ? 'TTS Nav: ON' : 'TTS Nav: OFF';
+    btn.classList.toggle('on', on);
+  }
+
+  function makeButton(){
+    btn = document.createElement('button');
+    btn.id = 'btnTTSNavToggle';
+    btn.type = 'button';
+    btn.className = 'btn-ttsnav';
+    btn.title = 'Alternar TTS de navegação';
+    btn.addEventListener('click', ()=> setNavTTS(!getNavTTS()));
+    updateBtn();
+    return btn;
+  }
+
+  function mountButton(){
+    const targets = [
+      '#brain .tools', '#brain .header', '#brain',
+      '#brainPanel', '#brain-header', '#brain-tools',
+      '#lsx-actions', '#lsx-panel .header',
+      '#header .right', '#header .tools', '#header'
+    ];
+    const el = targets.map(q=>document.querySelector(q)).find(Boolean) || document.body;
+    el.appendChild(makeButton());
+  }
+
+  function addStyles(){
+    const css = document.createElement('style');
+    css.textContent = `
+      .btn-ttsnav{
+        font: 500 11px/1.1 system-ui, -apple-system, Segoe UI, Roboto, Inter, sans-serif;
+        padding: 6px 8px;
+        border-radius: 999px;
+        border: 1px solid var(--line, #2a2f39);
+        background: rgba(255,255,255,0.04);
+        color: var(--fg, #e7ecf5);
+        margin-left: 8px;
+        vertical-align: middle;
+        cursor: pointer;
+        opacity: 0.9;
+        transition: box-shadow .2s var(--ease), opacity .2s var(--ease), transform .08s var(--ease);
+      }
+      .btn-ttsnav:hover{ opacity:1; }
+      .btn-ttsnav:active{ transform: translateY(1px); }
+      .btn-ttsnav.on{
+        box-shadow: 0 0 0 2px rgba(0,255,170,.2), 0 0 14px rgba(0,255,170,.25);
+        background: radial-gradient(100% 100% at 50% 0%, rgba(0,255,170,.18), rgba(0,0,0,0));
+        border-color: rgba(0,255,170,.35);
+      }
+      @media (max-width: 420px){
+        .btn-ttsnav{ padding: 5px 7px; font-size: 10px; }
+      }
+    `;
+    document.head.appendChild(css);
+  }
+
+  function init(){
+    try{ patchSpeakAndNav(); }catch(e){}
+    addStyles();
+    mountButton();
+    // Observa mudanças externas no localStorage e reflete no botão
+    window.addEventListener('storage', (ev)=>{
+      if(ev.key === LS_KEY) updateBtn();
+    });
+  }
+  if (document.readyState === 'loading')
+    document.addEventListener('DOMContentLoaded', init);
+  else
+    init();
+})();
+</script>
+</body></html>
