@@ -668,6 +668,16 @@ body::after {
       background: var(--ok);
       color: #0b0f14;
     }
+
+    /* Indica visualmente quando a gravação de voz está ativa */
+    .home-btn.recording {
+      animation: voice-pulse 1.2s infinite;
+      transform-origin: center;
+    }
+    @keyframes voice-pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
     /* Layout da barra de abas no modo nav-right */
     body.nav-right nav.tabbar {
       left: auto;
@@ -971,10 +981,26 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
       const archList = [ 'Luxara','Rhea','Aion','Atlas','Nova','Genus','Lumine','Kaion','Kaos','Horus','Elysha','Serena' ];
       function populateVoices() {
         let voices = speechSynthesis.getVoices();
-        // Filtrar por idiomas suportados (Português e Inglês) se disponível
-        const filtered = voices.filter(v => v.lang && (v.lang.startsWith('pt') || v.lang.startsWith('en')));
+        // Filtrar apenas vozes que falam Português ou Espanhol
+        const filtered = voices.filter(v => v.lang && (v.lang.startsWith('pt') || v.lang.startsWith('es')));
         voices = filtered.length ? filtered : voices;
         const saved = LS.get('infodose:voices', {}) || {};
+        // Definir parâmetros (pitch, rate) padrão para cada arquétipo
+        const archParams = LS.get('infodose:archParams', {}) || {};
+        const archListFull = archList;
+        if(Object.keys(archParams).length === 0) {
+          archListFull.forEach(name => {
+            // Valores diferentes de pitch/velocidade para dar personalidade; ajuste conforme necessário
+            const key = name;
+            archParams[key] = { pitch: 1.0, rate: 1.0 };
+            // Exemplos: suavize algumas vozes específicas
+            if(/nova/i.test(key)) archParams[key] = { pitch: 1.1, rate: 1.05 };
+            if(/atlas/i.test(key)) archParams[key] = { pitch: 0.95, rate: 1.0 };
+            if(/horus/i.test(key)) archParams[key] = { pitch: 1.0, rate: 0.92 };
+            if(/serena/i.test(key)) archParams[key] = { pitch: 1.05, rate: 0.95 };
+          });
+          LS.set('infodose:archParams', archParams);
+        }
         // Se ainda não houver vozes salvas, defina um mapeamento padrão
         if(Object.keys(saved).length === 0 && voices.length) {
           archList.forEach((name, idx) => {
@@ -1048,6 +1074,13 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
         if(!voice) return;
         const utter = new SpeechSynthesisUtterance(`Olá, eu sou ${archName}`);
         utter.voice = voice;
+        // Aplique pitch/velocidade personalizados
+        try {
+          const params = LS.get('infodose:archParams', {}) || {};
+          const p = params[archName] || {};
+          if(p.pitch) utter.pitch = p.pitch;
+          if(p.rate)  utter.rate  = p.rate;
+        } catch {}
         speechSynthesis.cancel();
         speechSynthesis.speak(utter);
       } catch (e) {}
@@ -1075,6 +1108,13 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
         if(!voice) return;
         const utter = new SpeechSynthesisUtterance(text);
         utter.voice = voice;
+        // Aplique pitch/velocidade personalizadas
+        try {
+          const params = LS.get('infodose:archParams', {}) || {};
+          const p = params[key] || {};
+          if(p.pitch) utter.pitch = p.pitch;
+          if(p.rate)  utter.rate  = p.rate;
+        } catch {}
         speechSynthesis.cancel();
         speechSynthesis.speak(utter);
       } catch (e) {}
@@ -1102,9 +1142,10 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
         }
         el.classList.add('show');
         clearTimeout(el._tm);
+        // Mantenha a mensagem visível por mais tempo para melhor leitura
         el._tm = setTimeout(() => {
           el.classList.remove('show');
-        }, 4000);
+        }, 7000);
       } catch (e) {}
     }
 
@@ -1390,24 +1431,32 @@ mark.ls-hit{background:#3b82f6; color:#0b0f14; border-radius:4px; padding:0 2px}
       recognition.lang = 'pt-BR';
       recognition.interimResults = false;
       recognition.maxAlternatives = 1;
+      // Referência ao botão de voz para animar durante a gravação
+      const micBtn = document.getElementById('homeVoiceBtn');
       recognition.onstart = () => {
         showArchMessage('Estou ouvindo…', 'ok');
         feedPush('status', '🎙️ Ouvindo…');
+        if(micBtn) micBtn.classList.add('recording');
       };
       recognition.onresult = (event) => {
         const transcript = event.results[0][0].transcript.trim();
         if(transcript) {
+          // Pare imediatamente de escutar
+          try { recognition.stop(); } catch{}
           feedPush('user', 'Você: ' + transcript);
           showArchMessage('Pulso enviado. Recebendo intenção…', 'ok');
-try{ speakWithActiveArch('Pulso enviado, recebendo intenção.'); }catch(e){}
-feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
-handleUserMessage(transcript, userName, sk, model);
+          try{ speakWithActiveArch('Pulso enviado, recebendo intenção.'); }catch(e){}
+          feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
+          handleUserMessage(transcript, userName, sk, model);
         }
       };
       recognition.onerror = (e) => {
         console.error('Erro no reconhecimento de fala:', e);
         showArchMessage('Erro no reconhecimento de fala.', 'err');
         feedPush('status', '❌ Erro no reconhecimento de fala.');
+      };
+      recognition.onend = () => {
+        if(micBtn) micBtn.classList.remove('recording');
       };
       recognition.start();
     }
@@ -1628,6 +1677,32 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
         try { displayGreeting(); } catch (e) {}
         try { updateHomeStatus(); } catch {}
       };
+
+      // === Campo para nomear a sua Dual Infodose ===
+      // Insere dinamicamente um cartão para configurar o nome do assistente (Dual)
+      try {
+        const grid = document.querySelector('#v-brain .grid');
+        if(grid && !document.getElementById('dualName')) {
+          const card = document.createElement('div');
+          card.className = 'card fx-trans fx-lift';
+          card.style.display = 'block';
+          card.innerHTML = '<div style="font-weight:800">Nome do Dual</div>' +
+            '<div style="display:flex;gap:8px;align-items:center;margin-top:6px">' +
+            '<input id="dualName" class="input ring" placeholder="Nome do seu assistente" />' +
+            '<button id="saveDualName" class="btn prime fx-trans fx-press ring">Salvar<span class="ripple"></span></button>' +
+            '</div>';
+          // Insira este cartão logo após o cartão do usuário
+          const ref = grid.children[1];
+          grid.insertBefore(card, ref);
+          const dualInp = card.querySelector('#dualName');
+          const btnSave = card.querySelector('#saveDualName');
+          dualInp.value = (localStorage.getItem('dual.infodoseName') || '').trim();
+          btnSave.onclick = () => {
+            localStorage.setItem('dual.infodoseName', (dualInp.value || '').trim());
+            toast('Nome do Dual salvo', 'ok');
+          };
+        }
+      } catch(e) {}
 
       // Permitir adicionar modelo personalizado
       const addBtn = $('#addModel');
@@ -1871,8 +1946,26 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
       const open = document.createElement('button'); open.className = 'btn fx-trans fx-press ring'; open.textContent = 'Abrir';
       const rip = document.createElement('span'); rip.className = 'ripple'; open.appendChild(rip); addRipple(open);
       open.onclick = () => openApp(a);
-      meta.appendChild(t); meta.appendChild(d); meta.appendChild(open);
-      el.appendChild(ic); el.appendChild(meta);
+      // Botão de remover para apps locais
+      let rm = null;
+      if(String(a.url || '').startsWith('local:')) {
+        rm = document.createElement('button');
+        rm.className = 'btn fx-trans fx-press ring';
+        rm.style.padding = '0 6px';
+        rm.title = 'Remover';
+        rm.textContent = '×';
+        const rr = document.createElement('span'); rr.className = 'ripple'; rm.appendChild(rr); addRipple(rm);
+        rm.onclick = (ev) => {
+          ev.stopPropagation();
+          removeLocalApp(a.key);
+        };
+      }
+      meta.appendChild(t);
+      meta.appendChild(d);
+      meta.appendChild(open);
+      if(rm) meta.appendChild(rm);
+      el.appendChild(ic);
+      el.appendChild(meta);
       return el
     }
 
@@ -1918,6 +2011,11 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
         const raw = JSON.parse($('#APPS_JSON').textContent || '{}');
         RAW.apps = Array.isArray(raw.apps) ? raw.apps : (Array.isArray(raw) ? raw : []);
       } catch { RAW.apps = [] }
+      // Marque abrir dentro por padrão quando carregar apps
+      try {
+        const openInside = document.getElementById('openInside');
+        if(openInside) openInside.checked = true;
+      } catch(e){}
       renderApps();
       // Sempre envie o catálogo atualizado ao iframe do Revo após carregar os apps embutidos.
       try {
@@ -2743,7 +2841,7 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
     // Drop empty or very short
     if(!norm || norm.length < 2) return false;
     // Drop repeats within 1200ms
-    if(norm === (_lastUtter.text||'') and (now - _lastUtter.t) < 1200) return false;
+    if (norm === (_lastUtter.text||'') && (now - _lastUtter.t) < 1200) return false;
     // If it's about Local Storage panel, prefer "abrindo/fechando" phrasing only.
     if(/local storage/.test(norm)){
       if(/aberto|fechado/.test(norm) && !/abrindo|fechando/.test(norm)) return false;
@@ -2843,11 +2941,13 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
         primary = sel.value.replace(/\.html$/i,'').toLowerCase();
       }
     }catch{}
-    // Secondary from user preference (array) or fallback
-    const pair = JSON.parse(localStorage.getItem('dual.arch.pair')||'[]');
-    let secondary = pair.find(x=>x && x.toLowerCase() !== primary) || 'horus';
-    // Capitalize
-    function cap(s){ s = String(s||'Dual'); return s.charAt(0).toUpperCase()+s.slice(1).toLowerCase(); }
+    // Secondary: use the custom Dual name if provided, otherwise fallback
+    let secondary = 'Dual Infodose';
+    try {
+      const dn = (localStorage.getItem('dual.infodoseName') || '').trim();
+      if(dn) secondary = `${dn} Dual Infodose`;
+    } catch {}
+    const cap = s => (s||'Dual').charAt(0).toUpperCase()+s.slice(1).toLowerCase();
     return [cap(primary), cap(secondary)];
   }
 
@@ -2855,11 +2955,16 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
   window.PowerAI = {
     async chat(userContent, sk, model){
       const [archA, archB] = activeArchetypePair();
+      // Use descrição do arquétipo primário e nome do usuário para enriquecer o prompt
+      const descA = getArchDesc(archA.toLowerCase());
+      const userName = getUserName();
       const sysIdentity =
-        `Você é o Assistente Dual Infodose — codinome "Horus". 
-Conectado simultaneamente aos arquétipos ${archA} e ${archB}. 
-Fale sempre em português do Brasil, direto e gentil. 
-Use o contexto do app (UNO • Brain • Stack • Apps) quando útil.`;
+        `Você é o Assistente Dual Infodose — codinome "${archB}".` +
+        `\nArquétipo primário: ${archA}${descA ? ' – ' + descA : ''}.` +
+        `\nConectado simultaneamente aos arquétipos ${archA} e ${archB}.` +
+        (userName ? `\nVocê conversa com ${userName}.` : '') +
+        `\nFale sempre em português do Brasil, direto e gentil.` +
+        `\nUse o contexto do app (UNO • Brain • Stack • Apps) quando útil.`;
 
       let training = await loadDXTTraining();
       // Normalize training to text (it may be JSON string)
@@ -2869,15 +2974,12 @@ Use o contexto do app (UNO • Brain • Stack • Apps) quando útil.`;
           training = (j.system || j.prompt || JSON.stringify(j));
         }catch{}
       }
-      const sysTraining = training ? `# Treinamento DXT
-${training}` : '';
+      const sysTraining = training ? `# Treinamento DXT\n${training}` : '';
 
       const payload = {
         model: model,
         messages: [
-          { role: 'system', content: sysIdentity + (sysTraining? '
-
-' + sysTraining : '') },
+          { role: 'system', content: sysIdentity + (sysTraining? '\n\n' + sysTraining : '') },
           { role: 'user', content: String(userContent||'') }
         ],
         max_tokens: 350,
@@ -3157,7 +3259,7 @@ ${training}` : '';
         setTimeout(stop, TIMEOUT_MS+200); // safety stop
         window.addEventListener('unhandledrejection', stop, {once:true});
       }, true);
-      form.__timerWrapped = True = true;
+      form.__timerWrapped = true;
     }
   });
 })();
@@ -3316,4 +3418,170 @@ ${training}` : '';
   });
 })();
 </script>
+
+<!-- Dual Patch: Canonical Brain Keys + dualFetch (v2025-09-21) -->
+<script id="dual-canonical-keys">
+// === Canonical Keys + helpers (Brain) =====================
+const K = {
+  name:  'infodose:userName',
+  sk:    'dual.keys.openrouter',
+  model: 'dual.openrouter.model',
+  train: 'dual.openrouter.training'
+};
+// Migra legados -> canônicos (somente se canônico estiver vazio)
+(function migrateKeys(){
+  const pairs = [
+    ['dual.name', K.name],
+    ['infodose:name', K.name],
+    ['infodose:sk', K.sk],
+    ['infodose:model', K.model],
+  ];
+  pairs.forEach(([oldKey, newKey])=>{
+    try{
+      const v = localStorage.getItem(oldKey);
+      if (v && !localStorage.getItem(newKey)) localStorage.setItem(newKey, v);
+    }catch(e){}
+  });
+})();
+
+function getUserName(){ return (localStorage.getItem(K.name) || '').trim(); }
+function getApiKey(){   return (localStorage.getItem(K.sk)   || '').trim(); }
+function getModel(){
+  try{
+    const m = (window.LS && LS.get) ? LS.get(K.model) : localStorage.getItem(K.model);
+    return (m && String(m).trim()) || 'openrouter/auto';
+  }catch(e){ return 'openrouter/auto'; }
+}
+
+// Remove um app local dado sua chave 'local:ID' e re-renderize a lista
+function removeLocalApp(key) {
+  try {
+    const id = String(key || '').replace(/^local:/, '');
+    let arr = [];
+    try { arr = JSON.parse(LS.raw('infodose:locals:v1') || '[]'); } catch {}
+    const filtered = arr.filter(x => x && x.id !== id);
+    LS.set('infodose:locals:v1', filtered);
+    renderApps();
+    toast('App removido', 'ok');
+  } catch(e){ console.warn('Falha ao remover app local:', e); }
+}
+function setModel(v){
+  try{
+    if (window.LS && LS.set) LS.set(K.model, String(v||'openrouter/auto'));
+    else localStorage.setItem(K.model, String(v||'openrouter/auto'));
+  }catch(e){}
+}
+
+// Pequeno helper para fetch com timeout/abort
+async function dualFetch(url, options={}, timeoutMs=20000){
+  const ctl = new AbortController();
+  const tId = setTimeout(()=>ctl.abort('timeout'), timeoutMs);
+  try {
+    const res = await fetch(url, { ...options, signal: ctl.signal });
+    return res;
+  } finally {
+    clearTimeout(tId);
+  }
+}
+
+  // Retorna a descrição do arquétipo a partir da lista de apps embutidos (RAW.apps)
+  function getArchDesc(key){
+    try{
+      const apps = (typeof RAW !== 'undefined' && Array.isArray(RAW.apps)) ? RAW.apps : [];
+      const it = apps.find(a => (a.key || '').toLowerCase() === String(key||'').toLowerCase());
+      return it && it.desc ? it.desc : '';
+    }catch(e){ return ''; }
+  }
+</script>
+
+
+<!-- Dual Patch: PowerAI unified chat + sendAIMessage override (v2025-09-21) -->
+<script id="dual-powerai-unified">
+(function(){
+  const oldSend = window.sendAIMessage;
+
+  async function loadDXTTrainingText(){
+    try{
+      const raw = localStorage.getItem(K.train);
+      if(!raw) return '';
+      const obj = JSON.parse(raw);
+      if(!obj?.data) return '';
+      const base64 = String(obj.data).split(',')[1] || '';
+      if(!base64) return '';
+      const bytes = atob(base64);
+      return bytes.length > 64*1024 ? bytes.slice(0, 64*1024) : bytes;
+    }catch{ return ''; }
+  }
+
+  function activeArchetypePair(){
+    let primary = 'Dual';
+    try{
+      const sel = document.getElementById('arch-select');
+      if(sel?.value) primary = sel.value.replace(/\.html$/i,'').toLowerCase();
+    }catch{}
+    // Secondary determined by custom Dual name
+    let secondary = 'Dual Infodose';
+    try{
+      const dn = (localStorage.getItem('dual.infodoseName') || '').trim();
+      if(dn) secondary = `${dn} Dual Infodose`;
+    }catch{}
+    const cap = s => (s||'Dual').charAt(0).toUpperCase()+s.slice(1).toLowerCase();
+    return [cap(primary), cap(secondary)];
+  }
+
+  window.PowerAI = {
+    async chat(userContent, sk, model, opts={}){
+      const [archA, archB] = activeArchetypePair();
+      const training = await loadDXTTrainingText();
+      const descA = getArchDesc(archA.toLowerCase());
+      const userName = getUserName();
+      const sys =
+`Você é o Assistente Dual Infodose — codinome "${archB}".`+
+`\nArquétipo primário: ${archA}${descA ? ' – ' + descA : ''}.`+
+`\nConectado simultaneamente aos arquétipos ${archA} e ${archB}.`+
+ (userName ? `\nVocê conversa com ${userName}.` : '')+
+`\nFale sempre em português do Brasil, direto e gentil.`+
+`\nUse o contexto do app (UNO • Brain • Stack • Apps) quando útil.`
+      + (training ? `\n\n# Treinamento DXT\n${training}` : '');
+
+      const payload = {
+        model: (model && String(model).trim()) || getModel(),
+        messages: [
+          { role: 'system', content: sys },
+          { role: 'user',   content: String(userContent||'') }
+        ],
+        max_tokens: 350,
+        temperature: 0.7
+      };
+
+      const key = (sk && String(sk).trim()) || getApiKey();
+      if(!key) throw new Error("Chave OpenRouter ausente — salve em Configurações/Brain.");
+
+      const res = await dualFetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${key}`,
+          'HTTP-Referer': location.origin,
+          'X-Title': 'Dual • UNO'
+        },
+        body: JSON.stringify(payload)
+      }, 20000);
+
+      if(!res.ok){
+        const txt = await res.text().catch(()=> '');
+        throw new Error(`Erro na API: ${res.status} ${txt&&'- '+txt.slice(0,180)}`);
+      }
+      const data = await res.json();
+      return data?.choices?.[0]?.message?.content || '';
+    }
+  };
+
+  // Override legado → usa PowerAI sempre (suporta 4º arg opcional opts)
+  window.sendAIMessage = async function(content, sk, model, opts={}){
+    return await window.PowerAI.chat(content, sk, model, opts);
+  };
+})();
+</script>
+
 </body></html>
