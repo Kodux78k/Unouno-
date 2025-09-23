@@ -1629,38 +1629,6 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
         try { updateHomeStatus(); } catch {}
       };
 
-      // ===== Campo para nome do Dual Infodose =====
-      // Se não existir ainda, crie dinamicamente uma linha de edição
-      try {
-        const brainView = document.getElementById('v-brain');
-        if (brainView && !document.getElementById('dualName')) {
-          // O primeiro card dentro do Brain é o de Usuário
-          const userCard = brainView.querySelector('.card');
-          if (userCard) {
-            const row = document.createElement('div');
-            row.style.display = 'flex';
-            row.style.gap = '8px';
-            row.style.alignItems = 'center';
-            row.style.marginTop = '6px';
-            row.innerHTML = '<input id="dualName" class="input ring" placeholder="Nome do Dual" /><button id="saveDualName" class="btn fx-trans fx-press ring">Salvar<span class="ripple"></span></button>';
-            userCard.appendChild(row);
-          }
-        }
-        // Preencha o campo com o valor salvo
-        const dn = document.getElementById('dualName');
-        if (dn) dn.value = localStorage.getItem('dual.infodoseName') || '';
-        // Salvar nome do Dual
-        const saveDN = document.getElementById('saveDualName');
-        if (saveDN && !saveDN.__boundDualName) {
-          saveDN.addEventListener('click', () => {
-            const val = (dn && dn.value) ? dn.value.trim() : '';
-            localStorage.setItem('dual.infodoseName', val);
-            toast('Nome do Dual salvo', 'ok');
-          });
-          saveDN.__boundDualName = true;
-        }
-      } catch(e) { console.warn('dualName init err', e); }
-
       // Permitir adicionar modelo personalizado
       const addBtn = $('#addModel');
       const customInput = $('#customModel');
@@ -2775,7 +2743,7 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
     // Drop empty or very short
     if(!norm || norm.length < 2) return false;
     // Drop repeats within 1200ms
-    if (norm === (_lastUtter.text||'') && (now - _lastUtter.t) < 1200) return false;
+    if(norm === (_lastUtter.text||'') and (now - _lastUtter.t) < 1200) return false;
     // If it's about Local Storage panel, prefer "abrindo/fechando" phrasing only.
     if(/local storage/.test(norm)){
       if(/aberto|fechado/.test(norm) && !/abrindo|fechando/.test(norm)) return false;
@@ -2875,15 +2843,10 @@ feedPush('status', '⚡ Pulso enviado · recebendo intenção…');
         primary = sel.value.replace(/\.html$/i,'').toLowerCase();
       }
     }catch{}
-    // Determine o secundário a partir do nome do Dual Infodose salvo
-    let secondary;
-    try {
-      const dn = (localStorage.getItem('dual.infodoseName') || '').trim();
-      if (dn) {
-        secondary = `${dn} Dual Infodose`;
-      }
-    } catch {}
-    if (!secondary) secondary = 'Dual Infodose';
+    // Secondary from user preference (array) or fallback
+    const pair = JSON.parse(localStorage.getItem('dual.arch.pair')||'[]');
+    let secondary = pair.find(x=>x && x.toLowerCase() !== primary) || 'horus';
+    // Capitalize
     function cap(s){ s = String(s||'Dual'); return s.charAt(0).toUpperCase()+s.slice(1).toLowerCase(); }
     return [cap(primary), cap(secondary)];
   }
@@ -3194,7 +3157,7 @@ ${training}` : '';
         setTimeout(stop, TIMEOUT_MS+200); // safety stop
         window.addEventListener('unhandledrejection', stop, {once:true});
       }, true);
-      form.__timerWrapped = true;
+      form.__timerWrapped = True = true;
     }
   });
 })();
@@ -3353,151 +3316,4 @@ ${training}` : '';
   });
 })();
 </script>
-
-<!-- Dual Patch: Canonical Brain Keys + dualFetch (v2025-09-21) -->
-<script id="dual-canonical-keys">
-// === Canonical Keys + helpers (Brain) =====================
-const K = {
-  name:  'infodose:userName',
-  sk:    'dual.keys.openrouter',
-  model: 'dual.openrouter.model',
-  train: 'dual.openrouter.training'
-};
-// Migra legados -> canônicos (somente se canônico estiver vazio)
-(function migrateKeys(){
-  const pairs = [
-    ['dual.name', K.name],
-    ['infodose:name', K.name],
-    ['infodose:sk', K.sk],
-    ['infodose:model', K.model],
-  ];
-  pairs.forEach(([oldKey, newKey])=>{
-    try{
-      const v = localStorage.getItem(oldKey);
-      if (v && !localStorage.getItem(newKey)) localStorage.setItem(newKey, v);
-    }catch(e){}
-  });
-})();
-
-function getUserName(){ return (localStorage.getItem(K.name) || '').trim(); }
-function getApiKey(){   return (localStorage.getItem(K.sk)   || '').trim(); }
-function getModel(){
-  try{
-    const m = (window.LS && LS.get) ? LS.get(K.model) : localStorage.getItem(K.model);
-    return (m && String(m).trim()) || 'openrouter/auto';
-  }catch(e){ return 'openrouter/auto'; }
-}
-function setModel(v){
-  try{
-    if (window.LS && LS.set) LS.set(K.model, String(v||'openrouter/auto'));
-    else localStorage.setItem(K.model, String(v||'openrouter/auto'));
-  }catch(e){}
-}
-
-// Pequeno helper para fetch com timeout/abort
-async function dualFetch(url, options={}, timeoutMs=20000){
-  const ctl = new AbortController();
-  const tId = setTimeout(()=>ctl.abort('timeout'), timeoutMs);
-  try {
-    const res = await fetch(url, { ...options, signal: ctl.signal });
-    return res;
-  } finally {
-    clearTimeout(tId);
-  }
-}
-</script>
-
-
-<!-- Dual Patch: PowerAI unified chat + sendAIMessage override (v2025-09-21) -->
-<script id="dual-powerai-unified">
-(function(){
-  const oldSend = window.sendAIMessage;
-
-  async function loadDXTTrainingText(){
-    try{
-      const raw = localStorage.getItem(K.train);
-      if(!raw) return '';
-      const obj = JSON.parse(raw);
-      if(!obj?.data) return '';
-      const base64 = String(obj.data).split(',')[1] || '';
-      if(!base64) return '';
-      const bytes = atob(base64);
-      return bytes.length > 64*1024 ? bytes.slice(0, 64*1024) : bytes;
-    }catch{ return ''; }
-  }
-
-  function activeArchetypePair(){
-    let primary = 'Dual';
-    try{
-      const sel = document.getElementById('arch-select');
-      if(sel?.value) primary = sel.value.replace(/\.html$/i,'').toLowerCase();
-    }catch{}
-    // Determine o secundário a partir do nome do Dual Infodose salvo
-    let secondary;
-    try {
-      const dn = (localStorage.getItem('dual.infodoseName') || '').trim();
-      if (dn) {
-        secondary = `${dn} Dual Infodose`;
-      }
-    } catch {}
-    // Fallback padrão
-    if (!secondary) secondary = 'Dual Infodose';
-    const cap = s => {
-      const str = String(s||'Dual');
-      return str.charAt(0).toUpperCase()+str.slice(1).toLowerCase();
-    };
-    return [cap(primary), cap(secondary)];
-  }
-
-  window.PowerAI = {
-    async chat(userContent, sk, model, opts={}){
-      const [archA, archB] = activeArchetypePair();
-      const training = await loadDXTTrainingText();
-      const sys =
-`Você é o Assistente Dual Infodose — codinome "Horus".
-Conectado simultaneamente aos arquétipos ${archA} e ${archB}.
-Fale sempre em português do Brasil, direto e gentil.
-Use o contexto do app (UNO • Brain • Stack • Apps) quando útil.`
-      + (training ? `\n\n# Treinamento DXT\n${training}` : '');
-
-      const payload = {
-        model: (model && String(model).trim()) || getModel(),
-        messages: [
-          { role: 'system', content: sys },
-          { role: 'user',   content: String(userContent||'') }
-        ],
-        max_tokens: 350,
-        temperature: 0.7
-      };
-
-      const key = (sk && String(sk).trim()) || getApiKey();
-      if(!key) throw new Error("Chave OpenRouter ausente — salve em Configurações/Brain.");
-
-      const res = await dualFetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${key}`,
-          'HTTP-Referer': location.origin,
-          'X-Title': 'Dual • UNO'
-        },
-        body: JSON.stringify(payload)
-      }, 20000);
-
-      if(!res.ok){
-        const txt = await res.text().catch(()=> '');
-        throw new Error(`Erro na API: ${res.status} ${txt&&'- '+txt.slice(0,180)}`);
-      }
-      const data = await res.json();
-      return data?.choices?.[0]?.message?.content || '';
-    }
-  };
-
-  // Override legado → usa PowerAI sempre (suporta 4º arg opcional opts)
-  window.sendAIMessage = async function(content, sk, model, opts={}){
-    return await window.PowerAI.chat(content, sk, model, opts);
-  };
-})();
-</script>
-
 </body></html>
