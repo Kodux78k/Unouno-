@@ -124,8 +124,12 @@ body::after {
     /* ===== Layout ===== */
     main { position: relative; height: 100%; padding-top: calc(var(--hdrH) + env(safe-area-inset-top) + var(--hdrOffset)); padding-bottom: calc(var(--tabsH) + env(safe-area-inset-bottom)); overflow: hidden }
     .view { position: absolute; inset: 0; padding: 12px 14px; overflow: auto; display: none }
-    .view.active { display: block; animation: fade .18s var(--ease) }
-    @keyframes fade { from { opacity: 0; transform: translateY(6px) } }
+    .view.active { display: block; animation: slideFade .4s var(--ease) }
+    @keyframes slideFade {
+      from { opacity: 0; transform: translateY(20px) scale(.96); }
+      60% { opacity: .7; transform: translateY(-4px) scale(1.02); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
 
     /* ===== Cards / grids ===== */
     .grid { display: grid; gap: 12px; max-width: 820px; margin: 0 auto }
@@ -364,6 +368,164 @@ body::after {
       height: 100%;
       border: 0;
       background: transparent;
+    }
+
+    /* ===== Splash overlay ===== */
+    /* O elemento #appSplash cobre toda a tela enquanto o app carrega.
+       Ele utiliza o loader UNO personalizado definido abaixo. */
+    #appSplash {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(42deg, var(--grad-a), var(--grad-b));
+      z-index: 200;
+      opacity: 1;
+      visibility: visible;
+      transition: opacity .3s var(--ease), visibility 0s linear .3s;
+    }
+    #appSplash.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+    /* Crie elementos de fundo difuso atrás do loader para um efeito de luz suave.
+       Estes pseudoelementos adicionam manchas coloridas em tons das cores do gradiente,
+       ajudando a diferenciar o loader do plano de fundo. */
+    #appSplash::before,
+    #appSplash::after {
+      content: "";
+      position: absolute;
+      width: 420px;
+      height: 420px;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: .35;
+      pointer-events: none;
+    }
+    #appSplash::before {
+      background: var(--grad-a);
+      top: -180px;
+      left: -120px;
+    }
+    #appSplash::after {
+      background: var(--grad-b);
+      bottom: -180px;
+      right: -120px;
+    }
+
+    /* ===== Loaders UNO e outros loaders ===== */
+    /* Estes estilos são incorporados diretamente para evitar dependência externa. */
+    .di{ --di-size:40px; --di-stroke:2px; --di-gold: color-mix(in oklab, var(--grad-a) 60%, var(--grad-b) 40%);
+      position:relative;width:var(--di-size);height:var(--di-size); }
+    /* Ajuste as cores do anel do loader para maior contraste no splash.
+       Utilize um branco semi-transparente para destacá-lo contra o fundo colorido. */
+    .di .ring{
+      position:absolute;
+      inset:0;
+      border:var(--di-stroke) solid rgba(255,255,255,0.85);
+      border-radius:50%;
+      animation:di-spin 6s linear infinite;
+    }
+    .di .stroke{position:absolute;left:50%;top:50%;width:62%;height:var(--di-stroke);
+      background:linear-gradient(90deg,var(--grad-a),var(--grad-b));transform:translate(-50%,-50%);
+      border-radius:999px;animation:di-breathe 2.4s ease-in-out infinite; }
+    .di .dots{position:absolute;inset:0;transform:rotate(-90deg);animation:di-orbit 4.2s linear infinite; }
+    .di .dots i{--i:0;position:absolute;left:50%;top:50%;width:4px;height:4px;border-radius:50%;
+      background:conic-gradient(var(--grad-a),var(--grad-b));
+      -webkit-mask: radial-gradient(circle, #000 62%, transparent 63%);
+      mask: radial-gradient(circle, #000 62%, transparent 63%);
+      opacity:.85;transform:rotate(calc(var(--i)*51deg)) translate(calc(7px + var(--i)*2.2px)) rotate(calc(var(--i)*-51deg));
+      animation:di-pulse 4.2s linear infinite;animation-delay:calc(var(--i)*.6s); }
+    @keyframes di-orbit{to{transform:rotate(270deg);}}
+    @keyframes di-spin{to{transform:rotate(360deg);}}
+    @keyframes di-breathe{0%,100%{opacity:.9;}50%{opacity:1;}}
+    @keyframes di-pulse{0%,70%{opacity:.55;transform:scale(.92);}76%,84%{opacity:1;transform:scale(1.12);}100%{opacity:.7;transform:scale(.96);}}
+
+    .simbio{position:relative;width:40px;height:40px; }
+    .simbio .ringA,.simbio .ringB{position:absolute;inset:0;border-radius:50%;
+      -webkit-mask:radial-gradient(farthest-side,transparent calc(50% - 1px),#000 calc(50% - 1px),#000 100%);
+      mask:radial-gradient(farthest-side,transparent calc(50% - 1px),#000 calc(50% - 1px),#000 100%); }
+    .simbio .ringA{background:conic-gradient(from 0deg,var(--grad-a),transparent 60%);animation:rotA 4.8s linear infinite; }
+    .simbio .ringB{background:conic-gradient(from 180deg,var(--grad-b),transparent 60%);animation:rotB 6.2s linear infinite; }
+    .simbio .stroke{position:absolute;left:50%;top:50%;width:60%;height:2px;background:linear-gradient(90deg,var(--grad-a),var(--grad-b));
+      transform:translate(-50%,-50%);border-radius:999px;opacity:.9; }
+    @keyframes rotA{to{transform:rotate(360deg);}}
+    @keyframes rotB{to{transform:rotate(-360deg);}}
+
+    .pulse{position:relative;width:40px;height:40px;display:grid;place-items:center; }
+    .pulse .dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(90deg,var(--grad-a),var(--grad-b)); }
+    .pulse .wave{position:absolute;inset:0;border-radius:50%;animation:wave 2.4s ease-out infinite;opacity:.6; }
+    .pulse .wave::before{content:"";position:absolute;inset:0;border-radius:50%;
+      background:conic-gradient(var(--grad-a),var(--grad-b));
+      -webkit-mask:radial-gradient(farthest-side,transparent calc(50% - 1px),#000 calc(50% - 1px),#000 100%);
+      mask:radial-gradient(farthest-side,transparent calc(50% - 1px),#000 calc(50% - 1px),#000 100%); }
+    .pulse .wave:nth-child(1){animation-delay:0s;} .pulse .wave:nth-child(2){animation-delay:.7s;} .pulse .wave:nth-child(3){animation-delay:1.4s; }
+    @keyframes wave{0%{transform:scale(.5);opacity:.36;}50%{transform:scale(1.4);opacity:.58;}100%{transform:scale(1.35);opacity:.0;}}
+
+    .coblux{position:relative;width:40px;height:40px;filter:drop-shadow(0 0 10px color-mix(in oklab,var(--grad-a) 35%, transparent)) drop-shadow(0 0 14px color-mix(in oklab,var(--grad-b) 25%, transparent)); }
+    .coblux .ring{position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 90deg,var(--grad-a),var(--grad-b));
+      -webkit-mask:radial-gradient(farthest-side,transparent calc(50% - 1px),#000 calc(50% - 1px),#000 100%);animation:spinFast 2.4s linear infinite; }
+    .coblux .trail{position:absolute;left:50%;top:50%;width:4px;height:4px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff 0 20%,var(--grad-a) 40%,var(--grad-b) 100%);transform-origin:-12px 0;animation:trail 1.8s linear infinite; }
+    @keyframes spinFast{to{transform:rotate(360deg);}}
+    @keyframes trail{to{transform:rotate(360deg);}}
+
+    .icon56{position:relative;width:56px;height:56px;display:block; }
+    .home-base{position:absolute;left:50%;top:50%;width:36px;height:24px;border:3px solid var(--grad-b);border-top:3px solid transparent;
+      transform:translate(-50%,-10px) scale(0);border-radius:5px;box-shadow:0 0 10px color-mix(in oklab,var(--grad-b) 60%, transparent);animation:homeBase 2.4s ease-in-out infinite; }
+    .home-roof{position:absolute;left:50%;top:30%;width:0;height:0;border-left:18px solid transparent;border-right:18px solid transparent;border-bottom:20px solid var(--grad-b);
+      transform:translateX(-50%) scaleX(0);filter:drop-shadow(0 0 8px color-mix(in oklab,var(--grad-a) 60%, transparent));animation:homeRoof 2.4s ease-in-out infinite; }
+    @keyframes homeBase{0%{transform:translate(-50%,-10px) scale(0);}40%{transform:translate(-50%,-10px) scale(1);}80%{transform:translate(-50%,-10px) scale(1);}100%{transform:translate(-50%,-10px) scale(0);}}
+    @keyframes homeRoof{0%{transform:translateX(-50%) scaleX(0);}50%{transform:translateX(-50%) scaleX(1);}100%{transform:translateX(-50%) scaleX(0);}}
+    .asst-left,.asst-right{position:absolute;left:50%;top:50%;width:26px;height:26px;border-radius:50%;filter:drop-shadow(0 0 6px color-mix(in oklab,var(--grad-a) 50%, transparent)); }
+    .asst-left{background:radial-gradient(circle at 50% 35%, var(--grad-b) 38%, transparent 39%), radial-gradient(circle at 50% 90%, var(--grad-b) 32%, transparent 33%);
+      transform:translate(-50%,-50%) translateX(0);animation:aL 1.6s ease-in-out infinite; }
+    .asst-right{background:radial-gradient(circle at 50% 35%, color-mix(in oklab, var(--grad-a) 70%, #ff7a00) 38%, transparent 39%), radial-gradient(circle at 50% 90%, color-mix(in oklab, var(--grad-a) 70%, #ff7a00) 32%, transparent 33%);
+      transform:translate(-50%,-50%) translateX(0);animation:aR 1.6s ease-in-out infinite; }
+    @keyframes aL{0%,100%{transform:translate(-50%,-50%) translateX(0) scale(1);}50%{transform:translate(-50%,-50%) translateX(-10px) scale(.95);}}
+    @keyframes aR{0%,100%{transform:translate(-50%,-50%) translateX(0) scale(1);}50%{transform:translate(-50%,-50%) translateX(10px) scale(.95);}}
+    .kob-ring{position:absolute;inset:6px;border-radius:50%;background:conic-gradient(from 0deg, var(--grad-b) 0 350deg, transparent 350deg 360deg);
+      filter:drop-shadow(0 0 8px color-mix(in oklab,var(--grad-a) 60%, transparent));animation:spin 1.2s linear infinite; }
+    .kob-spiral{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:22px;animation:spin 1.6s linear infinite reverse;
+      filter:drop-shadow(0 0 6px color-mix(in oklab,var(--grad-b) 60%, transparent)); }
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    /* Texto animado no splash */
+    #appSplash .loading-text {
+      /* Estilos do texto "DualWarp" no splash */
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: #f8f9fc;
+      opacity: 0;
+      /* Animação de zoom e opacidade no mesmo Y fixo (-333px). Ajuste a duração (0.8s) ou a
+         transformação para personalizar. */
+      animation: textZoom 0.8s var(--ease) forwards;
+    }
+    @keyframes fadeUp {
+      0%, 20% { opacity: 0; transform: translateY(12px); }
+      40%, 60% { opacity: 1; transform: translateY(0); }
+      80%, 100% { opacity: 0; transform: translateY(-12px); }
+    }
+
+    /*
+     * Animações personalizadas para o splash screen:
+     *  - loaderIn: faz o loader UNO aparecer com zoom e rotação.
+     *  - textZoom: faz a frase "DualWarp" surgir suavemente no mesmo Y fixo (-333px),
+     *              aumentando de escala e ganhando opacidade.
+     */
+    #appSplash .di {
+      opacity: 0;
+      animation: loaderIn 0.8s var(--ease) forwards;
+    }
+    @keyframes loaderIn {
+      0%   { opacity: 0; transform: scale(0.6) rotate(-20deg); }
+      60%  { opacity: 1; transform: scale(1.05) rotate(5deg); }
+      100% { opacity: 1; transform: scale(1) rotate(0deg); }
+    }
+    @keyframes textZoom {
+      0%   { opacity: 0; transform: translateY(-333px) scale(0.6); }
+      100% { opacity: 1; transform: translateY(-333px) scale(1); }
     }
 
   /* Certifique-se de que o logotipo de ponto e o círculo de arquétipo
@@ -709,6 +871,21 @@ body::after {
   </style>
 </head>
 <body>
+  <!-- Splash screen displayed on initial load -->
+  <div id="appSplash">
+    <!-- Ajuste o tamanho e a espessura do loader aqui. Para deixá-lo maior ou menor, modifique
+         --di-size. Para deixar o contorno mais grosso, modifique --di-stroke. -->
+    <span class="di" style="--di-size:120px; --di-stroke:3px;">
+      <span class="ring"></span>
+      <span class="stroke"></span>
+      <span class="dots">
+        <i style="--i:0"></i><i style="--i:1"></i><i style="--i:2"></i>
+        <i style="--i:3"></i><i style="--i:4"></i><i style="--i:5"></i><i style="--i:6"></i>
+      </span>
+    </span>
+    <!-- Texto de carregamento personalizado -->
+    <div class="loading-text"><strong>dual</strong>.app</div>
+  </div>
   <!-- ===== Header ===== -->
   <header class="mast">
     <button class="ib fx-trans fx-press ring" id="btnBack" title="Voltar" aria-label="Voltar">
@@ -2622,6 +2799,22 @@ body::after {
     } catch(e){ alert('Falha no IndexDB: ' + e.message) }
   });
 })();
+</script>
+
+<!-- Script para ocultar o splash screen após o carregamento completo da página -->
+<script>
+window.addEventListener('load', () => {
+  const splash = document.getElementById('appSplash');
+  if (!splash) return;
+  // Aguarde um breve instante após o carregamento para garantir que o loader seja exibido
+  setTimeout(() => {
+    splash.classList.add('hidden');
+    // Remova o elemento do DOM após a transição de opacidade
+    setTimeout(() => {
+      if (splash && splash.parentNode) splash.parentNode.removeChild(splash);
+    }, 400);
+  }, 400);
+});
 </script>
 </body>
 </html>
