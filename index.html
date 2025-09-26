@@ -417,7 +417,14 @@ body::after {
       width: 100%;
       height: 100%;
       border: 0;
-      background: transparent;
+      /*
+       * Defina um plano de fundo escuro para o iframe do arquétipo. Quando um
+       * PNG ou outro recurso não estiver disponível ou demora a carregar,
+       * alguns navegadores exibem uma cor de fundo branca padrão. Ao
+       * especificar explicitamente uma cor escura aqui, evitamos flashes
+       * de branco e mantemos a estética coesa durante as transições.
+       */
+      background: #0b0f14;
     }
 
     /* ===== Splash overlay ===== */
