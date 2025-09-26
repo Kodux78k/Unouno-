@@ -22,8 +22,9 @@
       --grad-b: #00c5e5;
       --fg: #f5f7ff;
       --mut: rgba(245, 247, 255, .68);
-      --surface: rgba(15, 17, 32, .50);
-      --surface-strong: rgba(15, 17, 32, .88);
+      /* Superfícies levemente mais opacas para melhorar a legibilidade em fundos complexos */
+      --surface: rgba(15, 17, 32, .65);
+      --surface-strong: rgba(15, 17, 32, .92);
       --bd: 1px solid rgba(255, 255, 255, .12);
       --ok: #39ffb6;
       --warn: #ffb86b;
@@ -56,8 +57,9 @@
       --grad-b: #1f242d;
       --fg: #f1f2f5;
       --mut: rgba(241, 242, 245, .68);
-      --surface: rgba(44, 47, 56, .40);
-      --surface-strong: rgba(44, 47, 56, .75);
+      /* No tema médio, aumente a opacidade das superfícies para reforçar o efeito de vidro */
+      --surface: rgba(44, 47, 56, .55);
+      --surface-strong: rgba(44, 47, 56, .85);
       --bd: 1px solid rgba(255, 255, 255, .06);
       --ok: #68d391;
       --warn: #f6ad55;
@@ -263,7 +265,7 @@ body::after {
       /* Ícone favoritado mantém cor original (amarelo) */
       filter: none;
     }
-    .card { background: var(--surface); border: var(--bd); border-radius: var(--r2); box-shadow: var(--shadow); padding: 12px; display: flex; gap: 10px; align-items: center; position: relative }
+    .card { background: var(--surface); border: var(--bd); border-radius: var(--r2); box-shadow: var(--shadow); padding: 12px; display: flex; gap: 10px; align-items: center; position: relative; backdrop-filter: blur(8px) saturate(160%) }
     .card.fx-trans:hover { box-shadow: 0 16px 40px rgba(0,0,0,.5) }
     .ico { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; background: rgba(255,255,255,.06); border: var(--bd) }
     .mut { color: var(--mut); font-size: 12px }
@@ -291,8 +293,9 @@ body::after {
       display: flex;
       gap: 12px;
       align-items: center;
-      /* Use um fundo um pouco mais claro para destacar cada app e melhorar a legibilidade */
-      background: rgba(255, 255, 255, 0.06);
+      /* Use um fundo com maior opacidade e um leve blur para destacar cada app e melhorar a legibilidade */
+      background: var(--surface);
+      backdrop-filter: blur(8px) saturate(160%);
       border: var(--bd);
       border-radius: var(--r);
       padding: 14px;
@@ -1176,6 +1179,22 @@ body::after {
             <button id="saveName" class="btn prime fx-trans fx-press ring">Salvar<span class="ripple"></span></button>
           </div>
         </div>
+        <!-- Configuração do assistente (Dual) -->
+        <div class="card fx-trans fx-lift" style="display:block">
+          <div style="font-weight:800">Assistente</div>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
+            <input id="assistantName" class="input ring" placeholder="Nome do assistente" />
+            <button id="saveAssistant" class="btn prime fx-trans fx-press ring">Salvar<span class="ripple"></span></button>
+          </div>
+        </div>
+        <!-- Seleção da voz de boas-vindas -->
+        <div class="card fx-trans fx-lift" style="display:block">
+          <div style="font-weight:800">Voz do assistente</div>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap">
+            <select id="selectVoice" class="input ring" style="max-width:260px"></select>
+            <button id="saveVoice" class="btn fx-trans fx-press ring">Salvar<span class="ripple"></span></button>
+          </div>
+        </div>
         <div class="card fx-trans fx-lift" style="display:block">
           <div style="font-weight:800">OpenRouter</div>
           <div style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap">
@@ -1779,8 +1798,8 @@ body::after {
         } catch (e) {}
         // Atualize também os status quando entrar no Home
         try { updateHomeStatus(); } catch {}
-        // Use a síntese de voz para saudar o usuário e informar o arquétipo ativo
-        try { if (typeof speakHomeGreeting === 'function') speakHomeGreeting(); } catch {}
+        // Fale a saudação sempre que o usuário entrar na Home
+        try { speakHomeGreeting(); } catch {}
       }
       // Nenhuma ação especial ao entrar na aba de chat por enquanto
 
@@ -2161,6 +2180,54 @@ body::after {
         try { displayGreeting(); } catch (e) {}
         try { updateHomeStatus(); } catch {}
       };
+
+      // Preencher campo de assistente com valor salvo
+      const assistantInput = document.getElementById('assistantName');
+      if (assistantInput) {
+        assistantInput.value = (localStorage.getItem('infodose:assistantName') || '').trim();
+      }
+      // Salvar nome do assistente
+      const btnAssistant = document.getElementById('saveAssistant');
+      if (btnAssistant) {
+        btnAssistant.onclick = () => {
+          const nameVal = (assistantInput.value || '').trim();
+          localStorage.setItem('infodose:assistantName', nameVal);
+          try { if (typeof window.playTechPopSound === 'function') window.playTechPopSound(); } catch {}
+        };
+      }
+
+      // Preencher lista de vozes para seleção global de fala
+      const voiceSel = document.getElementById('selectVoice');
+      function populateVoiceSel() {
+        if (!voiceSel) return;
+        voiceSel.innerHTML = '';
+        let voices = speechSynthesis.getVoices();
+        if (!voices || !voices.length) return;
+        // Filtrar por idiomas suportados (Português e Inglês) se disponível
+        const filtered = voices.filter(v => v.lang && (v.lang.toLowerCase().startsWith('pt') || v.lang.toLowerCase().startsWith('en')));
+        voices = filtered.length ? filtered : voices;
+        const savedVoice = localStorage.getItem('infodose:speechVoice') || '';
+        voices.forEach(v => {
+          const opt = document.createElement('option');
+          opt.value = v.name;
+          opt.textContent = v.name + ' (' + v.lang + ')';
+          if (savedVoice && savedVoice === v.name) opt.selected = true;
+          voiceSel.appendChild(opt);
+        });
+      }
+      if (voiceSel) {
+        // Populate now and when voices change
+        populateVoiceSel();
+        speechSynthesis.onvoiceschanged = populateVoiceSel;
+      }
+      const btnVoice = document.getElementById('saveVoice');
+      if (btnVoice && voiceSel) {
+        btnVoice.onclick = () => {
+          const val = voiceSel.value;
+          localStorage.setItem('infodose:speechVoice', val || '');
+          try { if (typeof window.playTechPopSound === 'function') window.playTechPopSound(); } catch {}
+        };
+      }
 
       // Permitir adicionar modelo personalizado
       const addBtn = $('#addModel');
@@ -3021,15 +3088,17 @@ function speakMsg(msg, voicePref) {
   }
 }
 function speakSplash() {
+  // Recupera o nome do usuário salvo no localStorage para personalizar a mensagem
   const name = (localStorage.getItem('infodose:userName') || '').trim();
+  // Se houver nome de usuário, use-o; caso contrário utilize "Dual" como padrão
   const msg = name ? `${name}, pulso ativo.` : 'Oi Dual, pulso ativo.';
-  // Use a voz "Joana" como preferência para as boas-vindas do splash
-  speakMsg(msg, 'Joana');
+  // Use a voz selecionada pelo usuário no Brain, ou "Joana" como fallback
+  const prefVoice = (localStorage.getItem('infodose:speechVoice') || '').trim() || 'Joana';
+  speakMsg(msg, prefVoice);
 }
 function speakHomeGreeting() {
-  // Só fale uma vez por sessão
-  if (window.__homeGreeted) return;
-  window.__homeGreeted = true;
+  // Esta função pode ser chamada manualmente para saudar o usuário na home.
+  // Não é chamada automaticamente para evitar saudações inesperadas.
   const assistant = (localStorage.getItem('dual.assistantName') || localStorage.getItem('infodose:assistantName') || 'Dual').trim();
   // Determine arquétipo selecionado a partir do select (remove .html)
   let archName = '';
@@ -3039,15 +3108,19 @@ function speakHomeGreeting() {
     if (opt) archName = opt.textContent.replace(/\.html$/i, '');
   }
   let msg = '';
+  // Determine o nome de saudação ou utilize "Dual" como padrão
+  const userName = (localStorage.getItem('infodose:userName') || '').trim();
+  const greet = userName || 'Dual';
   if (assistant && archName) {
-    msg = `Oi Dual, eu sou ${assistant}. Ativo o impulso com o arquétipo ${archName}.`;
+    msg = `Oi ${greet}, eu sou ${assistant}. Ativo o impulso com o arquétipo ${archName}.`;
   } else if (assistant) {
-    msg = `Oi Dual, eu sou ${assistant}.`;
+    msg = `Oi ${greet}, eu sou ${assistant}.`;
   } else {
-    msg = 'Oi Dual, ative seu impulso configurando um arquétipo.';
+    msg = `Oi ${greet}, ative seu impulso configurando um arquétipo.`;
   }
-  // Tente falar com a voz do arquétipo ativo; caso não exista, use uma voz em português
-  speakMsg(msg, archName || 'Joana');
+  // Use a voz salva pelo usuário ou o nome do arquétipo; se ambos vazios, use Joana
+  const prefVoice = (localStorage.getItem('infodose:speechVoice') || '').trim();
+  speakMsg(msg, archName || prefVoice || 'Joana');
 }
 // ===== LS Control (isolated; safe append) =====
 (function(){
