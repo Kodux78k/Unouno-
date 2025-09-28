@@ -3684,5 +3684,129 @@ window.addEventListener('load', () => {
     window.playTechPopSound = () => play('sndTechPop');
   })();
   </script>
+  <style>
+    /* === COMPACT VERTICAL — Mobile-first, 100% stack === */
+/* Tema mais compacto (tipografia, radius, iluminação, animações) */
+:root{
+  --radius: 12px;                /* antes: 20px */
+  --blur: 16px;                  /* antes: 24px */
+  --shadow: 0 6px 26px rgba(0,255,255,.22);
+  --fast:.12s; --med:.20s; --slow:.45s;
+  --focus-ring: 0 0 0 3px rgba(57,255,182,.22);
+  font-synthesis-weight: none;
+}
+
+/* Viewport & container: sem overflow lateral + safe-area bottom */
+html, body{ overflow-x: hidden; }
+body{ padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+.response-container{
+  width: min(100%, 100% - 0px) !important;
+  padding: 1rem 0 4rem;
+}
+
+/* Glass e micro-iluminação */
+.glass{
+  border-radius: var(--radius);
+  backdrop-filter: blur(var(--blur));
+  box-shadow: var(--shadow);
+  transition: box-shadow var(--med) ease, filter var(--med) ease, transform var(--med) ease;
+}
+.glass:hover{ filter: brightness(1.02); }
+
+/* === 1) Nada lado a lado: stack total === */
+.row, .controls, .controls .group, .kv, .panel, .stack, .dropzone .dz-area,
+.header, .sheet, .ifr, .ifr .bar{
+  display: block !important;
+}
+.row > *, .controls > *, .controls .group > *, .panel > * {
+  margin-block: .55rem;
+}
+
+/* Utilitários do pedido */
+.columns, .split{ display:block !important; }
+
+/* === 2) Qualquer grid vira 1 coluna === */
+.header, .panel, .kv, .stack,
+[class*="grid"], [style*="grid-template-columns"]{
+  grid-template-columns: 1fr !important;
+}
+
+/* === 3) Editor/Preview empilhados; Preview abaixo; alturas 50–60vh === */
+.editor{ 
+  min-height: 52svh; max-height: 60svh; 
+  width: 100%; resize: vertical; overflow: auto;
+}
+.preview, #preview{
+  display: block; margin-top: .8rem;
+  min-height: 48svh; max-height: 58svh; 
+  overflow: auto;
+}
+
+/* === 4) Navegações: horizontais, sem wrap, com rolagem === */
+/* Aplica no conjunto de chips do cabeçalho (a "nav" real deste layout) */
+.header .row.small{
+  display: flex !important; flex-direction: row; flex-wrap: nowrap !important;
+  gap: .5rem; overflow-x: auto; overflow-y: hidden; white-space: nowrap;
+  -webkit-overflow-scrolling: touch; scroll-snap-type: x proximity;
+}
+.header .row.small > *{ flex: 0 0 auto; scroll-snap-align: start; }
+
+/* === 5) Tap targets ≥ 44px === */
+:where(button, .btn, [role="button"], label, select, input, textarea, .pill){
+  min-block-size: 44px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(255,255,255,.08);
+}
+.btn{
+  width: 100%; justify-content: center; text-align: center;
+  transition: transform var(--fast) ease, filter var(--fast) ease, box-shadow var(--fast) ease !important;
+}
+.btn:active{ transform: translateY(1px) scale(.995); }
+
+/* Botão flutuante: respeita safe-area */
+#btnKOBLLUX{ bottom: calc(1rem + env(safe-area-inset-bottom)); }
+
+/* === 6) Form controls full-width e acessíveis === */
+select, .select, textarea, input[type="text"], input[type="email"], input[type="search"], input[type="number"]{
+  width: 100%; max-width: 100%;
+}
+input[type="range"]{ width: 100% !important; min-block-size: 44px; }
+
+/* === 7) Listas/cards/grids respeitam pilha com scroll interno quando necessário === */
+.card, .list, .grid, .panel, .sheet, .overlay .sheet, .ifr{
+  max-height: 86svh; overflow: auto;
+}
+
+/* === 8) Sem footer fixo (se existir em outras telas) — apenas header === */
+footer{ position: static !important; inset: auto !important; }
+
+/* === 9) Pequenos ajustes específicos do arquivo === */
+/* Cabeçalho compacto */
+.header .title{ font-weight: 700; letter-spacing: .2px; }
+
+/* “Key/Value” vira linha única em vertical */
+.kv{ display: block !important; }
+.kv .muted, .kv .val{ display:block; }
+
+/* Controles do painel (modo, voz, sliders, arquétipo) em coluna 100% */
+.controls .group{ 
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+  border: 1px solid rgba(255,255,255,.08);
+  padding: .6rem .7rem;
+}
+
+/* Chips “pill” mais clicáveis e densos */
+.pill{ padding: .44rem .66rem; }
+
+/* Medidor ocupa largura total */
+.meter{ width: 100%; }
+
+/* iFrame seguro empilhado (barra + frame) */
+.ifr{ grid-template-rows: auto 1fr !important; }
+.ifr .bar > *{ margin-block: .4rem; }
+
+/* === 10) Acessibilidade / motion === */
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+}
+  </style>
 </body>
 </html>
