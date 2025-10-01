@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+  <title>DUAL • Chat (Horus)</title>
+  <link rel="stylesheet" href="blue-1.css">
+  <style>
+    :root { --grad-a:#1e2028; --grad-b:#0b0f14; --fg:#f5f7ff; --mut:rgba(245,247,255,.68); }
+    html,body { height:100%; margin:0; background: linear-gradient(42deg, var(--grad-a), var(--grad-b)); color: var(--fg); font: 14px/1.45 Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial; }
+    .wrap { display:flex; flex-direction:column; height:100%; }
+    header { height:56px; display:flex; align-items:center; justify-content:center; font-weight:900; letter-spacing:.08em; }
+    #v-chat { flex:1 1 auto; display:flex; flex-direction:column; gap:12px; padding:12px; }
+    #chatFeed { flex:1; overflow:auto; background: rgba(15,17,32,.65); border: 1px solid rgba(255,255,255,.12); border-radius: 22px; padding: 12px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>DUAL · Chat</header>
+    <section id="v-chat">
+      <div id="chatFeed" aria-live="polite"></div>
+    </section>
+  </div>
+  <script src="dual_multiagent_v12_locked_fixed.js" defer></script>
+  <script src="blue-1.js" defer></script>
+</body>
+</html>
