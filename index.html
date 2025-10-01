@@ -932,6 +932,65 @@ body::after {
     body.session-full .tabs-wrap,
     body.session-full .fab { display: none !important; }
 
+
+/* === Added: Blue‑1 UI theme + FX Presets + Cinematic Overlay (2025‑09‑30) === */
+
+body[data-theme="blue1"] {
+  /* Blue‑1 (Glue) palette */
+  --grad-a: #0b1e3f;
+  --grad-b: #0a1030;
+  --fg: #e6f0ff;
+  --mut: rgba(230,240,255,.68);
+  --surface: rgba(10, 15, 30, .55);
+  --surface-strong: rgba(10, 15, 30, .86);
+  --bd: 1px solid rgba(150, 180, 255, .10);
+  --ok: #39ffb6;
+  --warn: #ffd089;
+  --err: #ff7a7a;
+  --blur: 24px;
+}
+
+/* Visual FX presets (independent from theme). We apply them via body[data-fx] */
+body[data-fx="blue1"] {
+  --fx-bloom: .40;
+  --fx-glow: .65;
+  --fx-grain: .08;
+  --fx-sat: 1.12;
+  --fx-contrast: 1.08;
+}
+body[data-fx="strong"] {
+  --fx-bloom: .70;
+  --fx-glow: .90;
+  --fx-grain: .13;
+  --fx-sat: 1.22;
+  --fx-contrast: 1.18;
+}
+body[data-fx="cine-soft"] {
+  --fx-bloom: .25;
+  --fx-glow: .35;
+  --fx-grain: .06;
+  --fx-sat: 1.04;
+  --fx-contrast: .98;
+}
+
+/* Cinematic overlay layer controlled by the vars above (kept OFF by default) */
+#fxOverlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 40; /* below headers (100) and arch-circle (60) but over the bg */
+  mix-blend-mode: screen;
+  opacity: calc(var(--fx-bloom, 0));
+  background:
+    radial-gradient(1200px 800px at 30% 10%, rgba(80,140,255,.08), transparent 60%),
+    radial-gradient(1000px 800px at 70% 110%, rgba(0,180,140,.06), transparent 60%);
+  transition: opacity .3s var(--ease), filter .3s var(--ease);
+  filter:
+    saturate(var(--fx-sat,1))
+    contrast(var(--fx-contrast,1))
+    drop-shadow(0 0 calc(40px * var(--fx-glow, .4)) rgba(80,140,255,.25));
+}
+
 </style>
 </head>
 <body>
@@ -990,6 +1049,7 @@ body::after {
   <!-- Container para fundo personalizado (imagem ou vídeo).  Será preenchido via JS quando o usuário escolher
        um tema customizado.  Fica no início do body para garantir que fique abaixo de todos os conteúdos -->
   <div id="custom-bg" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;overflow:hidden;pointer-events:none"></div>
+  <div id="fxOverlay" aria-hidden="true"></div>
 
   <!-- ===== Views ===== -->
   <main>
@@ -1274,6 +1334,34 @@ body::after {
               <button id="btnPerf" class="btn fx-trans fx-press ring">Aplicar<span class="ripple"></span></button>
             </div>
           </div>
+          <!-- Visual FX (Presets) — Blue‑1 · Strong · Cinematic Soft -->
+          <div class="card fx-trans fx-lift" style="display:block">
+            <div style="font-weight:800">Visual FX</div>
+            <div style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap">
+              <label>Preset:</label>
+              <select id="fxPresetSelect" class="input ring" style="max-width:220px">
+                <option>Blue-1</option>
+                <option>Strong</option>
+                <option>Cinematic Soft</option>
+              </select>
+              <button id="fxApply" class="btn fx-trans fx-press ring">Aplicar<span class="ripple"></span></button>
+              <button id="fxSaveDefault" class="btn fx-trans fx-press ring">Salvar padrão<span class="ripple"></span></button>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap">
+              <label class="mut" style="display:inline-flex;align-items:center;gap:6px">
+                <input id="fxOverlayToggle" type="checkbox" /> overlay cinematográfico
+              </label>
+              <label class="mut" style="display:inline-flex;align-items:center;gap:6px">
+                <input id="archOverlayToggle" type="checkbox" /> cor de arquétipo (overlay)
+              </label>
+            </div>
+            <div class="mut" style="font-size:11px;margin-top:6px">
+              Blue‑1 = tom “Glue”; Strong = contraste neon; Cinematic Soft = brilho suave. 
+              O overlay vem <strong>desligado</strong> por padrão.
+            </div>
+          </div>
+
+
 
           <!-- Preferências de Voz -->
           <div class="card fx-trans fx-lift" style="display:block">
@@ -2897,8 +2985,12 @@ body::after {
       function applyArchOverlay(name) {
         const key = (name || '').toLowerCase();
         const color = ARCH_OVERLAYS[key] || ARCH_OVERLAYS.default;
-        document.documentElement.style.setProperty('--arch-overlay', color);
+        let archOn = false;
+        try { archOn = !!JSON.parse(localStorage.getItem('uno:archOverlayOn') || 'false'); } catch {}
+        const finalColor = archOn ? color : 'rgba(0,0,0,0)';
+        document.documentElement.style.setProperty('--arch-overlay', finalColor);
       }
+      window.__applyArchOverlayExt = applyArchOverlay
       function populate() {
         select.innerHTML = '';
         archList.forEach(name => {
@@ -3030,6 +3122,99 @@ body::after {
     })();
     $$('button').forEach(addRipple);
   </script>
+<script>
+// === FX Presets & Overlay Controller (Blue‑1 / Strong / Cinematic Soft) — 2025‑09‑30 ===
+(function(){
+  const LS = {
+    get:(k,d)=>{ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d }catch{ return d } },
+    set:(k,v)=>{ try{ localStorage.setItem(k, JSON.stringify(v)) }catch{} }
+  };
+  function ensureThemeOptionBlue1(){
+    const sel = document.getElementById('themeSelect');
+    if (sel && !sel.querySelector('option[value="blue1"]')) {
+      const opt = document.createElement('option');
+      opt.value = 'blue1'; opt.textContent = 'Blue‑1 (Glue)';
+      // insert before "custom" if present
+      const customOpt = sel.querySelector('option[value="custom"]');
+      if (customOpt) sel.insertBefore(opt, customOpt);
+      else sel.appendChild(opt);
+    }
+    if (sel) {
+      const saved = LS.get('uno:theme', 'medium');
+      sel.value = saved;
+    }
+  }
+  function updateFxOverlay(){
+    const fx = document.getElementById('fxOverlay');
+    if (!fx) return;
+    const on = !!LS.get('uno:fxOverlayOn', false);
+    fx.style.display = on ? 'block' : 'none';
+  }
+  function applyFX(preset){
+    const body = document.body;
+    const map = { 'blue-1':'blue1','blue1':'blue1','Blue-1':'blue1', 'Strong':'strong', 'Cinematic Soft':'cine-soft', 'cinematic soft':'cine-soft' };
+    const key = (preset || 'Blue-1');
+    const fx = map[key] || 'blue1';
+    body.setAttribute('data-fx', fx);
+    // Optional: sync UI theme when preset is Blue‑1 for a coherent look
+    const sync = LS.get('uno:fxSyncTheme', true);
+    if (sync && fx === 'blue1') {
+      document.body.dataset.theme = 'blue1';
+      LS.set('uno:theme', 'blue1');
+    }
+    LS.set('uno:fxPreset', key);
+    updateFxOverlay();
+  }
+  // Expose to global (optional)
+  window.applyFXPreset = applyFX;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    ensureThemeOptionBlue1();
+    // Ensure FX overlay element exists (in case HTML patch missed)
+    if (!document.getElementById('fxOverlay')) {
+      const d = document.createElement('div');
+      d.id = 'fxOverlay'; d.setAttribute('aria-hidden','true');
+      document.body.appendChild(d);
+    }
+    // Defaults: Preset = Blue‑1, Overlay = OFF, Arch overlay = OFF
+    if (LS.get('uno:fxPreset', null) === null) LS.set('uno:fxPreset', 'Blue-1');
+    if (LS.get('uno:fxOverlayOn', null) === null) LS.set('uno:fxOverlayOn', false);
+    if (LS.get('uno:archOverlayOn', null) === null) LS.set('uno:archOverlayOn', false);
+
+    // Apply saved
+    applyFX(LS.get('uno:fxPreset', 'Blue-1'));
+    updateFxOverlay();
+
+    // Bind UI in Brain
+    const sel = document.getElementById('fxPresetSelect');
+    const tog = document.getElementById('fxOverlayToggle');
+    const btn = document.getElementById('fxApply');
+    const btnSave = document.getElementById('fxSaveDefault');
+    const archTog = document.getElementById('archOverlayToggle');
+
+    if (sel) sel.value = LS.get('uno:fxPreset', 'Blue-1');
+    if (tog) tog.checked = !!LS.get('uno:fxOverlayOn', false);
+    if (archTog) archTog.checked = !!LS.get('uno:archOverlayOn', false);
+
+    if (btn) btn.onclick = () => applyFX(sel ? sel.value : 'Blue-1');
+    if (btnSave) btnSave.onclick = () => { const v = sel ? sel.value : 'Blue-1'; LS.set('uno:fxPreset', v); applyFX(v); try{ toast('Preset salvo como padrão','ok') }catch{} };
+
+    if (tog) tog.onchange = () => { LS.set('uno:fxOverlayOn', !!tog.checked); updateFxOverlay(); };
+    if (archTog) archTog.onchange = () => {
+      LS.set('uno:archOverlayOn', !!archTog.checked);
+      // Re-apply current archetype color overlay via exposed helper (patched applyArchOverlay)
+      try{
+        const selArch = document.getElementById('arch-select');
+        const file = (selArch && selArch.value) || '';
+        const base = file.replace(/\.html$/i,'');
+        if (typeof window.__applyArchOverlayExt === 'function') window.__applyArchOverlayExt(base);
+      }catch{}
+    };
+  });
+})();
+</script>
+
+
 <!-- Local Storage Modal (safe-placed near end of body) -->
 <div id="modalLS" class="modal" aria-hidden="true">
   <div class="panel">
@@ -4235,8 +4420,6 @@ window.addEventListener('load', () => {
   <script src="dual_multiagent_v1.js"></script>
   <script src="dual_multiagent_v12_locked.js"></script>
   <script src="openrouter_hardlock_model_v1.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r155/three.min.js"></script>
-  <script src="UNO_patch_arch3d_particles.js"></script>
 </body>
 
 <style>
