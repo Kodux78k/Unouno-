@@ -1,16 +1,9 @@
 <!doctype html>
 <html lang="pt-BR" style="--arch-overlay: rgba(64, 158, 255, 0.22);"><head>
   <meta charset="utf-8">
-  <!-- Manifest PWA -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0b0f14" />
-
-<!-- iOS Safe Area -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
   <title>HUB UNO — PROD (safe)</title>
-
+  <meta name="theme-color" content="#0b0f14">
   <style>
     :root {
       /* Paleta padrão (rosa/azul) */
@@ -718,7 +711,6 @@ body::after{content:'';position:fixed;inset:0;background:none !important;pointer
     #v-chat.view.active, #v-chat.active {
       display: flex;
     }
-#v-chat{position:relative}
     #chatFeed {
       /* Mantenha um tamanho mínimo para que mensagens apareçam mesmo sem altura flex */
       min-height: 120px;
@@ -1179,60 +1171,80 @@ body[data-theme="blue1"] #chatFeed .msg.ai { background: rgba(77, 148, 255, 0.14
 body[data-theme="blue1"] #chatFeed .msg.user { background: rgba(232,240,255,0.10); }
 
 </style>
-<link rel="stylesheet" href="blue-1.css">
 
-<style id="ui-polish">
-/* ==== Pretty slider (range) ==== */
-input[type="range"]{
-  -webkit-appearance:none; appearance:none;
-  width:100%; height:12px; border-radius:999px;
-  background: linear-gradient(90deg, var(--grad-a), var(--grad-b));
-  outline:none; box-shadow: inset 0 0 0 1px rgba(255,255,255,.12), var(--shadow);
+<style id="overlay-defaults">
+:root{
+  --arch-color: #8a2be2;
+  --arch-overlay-strength: 12%; /* −1 default */
+  --arch-overlay: color-mix(in srgb, var(--arch-color) var(--arch-overlay-strength), transparent);
 }
-input[type="range"]::-webkit-slider-thumb{
-  -webkit-appearance:none; appearance:none;
-  width:22px; height:22px; border-radius:50%;
-  background:#0b0f14; border:2px solid rgba(255,255,255,.85);
-  box-shadow: 0 6px 18px rgba(0,0,0,.4);
-  cursor:pointer;
-}
-input[type="range"]::-moz-range-thumb{
-  width:22px; height:22px; border-radius:50%;
-  background:#0b0f14; border:2px solid rgba(255,255,255,.85);
-  box-shadow: 0 6px 18px rgba(0,0,0,.4);
-  cursor:pointer;
-}
-
-/* Toggle buttons (Overlay ON/OFF) */
-.btn.toggle{min-width:96px; font-weight:800}
-.btn.toggle.on{ background: var(--ok); color:#0b0f14; border-color: transparent; }
-.btn.toggle.off{ background: linear-gradient(180deg,#1a1e2e,#0e1220); border: var(--bd); }
-.btn.toggle.off:hover{ box-shadow: 0 10px 26px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.12) inset }
-
-/* File input pretty */
-#fileLocal{ position:absolute; left:-99999px; width:1px; height:1px; overflow:hidden; }
-label.btn-file{ display:inline-flex; align-items:center; gap:6px; cursor:pointer; }
-label.btn-file img{ filter: invert(1) brightness(1.2); }
-
-/* Wrap fixes */
-#logs{white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;-webkit-hyphens:auto;hyphens:auto}
-.app-title{
-  font-weight:800;white-space:normal;display:-webkit-box;
-  -webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
-  word-break:break-word;overflow-wrap:anywhere;
-}
-.app-card .mut{word-break:break-word;overflow-wrap:anywhere}
-.session .title{white-space:normal;word-break:break-word;overflow-wrap:anywhere}
-
-/* 3D circle fill & iframe hide */
-.arch-circle{position:relative}
-#three-canvas{position:absolute;inset:0}
-#three-canvas canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
-.arch-circle iframe{display:none !important}
+body::after{content:'';position:fixed;inset:0;background:var(--arch-overlay, transparent)!important;pointer-events:none;z-index:0}
+#arch-fadeCover{background:var(--arch-overlay, transparent);z-index:2}
 </style>
 
-<style>#arch-overlay-bg{position:absolute;inset:0;background:var(--arch-overlay);opacity:var(--arch-overlay-alpha,.08);pointer-events:none}</style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<style id="ls-panel-css">
+#lsModal.ls-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:1200;background:rgba(0,0,0,.55);backdrop-filter:blur(8px)}
+#lsModal.ls-modal.open{display:flex}
+#lsModal .ls-panel{width:min(1040px,95vw);max-height:86vh;overflow:auto;background:rgba(15,17,32,.92);border:1px solid rgba(255,255,255,.12);border-radius:18px;box-shadow:0 12px 34px rgba(0,0,0,.4);padding:14px;color:#f5f7ff;font:14px/1.45 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial}
+#lsModal .ls-hdr{display:flex;gap:10px;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.12);padding-bottom:10px;margin-bottom:10px}
+#lsModal .ls-ttl{font-weight:900;letter-spacing:.06em}
+#lsModal .ls-actions{display:flex;gap:8px;flex-wrap:wrap}
+#lsModal button{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#fff;padding:8px 12px;border-radius:10px;cursor:pointer}
+#lsModal button:hover{background:rgba(255,255,255,.18)}
+#lsModal .meta{color:#cfd8dc;font-size:12px;margin:8px 0 10px}
+#lsModal .presets{border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:8px;background:rgba(255,255,255,.04);margin:10px 0}
+#lsModal .presets-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-top:8px}
+#lsModal .preset{border:1px solid rgba(255,255,255,.12);border-radius:12px;background:rgba(255,255,255,.04);padding:10px;display:grid;gap:6px}
+#lsModal .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#lsModal .val{font:12px/1.4 ui-monospace,monospace;background:#0b0f1a;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:8px;max-height:140px;overflow:auto;word-break:break-word}
+#lsModal .list{display:grid;gap:10px}
+#lsModal .item{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px;display:grid;gap:8px}
+#lsModal .item .head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+#lsModal .key{font-weight:800;max-width:56vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#lsModal .type{font-size:11px;color:#cfd8dc}
+#lsModal .switch{inline-size:46px;block-size:28px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.15);position:relative;cursor:pointer}
+#lsModal .switch::after{content:"";position:absolute;inset:4px auto 4px 4px;width:20px;border-radius:999px;background:#fff;transition:all .18s}
+#lsModal .switch.on{background:rgba(25,226,123,.28)}
+#lsModal .switch.on::after{left:22px}
+#lsModal .img-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+#lsModal .img-card{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);border-radius:10px;padding:8px}
+#lsModal .img-card img{width:100%;height:auto;display:block;border-radius:8px}
+#lsModal .sk-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:720px){#lsModal .sk-grid{grid-template-columns:1fr}#lsModal .key{max-width:46vw}}
+#lsModal .sk-item{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px;display:grid;gap:8px}
+#lsModal .sk-item .top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+#lsModal .sk-item .name{font-weight:800}
+#lsModal .sk-item .key{font:12px/1.4 ui-monospace,monospace;opacity:.85;word-break:break-all}
+#lsModal .sk-item button{font-size:.75rem;padding:4px 8px;border-radius:8px}
+#lsModal .sk-item button:first-child{background:rgba(57,255,182,.18)}
+#lsModal .sk-item button:last-child{background:rgba(255,92,138,.18)}
+/* inside LS overlay ctl */
+#lsModal .seg{display:inline-grid;grid-auto-flow:column;gap:6px}
+#lsModal .ls-ov{min-width:40px;padding:6px 8px;border-radius:10px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);color:#fff;cursor:pointer;font-weight:700}
+#lsModal .ls-ov.on{background:rgba(57,255,182,.20);border-color:rgba(57,255,182,.45)}
+</style>
+
+
+<style id="show-app-title-css">.app-title{display:inline-flex;align-items:center;gap:6px}</style>
+
+<!-- PATCH: overlay-css-unify -->
+<style id="overlay-css-unify">
+/* Ensure overlay rendering is unified across variants */
+body::after{
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: var(--arch-overlay, transparent) !important;
+  pointer-events: none;
+  z-index: 0;
+}
+</style>
+<!-- PATCH: overlay-guardian-css -->
+<style id="overlay-guardian-css">
+html[data-overlay="off"] body::after{ background: transparent !important; }
+html[data-overlay="off"] #arch-fadeCover{ background: transparent !important; }
+</style>
 </head>
 <body>
   <!-- Splash screen displayed on initial load -->
@@ -1277,9 +1289,7 @@ label.btn-file img{ filter: invert(1) brightness(1.2); }
 
   <!-- Container para fundo personalizado (imagem ou vídeo).  Será preenchido via JS quando o usuário escolher
        um tema customizado.  Fica no início do body para garantir que fique abaixo de todos os conteúdos -->
-  <div id="custom-bg" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;overflow:hidden;pointer-events:none">
-    <div id="arch-overlay-bg"></div>
-  </div>
+  <div id="custom-bg" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;overflow:hidden;pointer-events:none"></div>
 
   <!-- ===== Views ===== -->
   <main>
@@ -1314,12 +1324,11 @@ label.btn-file img{ filter: invert(1) brightness(1.2); }
               <img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/chevron-right.svg" alt="Próximo" width="16" height="16" onerror="this.onerror=null;this.src='icons/chevron-right.svg'">
             <span class="ripple"></span></button>
           </div>
-          <div class="arch-circle" id="arch-circle">
-            <div id="three-canvas"></div>
+          <div class="arch-circle">
             <div id="arch-fadeCover"></div>
             <!-- Camada de ripple auditivo fica sobre o conteúdo do círculo -->
             <div id="audioRipple" class="audio-ripple"></div>
-            <iframe id="arch-frame" title="Archetype Core" sandbox="allow-scripts" referrerpolicy="no-referrer" src="./archetypes/atlas.html" src="archetypes/center.html?preset=blue1"></iframe>
+            <iframe id="arch-frame" title="Archetype Core" sandbox="allow-scripts" referrerpolicy="no-referrer" src="./archetypes/atlas.html"></iframe>
           </div>
           <!-- Mensagem de feedback aparece fora da bolinha, logo abaixo dela -->
           <div id="archMsg" class="arch-msg show" style="background: rgba(57, 255, 182, 0.75); color: rgb(11, 15, 20);">Bem-vindo de volta, KODUX. UNO está ao seu lado.</div>
@@ -1397,8 +1406,7 @@ label.btn-file img{ filter: invert(1) brightness(1.2); }
           <div class="status">Toque a bolinha para falar com a IA.</div>
         </div>
         
-      <div id="chatResizeHandle" title="Arraste para ajustar a altura" style="position:absolute;left:8px;bottom:8px;width:16px;height:16px;cursor:ns-resize;border-radius:4px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);"></div>
-    </div>
+      </div>
     </section>
 
     <!-- APPS -->
@@ -1419,7 +1427,6 @@ label.btn-file img{ filter: invert(1) brightness(1.2); }
             <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
               <!-- Aceita arquivos .json além de HTML/TXT para permitir upload de catálogos personalizados -->
               <input id="fileLocal" type="file" accept=".html,.htm,.txt,.json" multiple="" class="input ring">
-<label for="fileLocal" class="btn btn-file fx-trans fx-press ring"><img src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/file-arrow-up.svg" alt="Escolher" width="16" height="16" onerror="this.onerror=null;this.src='icons/file-upload.svg'">Selecionar arquivos<span class="ripple"></span></label>
               <button id="btnImport" class="btn fx-trans fx-press ring">
                 <img src="icons/plus-circle.svg" alt="Adicionar" width="16" height="16" onerror="this.onerror=null;this.src='icons/plus-circle.svg'" style="margin-right:4px">
                 Adicionar Locais<span class="ripple"></span>
@@ -1437,8 +1444,7 @@ label.btn-file img{ filter: invert(1) brightness(1.2); }
           </div>
         </div>
         <div id="appsWrap" class="apps-wrap"><div class="apps-group"><h3 style="margin: 16px 4px 8px; font-size: 15px; font-weight: 800; color: var(--mut);">Ampara</h3><div class="grid"><div class="app-card fx-trans fx-lift"><button class="fav-btn"><img alt="Favorito" src="icons/star.svg"><span class="ripple"></span></button><div class="app-icon"><img alt="" width="24" height="24" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2523f5f7ff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2021s-6-3.5-6-8a4%204%200%200%201%206-3%204%204%200%200%201%206%203c0%204.5-6%208-6%208z%22%2F%3E%3C%2Fsvg%3E"></div><div style="flex: 1 1 0%;"><div class="app-title" title="Serena · Ampara">Serena ·…</div><div class="mut">Acolhimento e suporte emocional.</div><button class="btn fx-trans fx-press ring">Abrir<span class="ripple"></span></button></div></div></div></div><div class="apps-group"><h3 style="margin: 16px 4px 8px; font-size: 15px; font-weight: 800; color: var(--mut);">Arcana</h3><div class="grid"><div class="app-card fx-trans fx-lift"><button class="fav-btn"><img alt="Favorito" src="icons/star.svg"><span class="ripple"></span></button><div class="app-icon"><img alt="" width="24" height="24" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2523f5f7ff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%203v6M12%2015v6%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%223%22%2F%3E%3Cpath%20d%3D%22M19%205l-3%203M5%2019l3-3M5%205l3%203M19%2019l-3-3%22%2F%3E%3C%2Fsvg%3E"></div><div style="flex: 1 1 0%;"><div class="app-title" title="Solus · Arcana">Solus ·…</div><div class="mut">Harmonização energética e meditação.</div><button class="btn fx-trans fx-press ring">Abrir<span class="ripple"></span></button></div></div></div></div><div class="apps-group"><h3 style="margin: 16px 4px 8px; font-size: 15px; font-weight: 800; color: var(--mut);">Brilhare</h3><div class="grid"><div class="app-card fx-trans fx-lift"><button class="fav-btn"><img alt="Favorito" src="icons/star.svg"><span class="ripple"></span></button><div class="app-icon"><img alt="" width="24" height="24" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2523f5f7ff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%224%22%2F%3E%3Cpath%20d%3D%22M12%202v2M12%2020v2M2%2012h2M20%2012h2M4.9%204.9l1.4%201.4M17.7%2017.7l1.4%201.4M4.9%2019.1l1.4-1.4M17.7%206.3l1.4-1.4%22%2F%3E%3C%2Fsvg%3E"></div><div style="flex: 1 1 0%;"><div class="app-title" title="Lumine · Brilhare">Lumine ·…</div><div class="mut">Inspiração leve e atividades lúdicas.</div><button class="btn fx-trans fx-press ring">Abrir<span class="ripple"></span></button></div></div></div></div><div class="apps-group"><h3 style="margin: 16px 4px 8px; font-size: 15px; font-weight: 800; color: var(--mut);">Cartesius</h3><div class="grid"><div class="app-card fx-trans fx-lift"><button class="fav-btn"><img alt="Favorito" src="icons/star.svg"><span class="ripple"></span></button><div class="app-icon"><img alt="" width="24" height="24" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2523f5f7ff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22%2F%3E%3Cpath%20d%3D%22M3%2012h18M12%203v18%22%2F%3E%3Cpath%20d%3D%22M5%208c3%202%2011%202%2014%200M5%2016c3-2%2011-2%2014%200%22%2F%3E%3C%2Fsvg%3E"></div><div style="flex: 1 1 0%;"><div class="app-title" title="Atlas · Cartesius">Atlas ·…</div><div class="mut">Planejador estratégico com cronogramas e checklists.</div><button class="btn fx-trans fx-press ring">Abrir<span class="ripple"></span></button></div></div></div></div><div class="apps-group"><h3 style="margin: 16px 4px 8px; font-size: 15px; font-weight: 800; color: var(--mut);">Disruptor</h3><div class="grid"><div class="app-card fx-trans fx-lift"><button class="fav-btn"><img alt="Favorito" src="icons/star.svg"><span class="ripple"></span></button><div class="app-icon"><img alt="" width="24" height="24" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2523f5f7ff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M4%204l7%207-7%207%22%2F%3E%3Cpath%20d%3D%22M20%204l-7%207%207%207%22%2F%3E%3C%2Fsvg%3E"></div><div style="flex: 1 1 0%;"><div class="app-title" title="Kaos · Disruptor">Kaos ·…</div><div class="mut">Questiona padrões e propõe soluções ousadas.</div><button class="btn fx-trans fx-press ring">Abrir<span class="ripple"></span></button></div></div></div></div><div class="apps-group"><h3 style="margin: 16px 4px 8px; font-size: 15px; font-weight: 800; color: var(--mut);">Evolutia</h3><div class="grid"><div class="app-card fx-trans fx-lift"><button class="fav-btn"><img alt="Favorito" src="icons/star.svg"><span class="ripple"></span></button><div class="app-icon"><img alt="" width="24" height="24" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2523f5f7ff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M7%2012c0-2.2%201.8-4%204-4%201.2%200%202.3.5%203%201.3M17%2012c0%202.2-1.8%204-4%204-1.2%200-2.3-.5-3-1.3%22%2F%3E%3Cpath%20d%3D%22M3%2012h4M17%2012h4%22%2F%3E%3C%2Fsvg%3E"></div><div style="flex: 1 1 0%;"><div class="app-title" title="Aion · Evolutia">Aion ·…</div><div class="mut">Microações estratégicas e evolução.</div><button class="btn fx-trans fx-press ring">Abrir<span class="ripple"></span></button></div></div></div></div><div class="apps-group"><h3 style="margin: 16px 4px 8px; font-size: 15px; font-weight: 800; color: var(--mut);">Fabricus</h3><div class="grid"><div class="app-card fx-trans fx-lift"><button class="fav-btn"><img alt="Favorito" src="icons/star.svg"><span class="ripple"></span></button><div class="app-icon"><img alt="" width="24" height="24" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2523f5f7ff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%227%22%20y%3D%227%22%20width%3D%2210%22%20height%3D%2210%22%20rx%3D%222%22%2F%3E%3Cpath%20d%3D%22M7%207l5-3%205%203M17%2017l-5%203-5-3%22%2F%3E%3C%2Fsvg%3E"></div><div style="flex: 1 1 0%;"><div class="app-title" title="Genus · Fabricus">Genus ·…</div><div class="mut">Protótipos e materialização de ideias.</div><button class="btn fx-trans fx-press ring">Abrir<span class="ripple"></span></button></div></div></div></div><div class="apps-group"><h3 style="margin: 16px 4px 8px; font-size: 15px; font-weight: 800; color: var(--mut);">Inspira</h3><div class="grid"><div class="app-card fx-trans fx-lift"><button class="fav-btn"><img alt="Favorito" src="icons/star.svg"><span class="ripple"></span></button><div class="app-icon"><img alt="" width="24" height="24" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2523f5f7ff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%202v4M12%2018v4M2%2012h4M18%2012h4%22%2F%3E%3Cpath%20d%3D%22M5.6%205.6l2.8%202.8M15.6%2015.6l2.8%202.8M18.4%205.6l-2.8%202.8M8.4%2015.6l-2.8%202.8%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%223%22%2F%3E%3C%2Fsvg%3E"></div><div style="flex: 1 1 0%;"><div class="app-title" title="Nova · Inspira">Nova ·…</div><div class="mut">Criativa que desbloqueia ideias com mapas mentais e exercícios.</div><button class="btn fx-trans fx-press ring">Abrir<span class="ripple"></span></button></div></div></div></div><div class="apps-group"><h3 style="margin: 16px 4px 8px; font-size: 15px; font-weight: 800; color: var(--mut);">Momentum</h3><div class="grid"><div class="app-card fx-trans fx-lift"><button class="fav-btn"><img alt="Favorito" src="icons/star.svg"><span class="ripple"></span></button><div class="app-icon"><img alt="" width="24" height="24" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2523f5f7ff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%2012h4l2-5%204%2010%202-5h6%22%2F%3E%3Cpath%20d%3D%22M13%203l-2%204%203%201-2%204%22%2F%3E%3C%2Fsvg%3E"></div><div style="flex: 1 1 0%;"><div class="app-title" title="Vitalis · Momentum">Vitalis ·…</div><div class="mut">Rotinas físicas, hacks biológicos e motivação.</div><button class="btn fx-trans fx-press ring">Abrir<span class="ripple"></span></button></div></div></div></div><div class="apps-group"><h3 style="margin: 16px 4px 8px; font-size: 15px; font-weight: 800; color: var(--mut);">Naviga</h3><div class="grid"><div class="app-card fx-trans fx-lift"><button class="fav-btn"><img alt="Favorito" src="icons/star.svg"><span class="ripple"></span></button><div class="app-icon"><img alt="" width="24" height="24" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2523f5f7ff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%2012h12%22%2F%3E%3Cpath%20d%3D%22M13%206l6%206-6%206%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22%2F%3E%3C%2Fsvg%3E"></div><div style="flex: 1 1 0%;"><div class="app-title" title="Artemis · Naviga">Artemis ·…</div><div class="mut">Explora conhecimentos e rotas de aprendizado.</div><button class="btn fx-trans fx-press ring">Abrir<span class="ripple"></span></button></div></div></div></div><div class="apps-group"><h3 style="margin: 16px 4px 8px; font-size: 15px; font-weight: 800; color: var(--mut);">Outros</h3><div class="grid"><div class="app-card fx-trans fx-lift"><button class="fav-btn"><img alt="Favorito" src="icons/star.svg"><span class="ripple"></span></button><div class="app-icon"><img alt="" width="24" height="24" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2523f5f7ff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22%2F%3E%3Cpath%20d%3D%22M3%2012h18M12%203v18%22%2F%3E%3Cpath%20d%3D%22M5%208c3%202%2011%202%2014%200M5%2016c3-2%2011-2%2014%200%22%2F%3E%3C%2Fsvg%3E"></div><div style="flex: 1 1 0%;"><div class="app-title" title="Dual_esqueci">Dual_esqueci</div><div class="mut">HTML local</div><button class="btn fx-trans fx-press ring">Abrir<span class="ripple"></span></button></div></div><div class="app-card fx-trans fx-lift"><button class="fav-btn"><img alt="Favorito" src="icons/star.svg"><span class="ripple"></span></button><div class="app-icon"><img alt="" width="24" height="24" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2523f5f7ff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22%2F%3E%3Cpath%20d%3D%22M3%2012h18M12%203v18%22%2F%3E%3Cpath%20d%3D%22M5%208c3%202%2011%202%2014%200M5%2016c3-2%2011-2%2014%200%22%2F%3E%3C%2Fsvg%3E"></div><div style="flex: 1 1 0%;"><div class="app-title" title="index_kobllux_voicefix">index_kobllux_voicefix</div><div class="mut">HTML local</div><button class="btn fx-trans fx-press ring">Abrir<span class="ripple"></span></button></div></div><div class="app-card fx-trans fx-lift"><button class="fav-btn"><img alt="Favorito" src="icons/star.svg"><span class="ripple"></span></button><div class="app-icon"><img alt="" width="24" height="24" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2523f5f7ff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22%2F%3E%3Cpath%20d%3D%22M3%2012h18M12%203v18%22%2F%3E%3Cpath%20d%3D%22M5%208c3%202%2011%202%2014%200M5%2016c3-2%2011-2%2014%200%22%2F%3E%3C%2Fsvg%3E"></div><div style="flex: 1 1 0%;"><div class="app-title" title="index-100">index-100</div><div class="mut">HTML local</div><button class="btn fx-trans fx-press ring">Abrir<span class="ripple"></span></button></div></div></div></div><div class="apps-group"><h3 style="margin: 16px 4px 8px; font-size: 15px; font-weight: 800; color: var(--mut);">Raízes</h3><div class="grid"><div class="app-card fx-trans fx-lift"><button class="fav-btn"><img alt="Favorito" src="icons/star.svg"><span class="ripple"></span></button><div class="app-icon"><img alt="" width="24" height="24" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2523f5f7ff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%203v6%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%229%22%20r%3D%224%22%2F%3E%3Cpath%20d%3D%22M12%2013v2l-2%202M12%2015l2%202M12%2017v3%22%2F%3E%3C%2Fsvg%3E"></div><div style="flex: 1 1 0%;"><div class="app-title" title="Rhea · Raízes">Rhea ·…</div><div class="mut">Vínculos e memórias emocionais.</div><button class="btn fx-trans fx-press ring">Abrir<span class="ripple"></span></button></div></div></div></div><div class="apps-group"><h3 style="margin: 16px 4px 8px; font-size: 15px; font-weight: 800; color: var(--mut);">Resona</h3><div class="grid"><div class="app-card fx-trans fx-lift"><button class="fav-btn"><img alt="Favorito" src="icons/star.svg"><span class="ripple"></span></button><div class="app-icon"><img alt="" width="24" height="24" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2523f5f7ff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M2%2012h3l2-4%203%208%202-4h8%22%2F%3E%3Cpath%20d%3D%22M20%208v-3M20%2019v-3%22%2F%3E%3C%2Fsvg%3E"></div><div style="flex: 1 1 0%;"><div class="app-title" title="Pulse · Resona">Pulse ·…</div><div class="mut">Trilhas sonoras e ajuste de som emocional.</div><button class="btn fx-trans fx-press ring">Abrir<span class="ripple"></span></button></div></div></div></div></div>
-      <div id="chatResizeHandle" title="Arraste para ajustar a altura" style="position:absolute;left:8px;bottom:8px;width:16px;height:16px;cursor:ns-resize;border-radius:4px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);"></div>
-    </div>
+      </div>
     </section>
 
     <!-- STACK -->
@@ -1467,8 +1473,7 @@ label.btn-file img{ filter: invert(1) brightness(1.2); }
         </div>
         <!-- Área de grupos e sessões -->
         <div id="stackWrap" class="grid"></div>
-      <div id="chatResizeHandle" title="Arraste para ajustar a altura" style="position:absolute;left:8px;bottom:8px;width:16px;height:16px;cursor:ns-resize;border-radius:4px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);"></div>
-    </div>
+      </div>
     </section>
 
     <!-- BRAIN -->
@@ -1591,20 +1596,13 @@ label.btn-file img{ filter: invert(1) brightness(1.2); }
             <pre id="logs" style="margin:0;font:12px/1.4 ui-monospace,monospace;color:var(--mut);max-height:140px;overflow:auto"></pre>
           </div>
           </div>
-      <div id="chatResizeHandle" title="Arraste para ajustar a altura" style="position:absolute;left:8px;bottom:8px;width:16px;height:16px;cursor:ns-resize;border-radius:4px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);"></div>
-    </div>
+      </div>
     </section>
 
     <!-- CHAT (Dual • Chat) -->
     <section id="v-chat" class="view">
       <!-- Feed de mensagens do chat -->
-      <div id="chatFeed">
-<div id="chatQuickActions" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
-  <button class="btn fx-trans fx-press ring" id="btnReward">Recompensa Inicial</button>
-  <button class="btn fx-trans fx-press ring" id="btnCurious">Curiosidade & Expansão</button>
-  <button class="btn fx-trans fx-press ring" id="btnVibe">Antecipação Vibracional</button>
-</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: E aí beleza</div><div id="chatResizeHandle" title="Arraste para ajustar a altura" style="position:absolute;left:8px;bottom:8px;width:16px;height:16px;cursor:ns-resize;border-radius:4px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);"></div>
-    </div>
+      <div id="chatFeed"><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: E aí beleza</div></div>
     </section>
   </main>
 
@@ -2955,7 +2953,7 @@ label.btn-file img{ filter: invert(1) brightness(1.2); }
       dock.innerHTML = '';
       $$('.session').forEach(s => {
         const meta = JSON.parse(s.dataset.meta || '{}');
-        dock.appendChild(badge({ title: meta.title, sid: s.dataset.sid }))
+        dock.appendChild(badge({ title: "", sid: s.dataset.sid }))
       });
       // Atualize o status de sessões na home
       try { updateHomeStatus(); } catch {}
@@ -3349,334 +3347,8 @@ label.btn-file img{ filter: invert(1) brightness(1.2); }
     $$('button').forEach(addRipple);
   </script><div style="position: fixed; right: 14px; bottom: calc(var(--tabsH) + 16px); display: grid; gap: 8px; z-index: 120;"></div><div style="position: fixed; right: 14px; bottom: calc(var(--tabsH) + 16px); display: grid; gap: 8px; z-index: 120;"></div>
 <!-- Local Storage Modal (safe-placed near end of body) -->
-<div id="modalLS" class="modal" aria-hidden="true">
-  <div class="panel">
-    <div style="display:flex;align-items:center;gap:10px;justify-content:space-between">
-      <h3 style="margin:0">Local Storage</h3>
-      <button id="lsClose" class="btn fx-trans fx-press ring">Fechar<span class="ripple"></span></button>
-    </div>
-    <div class="mut" id="lsStats" style="margin-top:8px;font-size:12px">–</div>
-    <!-- Informações rápidas do usuário, assistente e arquétipo ativo -->
-    <div id="lsInfo" style="margin-top:8px;font-size:12px;line-height:1.4">
-      <div><strong>Usuário:</strong> <span id="lsUserDisplay">–</span></div>
-      <div><strong>Assistente:</strong> <span id="lsAssistantDisplay">–</span></div>
-      <div><strong>Arquétipo ativo:</strong> <span id="lsArchDisplay">–</span></div>
-    </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
-      <button id="lsExport" class="btn fx-trans fx-press ring">Exportar<span class="ripple"></span></button>
-      <button id="lsImport" class="btn fx-trans fx-press ring">Importar<span class="ripple"></span></button>
-      <button id="lsClear" class="btn fx-trans fx-press ring">Limpar LS<span class="ripple"></span></button>
-      <button id="lsClearIDB" class="btn fx-trans fx-press ring">Limpar IndexDB<span class="ripple"></span></button>
-      <button id="lsReloadPage" class="btn fx-trans fx-press ring">Atualizar página<span class="ripple"></span></button>
-    </div>
-    <!-- Lista dinâmica de itens armazenados no LocalStorage -->
-    <div id="lsList" style="margin-top:12px; max-height:200px; overflow:auto; font-size:12px; color:var(--fg);"></div>
-    <!-- Botão para adicionar novo item ao LocalStorage -->
-    <div style="margin-top:10px; display:flex; gap:6px;">
-      <button id="lsAdd" class="btn fx-trans fx-press ring">Adicionar item<span class="ripple"></span></button>
-    </div>
-    <div class="mut" style="margin-top:10px;font-size:11px">Dica: exporte antes de limpar. O tamanho é aproximado (UTF-16).</div>
-  </div>
-</div>
-<script>
-// === Fala por voz usando Web Speech API ===
-// Estas funções utilizam a API de síntese de fala do navegador para
-// pronunciar mensagens. A voz padrão é configurada para o português do Brasil.
-// Fala uma mensagem opcionalmente selecionando uma voz preferida.
-function pickVoice(pref) {
-  try {
-    const voices = speechSynthesis.getVoices();
-    if (!voices || !voices.length) return null;
-    // Se houver uma preferência, tente encontrá-la pelo nome
-    if (pref) {
-      const found = voices.find(v => v.name && v.name.toLowerCase().includes(pref.toLowerCase()));
-      if (found) return found;
-    }
-    // Caso contrário, escolha uma voz em português ou a primeira disponível
-    const ptVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('pt'));
-    return ptVoice || voices[0];
-  } catch (err) {
-    return null;
-  }
-}
-function speakMsg(msg, voicePref) {
-  try {
-    const utter = new SpeechSynthesisUtterance(msg);
-    utter.lang = 'pt-BR';
-    const voice = pickVoice(voicePref);
-    if (voice) utter.voice = voice;
-    speechSynthesis.speak(utter);
-  } catch (e) {
-    console.warn('Speech synthesis not supported', e);
-  }
-}
-function speakSplash() {
-  // Recupera o nome do usuário salvo no localStorage para personalizar a mensagem
-  const name = (localStorage.getItem('infodose:userName') || '').trim();
-  // Se houver nome de usuário, use-o; caso contrário utilize "Dual" como padrão
-  const msg = name ? `${name}, pulso ativo.` : 'Oi Dual, pulso ativo.';
-  // Use a voz selecionada pelo usuário no Brain, ou "Joana" como fallback
-  const prefVoice = (localStorage.getItem('infodose:speechVoice') || '').trim() || 'Joana';
-  speakMsg(msg, prefVoice);
-}
-function speakHomeGreeting() {
-  // Esta função pode ser chamada manualmente para saudar o usuário na home.
-  // Não é chamada automaticamente para evitar saudações inesperadas.
-  const assistant = (localStorage.getItem('dual.assistantName') || localStorage.getItem('infodose:assistantName') || 'Dual').trim();
-  // Determine arquétipo selecionado a partir do select (remove .html)
-  let archName = '';
-  const sel = document.getElementById('arch-select');
-  if (sel && sel.options.length > 0) {
-    const opt = sel.options[sel.selectedIndex];
-    if (opt) archName = opt.textContent.replace(/\.html$/i, '');
-  }
-  let msg = '';
-  // Determine o nome de saudação ou utilize "Dual" como padrão
-  const userName = (localStorage.getItem('infodose:userName') || '').trim();
-  const greet = userName || 'Dual';
-  if (assistant && archName) {
-    msg = `Oi ${greet}, eu sou ${assistant}. Ativo o impulso com o arquétipo ${archName}.`;
-  } else if (assistant) {
-    msg = `Oi ${greet}, eu sou ${assistant}.`;
-  } else {
-    msg = `Oi ${greet}, ative seu impulso configurando um arquétipo.`;
-  }
-  // Use a voz salva pelo usuário ou o nome do arquétipo; se ambos vazios, use Joana
-  const prefVoice = (localStorage.getItem('infodose:speechVoice') || '').trim();
-  speakMsg(msg, archName || prefVoice || 'Joana');
-}
-// ===== LS Control (isolated; safe append) =====
-(function(){
-  function toast(msg, type){ try{ window.toast(msg, type || 'ok') }catch{ console.log(msg) } }
-  const modal = document.getElementById('modalLS');
-  const stats = document.getElementById('lsStats');
-  const btn = document.getElementById('btnLS');
-  const btnClose = document.getElementById('lsClose');
-  const btnExport = document.getElementById('lsExport');
-  const btnImport = document.getElementById('lsImport');
-  const btnClear = document.getElementById('lsClear');
-  const btnClearIDB = document.getElementById('lsClearIDB');
-  // Elementos adicionais para exibir e editar LocalStorage
-  const lsList = document.getElementById('lsList');
-  const btnAdd  = document.getElementById('lsAdd');
 
-  function approxSize(){
-    let bytes = 0;
-    for (let i=0; i<localStorage.length; i++){
-      const k = localStorage.key(i) || '';
-      const v = localStorage.getItem(k) || '';
-      bytes += 2 * (k.length + v.length);
-    }
-    const KB = 1024, MB = KB*1024;
-    const human = bytes > MB ? (bytes/MB).toFixed(2)+' MB' : (bytes>KB ? (bytes/KB).toFixed(1)+' KB' : bytes+' B');
-    return { bytes, human, keys: localStorage.length };
-  }
-  function updateStats(){ if (!stats) return; const s = approxSize(); stats.textContent = 'Chaves: ' + s.keys + ' · Tamanho aprox: ' + s.human; }
-  // Renderiza a lista de itens no LocalStorage dentro do modal.  Cada item possui campos
-  // editáveis para chave e valor, além de botões para salvar ou excluir.
-  function renderLS(){
-    if (!lsList) return;
-    lsList.innerHTML = '';
-    const keys = [];
-    for (let i=0; i<localStorage.length; i++){
-      const k = localStorage.key(i);
-      if (k != null) keys.push(k);
-    }
-    // Ordene as chaves para exibir de forma consistente
-    keys.sort();
-    keys.forEach((key) => {
-      const value = localStorage.getItem(key) ?? '';
-      const row = document.createElement('div');
-      row.style.display = 'flex';
-      row.style.alignItems = 'center';
-      row.style.gap = '6px';
-      row.style.marginTop = '6px';
-      // Campo de chave
-      const keyInput = document.createElement('input');
-      keyInput.value = key;
-      keyInput.placeholder = 'chave';
-      keyInput.style.flex = '1 1 30%';
-      keyInput.style.padding = '4px';
-      keyInput.style.borderRadius = '6px';
-      keyInput.style.border = '1px solid rgba(255,255,255,0.15)';
-      keyInput.style.background = 'rgba(255,255,255,0.05)';
-      keyInput.style.color = 'inherit';
-      // Campo de valor
-      const valInput = document.createElement('input');
-      valInput.value = value;
-      valInput.placeholder = 'valor';
-      valInput.style.flex = '1 1 50%';
-      valInput.style.padding = '4px';
-      valInput.style.borderRadius = '6px';
-      valInput.style.border = '1px solid rgba(255,255,255,0.15)';
-      valInput.style.background = 'rgba(255,255,255,0.05)';
-      valInput.style.color = 'inherit';
-      // Botão salvar
-      const btnSave = document.createElement('button');
-      btnSave.textContent = 'Salvar';
-      btnSave.className = 'btn fx-trans fx-press ring';
-      btnSave.style.fontSize = '11px';
-      // Botão excluir
-      const btnDel = document.createElement('button');
-      btnDel.textContent = 'Del';
-      btnDel.className = 'btn fx-trans fx-press ring';
-      btnDel.style.fontSize = '11px';
-      // Ações
-      btnSave.addEventListener('click', () => {
-        const newKey = keyInput.value.trim();
-        const newVal = valInput.value;
-        if (!newKey) { toast('Chave vazia', 'warn'); return; }
-        if (newKey !== key) localStorage.removeItem(key);
-        try { localStorage.setItem(newKey, newVal); toast('Item salvo', 'ok'); } catch(e){ toast('Erro ao salvar', 'err'); }
-        renderLS(); updateStats();
-      });
-      btnDel.addEventListener('click', () => {
-        if (!confirm('Excluir a chave "'+keyInput.value+'"?')) return;
-        localStorage.removeItem(keyInput.value);
-        renderLS(); updateStats(); toast('Item removido', 'warn');
-      });
-      row.appendChild(keyInput);
-      row.appendChild(valInput);
-      row.appendChild(btnSave);
-      row.appendChild(btnDel);
-      lsList.appendChild(row);
-    });
-  }
-  function openModal(){ if (!modal) return; updateStats(); modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); }
-  function closeModal(){ if (!modal) return; modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); }
 
-  // Ao abrir o modal, também carregue a lista de itens atuais
-  const _openModalRef = openModal;
-  function openModalLS(){
-    _openModalRef();
-    renderLS();
-    // Preencha informações do usuário, assistente e arquétipo ativo
-    try {
-      const uDisplay = document.getElementById('lsUserDisplay');
-      const aDisplay = document.getElementById('lsAssistantDisplay');
-      const archDisplay = document.getElementById('lsArchDisplay');
-      // Tente recuperar o nome do usuário das chaves salvas
-      const userName = (localStorage.getItem('dual.name') || localStorage.getItem('infodose:userName') || '').trim();
-      const assistantName = (localStorage.getItem('dual.assistantName') || localStorage.getItem('infodose:assistantName') || 'Dual').trim();
-      // Obtenha o arquétipo ativo a partir do seletor
-      let arch = '';
-      const archSel = document.getElementById('arch-select');
-      if (archSel && archSel.value) arch = archSel.value.replace(/\.html$/i, '');
-      if (uDisplay) uDisplay.textContent = userName || '–';
-      if (aDisplay) aDisplay.textContent = assistantName || '–';
-      if (archDisplay) archDisplay.textContent = arch || '–';
-    } catch {}
-    // Botão para recarregar a página
-    const btnReload = document.getElementById('lsReloadPage');
-    if (btnReload) {
-      btnReload.onclick = () => { location.reload(); };
-    }
-  }
-  // Redefina o evento para usar a nova função
-  if (btn) btn.addEventListener('click', openModalLS);
-
-  // O botão LS já foi associado à função openModalLS acima.
-  if (btnClose) btnClose.addEventListener('click', closeModal);
-  if (modal) modal.addEventListener('click', (e)=>{ if (e.target === modal) closeModal(); });
-
-  // Botão para adicionar novo item
-  if (btnAdd) btnAdd.addEventListener('click', () => {
-    if (!lsList) return;
-    // Insira uma nova linha em branco no início para o usuário digitar
-    const row = document.createElement('div');
-    row.style.display = 'flex';
-    row.style.alignItems = 'center';
-    row.style.gap = '6px';
-    row.style.marginTop = '6px';
-    const keyInput = document.createElement('input');
-    keyInput.placeholder = 'nova chave';
-    keyInput.style.flex = '1 1 30%';
-    keyInput.style.padding = '4px';
-    keyInput.style.borderRadius = '6px';
-    keyInput.style.border = '1px solid rgba(255,255,255,0.15)';
-    keyInput.style.background = 'rgba(255,255,255,0.05)';
-    keyInput.style.color = 'inherit';
-    const valInput = document.createElement('input');
-    valInput.placeholder = 'novo valor';
-    valInput.style.flex = '1 1 50%';
-    valInput.style.padding = '4px';
-    valInput.style.borderRadius = '6px';
-    valInput.style.border = '1px solid rgba(255,255,255,0.15)';
-    valInput.style.background = 'rgba(255,255,255,0.05)';
-    valInput.style.color = 'inherit';
-    const btnSave = document.createElement('button');
-    btnSave.textContent = 'Salvar';
-    btnSave.className = 'btn fx-trans fx-press ring';
-    btnSave.style.fontSize = '11px';
-    const btnCancel = document.createElement('button');
-    btnCancel.textContent = 'Cancelar';
-    btnCancel.className = 'btn fx-trans fx-press ring';
-    btnCancel.style.fontSize = '11px';
-    btnSave.addEventListener('click', () => {
-      const newKey = keyInput.value.trim();
-      const newVal = valInput.value;
-      if (!newKey) { toast('Chave vazia', 'warn'); return; }
-      try {
-        localStorage.setItem(newKey, newVal);
-        toast('Item adicionado', 'ok');
-      } catch(e) { toast('Erro ao adicionar', 'err'); }
-      renderLS(); updateStats();
-    });
-    btnCancel.addEventListener('click', () => {
-      row.remove();
-    });
-    row.appendChild(keyInput);
-    row.appendChild(valInput);
-    row.appendChild(btnSave);
-    row.appendChild(btnCancel);
-    lsList.prepend(row);
-  });
-
-  if (btnExport) btnExport.addEventListener('click', () => {
-    const dump = {};
-    for (let i=0; i<localStorage.length; i++){ const k = localStorage.key(i); if (!k) continue; dump[k] = localStorage.getItem(k); }
-    const blob = new Blob([JSON.stringify({ when: Date.now(), dump }, null, 2)], { type: 'application/json' });
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'localStorage_backup.json'; a.click();
-    setTimeout(()=>URL.revokeObjectURL(a.href), 400);
-    toast('LS exportado', 'ok');
-  });
-
-  if (btnImport) btnImport.addEventListener('click', () => {
-    const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json,application/json';
-    inp.onchange = (ev) => {
-      const f = ev.target.files && ev.target.files[0]; if (!f) return;
-      const r = new FileReader();
-      r.onload = () => {
-        try {
-          const obj = JSON.parse(String(r.result||'') || '{}'); const data = obj.dump || obj || {};
-          Object.keys(data).forEach(k => { try { localStorage.setItem(k, String(data[k])) } catch{} });
-          updateStats(); toast('LS importado', 'ok');
-        } catch { toast('Erro no JSON', 'err'); }
-      };
-      r.readAsText(f);
-    };
-    inp.click();
-  });
-
-  if (btnClear) btnClear.addEventListener('click', () => {
-    if (!confirm('Limpar TODO o Local Storage?')) return;
-    try { localStorage.clear(); updateStats(); toast('LS limpo', 'warn'); } catch(e){ alert(e.message) }
-  });
-
-  if (btnClearIDB) btnClearIDB.addEventListener('click', async () => {
-    if (!confirm('Apagar bancos do IndexDB?')) return;
-    try {
-      if ('databases' in indexedDB) {
-        const dbs = await indexedDB.databases();
-        for (const db of dbs) { if (db && db.name) indexedDB.deleteDatabase(db.name); }
-      } else {
-        ['infodose','dual','uno'].forEach(name => { try { indexedDB.deleteDatabase(name) } catch{} });
-      }
-      toast('IndexDB limpo', 'warn');
-    } catch(e){ alert('Falha no IndexDB: ' + e.message) }
-  });
-})();
-</script>
 
 <!-- Script para ocultar o splash screen após o carregamento completo da página -->
 <!-- Script adicional para o Stacks estendido: upload de HTML e criação de grupos -->
@@ -4550,7 +4222,12 @@ window.addEventListener('load', () => {
 
 })(); // end ChatPlus
 </script>
-  <style>
+  <script src="dual_multiagent_v1.js"></script>
+  <script src="dual_multiagent_v12_locked.js"></script>
+  <script src="openrouter_hardlock_model_v1.js" defer=""></script>
+
+
+<style>
 /* --------------------------------------------
    KOBLLUX • Compact Mode — Mobile-first Vertical
    Colar após o CSS atual
@@ -4957,128 +4634,380 @@ main .row > * + * { margin-top: .5rem; }
 })();
 </script>
 
-<script src="dual_multiagent_v12_locked_fixed.js"></script>
-<script src="UNO_patch_arch3d_particles.js"></script>
-<script src="blue-1.js"></script>
 
-<script>
-(function(){
-  const selArch   = document.getElementById('arch-select');
-  const selPreset = document.getElementById('arch-preset');
-  const frame     = document.getElementById('arch-frame');
-  if (!selArch || !frame || !selPreset) return;
-  const LS = { get:(k,d)=>{ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d }catch{ return d } },
-               set:(k,v)=>{ try{ localStorage.setItem(k, JSON.stringify(v)) }catch{} } };
-  // Load saved preset
-  const saved = (LS.get('uno:arch:preset')||'blue1').toLowerCase();
-  if (['blue1','strong','cinematic','off'].includes(saved)) selPreset.value = saved;
-  function apply(){
-    if (!selArch.value) return;
-    const url = new URL(selArch.value, location.href);
-    const preset = selPreset.value || 'blue1';
-    if (preset==='off') { url.searchParams.delete('preset'); } else { url.searchParams.set('preset', preset); }
-    frame.src = url.toString();
-    LS.set('uno:arch:preset', preset);
-  }
-  selPreset.addEventListener('change', apply);
-  selArch.addEventListener('change', apply);
-  // Initial apply if iframe empty
-  if (!frame.getAttribute('src')) apply();
-})();
-</script>
-<script type="module" src="UNO_patch_arch3d_bloom.js" defer></script>
- 
+  <link rel="stylesheet" href="uno_showcase_patch.css">
+  <script src="uno_showcase_patch.js" defer></script>
 
-<script type="module" src="UNO_patch_arch3d.js"defer></script>
+<div id="lsModal" class="ls-modal" aria-hidden="true">
+  <div class="ls-panel" id="lsPanel">
+    <div class="ls-hdr">
+      <div class="ls-ttl">LocalStorage • Presets, Chaves & Carteira SK</div>
+      <div class="ls-actions">
+        <button id="lsRescan">Re-scan</button>
+        <button id="lsRefresh">Atualizar página</button>
+        <button id="lsExport">Exportar</button>
+        <label for="lsImportFile" style="display:inline-block"><button type="button">Importar</button></label>
+        <input id="lsImportFile" type="file" accept="application/json" hidden>
+        <button id="lsClearDisabled">Limpar desativados</button>
+        <button id="lsClose">Fechar</button>
+      </div>
+    </div>
+
+    <details class="presets" open>
+      <summary><strong>Presets (ON/OFF global)</strong></summary>
+      <div class="presets-grid" id="presetsGrid"></div>
+    </details>
+
+    <details class="presets" open>
+      <summary><strong>Carteira de Chaves OpenRouter</strong></summary>
+      <div class="grid" style="gap:8px">
+        <div class="row" style="border:0;padding:0;gap:8px">
+          <input id="skName" placeholder="Nome curto (ex.: Prod, Dev, Teste)" style="flex:1">
+          <input id="skValue" placeholder="sk-..." style="flex:2">
+          <button id="skAdd">Adicionar</button>
+        </div>
+        <div class="sk-grid" id="skGrid"></div>
+      </div>
+      <div class="meta">A chave <code>dual.keys.openrouter</code> recebe a chave marcada como <b>Ativa</b>. Desativar retira a chave ativa do uso (sem apagar a carteira).</div>
+    </details>
+
+    <details class="presets" open>
+      <summary><strong>Overlay do Arquétipo</strong> <span class="type" style="opacity:.75">força</span></summary>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <div>Força:</div>
+        <div class="seg">
+          <button type="button" class="ls-ov" data-level="0">0</button>
+          <button type="button" class="ls-ov" data-level="-1">−1</button>
+          <button type="button" class="ls-ov" data-level="-2">−2</button>
+        </div>
+        <div class="meta">Salvo em <code>infodose:arch.overlay.level</code> • Default: −1 (12%).</div>
+      </div>
+    </details>
+
+    <div class="meta"><span id="lsCount">—</span> • <span id="lsSize">—</span></div>
+    <div class="list" id="lsList"></div>
+
+    <details class="presets" style="margin-top:10px" open>
+      <summary><strong>Pré-visualização de Imagens</strong></summary>
+      <div class="img-grid" id="imgGrid"></div>
+    </details>
+  </div>
+
+</div>
 
 
+<script id="ls-panel-js">
+(() => {
+  const $ = (s, r=document)=> r.querySelector(s);
+  const $$ = (s, r=document)=> Array.from(r.querySelectorAll(s));
+  const prettyBytes = (n)=>{ if(!Number.isFinite(n)||n<=0) return '0 B'; const u=['B','KB','MB','GB']; let i=0; while(n>=1024&&i<u.length-1){n/=1024;i++} return n.toFixed(2)+' '+u[i] };
+  const isJson = (v)=>{ try{ JSON.parse(v); return true; }catch{ return false; } };
+  const inferType = (v)=>{
+    if(v==null||v==='') return 'empty';
+    if(isJson(v)){const p=JSON.parse(v); if(Array.isArray(p)) return 'json[array]'; if(p&&typeof p==='object') return 'json[object]'; return 'json['+(typeof p)+']';}
+    if(/^data:image\//i.test(v)||/\.(png|jpe?g|gif|webp|svg)(\?|$)/i.test(v)) return 'image';
+    if(/^(true|false|1|0)$/i.test(v)) return 'boolean-like';
+    if(/^https?:\/\//i.test(v)) return 'url';
+    if(/^data:/i.test(v)) return 'data-url';
+    return 'string';
+  };
 
- <script type="module" src="dual_multiagent_v12_locked_fixed.js"defer></script>
- 
+  const DISABLED_KEY = 'infodose:presets.disabled';
+  const PRESETS = [
+    { key:'infodose:userName', label:'Usuário' },
+    { key:'infodose:assistantName', label:'Assistente' },
+    { key:'dual.keys.openrouter', label:'Chave OpenRouter (ativa)' },
+    { key:'dual.openrouter.model', label:'Modelo OpenRouter' },
+    { key:'uno:theme', label:'Tema' },
+    { key:'uno:bg', label:'Fundo Custom' },
+    { key:'infodose:cssCustom', label:'CSS Custom' },
+    { key:'infodose:voices', label:'Vozes Arquetípicas' }
+  ];
 
- <script type="module" src="UNO_patch_arch3d_particles.js" defer></script>
+  const disabledSet = ()=> { try{ return new Set(JSON.parse(localStorage.getItem(DISABLED_KEY)||'[]')); }catch{ return new Set(); } };
+  const saveDisabled = (set)=> localStorage.setItem(DISABLED_KEY, JSON.stringify(Array.from(set)));
+  const isEnabled = (k)=> !disabledSet().has(k);
+  const toggleDisabled = (k)=> { const s=disabledSet(); s.has(k)?s.delete(k):s.add(k); saveDisabled(s); renderAll(); window.dispatchEvent(new CustomEvent('ls:disabled-changed',{detail:{key:k,disabled:s.has(k)}})); };
 
- <script type="module" src="blue-1.js"defer></script>
-
-
- <script type="module" src="uno_audio_breath.js" defer></script>
-
-<script>
-(function(){
-  const $ = (q,r=document)=>r.querySelector(q);
-  const LS = { get:(k,d)=>{ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d }catch{ return d } },
-               set:(k,v)=>{ try{ localStorage.setItem(k, JSON.stringify(v)) }catch{} } };
-  function applyOverlayAlpha(val){ document.documentElement.style.setProperty('--arch-overlay-alpha', (Number(val)||0).toString()); }
-  document.addEventListener('DOMContentLoaded', ()=>{
-    const onBtn = $('#overlayAlphaOn'), offBtn = $('#overlayAlphaOff');
-    const range = $('#overlayAlphaRange'), label = $('#overlayAlphaVal');
-    const savedAlpha = LS.get('uno:overlay:alpha', 0.08);
-    const enabled = LS.get('uno:overlay:enabled', true);
-    if(range){ range.value = savedAlpha; if(label) label.textContent = Number(savedAlpha).toFixed(2); }
-    if(enabled){ applyOverlayAlpha(savedAlpha); onBtn && onBtn.classList.add('on'); } else { applyOverlayAlpha(0); onBtn && onBtn.classList.remove('on'); }
-    function setEnabled(flag){
-      LS.set('uno:overlay:enabled', !!flag);
-      if(flag){ const a = Number((range && range.value) || savedAlpha || 0.08); applyOverlayAlpha(a); onBtn && onBtn.classList.add('on'); }
-      else{ applyOverlayAlpha(0); onBtn && onBtn.classList.remove('on'); }
+  // Carteira SK
+  const WALLET_KEY = 'dual.keys.wallet';
+  const getWallet = ()=>{ try{ return JSON.parse(localStorage.getItem(WALLET_KEY)||'[]'); }catch{return []} };
+  const setWallet = (arr)=> localStorage.setItem(WALLET_KEY, JSON.stringify(arr));
+  const addWalletItem = (name, key)=>{
+    const list=getWallet();
+    const genId = (crypto?.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2));
+    list.push({ id: genId, name, key, active:false });
+    setWallet(list); renderWallet();
+  };
+  const removeWalletItem = (id)=>{ const list=getWallet().filter(x=>x.id!==id); setWallet(list); ensureActiveConsistency(); renderWallet(); };
+  const activateWalletItem = (id)=>{
+    const list=getWallet().map(x=>({...x, active: x.id===id})); setWallet(list);
+    if(isEnabled('dual.keys.openrouter')){
+      const chosen=list.find(x=>x.active); localStorage.setItem('dual.keys.openrouter', chosen? chosen.key: '');
     }
-    onBtn && onBtn.addEventListener('click', ()=> setEnabled(true));
-    offBtn && offBtn.addEventListener('click', ()=> setEnabled(false));
-    range && range.addEventListener('input', ()=>{
-      const v = Number(range.value || 0.08);
-      LS.set('uno:overlay:alpha', v);
-      if(label) label.textContent = v.toFixed(2);
-      if(LS.get('uno:overlay:enabled', true)) applyOverlayAlpha(v);
+    renderAll();
+  };
+  const ensureActiveConsistency = ()=>{ const list=getWallet(); const anyActive=list.some(x=>x.active); if(!anyActive){ localStorage.setItem('dual.keys.openrouter',''); } };
+  const renderWallet = ()=>{
+    const grid=$('#skGrid'); if(!grid) return; grid.innerHTML='';
+    const list=getWallet(); if(!list.length){ grid.innerHTML='<div class="meta">Nenhuma chave na carteira ainda.</div>'; return; }
+    list.forEach(item=>{
+      const div=document.createElement('div'); div.className='sk-item';
+      const top=document.createElement('div'); top.className='top';
+      const name=document.createElement('div'); name.className='name'; name.textContent=item.name+(item.active?' • ATIVA':'');
+      const act=document.createElement('div');
+      const bUse=document.createElement('button'); bUse.textContent=item.active?'Desativar':'Ativar';
+      bUse.onclick=()=>{ if(item.active){
+          const list2=getWallet().map(x=>({...x, active: x.id===item.id? false: x.active })); setWallet(list2); ensureActiveConsistency(); renderWallet(); renderAll();
+        } else { activateWalletItem(item.id); } };
+      const bDel=document.createElement('button'); bDel.textContent='Apagar'; bDel.onclick=()=>{ if(confirm('Apagar entrada da carteira?')) removeWalletItem(item.id) };
+      act.append(bUse,bDel); top.append(name,act);
+      const key=document.createElement('div'); key.className='key'; key.textContent=item.key;
+      div.append(top,key); grid.append(div);
     });
-  });
+  };
+
+  // LS
+  const lsEntries = ()=>{ const out=[]; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); const v=localStorage.getItem(k)||''; out.push({key:k,val:v}); } return out.sort((a,b)=>a.key.localeCompare(b.key)); };
+  const lsSizeBytes = ()=>{ let sum=0; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); const v=localStorage.getItem(k)||''; sum += k.length + v.length; } return sum; };
+
+  const renderPresets = ()=>{
+    const grid=$('#presetsGrid'); if(!grid) return; grid.innerHTML='';
+    const dis=disabledSet();
+    PRESETS.forEach(p=>{
+      const val=localStorage.getItem(p.key); const on=!dis.has(p.key);
+      const wrap=document.createElement('div'); wrap.className='preset';
+      const head=document.createElement('div'); head.className='row';
+      const name=document.createElement('div'); name.innerHTML = `<strong>${p.label}</strong><div class="type">${p.key}</div>`;
+      const sw=document.createElement('div'); sw.className='switch'+(on?' on':''); sw.title=on?'Desativar (não apaga)':'Ativar'; sw.onclick=()=>toggleDisabled(p.key);
+      head.append(name,sw);
+      const meta=document.createElement('div'); meta.className='val';
+      meta.textContent = val ? (inferType(val).startsWith('json')? JSON.stringify(JSON.parse(val),null,2): val) : '—';
+      wrap.append(head,meta); grid.append(wrap);
+    });
+  };
+
+  const addImagePreview = (key,src)=>{ const g=$('#imgGrid'); if(!g) return; const card=document.createElement('div'); card.className='img-card'; const cap=document.createElement('div'); cap.className='meta'; cap.textContent=key; const im=new Image(); im.src=src; im.loading='lazy'; card.append(cap,im); g.append(card); };
+
+  const renderLS = ()=>{
+    const list=$('#lsList'); if(!list) return; list.innerHTML=''; const imgGrid=$('#imgGrid'); if(imgGrid) imgGrid.innerHTML='';
+    const entries=lsEntries(); const count=$('#lsCount'); if(count) count.textContent = entries.length+' chave(s)';
+    const size=$('#lsSize'); if(size) size.textContent = prettyBytes(lsSizeBytes());
+    const dis=disabledSet();
+    entries.forEach(({key,val})=>{
+      if(key===DISABLED_KEY) return;
+      const it=document.createElement('div'); it.className='item';
+      const head=document.createElement('div'); head.className='head';
+      const left=document.createElement('div');
+      left.innerHTML=`<div class="key">${key}${dis.has(key)?' <span class="type">(desativado)</span>':''}</div><div class="type">${inferType(val)} • ${prettyBytes((val||'').length)}</div>`;
+      const ctr=document.createElement('div'); ctr.style.display='flex'; ctr.style.gap='8px'; ctr.style.flexWrap='wrap';
+      const sw=document.createElement('div'); sw.className='switch'+(!dis.has(key)?' on':''); sw.title = (!dis.has(key)?'Desativar':'Ativar'); sw.onclick=()=>toggleDisabled(key);
+      const bEdit=document.createElement('button'); bEdit.textContent='Editar'; bEdit.onclick=()=>{ const next=prompt('Editar valor de\n'+key, val ?? ''); if(next==null) return; localStorage.setItem(key,String(next)); renderAll(); };
+      const bDel=document.createElement('button'); bDel.textContent='Apagar'; bDel.onclick=()=>{ if(confirm('Apagar '+key+'?')){ localStorage.removeItem(key); renderAll(); } };
+      if(inferType(val)==='image'){ const bImg=document.createElement('button'); bImg.textContent='Ver imagem'; bImg.onclick=()=>addImagePreview(key,val); ctr.append(bImg); }
+      ctr.append(sw,bEdit,bDel); head.append(left,ctr);
+      const v=document.createElement('div'); v.className='val'; v.textContent = inferType(val).startsWith('json')? JSON.stringify(JSON.parse(val),null,2): (val??'—');
+      it.append(head,v); list.append(it);
+    });
+  };
+
+  const exportLS = ()=>{ const dump={}; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k===DISABLED_KEY) continue; dump[k]=localStorage.getItem(k); } const blob=new Blob([JSON.stringify(dump,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='localstorage_export.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(url), 2000); };
+  const importLS = (file)=>{ const r=new FileReader(); r.onload=()=>{ try{ const data=JSON.parse(r.result||'{}'); Object.entries(data).forEach(([k,v])=>localStorage.setItem(k,String(v))); alert('Importado com sucesso.'); renderAll(); }catch(e){ alert('JSON inválido.'); } }; r.readAsText(file); };
+
+  const openLS = ()=>{ const m=$('#lsModal'); if(!m) return; m.classList.add('open'); m.setAttribute('aria-hidden','false'); renderAll(); renderWallet(); };
+  const closeLS = ()=>{ const m=$('#lsModal'); if(!m) return; m.classList.remove('open'); m.setAttribute('aria-hidden','true'); };
+  const renderAll = ()=>{ renderPresets(); renderLS(); };
+
+  const ready = () => {
+    // Unify LS button (clone -> only our modal)
+    const btn = document.getElementById('btnLS');
+    if(btn && !btn.dataset._lsUnified){
+      const c=btn.cloneNode(true);
+      c.removeAttribute('onclick'); c.removeAttribute('href');
+      c.dataset._lsUnified='1';
+      c.addEventListener('click', (ev)=>{
+        ev.preventDefault(); ev.stopPropagation();
+        try{
+          document.querySelectorAll('.modal,[role="dialog"],[class*="modal"]').forEach(el=>{ if(el.id!=='lsModal'){ el.style.display='none'; el.classList.remove('open','show','visible'); el.setAttribute('aria-hidden','true'); } });
+        }catch(e){}
+        openLS();
+      }, {passive:false});
+      btn.parentNode.replaceChild(c, btn);
+    }
+
+    const c = $('#lsClose'); if(c) c.onclick = closeLS;
+    const r = $('#lsRescan'); if(r) r.onclick = renderAll;
+    const e = $('#lsExport'); if(e) e.onclick = exportLS;
+    const imp = $('#lsImportFile'); if(imp) imp.addEventListener('change', ev=>{ const f=ev.target.files?.[0]; if(f) importLS(f); ev.target.value=''; });
+    const clr = $('#lsClearDisabled'); if(clr) clr.onclick = ()=>{ localStorage.setItem(DISABLED_KEY,'[]'); renderAll(); };
+
+    const modal = $('#lsModal'); if(modal) modal.addEventListener('click', (evt)=>{ if(evt.target===modal) closeLS(); });
+    const skAdd = $('#skAdd'); if(skAdd) skAdd.onclick = ()=>{ const name=$('#skName').value.trim(); const key=$('#skValue').value.trim(); if(!name||!key) return alert('Informe nome e chave.'); addWalletItem(name,key); $('#skName').value=''; $('#skValue').value=''; };
+
+    // Overlay control in LS
+    const KEY='infodose:arch.overlay.level';
+    const LEVELS={"0":"16%","-1":"12%","-2":"8%"};
+    const apply=(lvl)=>{
+      const force=LEVELS[String(lvl)]||LEVELS["-1"];
+      document.documentElement.style.setProperty('--arch-overlay-strength', force);
+      if(window.ArchTint&&typeof ArchTint.set==='function'){ try{ ArchTint.set(null, String(lvl)); }catch(e){} }
+      document.querySelectorAll('.ls-ov[data-level]').forEach(b=>b.classList.toggle('on', b.dataset.level===String(lvl)));
+    };
+    const saved=localStorage.getItem(KEY)||"-1";
+    apply(saved);
+    $$('.ls-ov[data-level]').forEach(b=> b.addEventListener('click',()=>{ const lvl=b.dataset.level; localStorage.setItem(KEY, String(lvl)); apply(lvl); }, {passive:true}));
+  };
+  if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', ready); } else { ready(); }
+
+  window.DualLS = { open: openLS, close: closeLS, render: renderAll };
 })();
 </script>
 
 
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(()=>{});
-  });
-}
+<script id="ls-snpt-boot">
+(function(){
+  function ensure(){
+    if(document.getElementById('ls-panel-js') || document.getElementById('lsModal')) return;
+    fetch('lspanel.snpt', {cache:'no-store'}).then(r => r.ok ? r.text(): null).then(txt => {
+      if(!txt) return;
+      document.body.insertAdjacentHTML('beforeend', txt);
+      setTimeout(function(){
+        try{
+          if(window.DualLS && typeof window.DualLS.render==='function'){ window.DualLS.render(); }
+        }catch(e){}
+      }, 50);
+    }).catch(()=>{});
+  }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', ensure); } else { ensure(); }
+})();
 </script>
 
 
+
+<script id="ls-sanitize-old-js">
+(function(){
+  // Remove apenas ids legados conhecidos, preservando #lsModal e #lsPanel
+  const LEGACY = [
+    'modalLS','localStorageModal','lsWindow','lsPopup','modal-localstorage',
+    'local-storage-modal','ls-modal-old','oldLsModal','modalLocalStorage','modal-ls'
+  ];
+  function clean(){
+    try{
+      LEGACY.forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.remove();
+      });
+      // Opcional: fecha modais legados que venham com classes genéricas
+      document.querySelectorAll('.modal,[role="dialog"]').forEach(el=>{
+        if(el.id && (el.id==='lsModal' || el.id==='lsPanel')) return;
+        if(el.closest('#lsModal')) return;
+        if(/localstorage|modal-ls|ls-?old/i.test(el.id||'') || /localstorage/i.test(el.className||'')){
+          el.remove();
+        }
+      });
+    }catch(e){}
+  }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', clean); } else { clean(); }
+})();
+</script>
+
+
+
+<script id="arch-init-nonatlas">
+(function(){
+  function initArchSelect(){
+    var sel=document.getElementById('arch-select'); if(!sel) return;
+    var saved=(localStorage.getItem('uno:arch')||localStorage.getItem('infodose:arch')||'').replace(/\.html$/i,'');
+    var idx=-1;
+    for(var i=0;i<sel.options.length;i++){
+      var v=sel.options[i].value.replace(/\.html$/i,'');
+      if(saved && v===saved){ idx=i; break; }
+    }
+    sel.selectedIndex = idx; // -1 = nenhum, evita default 'atlas'
+  }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', initArchSelect); } else { initArchSelect(); }
+})();
+</script>
+
+
+<!-- PATCH: overlay-hardlock -->
+<script id="overlay-hardlock">
+(function () {
+  const LSget = (k,d)=>{ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d }catch(e){ return d } };
+
+  function setOverlayTransparent(){
+    try{
+      document.documentElement.style.setProperty('--arch-overlay','rgba(0,0,0,0)');
+      document.documentElement.style.setProperty('--arch-overlay-strength','0%');
+    }catch(e){}
+  }
+
+  function gateApply(){
+    // Re-define applyArchOverlay ALWAYS last so it cannot be overridden later
+    window.applyArchOverlay = function(name){
+      const on = !!LSget('arch:overlayOn', false);
+      if(!on){ setOverlayTransparent(); return; }
+      const key = (name||'').toLowerCase();
+      const MAP = (window.ARCH_OVERLAYS_PATCHED||window.ARCH_OVERLAYS||{default:'rgba(0,0,0,0)'});
+      const color = MAP[key] || MAP.default || 'rgba(0,0,0,0)';
+      try{
+        document.documentElement.style.setProperty('--arch-overlay', color);
+        // If some panels manage strength separately, leave current value as-is when ON
+      }catch(e){}
+    };
+
+    // On load, keep OFF if toggle is OFF
+    const sel = document.getElementById('arch-select');
+    const base = (sel?.value || '').replace(/\.html$/i,'');
+    if(!LSget('arch:overlayOn', false)) setOverlayTransparent(); else window.applyArchOverlay(base);
+  }
+
+  if(document.readyState === 'complete') gateApply();
+  else window.addEventListener('load', gateApply);
+})();
+</script>
+<!-- PATCH: ls-refresh-binder -->
 <script>
 (function(){
-  const $ = (q,r=document)=>r.querySelector(q);
-  function appendUser(msg){ try{ const feed=$('#chatFeed'); const n=document.createElement('div'); n.className='msg user'; n.textContent='Você: '+msg; feed.appendChild(n); feed.scrollTop=feed.scrollHeight; }catch{} }
-  function send(msg){ if (window.sendUserMessage) { window.sendUserMessage(msg); } else { appendUser(msg); } }
-
-  // Quick actions insert templated prompts
-  document.addEventListener('DOMContentLoaded', ()=>{
-    const q = $('#chatQuickActions');
-    if(!q) return;
-    $('#btnReward')?.addEventListener('click', ()=> send('### Recompensa Inicial\nEscreva a recompensa inicial curta e magnética.'));
-    $('#btnCurious')?.addEventListener('click', ()=> send('### Curiosidade & Expansão\nAprofunde com 2-3 bullets e 1 insight.'));
-    $('#btnVibe')?.addEventListener('click', ()=> send('### Antecipação Vibracional\nFeche com um chamado poético e prático.'));
-  });
-
-  // Resize handle for chat feed
-  document.addEventListener('DOMContentLoaded', ()=>{
-    const handle = document.getElementById('chatResizeHandle');
-    const feed   = document.getElementById('chatFeed');
-    if(!handle || !feed) return;
-    let dragging=false, startY=0, startH=0;
-    handle.addEventListener('pointerdown', (ev)=>{
-      dragging=true; startY=ev.clientY; startH=feed.clientHeight;
-      handle.setPointerCapture(ev.pointerId);
-    });
-    handle.addEventListener('pointermove', (ev)=>{
-      if(!dragging) return;
-      const dy = ev.clientY - startY;
-      const h = Math.max(120, startH + dy);
-      feed.style.maxHeight = h + 'px';
-    });
-    const stop=()=>dragging=false;
-    handle.addEventListener('pointerup', stop);
-    handle.addEventListener('pointercancel', stop);
-  });
+  function bind(){
+    var b = document.getElementById('lsRefresh');
+    if(b){ b.onclick = function(){ try{ location.reload(); }catch(e){} }; }
+  }
+  if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', bind); } else { bind(); }
 })();
 </script>
-
+<!-- PATCH: overlay-guardian-js -->
+<script id="overlay-guardian-js">
+(function(){
+  function readLSBool(key, d){ try{ var v = localStorage.getItem(key); return v ? JSON.parse(v) : d; }catch(e){ return d; } }
+  function enforce(){
+    var on = !!readLSBool('arch:overlayOn', false);
+    document.documentElement.setAttribute('data-overlay', on ? 'on' : 'off');
+    if(!on){
+      try{
+        document.documentElement.style.setProperty('--arch-overlay','rgba(0,0,0,0)');
+        document.documentElement.style.setProperty('--arch-overlay-strength','0%');
+        var fade = document.getElementById('arch-fadeCover');
+        if(fade) fade.style.background = 'transparent';
+      }catch(e){}
+    }
+  }
+  function bind(){
+    enforce();
+    // Poll lightly to defeat late writers
+    setInterval(enforce, 500);
+    // Also react to storage changes (other tabs)
+    window.addEventListener('storage', function(ev){ if(ev && ev.key==='arch:overlayOn'){ enforce(); } });
+    // If there is a Brain toggle, hook it
+    document.addEventListener('click', function(e){
+      var t = e.target;
+      if(!t) return;
+      if(t.id==='overlayToggle' || t.closest && t.closest('#overlayToggle')){
+        setTimeout(enforce, 60);
+      }
+    }, true);
+  }
+  if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', bind); } else { bind(); }
+})();
+</script>
 </body></html>
