@@ -2,7 +2,7 @@
 <html lang="pt-BR" style="--arch-overlay: rgba(64, 158, 255, 0.22);"><head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
-  <title>HUB UNO — PROD (safe)</title>
+  <title>HUB UNO — PROD (safe) · Sphere Brava (CSS Layers)</title>
   <meta name="theme-color" content="#0b0f14">
   <style>
     :root {
@@ -1242,9 +1242,20 @@ body::after{
 </style>
 <!-- PATCH: overlay-guardian-css -->
 <style id="overlay-guardian-css">
-html[data-overlay="off"] body::after{ background: transparent !important; }
-html[data-overlay="off"] #arch-fadeCover{ background: transparent !important; }
+html[data-overlay="on"] body::after{ background: transparent !important; }
+html[data-overlay="on"] #arch-fadeCover{ background: transparent !important; }
 </style>
+
+<style id="particles-only-style">
+/* Partículas‑Only mode (remove ORB + Arch UI) */
+body.particles-only .orb-wrap{ display:none !important }
+body.particles-only .orb-glow{ display:none !important }
+canvas#particles{ position:fixed !important; inset:0 !important; width:100vw !important; height:100vh !important;
+  border-radius:0 !important; z-index:0 !important; pointer-events:none !important; display:block !important }
+html[data-overlay="on"] body::after{ background: transparent !important; }
+:root{ --arch-overlay-strength: 0% !important; --arch-overlay: transparent !important; }
+</style>
+
 </head>
 <body>
   <!-- Splash screen displayed on initial load -->
@@ -1328,7 +1339,36 @@ html[data-overlay="off"] #arch-fadeCover{ background: transparent !important; }
             <div id="arch-fadeCover"></div>
             <!-- Camada de ripple auditivo fica sobre o conteúdo do círculo -->
             <div id="audioRipple" class="audio-ripple"></div>
-            <iframe id="arch-frame" title="Archetype Core" sandbox="allow-scripts" referrerpolicy="no-referrer" src="./archetypes/atlas.html"></iframe>
+            <iframe id="arch-frame" title="Archetype Core" sandbox="allow-scripts allow-same-origin" referrerpolicy="no-referrer" srcdoc="
+&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;pt-BR&quot;&gt;
+&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;
+&lt;title&gt;Brava Master Blaster — Orb CSS&lt;/title&gt;
+&lt;style&gt;
+  html,body{height:100%;margin:0;background:#0a0e18;color:#eaf2ff;font:14px/1.4 system-ui}
+  .stage{position:relative;height:100%;display:grid;place-items:center}
+  .orb-wrap{position:relative;width:min(62vw,440px);aspect-ratio:1;filter:drop-shadow(0 30px 60px rgba(0,0,0,.65))}
+  .orb{position:absolute;inset:0;border-radius:50%;
+    background:
+      radial-gradient(32% 32% at 36% 34%, rgba(255,255,255,.95) 0%, rgba(255,255,255,.25) 36%, rgba(255,255,255,0) 68%),
+      radial-gradient(70% 70% at 62% 64%, #00e5ff 0%, rgba(0,0,0,0) 70%),
+      radial-gradient(72% 72% at 45% 55%, #7a3cff 0%, rgba(0,0,0,0) 72%);
+    box-shadow:0 0 40px 12px rgba(0,229,255,.22) inset, 0 0 32px 12px rgba(122,60,255,.20);
+    animation:pulse 3.6s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
+  .orb-glow{position:absolute;inset:-10%;border-radius:50%;pointer-events:none;background:radial-gradient(60% 60% at 50% 50%, rgba(122,60,255,.18), rgba(0,229,255,.14) 45%, rgba(0,0,0,0) 70%);filter:blur(18px)}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div class=&quot;stage&quot;&gt;
+  &lt;div class=&quot;orb-wrap&quot;&gt;
+    &lt;div class=&quot;orb&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;orb-glow&quot;&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;/body&gt;&lt;/html&gt;
+"></iframe>
           </div>
           <!-- Mensagem de feedback aparece fora da bolinha, logo abaixo dela -->
           <div id="archMsg" class="arch-msg show" style="background: rgba(57, 255, 182, 0.75); color: rgb(11, 15, 20);">Bem-vindo de volta, KODUX. UNO está ao seu lado.</div>
@@ -5018,4 +5058,7 @@ if ('serviceWorker' in navigator) {
   addEventListener('load', ()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 }
 </script>
+
+<!-- particles-only disabled for sphere variant -->
+
 </body></html>
