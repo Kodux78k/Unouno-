@@ -1304,6 +1304,57 @@ body::after{
 html[data-overlay="off"] body::after{ background: transparent !important; }
 html[data-overlay="off"] #arch-fadeCover{ background: transparent !important; }
 </style>
+
+<style id="orb-slot-css">
+/* === ORB Slot (iframe "dentro" do orbe) === */
+.arch-circle { position: relative; }
+#orbWrap { position: relative; }
+#orbWrap canvas#orb,
+#orbWrap .orb-glow,
+#orbWrap .ring,
+#orbWrap canvas#particles { position: absolute; inset: 0; }
+
+/* Z-order for sandwiching */
+#orbWrap canvas#orb { z-index: 1; }
+#orbWrap .orb-glow { z-index: 2; }
+#orbWrap .orb-slot   { z-index: 3; } /* iframe masked */
+#orbWrap canvas#particles { z-index: 4; }
+#orbWrap .ring { z-index: 5; }
+/* HUB overlays keep above */
+#arch-fadeCover, #audioRipple { z-index: 6; }
+
+/* Masked slot inside the orb */
+.orb-slot{
+  position:absolute;
+  inset: 8%;              /* adjust 6–10% to taste */
+  border-radius: 50%;
+  overflow: hidden;
+  -webkit-clip-path: circle(50% at 50% 50%);
+          clip-path: circle(50% at 50% 50%);
+  mix-blend-mode: screen;
+  opacity: .92;
+  filter: saturate(1.06) contrast(1.04);
+  will-change: transform, opacity, filter;
+  pointer-events: auto;   /* allow interaction inside the archetype app */
+}
+.orb-slot iframe#arch-frame{
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  border:0; background:#0b0f14; /* avoid white flash */
+  transform: translateZ(0);
+}
+/* Tint with archetype overlay color */
+.orb-slot::after{
+  content:"";
+  position:absolute; inset:0;
+  background: var(--arch-overlay, transparent);
+  pointer-events:none;
+  mix-blend-mode: overlay;
+  opacity:.35;
+  transition: opacity .25s ease;
+}
+</style>
+
 </head>
 <body>
   <!-- Splash screen displayed on initial load -->
@@ -5178,6 +5229,188 @@ if ('serviceWorker' in navigator) {
 
 // Pulsar no clique direto no wrap
 document.getElementById('orbWrap')?.addEventListener('click', function(){ try{ window.__orbGL__ && window.__orbGL__.pulse(); }catch(_){ } });
+</script>
+
+
+<script id="orb-slot-and-archpersist-patch">
+(function(){
+  // ---- Helpers ----
+  function $(q, r=document){ return r.querySelector(q); }
+  function baseName(file){ return String(file||'').replace(/\.html$/i,'').toLowerCase(); }
+
+  // ---- Create orb-slot and move the iframe inside the orb ----
+  function fuseIframeIntoOrb(){
+    var wrap = $('#orbWrap');
+    var frame = $('#arch-frame');
+    if(!wrap || !frame) return;
+    // If already fused, skip
+    if (frame.parentElement && frame.parentElement.classList && frame.parentElement.classList.contains('orb-slot')) return;
+    var slot = document.createElement('div');
+    slot.className = 'orb-slot';
+    // Insert slot above particles but below ring (order controlled by CSS z-index)
+    wrap.appendChild(slot);
+    // Move iframe inside slot
+    slot.appendChild(frame);
+  }
+
+  // ---- Archetype persistence (uno:arch) + overlay/apply + Firestore sync ----
+  function currentSelectBase(){
+    var sel = $('#arch-select'); if(!sel) return '';
+    var opt = sel.options[sel.selectedIndex];
+    return baseName(opt && opt.value);
+  }
+  function applyArch(base){
+    var sel = $('#arch-select'), frame = $('#arch-frame'), fade = $('#arch-fadeCover');
+    if(!sel || !frame) return;
+    var idx = -1;
+    for (var i=0;i<sel.options.length;i++){
+      if (baseName(sel.options[i].value) === base){ idx = i; break; }
+    }
+    if (idx >= 0){
+      sel.selectedIndex = idx;
+      if (fade) fade.classList.add('show');
+      var file = sel.options[idx].value;
+      frame.src = './archetypes/' + file;
+      try { if (typeof window.applyArchOverlay === 'function') window.applyArchOverlay(base); } catch(_){}
+      try { if (typeof window.speakArchetype === 'function') window.speakArchetype(base); } catch(_){}
+      try { if (typeof window.updateHomeStatus === 'function') window.updateHomeStatus(); } catch(_){}
+      setTimeout(function(){ if (fade) fade.classList.remove('show'); }, 240);
+    }
+  }
+  function saveArch(base){
+    if(!base) return;
+    try { localStorage.setItem('uno:arch', base); } catch(_){}
+    // If a shared app state exists, mirror and save remotely
+    try {
+      if (window.S && S.state){
+        S.state.archetype = base;
+        if (typeof window.saveState === 'function') saveState(S.state);
+      }
+    } catch(_){}
+  }
+  function bindArchPersistence(){
+    var sel = $('#arch-select'), prev = $('#arch-prev'), next = $('#arch-next');
+    function persist(){ var b=currentSelectBase(); if(b){ saveArch(b);} }
+    if (sel) sel.addEventListener('change', persist, {passive:true});
+    if (prev) prev.addEventListener('click', function(){ setTimeout(persist, 0); }, {passive:true});
+    if (next) next.addEventListener('click', function(){ setTimeout(persist, 0); }, {passive:true});
+    // Accept remote notifications
+    window.addEventListener('message', function(ev){
+      var d = ev && ev.data || {};
+      if (d && d.type==='archReady' && d.name){
+        var b = baseName(d.name);
+        saveArch(b);
+      }
+    });
+  }
+  function bootWithSavedArch(){
+    var saved = (localStorage.getItem('uno:arch') || localStorage.getItem('infodose:arch') || '').replace(/\.html$/i,'');
+    saved = baseName(saved);
+    if(saved){
+      var cur = currentSelectBase();
+      if (cur !== saved) applyArch(saved);
+    } else {
+      // Initialize with current
+      saveArch(currentSelectBase());
+    }
+  }
+
+  function start(){
+    fuseIframeIntoOrb();
+    bindArchPersistence();
+    bootWithSavedArch();
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+  else start();
+})();
+</script>
+
+
+<script id="archetype-orb_manifest-write">
+// Force-write the active archetype to Firestore orb_manifest on boot and every change.
+// Path: /artifacts/{appId}/users/{userId}/atom_state/orb_manifest
+(function(){
+  const QUEUE = [];
+  let ready = false, writing = false;
+
+  async function writeFS(name){
+    try{
+      if (!window.db || !window.userId || !window.appId) return false;
+      const { doc, setDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js');
+      const ref = doc(window.db, `/artifacts/${window.appId}/users/${window.userId}/atom_state`, 'orb_manifest');
+      await setDoc(ref, { archetype: name, lastArchetypeAt: serverTimestamp ? serverTimestamp() : (new Date()).toISOString() }, { merge:true });
+      return true;
+    }catch(e){ console.warn('[orb_manifest] write failed:', e); return false; }
+  }
+
+  function enqueue(name){
+    if (!name) return;
+    QUEUE.push(String(name));
+    pump();
+  }
+
+  async function pump(){
+    if (writing) return;
+    writing = true;
+    while (QUEUE.length){
+      const name = QUEUE.shift();
+      const ok = await writeFS(name);
+      if (!ok){
+        // If not ok, put it back and retry later
+        QUEUE.unshift(name);
+        break;
+      }
+    }
+    writing = false;
+  }
+
+  // When Firebase becomes available later, mark ready and pump
+  function tryMarkReady(){
+    if (window.db && window.userId && window.appId){ ready = true; pump(); }
+  }
+  const readyTimer = setInterval(tryMarkReady, 600);
+  window.addEventListener('load', tryMarkReady);
+  document.addEventListener('DOMContentLoaded', tryMarkReady);
+
+  // Hook into our existing persistence helpers if present
+  function currentBase(){
+    const sel = document.getElementById('arch-select');
+    if (!sel) return '';
+    const opt = sel.options[sel.selectedIndex];
+    return String((opt && opt.value) || '').replace(/\.html$/i,'').toLowerCase();
+  }
+
+  // Boot write (after DOM is ready)
+  function bootWrite(){
+    const b = currentBase();
+    if (b) enqueue(b);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootWrite);
+  else bootWrite();
+
+  // Persist on select/prev/next
+  function bind(){
+    const sel = document.getElementById('arch-select');
+    const prev = document.getElementById('arch-prev');
+    const next = document.getElementById('arch-next');
+    function onChange(){ const b = currentBase(); if (b) enqueue(b); }
+    if (sel) sel.addEventListener('change', onChange, {passive:true});
+    if (prev) prev.addEventListener('click', ()=> setTimeout(onChange, 0), {passive:true});
+    if (next) next.addEventListener('click', ()=> setTimeout(onChange, 0), {passive:true});
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind);
+  else bind();
+
+  // Also accept child-frame notifications
+  window.addEventListener('message', (ev)=>{
+    const d = ev && ev.data || {};
+    if (d && d.type === 'archReady' && d.name){
+      const base = String(d.name||'').replace(/\.html$/i,'').toLowerCase();
+      if (base) enqueue(base);
+    }
+  });
+})();
 </script>
 
 </body></html>
