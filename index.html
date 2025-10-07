@@ -1429,7 +1429,7 @@ html[data-overlay="off"] #arch-fadeCover{ background: transparent !important; }
             <button class="btn fx-trans fx-press ring" id="arch-prev" title="Anterior">
               <img src="icons/chevron-left.svg" alt="Anterior" width="16" height="16" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/chevron-left.svg'">
             <span class="ripple"></span></button>
-            <select id="arch-select" title="Escolher arquétipo"><option value="atlas.html">atlas.html</option><option value="nova.html">nova.html</option><option value="vitalis.html">vitalis.html</option><option value="pulse.html">pulse.html</option><option value="artemis.html">artemis.html</option><option value="serena.html">serena.html</option><option value="kaos.html">kaos.html</option><option value="genus.html">genus.html</option><option value="lumine.html">lumine.html</option><option value="rhea.html">rhea.html</option><option value="solus.html">solus.html</option><option value="aion.html">aion.html</option></select>
+            <select id="arch-select" title="Escolher arquétipo"><option value="./archetypes3d/value="./archetypes3d/atlas.html">atlas.html</option><option value="./archetypes3d/value="./archetypes3d/nova.html">nova.html</option><option value="./archetypes3d/value="./archetypes3d/vitalis.html">vitalis.html</option><option value="./archetypes3d/value="./archetypes3d/pulse.html">pulse.html</option><option value="./archetypes3d/value="./archetypes3d/artemis.html">artemis.html</option><option value="./archetypes3d/value="./archetypes3d/serena.html">serena.html</option><option value="./archetypes3d/value="./archetypes3d/kaos.html">kaos.html</option><option value="./archetypes3d/value="./archetypes3d/genus.html">genus.html</option><option value="./archetypes3d/value="./archetypes3d/lumine.html">lumine.html</option><option value="./archetypes3d/value="./archetypes3d/rhea.html">rhea.html</option><option value="./archetypes3d/value="./archetypes3d/solus.html">solus.html</option><option value="./archetypes3d/value="./archetypes3d/aion.html">aion.html</option></select>
             <button class="btn fx-trans fx-press ring" id="arch-next" title="Próximo">
               <img src="icons/chevron-right.svg" alt="Próximo" width="16" height="16" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/svgs/solid/chevron-right.svg'">
             <span class="ripple"></span></button>
@@ -5327,89 +5327,99 @@ document.getElementById('orbWrap')?.addEventListener('click', function(){ try{ w
 </script>
 
 
-<script id="archetype-orb_manifest-write">
-// Force-write the active archetype to Firestore orb_manifest on boot and every change.
-// Path: /artifacts/{appId}/users/{userId}/atom_state/orb_manifest
+<script id="arch-chips-3d-layers">
 (function(){
-  const QUEUE = [];
-  let ready = false, writing = false;
-
-  async function writeFS(name){
-    try{
-      if (!window.db || !window.userId || !window.appId) return false;
-      const { doc, setDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js');
-      const ref = doc(window.db, `/artifacts/${window.appId}/users/${window.userId}/atom_state`, 'orb_manifest');
-      await setDoc(ref, { archetype: name, lastArchetypeAt: serverTimestamp ? serverTimestamp() : (new Date()).toISOString() }, { merge:true });
-      return true;
-    }catch(e){ console.warn('[orb_manifest] write failed:', e); return false; }
-  }
-
-  function enqueue(name){
-    if (!name) return;
-    QUEUE.push(String(name));
-    pump();
-  }
-
-  async function pump(){
-    if (writing) return;
-    writing = true;
-    while (QUEUE.length){
-      const name = QUEUE.shift();
-      const ok = await writeFS(name);
-      if (!ok){
-        // If not ok, put it back and retry later
-        QUEUE.unshift(name);
-        break;
-      }
-    }
-    writing = false;
-  }
-
-  // When Firebase becomes available later, mark ready and pump
-  function tryMarkReady(){
-    if (window.db && window.userId && window.appId){ ready = true; pump(); }
-  }
-  const readyTimer = setInterval(tryMarkReady, 600);
-  window.addEventListener('load', tryMarkReady);
-  document.addEventListener('DOMContentLoaded', tryMarkReady);
-
-  // Hook into our existing persistence helpers if present
-  function currentBase(){
-    const sel = document.getElementById('arch-select');
-    if (!sel) return '';
-    const opt = sel.options[sel.selectedIndex];
-    return String((opt && opt.value) || '').replace(/\.html$/i,'').toLowerCase();
-  }
-
-  // Boot write (after DOM is ready)
-  function bootWrite(){
-    const b = currentBase();
-    if (b) enqueue(b);
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootWrite);
-  else bootWrite();
-
-  // Persist on select/prev/next
-  function bind(){
-    const sel = document.getElementById('arch-select');
-    const prev = document.getElementById('arch-prev');
-    const next = document.getElementById('arch-next');
-    function onChange(){ const b = currentBase(); if (b) enqueue(b); }
-    if (sel) sel.addEventListener('change', onChange, {passive:true});
-    if (prev) prev.addEventListener('click', ()=> setTimeout(onChange, 0), {passive:true});
-    if (next) next.addEventListener('click', ()=> setTimeout(onChange, 0), {passive:true});
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind);
-  else bind();
-
-  // Also accept child-frame notifications
-  window.addEventListener('message', (ev)=>{
-    const d = ev && ev.data || {};
-    if (d && d.type === 'archReady' && d.name){
-      const base = String(d.name||'').replace(/\.html$/i,'').toLowerCase();
-      if (base) enqueue(base);
-    }
+  // Minimal palettes (sync with your overlay colors)
+  const COLORS = {
+    atlas:'#409EFF', nova:'#FF52B1', vitalis:'#34D399', pulse:'#00BFFF',
+    artemis:'#FFC300', serena:'#B684FF', kaos:'#FF4D6D', genus:'#22C55E',
+    lumine:'#FFD54F', rhea:'#00D1B2', solus:'#6495ED', aion:'#8B5CF6'
+  };
+  const PRESET = name => ({
+    name,
+    color: COLORS[name] || '#88a',
+    count: (name==='nova'||name==='pulse'||name==='lumine') ? 340 : 260,
+    orbitRadius: (name==='nova'||name==='serena'||name==='lumine') ? 0.76 : 0.68,
+    spin: (name==='nova'||name==='pulse') ? 0.7 : 0.56,
+    size: 0.010, // sphere size
+    glow: 0.42
   });
+
+  const ACTIVE = new Set();
+  function sendLayers(){
+    const fr = document.getElementById('arch-frame');
+    if (!fr || !fr.contentWindow) return;
+    const arr = Array.from(ACTIVE).map(n => PRESET(n));
+    fr.contentWindow.postMessage({ type:'atomConfigLayers', layers: arr }, '*');
+  }
+
+  function chipEl(name){
+    const b = document.createElement('button');
+    b.className = 'arch-chip';
+    b.textContent = name[0].toUpperCase()+name.slice(1);
+    b.style.borderColor = 'rgba(255,255,255,.18)';
+    b.style.background = 'rgba(255,255,255,.06)';
+    b.onclick = ()=>{
+      if (ACTIVE.has(name)) ACTIVE.delete(name); else ACTIVE.add(name);
+      b.classList.toggle('on', ACTIVE.has(name));
+      sendLayers();
+    };
+    return b;
+  }
+
+  function ensureStyles(){
+    if (document.getElementById('archChip3DStyles')) return;
+    const st = document.createElement('style'); st.id='archChip3DStyles';
+    st.textContent = `
+      .arch-chip-wrap{ display:grid; grid-template-columns: repeat(auto-fill,minmax(92px,1fr)); gap:8px; }
+      .arch-chip{ appearance:none; border:1px solid var(--ring, rgba(255,255,255,.18)); background: var(--glass, rgba(255,255,255,.06)); color: var(--txt, #eaf2ff);
+        padding:8px 10px; border-radius:999px; font-size:12px; letter-spacing:.2px; cursor:pointer; }
+      .arch-chip.on{ background: rgba(57,255,182,.18); border-color: rgba(57,255,182,.45); }
+      .arch-chip-title{ font-size:12px; color: var(--muted,#a6b0c0); margin: 6px 0 6px; font-weight:800; }
+    `;
+    document.head.appendChild(st);
+  }
+
+  function injectInLSPanel(){
+    ensureStyles();
+    const panel = document.getElementById('lsPanel') || document.querySelector('#lsModal .ls-panel');
+    if (!panel || document.getElementById('archChip3DSection')) return;
+    const sec = document.createElement('div');
+    sec.id = 'archChip3DSection';
+    sec.className = 'preset';
+    sec.style.marginTop = '10px';
+    sec.innerHTML = `<div class="arch-chip-title">Arquétipos (camadas no ORB · 3D)</div>`;
+    const wrap = document.createElement('div'); wrap.className = 'arch-chip-wrap';
+    ['atlas','nova','vitalis','pulse','artemis','serena','kaos','genus','lumine','rhea','solus','aion'].forEach(n=> wrap.appendChild(chipEl(n)));
+    sec.appendChild(wrap);
+    // Coloca no topo do LS Panel
+    const hdr = panel.querySelector('.ls-hdr');
+    if (hdr && hdr.parentNode) hdr.parentNode.insertBefore(sec, hdr.nextSibling);
+    // Ativa por padrão a camada do arquétipo atual
+    try{
+      const sel = document.getElementById('arch-select');
+      const cur = (sel && sel.value || 'atlas.html').replace(/.*\//,'').replace(/\.html$/i,'');
+      const btn = wrap.querySelector('button.arch-chip:nth-child(' + (['atlas','nova','vitalis','pulse','artemis','serena','kaos','genus','lumine','rhea','solus','aion'].indexOf(cur)+1) + ')');
+      if (cur && btn){ ACTIVE.add(cur); btn.classList.add('on'); sendLayers(); }
+    }catch(_){}
+  }
+
+  function bindLSButton(){
+    const btn = document.getElementById('btnLS');
+    if (btn && !btn.dataset._chipsHook){
+      btn.dataset._chipsHook = '1';
+      btn.addEventListener('click', ()=> setTimeout(injectInLSPanel, 80), {passive:true});
+    } else {
+      // if already open
+      setTimeout(injectInLSPanel, 120);
+    }
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindLSButton);
+  else bindLSButton();
+
+  // Also re-inject if LS modal gets rebuilt
+  document.addEventListener('ls:disabled-changed', ()=> setTimeout(injectInLSPanel, 60));
 })();
 </script>
 
