@@ -1,5 +1,7 @@
 <!doctype html>
-<html lang="pt-BR" style="--arch-overlay: rgba(64, 158, 255, 0.22);"><head>
+<html lang="pt-BR" style="--arch-overlay: rgba(0,0,0,0);
+  --overlay-alpha: .28;
+  --overlay-mode: multiply;"><head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
   <title>HUB UNO — PROD (safe)</title>
@@ -74,7 +76,7 @@
 /* Overlay de cor do arquétipo ativo.  Usa a variável --arch-overlay definida no
    :root e atualizada via script.  O overlay cobre toda a tela, tem pointer-events
    desativado e fica atrás dos demais elementos (z-index: 0). */
-body::after{content:'';position:fixed;inset:0;background:none !important;pointer-events:none;}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;background: var(--arch-overlay, transparent);mix-blend-mode: var(--overlay-mode, multiply);opacity: var(--overlay-alpha, .28);transition: opacity .25s ease, background .25s ease, mix-blend-mode .25s ease;z-index: 0;}
 
     /* ===== Micro-interações base ===== */
     .fx-trans { transition: transform .16s var(--ease), background .25s var(--ease), box-shadow .25s var(--ease), border-color .25s var(--ease), color .25s var(--ease), opacity .25s var(--ease) }
@@ -973,6 +975,88 @@ body::after{content:'';position:fixed;inset:0;background:none !important;pointer
   .arch-circle .call{ font-size:12px; }
 }
 </style>
+
+<script>
+// === UNO Overlay Controls (LS Panel) ===
+(function(){
+  const KEY_MODE = 'UNO.overlay.mode';
+  const KEY_ALPHA = 'UNO.overlay.alpha';
+
+  const S = {
+    mode: localStorage.getItem(KEY_MODE) || getComputedStyle(document.documentElement).getPropertyValue('--overlay-mode').trim() || 'multiply',
+    alpha: parseFloat(localStorage.getItem(KEY_ALPHA) || getComputedStyle(document.documentElement).getPropertyValue('--overlay-alpha') || '.28')
+  };
+
+  function applyOverlayVars(){
+    const root = document.documentElement;
+    root.style.setProperty('--overlay-mode', S.mode);
+    root.style.setProperty('--overlay-alpha', isFinite(S.alpha) ? S.alpha : .28);
+  }
+
+  // Build controls into LS Panel (#brain) when it exists
+  function ensureControls(){
+    const brain = document.querySelector('#brain .popover');
+    if(!brain || brain.__overlayControlsMounted) return;
+    brain.__overlayControlsMounted = true;
+
+    const sec = document.createElement('section');
+    sec.className = 'menuItem';
+    sec.style.flexDirection = 'column';
+    sec.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;justify-content:space-between;width:100%">
+        <strong style="font-weight:900">Overlay de Arquétipo</strong>
+        <span style="opacity:.7;font-size:12px">blend + opacidade</span>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+        <button class="btn chip" data-mode="multiply" title="Multiply">Multiply</button>
+        <button class="btn chip" data-mode="overlay" title="Overlay">Overlay</button>
+        <button class="btn chip" data-mode="screen" title="Screen">Screen</button>
+      </div>
+      <label style="display:grid;grid-template-columns:80px 1fr;align-items:center;gap:8px;margin-top:8px">
+        <span style="opacity:.8">Opacidade</span>
+        <input id="ovAlpha" type="range" min="0" max="1" step="0.01" value="${S.alpha}">
+      </label>
+    `;
+    brain.appendChild(sec);
+
+    // mark active chip
+    function paintChips(){
+      sec.querySelectorAll('[data-mode]').forEach(b=>{
+        if(b.dataset.mode===S.mode){ b.classList.add('prime'); }
+        else { b.classList.remove('prime'); }
+      });
+      const inp = sec.querySelector('#ovAlpha');
+      if(inp) inp.value = S.alpha;
+    }
+    paintChips();
+
+    sec.addEventListener('click', (e)=>{
+      const b = e.target.closest('[data-mode]');
+      if(!b) return;
+      S.mode = b.dataset.mode;
+      localStorage.setItem(KEY_MODE, S.mode);
+      applyOverlayVars();
+      paintChips();
+    });
+
+    sec.querySelector('#ovAlpha').addEventListener('input', (e)=>{
+      const v = parseFloat(e.target.value);
+      if(isFinite(v)){
+        S.alpha = v;
+        localStorage.setItem(KEY_ALPHA, String(v));
+        applyOverlayVars();
+      }
+    });
+  }
+
+  // Apply on boot
+  applyOverlayVars();
+  // Try to mount controls after DOM is ready and whenever #brain opens
+  document.addEventListener('DOMContentLoaded', ensureControls);
+  const obs = new MutationObserver(ensureControls);
+  obs.observe(document.documentElement, {subtree:true,childList:true});
+})();
+</script>
 <style id="blue1Theme">
 /* === Blue‑1 Theme (UI) === */
 :root {
@@ -5789,4 +5873,100 @@ document.getElementById('orbWrap')?.addEventListener('click', function(){ try{ w
   try { window.speechSynthesis.onvoiceschanged = () => bootstrap(); } catch(e){}
 })();
 </script>
+
+<script>
+// === DUAL • Chat — robust fetch wrapper ===
+(function(){
+  const FEED = ()=>document.querySelector('#chatFeed');
+  const status = (t)=>{ const el=document.createElement('div'); el.className='msg status'; el.textContent=t; FEED()?.appendChild(el); };
+  async function sendChatMessage(text){
+    const endpoint = localStorage.getItem('UNO.chatEndpoint') || '/api/chat';
+    const body = { message: text, archetype: (window.S && S.state && S.state.archetype) || null };
+    try{
+      const res = await fetch(endpoint, {
+        method:'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(body),
+        mode: 'cors',
+        credentials: 'omit',
+      });
+      if(!res.ok){
+        status('AI offline: ' + res.status + ' ' + res.statusText);
+        return;
+      }
+      const data = await res.json().catch(()=>null);
+      const msg = document.createElement('div');
+      msg.className='msg ai';
+      msg.textContent = (data && (data.reply || data.text || data.message)) || '✓ recebido';
+      FEED()?.appendChild(msg);
+    }catch(err){
+      status('AI offline (fetch falhou). Configure UNO.chatEndpoint em localStorage.');
+      console.warn('[chat] fetch error', err);
+    }
+  }
+  // expose to global if not present
+  window.UNO = window.UNO || {};
+  if(!UNO.Chat){ UNO.Chat = { send: sendChatMessage }; }
+  // Hook preview tap -> example message
+  const pv = document.getElementById('msgPreview');
+  if(pv && !pv.__hooked){
+    pv.__hooked = true;
+    pv.addEventListener('click', ()=>{
+      const text = pv.textContent || 'Olá, Nebula!';
+      const out = document.createElement('div');
+      out.className = 'msg user';
+      out.textContent = text;
+      FEED()?.appendChild(out);
+      UNO.Chat.send(text);
+    });
+  }
+})();
+</script>
+
+
+<script>
+// === ORB selector (LS Panel tiny toggles) ===
+(function(){
+  const KEY = 'UNO.orb.kind'; // 'solid' or 'custom'
+  const S = { kind: localStorage.getItem(KEY) || 'custom' };
+  function applyKind(){ document.body.dataset.orb = S.kind; localStorage.setItem(KEY, S.kind); }
+  function mount(){
+    const brain = document.querySelector('#brain .popover');
+    if(!brain || brain.__orbKindMounted) return;
+    brain.__orbKindMounted = true;
+    const sec = document.createElement('section');
+    sec.className = 'menuItem';
+    sec.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;justify-content:space-between;width:100%">
+        <strong style="font-weight:900">Orbe ativo</strong>
+        <span style="opacity:.7;font-size:12px">alternar</span>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+        <button class="btn chip" data-kind="custom">Custom</button>
+        <button class="btn chip" data-kind="solid">Solid</button>
+      </div>
+    `;
+    brain.appendChild(sec);
+    function paint(){
+      sec.querySelectorAll('[data-kind]').forEach(b=>{
+        if(b.dataset.kind===S.kind) b.classList.add('prime'); else b.classList.remove('prime');
+      });
+    }
+    paint();
+    sec.addEventListener('click', (e)=>{
+      const b = e.target.closest('[data-kind]'); if(!b) return;
+      S.kind = b.dataset.kind; applyKind(); paint();
+    });
+  }
+  applyKind();
+  document.addEventListener('DOMContentLoaded', mount);
+  new MutationObserver(mount).observe(document.documentElement, {subtree:true, childList:true});
+})();
+</script>
+<style>
+/* Optionally hide/show orbs based on body[data-orb] */
+[data-orb="solid"] .orb-wrap { display:none !important; }
+[data-orb="custom"] #orbSolid { display:none !important; }
+</style>
+
 </body></html>
