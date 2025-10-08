@@ -1,33 +1,70 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Lumine • Archetype</title>
-  <style>
-    :root{--bg:#0b0f14;--fg:#e7e8ea;--mut:#9ba7b4;}
-    *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:var(--bg);color:var(--fg);font:14px/1.5 Inter,system-ui,Segoe UI,Roboto,Arial}
-    .card{width:min(92vw,680px);border:1px solid #ffffff22;border-radius:18px;background:#0b0f14aa;backdrop-filter:blur(10px);padding:18px;box-shadow:0 14px 40px rgba(0,0,0,.45)}
-    h1{margin:0 0 6px 0;letter-spacing:.06em}
-    .mut{color:var(--mut);font-size:12px;margin-bottom:10px}
-    .bubble{margin-top:10px;border:1px dashed #ffffff22;border-radius:12px;padding:10px}
-    .mini{font-size:12px;color:var(--mut)}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lumine · Arquétipo</title>
+<style>
+:root {
+  --a: #00c2ff; --b: #6d7dff; --fg: #e8f0ff; --bg: #0a101b;
+}
+* { box-sizing: border-box }
+html, body { height: 100% }
+body {
+  margin: 0; color: var(--fg); background: radial-gradient(1200px 800px at 60% -10%, #0a1220 0%, #070b12 55%, #05080f 100%);
+  font: 14px/1.45 Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+  overflow: hidden;
+}
+.main {
+  position: fixed; inset: 0; display: grid; place-items: center; padding: 10vmin;
+}
+.card {
+  background: rgba(13, 18, 34, .55); border: 1px solid rgba(126,170,255,.16);
+  border-radius: 18px; box-shadow: 0 14px 40px rgba(0,0,0,.45);
+  padding: 16px; width: min(860px, calc(100% - 28px));
+  backdrop-filter: blur(12px) saturate(160%);
+}
+h1 { margin: 0 0 6px 0; font-size: 20px; letter-spacing: .06em }
+h2 { margin: 8px 0 6px 0; font-size: 14px; opacity: .8 }
+.pill {
+  display: inline-flex; gap: 8px; align-items: center; padding: 8px 12px;
+  border-radius: 999px; background: rgba(255,255,255,.08);
+  border: 1px solid rgba(126,170,255,.16); font-weight: 800;
+}
+.big {
+  margin-top: 10px; font-size: 24px; font-weight: 900; letter-spacing: .04em;
+}
+.note { margin-top: 10px; opacity: .75 }
+.pulse {
+  position: relative; width: 44px; height: 44px; display: inline-grid; place-items: center;
+}
+.pulse .dot{ width: 10px; height: 10px; border-radius: 50%; background: linear-gradient(90deg,var(--a),var(--b)); }
+.pulse .wave{ position:absolute; inset:0; border-radius:50%; animation:wave 2.4s ease-out infinite; opacity:.6; }
+.pulse .wave::before{ content:""; position:absolute; inset:0; border-radius:50%;
+  background:conic-gradient(var(--a),var(--b));
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(50% - 1px),#000 calc(50% - 1px),#000 100%);
+  mask:radial-gradient(farthest-side,transparent calc(50% - 1px),#000 calc(50% - 1px),#000 100%); }
+.pulse .wave:nth-child(1){ animation-delay:0s; } .pulse .wave:nth-child(2){ animation-delay:.7s; } .pulse .wave:nth-child(3){ animation-delay:1.4s; }
+@keyframes wave{ 0%{transform:scale(.5);opacity:.36;}50%{transform:scale(1.4);opacity:.58;}100%{transform:scale(1.35);opacity:.0;} }
+.small { font-size: 12px; opacity: .9 }
+</style>
 </head>
 <body>
-  <main class="card">
-    <h1>Lumine</h1>
-    <div class="mut">Arquetipo de vitrine (placeholder). Esta página responde ao host via postMessage.</div>
-    <div id="status" class="bubble mini">Aguardando mensagens…</div>
-  </main>
-  <script>
-    // Eco simples de mensagens do host (se houver)
-    window.addEventListener('message', (ev)=>{
-      const s = document.getElementById('status');
-      s.textContent = 'Mensagem recebida do host: '+ (typeof ev.data==='string' ? ev.data : JSON.stringify(ev.data||{}));
-    });
-    // Informe ao host que carregou
-    try { parent.postMessage({ type:'ARCH_READY', key:'lumine' }, '*'); } catch(e){}
-  </script>
+  <div class="main">
+    <div class="card">
+      <h1>Lumine · Arquétipo</h1>
+      <div class="pill">
+        <span>Ritual</span>
+        <strong>✦ + ☀ + ❂</strong>
+      </div>
+      <div class="big">Espalhe brilho. Mas nunca toda a luz de uma vez.</div>
+      <div class="note small">Idioma: pt‑BR · Textos exatamente do seu preset.</div>
+      <div style="margin-top:10px;display:flex;align-items:center;gap:10px">
+        <div class="pulse"><i class="wave"></i><i class="wave"></i><i class="wave"></i><i class="dot"></i></div>
+        <div class="small">Pulso visual (placeholder). Substitua por shader 3D quando desejar.</div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
