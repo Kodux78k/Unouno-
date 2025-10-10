@@ -1,69 +1,134 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Nova · Arquétipo</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Nova · Farinha ASCII</title>
 <style>
-:root {
-  --a: #00c2ff; --b: #6d7dff; --fg: #e8f0ff; --bg: #0a101b;
-}
-* { box-sizing: border-box }
-html, body { height: 100% }
-body {
-  margin: 0; color: var(--fg); background: radial-gradient(1200px 800px at 60% -10%, #0a1220 0%, #070b12 55%, #05080f 100%);
-  font: 14px/1.45 Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
-  overflow: hidden;
-}
-.main {
-  position: fixed; inset: 0; display: grid; place-items: center; padding: 10vmin;
-}
-.card {
-  background: rgba(13, 18, 34, .55); border: 1px solid rgba(126,170,255,.16);
-  border-radius: 18px; box-shadow: 0 14px 40px rgba(0,0,0,.45);
-  padding: 16px; width: min(860px, calc(100% - 28px));
-  backdrop-filter: blur(12px) saturate(160%);
-}
-h1 { margin: 0 0 6px 0; font-size: 20px; letter-spacing: .06em }
-h2 { margin: 8px 0 6px 0; font-size: 14px; opacity: .8 }
-.pill {
-  display: inline-flex; gap: 8px; align-items: center; padding: 8px 12px;
-  border-radius: 999px; background: rgba(255,255,255,.08);
-  border: 1px solid rgba(126,170,255,.16); font-weight: 800;
-}
-.big {
-  margin-top: 10px; font-size: 24px; font-weight: 900; letter-spacing: .04em;
-}
-.note { margin-top: 10px; opacity: .75 }
-.pulse {
-  position: relative; width: 44px; height: 44px; display: inline-grid; place-items: center;
-}
-.pulse .dot{ width: 10px; height: 10px; border-radius: 50%; background: linear-gradient(90deg,var(--a),var(--b)); }
-.pulse .wave{ position:absolute; inset:0; border-radius:50%; animation:wave 2.4s ease-out infinite; opacity:.6; }
-.pulse .wave::before{ content:""; position:absolute; inset:0; border-radius:50%;
-  background:conic-gradient(var(--a),var(--b));
-  -webkit-mask:radial-gradient(farthest-side,transparent calc(50% - 1px),#000 calc(50% - 1px),#000 100%);
-  mask:radial-gradient(farthest-side,transparent calc(50% - 1px),#000 calc(50% - 1px),#000 100%); }
-.pulse .wave:nth-child(1){ animation-delay:0s; } .pulse .wave:nth-child(2){ animation-delay:.7s; } .pulse .wave:nth-child(3){ animation-delay:1.4s; }
-@keyframes wave{ 0%{transform:scale(.5);opacity:.36;}50%{transform:scale(1.4);opacity:.58;}100%{transform:scale(1.35);opacity:.0;} }
-.small { font-size: 12px; opacity: .9 }
+  :root {
+    --color: #f97316;
+    --n: 8;
+    --r: min(34vmin, 220px);
+    --fontSize: clamp(14px, 3.6vmin, 28px);
+    --labelSize: clamp(12px, 2.4vmin, 16px);
+    --bg: transparent;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin:0; padding:0;
+    height:100%; width:100%;
+    background: var(--bg);
+  }
+  body {
+    display:grid; place-items:center;
+    color: var(--color);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    user-select:none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  .stage {
+    position:relative;
+    width:min(80vmin, 520px);
+    height:min(80vmin, 520px);
+  }
+  .ring {
+    position:absolute; inset:0;
+    animation: ring-rot 28s linear infinite;
+    transform-origin: 50% 50%;
+  }
+  @keyframes ring-rot {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  .glyph {
+    position:absolute; left:50%; top:50%;
+    transform: rotate(calc(var(--angle))) translate(var(--r)) rotate(calc(-1*var(--angle)));
+    font-size: var(--fontSize);
+    line-height:1;
+    opacity:.9;
+    text-shadow: 0 0 0.25em color-mix(in oklab, var(--color) 70%, transparent);
+    animation: blink 2.6s ease-in-out infinite alternate, bob 5.2s ease-in-out infinite;
+    animation-delay: var(--delay);
+  }
+  @keyframes blink {
+    from { opacity:.55; transform: rotate(calc(var(--angle))) translate(var(--r)) rotate(calc(-1*var(--angle))) scale(0.95); }
+    to   { opacity:.95; transform: rotate(calc(var(--angle))) translate(var(--r)) rotate(calc(-1*var(--angle))) scale(1.05); }
+  }
+  @keyframes bob {
+    0%,100% { letter-spacing: 0px; }
+    50%     { letter-spacing: 1px; }
+  }
+
+  .center {
+    position:absolute; inset:0;
+    display:grid; place-items:center;
+    gap: 1.2vmin;
+  }
+  .face {
+    font-size: clamp(22px, 8vmin, 64px);
+    line-height:1;
+    filter: drop-shadow(0 0 0.25rem color-mix(in oklab, var(--color) 65%, transparent));
+  }
+  .face::after {
+    content: var(--f1);
+    display:inline-block;
+    animation: face-swap 6s steps(1,end) infinite, face-pulse 2.8s ease-in-out infinite;
+  }
+  @keyframes face-pulse {
+    0%,100% { transform: scale(1); opacity: .95; }
+    50%     { transform: scale(1.06) rotate(2deg); opacity: .85; }
+  }
+  @keyframes face-swap {
+    0%     { content: var(--f1); }
+    25%    { content: var(--f2); }
+    50%    { content: var(--f3); }
+    75%    { content: var(--f4); }
+    100%   { content: var(--f1); }
+  }
+
+  .label {
+    font-size: var(--labelSize);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    opacity: .8;
+  }
+
+  /* Halo sutil */
+  .halo {
+    position:absolute; left:50%; top:50%;
+    transform: translate(-50%,-50%);
+    width: 68%; height: 68%;
+    border: 1px solid color-mix(in oklab, var(--color) 35%, transparent);
+    border-radius: 50%;
+    opacity: .2;
+  }
+
+  /* Menos movimento se preferido */
+  @media (prefers-reduced-motion: reduce) {
+    .ring { animation-duration: 120s; }
+    .glyph { animation: none; }
+    .face::after { animation: face-swap 10s steps(1,end) infinite; }
+  }
 </style>
 </head>
 <body>
-  <div class="main">
-    <div class="card">
-      <h1>Nova · Arquétipo</h1>
-      <div class="pill">
-        <span>Ritual</span>
-        <strong>△ + ✧ + ✦</strong>
-      </div>
-      <div class="big">Ideias vêm em ondas. Pegue a próxima.</div>
-      <div class="note small">Idioma: pt‑BR · Textos exatamente do seu preset.</div>
-      <div style="margin-top:10px;display:flex;align-items:center;gap:10px">
-        <div class="pulse"><i class="wave"></i><i class="wave"></i><i class="wave"></i><i class="dot"></i></div>
-        <div class="small">Pulso visual (placeholder). Substitua por shader 3D quando desejar.</div>
-      </div>
+  <div class="stage" role="img" aria-label="Animação ritual ASCII do arquétipo Nova">
+    <div class="halo" aria-hidden="true"></div>
+    <div class="ring">
+      <span class="glyph" style="--angle:calc(0 * (360deg / 8));--delay:0.00s">*</span>
+      <span class="glyph" style="--angle:calc(1 * (360deg / 8));--delay:0.12s">+</span>
+      <span class="glyph" style="--angle:calc(2 * (360deg / 8));--delay:0.24s">.</span>
+      <span class="glyph" style="--angle:calc(3 * (360deg / 8));--delay:0.36s">^</span>
+      <span class="glyph" style="--angle:calc(4 * (360deg / 8));--delay:0.48s">*</span>
+      <span class="glyph" style="--angle:calc(5 * (360deg / 8));--delay:0.60s">+</span>
+      <span class="glyph" style="--angle:calc(6 * (360deg / 8));--delay:0.72s">.</span>
+      <span class="glyph" style="--angle:calc(7 * (360deg / 8));--delay:0.84s">^</span>
+    </div>
+    <div class="center">
+      <div class="face" style="--f1:'*';--f2:'+';--f3:'*';--f4:'x';"></div>
+      <div class="label">[ Nova ]</div>
     </div>
   </div>
 </body>
