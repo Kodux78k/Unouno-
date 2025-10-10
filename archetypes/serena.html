@@ -47,7 +47,7 @@
 <body>
 
 <canvas id="dnaCanvas"></canvas>
-<button class="btn-activate" onclick="sendActivation()">🧬 Ativar Serena</button>
+
 
 <script>
   const canvas = document.getElementById('dnaCanvas');
@@ -57,8 +57,35 @@
     w = canvas.width = window.innerWidth;
     h = canvas.height = window.innerHeight;
   }
+  // replaced by DPR-aware resize
+  // [POLYFILL + DPR SCALE]
+  window.requestAnimationFrame = window.requestAnimationFrame
+      || window.webkitRequestAnimationFrame
+      || window.mozRequestAnimationFrame
+      || function(cb){ return setTimeout(cb, 16); };
+
+  let dpr = Math.max(1, window.devicePixelRatio || 1);
+  function applyScale() {
+    // Reset then scale to avoid cumulative scaling on multiple resizes
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+  }
+
+  function resize() {
+    dpr = Math.max(1, window.devicePixelRatio || 1);
+    w = window.innerWidth;
+    h = window.innerHeight;
+    canvas.width  = Math.floor(w * dpr);
+    canvas.height = Math.floor(h * dpr);
+    canvas.style.width  = w + 'px';
+    canvas.style.height = h + 'px';
+    applyScale();
+  }
   window.addEventListener('resize', resize);
   resize();
+
+  const PREFERS_REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    
 
   
 
@@ -79,13 +106,34 @@ const particles = Array.from({length: 96}, () => ({
   }));
 
   function draw() {
-    ctx.clearRect(0, 0, w, h);
+    // [HALO] anel sutil no centro
+    const haloRx = 120;
+    const haloRy = 120 * ELEMENT_CFG.y_factor;
+    ctx.save();
+    ctx.globalAlpha = 0.08;
+    ctx.strokeStyle = ELEMENT_CFG.color;
+    ctx.lineWidth = 0.75;
+    if (ctx.ellipse) {
+      ctx.beginPath();
+      ctx.ellipse(w/2, h/2, haloRx, haloRy, 0, 0, Math.PI*2);
+      ctx.stroke();
+    } else {
+      ctx.beginPath();
+      ctx.arc(w/2, h/2, Math.min(haloRx, haloRy), 0, Math.PI*2);
+      ctx.stroke();
+    }
+    ctx.restore();
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fillStyle = 'rgba(0,0,0,0.08)';
+    ctx.fillRect(0, 0, w, h);
+    ctx.restore();
     ctx.globalCompositeOperation = ELEMENT_CFG.composite;
     ctx.fillStyle = ELEMENT_CFG.color;
     ctx.shadowColor = ELEMENT_CFG.color;
     ctx.shadowBlur = ELEMENT_CFG.shadow_blur;
     particles.forEach(p => {
-      p.angle += p.speed;
+      if (PREFERS_REDUCED) { p.angle += p.speed * 0.4; } else { p.angle += p.speed; }
       const pulse = Math.sin(p.angle + p.radiusOffset) * ELEMENT_CFG.radius_pulse_amp;
       const radius = p.baseRadius + pulse;
       const x = w/2 + Math.cos(p.angle) * radius;
