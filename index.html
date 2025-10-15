@@ -1403,6 +1403,25 @@ document.addEventListener('DOMContentLoaded', ()=>{
 <link rel="manifest" href="./manifest.webmanifest"/>
 <link rel="icon" href="./icons/icon-192.png" sizes="192x192"/>
 <link rel="apple-touch-icon" href="./icons/icon-192.png"/>
+<style id="OVERSCROLL_FIX">
+html, body {
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+</style>
+
+<script id="WINDEX_SCROLL_FIX">
+window.addEventListener("DOMContentLoaded", () => {
+  setTimeout(() => {
+    document.body.style.overflowY = "auto";
+  }, 500);
+});
+window.addEventListener("WindexReady", () => {
+  document.body.style.overflowY = "auto";
+});
+</script>
 </head>
 <body>
 
@@ -1564,7 +1583,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
               <div class="orb-glow" id="orbGlow"></div>
               <canvas id="particles"></canvas>
               <div class="ring"></div>
-              <div class="call" id="orbCall">Toque para pulsar · Nebula</div>
+              <div class="call" id="orbCall"></div>
             </div>
 
             <iframe id="arch-frame" title="Archetype Core" sandbox="allow-scripts" referrerpolicy="no-referrer" src="./archetypes/atlas.html"></iframe>
