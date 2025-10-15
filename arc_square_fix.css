@@ -1,0 +1,36 @@
+
+/* Arc Square Fix — CSS (v1.0)
+   Remove qualquer "quadrado" de fundo atrás do arco (SVG/ORB).
+   - Zera background em SVGs do arco
+   - Garante fill:none nas bases/retângulos do SVG
+   - Mantém o stroke do arco respeitando as vars atuais
+*/
+#arc, #arc svg,
+.orb-arc, .orb-arc svg,
+.ring-arc, .ring-arc svg,
+[data-arc], [data-arc] svg {
+  background: transparent !important;
+  overflow: visible !important; /* evita clip retangular de sombras/filtros */
+}
+
+/* Remove retângulos de fundo comuns */
+#arc rect, .orb-arc rect, .ring-arc rect, [data-arc] rect {
+  fill: none !important;
+  stroke: none !important;
+}
+
+/* Garante que o arco é só traço (sem preenchimento) */
+#arc path, .orb-arc path, .ring-arc path, [data-arc] path {
+  fill: none !important;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  shape-rendering: auto;
+}
+
+/* Opcional: mantém cor do arco por variável se existir */
+:root {
+  --arc-stroke: var(--c-ring, currentColor);
+}
+#arc path[data-ring], .orb-arc path[data-ring], .ring-arc path[data-ring], [data-arc] path[data-ring] {
+  stroke: var(--arc-stroke) !important;
+}

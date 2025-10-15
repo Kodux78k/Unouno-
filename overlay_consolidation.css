@@ -1,0 +1,15 @@
+/* === CONSOLIDATION: OVERLAY BACKGROUND-ONLY (mantém apenas esta versão) === */
+body::after{ content:none !important; }
+/* Camada 1: overlay controlado por --arch-overlay; Camada 2: gradiente base */
+body{
+  background:
+    radial-gradient(120% 120% at 50% 40%,
+      var(--arch-overlay, rgba(0,0,0,0)) 0%,
+      rgba(0,0,0,0) 62%),
+    linear-gradient(42deg, var(--grad-a), var(--grad-b)) fixed !important;
+}
+/* Tema default Nebula; Blue-1 via data-theme="blue1" */
+:root{ --grad-a:#ff52e5; --grad-b:#00c5e5; }
+body[data-theme="blue1"]{ --grad-a:#0044ff; --grad-b:#00aaff; }
+/* Sombra de segurança para orb/chat */
+.arch-circle{ box-shadow: 0 18px 50px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.06); }
