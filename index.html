@@ -1532,28 +1532,128 @@ body{
 try{ document.documentElement.style.setProperty('--arch-overlay','rgba(64,158,255,.22)'); }catch{}
 </script>
 
-<style id="CHAT13_CSS">
-.chat-wrap{display:grid;gap:12px}
-.chat-pulse{position:relative;height:10px;border-radius:999px;
-  background:linear-gradient(90deg,var(--grad-a),var(--grad-b));opacity:.8;overflow:hidden}
-.chat-pulse::after{content:"";position:absolute;inset:0;
-  background:radial-gradient(60% 120% at 0% 50%, #fff8 0%, #fff0 60%);
-  animation:pulseRun 2.8s cubic-bezier(.22,.61,.36,1) infinite}
-@keyframes pulseRun{0%{transform:translateX(-40%)}50%{transform:translateX(40%)}100%{transform:translateX(140%)}}
-
-.chat-feed{display:grid;gap:10px}
-.msg{background:var(--surface);border:var(--bd);border-radius:14px;padding:10px}
-.msg.role-user{border-color:#ffffff2a}
-.msg.role-assistant{box-shadow:0 10px 32px rgba(0,0,0,.35)}
-.msg h5{margin:.2rem 0 .35rem;font-size:12px;letter-spacing:.08em;color:var(--mut);text-transform:uppercase}
-
-.chat-composer{display:flex;gap:8px;align-items:center;position:sticky;bottom:0;
-  background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.2));
-  padding:10px;border-radius:16px}
-.chat-composer textarea{flex:1;min-height:44px;max-height:36vh;resize:vertical;border-radius:12px;
-  padding:10px 12px;border:var(--bd);background:rgba(255,255,255,.04);color:var(--fg)}
-.chat-composer .btn{white-space:nowrap}
+<style id="OVERLAY_CONSOLIDATION">
+/* === CONSOLIDATION: OVERLAY BACKGROUND-ONLY === */
+body::after{ content:none !important; }
+body{
+  background:
+    radial-gradient(120% 120% at 50% 40%,
+      var(--arch-overlay, rgba(0,0,0,0)) 0%,
+      rgba(0,0,0,0) 62%),
+    linear-gradient(42deg, var(--grad-a), var(--grad-b)) fixed !important;
+}
+:root{ --grad-a:#ff52e5; --grad-b:#00c5e5; }
+body[data-theme="blue1"]{ --grad-a:#0044ff; --grad-b:#00aaff; }
+.arch-circle{ box-shadow: 0 18px 50px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.06); }
 </style>
+<style id="TOP_SPACING_FIX">
+:root{
+  --hdrH: 56px;
+  --tabsH: 60px;
+}
+main{
+  padding-top: calc(var(--hdrH) + min(env(safe-area-inset-top, 0px), 10px)) !important;
+  padding-bottom: calc(var(--tabsH) + min(env(safe-area-inset-bottom, 0px), 8px)) !important;
+}
+.arch-container{
+  margin-top: clamp(6px, 1.2vh, 12px) !important;
+}
+.view{ padding-top: 8px !important; }
+</style>
+<style id="TOP_SPACING_TIGHT">
+/* Variante mais colada: ignora safe-area extra */
+main{ padding-top: var(--hdrH) !important; }
+</style>
+<style id="ULTRA_TIGHT_TOP">
+:root{ --hdrH: 52px; --tabsH: 58px; }
+header.mast{
+  position: fixed !important;
+  top: 0; left: 0; right: 0;
+  margin-top: 0 !important;
+  z-index: 100;
+}
+main{
+  padding-top: var(--hdrH) !important;
+  padding-bottom: calc(var(--tabsH) + min(env(safe-area-inset-bottom, 0), 8px)) !important;
+}
+.arch-container{
+  margin-top: clamp(0px, 0.6vh, 8px) !important;
+}
+.view{ padding-top: 0 !important; }
+</style>
+
+<style id="LSPANEL_REFINEMENT">
+/* Painel compacto, sem seções de debug/partículas/FPS */
+#panel, #lsPanel{
+  --pad:12px;
+  background: rgba(15,17,32,.92);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 16px;
+  box-shadow: 0 12px 34px rgba(0,0,0,.55);
+  padding: var(--pad);
+  max-height: 72vh;
+  overflow: auto;
+}
+#panel .row, #lsPanel .row{ margin: 8px 0; display: grid; gap: 8px; }
+#panel .row.inline, #lsPanel .row.inline{ display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+#panel .mut, #lsPanel .mut{ color: var(--mut); font-size: 12px; }
+#panel .footer, #lsPanel .footer{
+  position: sticky; bottom: 0; padding-top: var(--pad);
+  background: linear-gradient(180deg, transparent, rgba(0,0,0,.2));
+  display: flex; gap: 8px; justify-content: flex-end;
+}
+/* Esconde linhas marcadas como dev ou com classes comuns de debug */
+#panel [data-dev], #lsPanel [data-dev], 
+#panel .dev, #lsPanel .dev,
+#panel .debug, #lsPanel .debug,
+#panel .perf, #lsPanel .perf { display: none !important; }
+</style>
+
+
+<style id="UPLOAD_BUTTONS_CSS">
+/* Upload (Nebula/Blue) — botão bonito, acessível e mobile-first */
+.input-file-wrap{position:relative;display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap}
+.btn-upload{
+  --h:44px;
+  display:inline-flex;align-items:center;gap:10px;cursor:pointer;
+  height:var(--h); padding:0 14px;border-radius:12px;
+  border:1px solid rgba(255,255,255,.14);
+  background:linear-gradient(90deg,var(--grad-a),var(--grad-b));
+  color:#0b0f14;font-weight:800; letter-spacing:.02em;
+  box-shadow:0 8px 24px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.08) inset;
+  transition:transform .12s ease, box-shadow .2s ease, opacity .2s ease;
+}
+.btn-upload:hover{ transform:translateY(-1px); }
+.btn-upload:active{ transform:translateY(0); opacity:.9; }
+.btn-upload.ghost{
+  background:linear-gradient(180deg,#11162a,#0b1122);
+  color:var(--fg);
+}
+/* Ícone SVG via mask (data-URI), herda o gradiente */
+.btn-upload .ico{
+  width:18px;height:18px;display:inline-block;flex:0 0 18px;
+  background: #0b0f14; /* não aparece, só base pro mask */
+  -webkit-mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path d="M12 16l4-4 2 2-7 7-7-7 2-2 4 4V3h2v13zM5 21h14v-2H5v2z"/></svg>');
+  mask-image: url("data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\"><path d=\"M12 16l4-4 2 2-7 7-7-7 2-2 4 4V3h2v13zM5 21h14v-2H5v2z\"/></svg>");
+  -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
+  -webkit-mask-size:contain; mask-size:contain;
+  background:linear-gradient(90deg,var(--grad-a),var(--grad-b));
+}
+/* input “nativo” invisível, mas clicável */
+.btn-upload input[type=file]{
+  position:absolute; inset:0; opacity:0; cursor:pointer;
+  width:100%; height:100%;
+}
+/* Metadata do arquivo selecionado */
+.file-meta{font-size:12px;color:var(--mut);max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Preview de imagem pequeno */
+.file-thumb{
+  width:40px;height:40px;border-radius:10px;object-fit:cover;display:none;
+  box-shadow:0 2px 10px rgba(0,0,0,.35); border:1px solid rgba(255,255,255,.08);
+}
+.input-file-wrap.has-thumb .file-thumb{ display:block; }
+</style>
+
 </head>
 <body>
   <!-- Splash screen displayed on initial load -->
@@ -1686,7 +1786,20 @@ try{ document.documentElement.style.setProperty('--arch-overlay','rgba(64,158,25
   <polyline points="15 18 9 12 15 6" stroke="url(#g5)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
             <span class="ripple"></span></button>
-            <select id="arch-select" title="Escolher arquétipo"><option value="./archetypes3d/value="./archetypes3d/atlas.html">atlas.html</option><option value="./archetypes3d/value="./archetypes3d/nova.html">nova.html</option><option value="./archetypes3d/value="./archetypes3d/vitalis.html">vitalis.html</option><option value="./archetypes3d/value="./archetypes3d/pulse.html">pulse.html</option><option value="./archetypes3d/value="./archetypes3d/artemis.html">artemis.html</option><option value="./archetypes3d/value="./archetypes3d/serena.html">serena.html</option><option value="./archetypes3d/value="./archetypes3d/kaos.html">kaos.html</option><option value="./archetypes3d/value="./archetypes3d/genus.html">genus.html</option><option value="./archetypes3d/value="./archetypes3d/lumine.html">lumine.html</option><option value="./archetypes3d/value="./archetypes3d/rhea.html">rhea.html</option><option value="./archetypes3d/value="./archetypes3d/solus.html">solus.html</option><option value="./archetypes3d/value="./archetypes3d/aion.html">aion.html</option></select>
+            <select id="arch-select" title="Escolher arquétipo">
+  <option value="./archetypes/atlas.html">atlas</option>
+  <option value="./archetypes/nova.html">nova</option>
+  <option value="./archetypes/vitalis.html">vitalis</option>
+  <option value="./archetypes/pulse.html">pulse</option>
+  <option value="./archetypes/artemis.html">artemis</option>
+  <option value="./archetypes/serena.html">serena</option>
+  <option value="./archetypes/kaos.html">kaos</option>
+  <option value="./archetypes/genus.html">genus</option>
+  <option value="./archetypes/lumine.html">lumine</option>
+  <option value="./archetypes/rhea.html">rhea</option>
+  <option value="./archetypes/solus.html">solus</option>
+  <option value="./archetypes/aion.html">aion</option>
+</select>
             <button class="btn fx-trans fx-press ring" id="arch-next" title="Próximo">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
 
@@ -2303,25 +2416,9 @@ try{ document.documentElement.style.setProperty('--arch-overlay','rgba(64,158,25
 
     <!-- CHAT (Dual • Chat) -->
     <section id="v-chat" class="view">
-  <div class="grid">
-    <div class="card">
-      <div style="font-weight:800;margin-bottom:6px">Pulso em Expansão</div>
-      <div class="chat-pulse" id="chatPulse"></div>
-    </div>
-
-    <div class="card">
-      <div class="chat-wrap">
-        <div id="chatFeed" class="chat-feed" aria-live="polite"></div>
-
-        <div class="chat-composer">
-          <textarea id="chatInput" placeholder="Escreva sua intenção... (Shift+Enter quebra linha)"></textarea>
-          <button id="chatSend" class="btn prime">Enviar</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
+      <!-- Feed de mensagens do chat -->
+      <div id="chatFeed"><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: E aí beleza</div></div>
+    </section>
   </main>
 
   <!-- DOCK & TABS -->
@@ -6589,114 +6686,196 @@ document.getElementById('orbWrap')?.addEventListener('click', function(){ try{ w
       ctx.fillStyle=PALETTE.dust; ctx.globalAlpha=0.75; ctx.beginPath(); ctx.arc(x,y,p.size,0,Math.PI*2); ctx.fill(); } ctx.globalAlpha=1;
     requestAnimationFrame(draw); } requestAnimationFrame(draw);
 })();
-</script>
-<script id="CHAT13_JS">
-(()=>{
-const CHAT_BACKEND = "openrouter";
-const OPENROUTER_CONF = {
-  model: (localStorage.getItem('dual.openrouter.model') || 'openai/gpt-4o-mini'),
-  endpoint: 'https://openrouter.ai/api/v1/chat/completions',
-  key: localStorage.getItem('dual.keys.openrouter') || ''
-};
-
-const BLOCKS = [
-  ["Sinal","Contextualize a intenção do usuário em 1 frase objetiva."],
-  ["Mapa","Liste 3-5 pontos-chave do problema."],
-  ["Hipóteses","Traga 3 hipóteses testáveis."],
-  ["Dados","Quais dados mínimos precisamos coletar?"],
-  ["Ações 10min","Aplique uma micro-ação que cabe em 10 minutos."],
-  ["Riscos","Alerte sobre 2 riscos ou armadilhas."],
-  ["Recursos","Sugira 3 recursos (apps, docs, pessoas)."],
-  ["Sequência","Desenhe a ordem ótima em 4 passos."],
-  ["Expansão","Mostre 2 variações criativas do caminho."],
-  ["Métrica","Defina 1 métrica simples de sucesso."],
-  ["Checkpoint","O que revisar em 24h?"],
-  ["Compromisso","Gere 1 compromisso curto e claro."],
-  ["Fecho","Feche com 1 frase que mantenha o pulso."]
-];
-
-function sanitize(md){
-  const esc = (s)=>s.replace(/[&<>]/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;' }[m]));
-  md = md.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-         .replace(/\*(.+?)\*/g,'<em>$1</em>')
-         .replace(/`([^`]+?)`/g,'<code>$1</code>')
-         .replace(/\[(.+?)\]\((https?:\/\/[^\s)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
-  return md.split('\n').map(ln=>'<p>'+esc(ln)+'</p>').join('');
+</script> <style id="uno-superpatch-css">
+/* === SUPER PATCH — estilos necessários === */
+/* Tabbar glass + alinhamento */
+.tabbar .inner{ background: rgba(255,255,255,.06) !important; border:1px solid rgba(255,255,255,.14) !important; backdrop-filter: blur(10px) !important; }
+.tabbar .tab svg { display:block; margin:0 auto 2px }
+/* Header icon button alignment */
+header.mast .ib svg{ display:block }
+/* Archetype overlay por trás de tudo e sem capturar cliques */
+#archOverlay, .arch-overlay, [data-arch-overlay], body::after, .arch-ring, .arch-overlay::before {
+  z-index: 0 !important;
+  pointer-events: none !important;
 }
-
-const feed = document.getElementById('chatFeed');
-function push(role, title, html){
-  const el = document.createElement('div');
-  el.className = `msg role-${role}`;
-  el.innerHTML = (title ? `<h5>${title}</h5>` : '') + (html||'');
-  feed.appendChild(el);
-  el.scrollIntoView({behavior:'smooth',block:'end'});
-}
-function pushBlock(title){
-  const el = document.createElement('div');
-  el.className = 'msg role-assistant';
-  el.innerHTML = `<h5>${title}</h5><div class="mut">…</div>`;
-  feed.appendChild(el);
-  el.scrollIntoView({behavior:'smooth',block:'end'});
-  return el;
-}
-
-async function callOpenRouter(messages){
-  if(!OPENROUTER_CONF.key){ throw new Error('Chave OpenRouter ausente (defina em localStorage: dual.keys.openrouter)'); }
-  const body = { model: OPENROUTER_CONF.model, messages, temperature: 0.7 };
-  const r = await fetch(OPENROUTER_CONF.endpoint, {
-    method:'POST',
-    headers:{
-      'Content-Type':'application/json',
-      'Authorization':`Bearer ${OPENROUTER_CONF.key}`,
-      'HTTP-Referer': location.origin,
-      'X-Title':'HUB UNO Chat13'
-    },
-    body: JSON.stringify(body)
-  });
-  if(!r.ok){ throw new Error('OpenRouter HTTP '+r.status); }
-  const j = await r.json();
-  return j.choices?.[0]?.message?.content || '';
-}
-
-async function chat13Pipeline(userText){
-  const baseSystem = "Você é o Chat13 do HUB UNO. Responda de forma breve, clara e aplicável para cada bloco.";
-  const baseMsgs = [{role:'system', content: baseSystem}, {role:'user', content: userText}];
-  for(const [title, instr] of BLOCKS){
-    const dom = pushBlock(title);
-    try{
-      const content = await callOpenRouter([
-        ...baseMsgs,
-        {role:'user', content: `Bloco: ${title}. Instrução: ${instr}.
-Formate com frases curtas, listas quando fizer sentido, e sem rodeios.`}
-      ]);
-      dom.innerHTML = `<h5>${title}</h5>${sanitize(content)}`;
-    }catch(e){
-      dom.innerHTML = `<h5>${title}</h5><p class="mut">[erro: ${e.message}]</p>`;
-    }
-  }
-}
-
-const input = document.getElementById('chatInput');
-document.getElementById('chatSend').addEventListener('click', async ()=>{
-  const text = (input.value||'').trim();
-  if(!text) return;
-  push('user','Você', sanitize(text));
-  input.value = ''; input.focus();
-  try{ await chat13Pipeline(text); }
-  catch(e){ push('assistant','Erro', `<p class="mut">${e.message}</p>`); }
-});
-
-input.addEventListener('keydown',(e)=>{
-  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); document.getElementById('chatSend').click(); }
-});
-
-const pulse = document.getElementById('chatPulse');
-function setPulseSpeed(fast){ pulse.style.setProperty('animation-duration', fast?'1.6s':'2.8s'); }
-input.addEventListener('focus', ()=>setPulseSpeed(true));
-input.addEventListener('blur',  ()=>setPulseSpeed(false));
-
-push('assistant','Pronto','<p>Chat 13-Blocos iniciado. Escreva sua intenção e aperte <strong>Enviar</strong>.</p>');
+.view, header.mast, .tabbar, #lsModal { position: relative; z-index: 1 }
+/* Pequeno ajuste do LS modal dentro do glass theme */
+#lsModal .panel{ backdrop-filter: blur(8px) }
+</style>
+<script id="BOOTSTRAP_CONSOLIDATION">
+(function(){
+  try{
+    const theme = localStorage.getItem('uno:theme') || 'default';
+    document.body.dataset.theme = (theme === 'blue1') ? 'blue1' : '';
+    if (!localStorage.getItem('uno:overlayLevel')) localStorage.setItem('uno:overlayLevel','22');
+    function overlayAlpha(){ const v=parseInt(localStorage.getItem('uno:overlayLevel')||'22',10); return Math.min(30,Math.max(0,isNaN(v)?22:v))/100; }
+    function overlayColor(name,a){ const RGB={atlas:[64,158,255],nova:[255,82,177],vitalis:[72,218,168],pulse:[0,191,255],artemis:[186,130,219],serena:[140,190,255],kaos:[255,77,109],genus:[87,207,112],lumine:[255,213,79],rhea:[0,209,178],solus:[100,149,237],aion:[255,159,67]}; const rgb=RGB[name]||[64,158,255]; return `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a})`; }
+    const saved=(localStorage.getItem('uno:arch')||'atlas').toLowerCase();
+    const a = overlayAlpha(); document.documentElement.style.setProperty('--arch-overlay', overlayColor(saved,a));
+  }catch(e){ console.warn('bootstrap consolidation:', e); }
 })();
 </script>
+<script id="TOP_SPACING_RUNTIME_FIX">
+document.addEventListener('DOMContentLoaded', ()=>{
+  try{
+    const hdr = document.querySelector('header.mast');
+    if(!hdr) return;
+    const hh = Math.round(hdr.getBoundingClientRect().height);
+    document.documentElement.style.setProperty('--hdrH', hh + 'px');
+  }catch(e){}
+});
+</script>
+<script id="ULTRA_TIGHT_RUNTIME">
+document.addEventListener('DOMContentLoaded', ()=>{
+  try{
+    const hdr = document.querySelector('header.mast');
+    if(!hdr) return;
+    const hh = Math.round(hdr.getBoundingClientRect().height);
+    document.documentElement.style.setProperty('--hdrH', hh + 'px');
+  }catch(e){}
+});
+</script>
+
+<script id="LSPANEL_SANITIZE">
+(function(){
+  function closerRow(el){
+    while(el && el !== document && !el.classList?.contains('row') && !/card|item|line|group/i.test(el.className||'')){
+      el = el.parentElement;
+    }
+    return el;
+  }
+  function removeByText(root){
+    const bad = /(part[ií]cul|particle|fps|frames|bloom|grain|density|count|debug|perf|hud|pedal)/i;
+    const nodes = Array.from(root.querySelectorAll('label, .mut, .row, div, section'));
+    const toRemove = new Set();
+    nodes.forEach(n=>{
+      const t = (n.textContent||'').trim();
+      if(bad.test(t)){
+        const r = closerRow(n) || n;
+        toRemove.add(r);
+      }
+    });
+    toRemove.forEach(n=>{ try{ n.remove(); }catch(_){} });
+  }
+
+  function tidyFooter(panel){
+    if(!panel) return;
+    const btnSave = panel.querySelector('#panelSave, #lsSave');
+    const btnClose = panel.querySelector('#panelClose, #lsClose');
+    if(!btnSave && !btnClose) return;
+    let f = panel.querySelector('.footer');
+    if(!f){
+      f = document.createElement('div');
+      f.className = 'footer';
+      panel.appendChild(f);
+    }
+    if(btnClose) f.appendChild(btnClose);
+    if(btnSave) f.appendChild(btnSave);
+  }
+
+  function run(){
+    const p = document.getElementById('panel') || document.getElementById('lsPanel');
+    if(!p) return;
+    removeByText(p);
+    tidyFooter(p);
+  }
+  // Ao abrir o painel
+  document.addEventListener('click', (e)=>{
+    const id = (e.target && (e.target.id||'')).toLowerCase();
+    if(id.includes('btnsettings') || id.includes('btnls') || id.includes('panelopen')){
+      setTimeout(run, 30);
+    }
+  });
+  // Tenta rodar uma vez após carregamento (para painéis já visíveis)
+  setTimeout(run, 300);
+})();
+</script>
+
+
+
+<script id="UPLOAD_BUTTONS_JS">
+(function(){
+  function visible(el){
+    if(!el || el.type!=='file') return false;
+    const cs = getComputedStyle(el);
+    if(el.hidden || cs.display==='none' || cs.visibility==='hidden') return false;
+    if(el.id && /appsimportfile|hidden/i.test(el.id)) return false;
+    return el.offsetParent !== null;
+  }
+  function labelFor(input){
+    // Priority: data-label -> aria-label/title -> accept-based label -> fallback
+    const dl = input.getAttribute('data-label') || input.getAttribute('aria-label') || input.getAttribute('title');
+    if(dl) return dl;
+    const acc = (input.getAttribute('accept') || '').toLowerCase();
+    if(acc.includes('image/')) return 'Enviar imagem';
+    if(acc.includes('video/')) return 'Enviar vídeo';
+    if(acc.includes('audio/')) return 'Enviar áudio';
+    return 'Enviar arquivo';
+  }
+  function enhance(input){
+    if(input.__styled) return; input.__styled = true;
+    const wrap = document.createElement('span');
+    wrap.className = 'input-file-wrap';
+    const btn = document.createElement('label');
+    btn.className = 'btn-upload';
+    btn.innerHTML = '<i class="ico"></i><span class="txt"></span>';
+    btn.querySelector('.txt').textContent = labelFor(input);
+    const meta = document.createElement('span'); meta.className='file-meta'; meta.textContent='';
+    const thumb = document.createElement('img'); thumb.className='file-thumb'; thumb.alt='preview';
+    input.parentNode.insertBefore(wrap, input);
+    wrap.appendChild(btn);
+    btn.appendChild(input);
+    wrap.appendChild(thumb);
+    wrap.appendChild(meta);
+
+    input.addEventListener('change', ()=>{
+      const f = input.files && input.files[0];
+      if(!f){ meta.textContent=''; wrap.classList.remove('has-thumb'); thumb.src=''; return; }
+      meta.textContent = f.name || '';
+      if(/^image\//i.test(f.type)){
+        const url = URL.createObjectURL(f);
+        thumb.src = url;
+        wrap.classList.add('has-thumb');
+        setTimeout(()=>URL.revokeObjectURL(url), 1000);
+      }else{
+        wrap.classList.remove('has-thumb'); thumb.src='';
+      }
+    });
+  }
+  function scan(){
+    document.querySelectorAll('input[type=file]:not(.__styled)').forEach(el=>{
+      if(visible(el)) enhance(el);
+    });
+  }
+  document.addEventListener('DOMContentLoaded', scan);
+  const mo = new MutationObserver(scan);
+  mo.observe(document.documentElement, {subtree:true, childList:true, attributes:true, attributeFilter:['style','class','hidden','accept','title','aria-label','data-label']});
+})();
+</script>
+
+<style id="ARCH_FAB_ROUND_FIX">
+.arch-circle{
+  border-radius:50% !important;
+  overflow:hidden !important;
+  -webkit-clip-path: circle(50% at 50% 50%); clip-path: circle(50% at 50% 50%);
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 99.9%, transparent 100%);
+          mask-image: radial-gradient(circle at 50% 50%, #000 99.9%, transparent 100%);
+  isolation:isolate; contain: paint; transform: translateZ(0); will-change: transform;
+  background-clip: padding-box;
+}
+.arch-circle > .arch-fab{
+  background:none !important; mix-blend-mode: normal !important;
+  backface-visibility:hidden; -webkit-backface-visibility:hidden;
+}
+.arch-circle > .arch-fab::before{
+  content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+  background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
+  box-shadow:0 6px 16px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.06) inset;
+}
+/* failsafe de recorte para camadas do orbe */
+.arch-circle > canvas, .arch-circle #orbWrap, .arch-circle .orb-slot, .arch-circle iframe#arch-frame{
+  -webkit-clip-path: circle(50% at 50% 50%); clip-path: circle(50% at 50% 50%);
+}
+</style>
+
 </body></html>
