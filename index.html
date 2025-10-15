@@ -913,8 +913,6 @@ body::after{content:'';position:fixed;inset:0;background:none !important;pointer
     body.session-full .tabs-wrap,
     body.session-full .fab { display: none !important; }
 
-
-
 /* === ORB + Particles (escopado dentro do círculo de arquétipos) === */
 .arch-circle .orb-wrap{
   pointer-events:auto;
@@ -1059,7 +1057,7 @@ textarea {
 }
 
 /* Botão Único: respeita safe-area no iOS */
-#btnKOBLLUX { 
+#btnKOBLLUX {
   bottom: calc(1rem + env(safe-area-inset-bottom));
 }
 
@@ -1158,7 +1156,7 @@ pre { word-break: break-word; }
 /* Header único (nenhum footer fixo) — nenhuma regra extra de footer */
 
 /* Safe-area e “tap spacing” no rodapé de ações flutuantes/badges */
-.badge-reopen { 
+.badge-reopen {
   bottom: calc(1rem + env(safe-area-inset-bottom));
 }
 
@@ -1231,17 +1229,6 @@ body[data-theme="blue1"] #chatFeed .msg.user { background: rgba(232,240,255,0.10
 
 </style>
 
-<style id="overlay-defaults">
-:root{
-  --arch-color: #8a2be2;
-  --arch-overlay-strength: 12%; /* −1 default */
-  --arch-overlay: color-mix(in srgb, var(--arch-color) var(--arch-overlay-strength), transparent);
-}
-body::after{content:'';position:fixed;inset:0;background:var(--arch-overlay, transparent)!important;pointer-events:none;z-index:0}
-#arch-fadeCover{background:var(--arch-overlay, transparent);z-index:2}
-</style>
-
-
 <style id="ls-panel-css">
 #lsModal.ls-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:1200;background:rgba(0,0,0,.55);backdrop-filter:blur(8px)}
 #lsModal.ls-modal.open{display:flex}
@@ -1284,26 +1271,7 @@ body::after{content:'';position:fixed;inset:0;background:var(--arch-overlay, tra
 #lsModal .ls-ov.on{background:rgba(57,255,182,.20);border-color:rgba(57,255,182,.45)}
 </style>
 
-
 <style id="show-app-title-css">.app-title{display:inline-flex;align-items:center;gap:6px}</style>
-
-<!-- PATCH: overlay-css-unify -->
-<style id="overlay-css-unify">
-/* Ensure overlay rendering is unified across variants */
-body::after{
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: var(--arch-overlay, transparent) !important;
-  pointer-events: none;
-  z-index: 0;
-}
-</style>
-<!-- PATCH: overlay-guardian-css -->
-<style id="overlay-guardian-css">
-html[data-overlay="off"] body::after{ background: transparent !important; }
-html[data-overlay="off"] #arch-fadeCover{ background: transparent !important; }
-</style>
 
 <style id="orb-slot-css">
 /* === ORB Slot (iframe "dentro" do orbe) === */
@@ -1355,120 +1323,6 @@ html[data-overlay="off"] #arch-fadeCover{ background: transparent !important; }
 }
 </style>
 
-
-<style id="hdpro-override">
-
-/* === HD•PRO Override (Dual UNO) ==============================
-   - Handle (quase invisível) para abrir/fechar LS Panel (#brain)
-   - Painel "HD Pro" dentro do LS Panel (estatísticas + ações)
-   - Metrificadores animados de Storage (LocalStorage/IndexedDB/Total)
-   - Toggle para colapsar opções avançadas do ORB/FPS
-   ================================================================= */
-:root{
-  --hdpro-glass: rgba(12,16,24,.64);
-  --hdpro-line: 1px solid rgba(143,211,255,.14);
-  --hdpro-ok: var(--ok, #39ffb6);
-  --hdpro-warn: var(--warn, #ffb86b);
-  --hdpro-err: var(--err, #ff6b6b);
-}
-
-/* Botão/área de pega "tango" (quase invisível) */
-#lsHandle{
-  position: fixed;
-  top: calc(env(safe-area-inset-top, 8px) + 6px);
-  left: 8px;
-  width: 16px;
-  height: 16px;
-  border-radius: 999px;
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.18);
-  box-shadow: 0 8px 20px rgba(0,0,0,.45);
-  opacity: .14;
-  z-index: 1600;
-  transition: opacity .18s ease, transform .18s ease, background .18s ease;
-  backdrop-filter: blur(6px);
-}
-#lsHandle:hover, #lsHandle:active{ opacity:.42; transform: scale(1.06); }
-#lsHandle.on{ opacity:.8; background: rgba(57,255,182,.25); }
-
-/* Painel HD Pro embutido no LS (#brain .popover) */
-.hdpro-sec{
-  margin-top: 10px;
-  padding: 10px;
-  border-radius: 16px;
-  background: var(--hdpro-glass);
-  border: var(--hdpro-line);
-  box-shadow: 0 10px 24px rgba(0,0,0,.35);
-}
-.hdpro-sec .sec-hdr{
-  display:flex; align-items:center; justify-content:space-between;
-  gap:10px; margin-bottom:8px;
-}
-.hdpro-sec .sec-hdr h3{
-  margin:0; font-weight:900; font-size:14px; letter-spacing:.04em;
-}
-.hdpro-grid{
-  display:grid; grid-template-columns: 1fr; gap:10px;
-}
-.hdpro-row{ display:grid; grid-template-columns: 1fr auto; gap:8px; align-items:center; }
-.hdpro-actions{ display:flex; gap:8px; flex-wrap:wrap; }
-
-/* Meters */
-.hdpro-meter{
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 10px;
-  overflow: hidden;
-  height: 14px;
-  position: relative;
-}
-.hdpro-meter .bar{
-  position:absolute; left:0; top:0; height:100%;
-  width:0%;
-  background: linear-gradient(90deg, var(--grad-a), var(--grad-b));
-  transition: width .8s cubic-bezier(.22,.61,.36,1);
-  box-shadow: inset 0 0 12px rgba(0,0,0,.25);
-}
-.hdpro-label{ font-size:12px; color: var(--mut, rgba(245,247,255,.68)); }
-.hdpro-val{ font-size:12px; font-weight:800; }
-
-/* Toggle de avançados ORB/FPS */
-.hdpro-toggle{
-  display:flex; align-items:center; gap:8px;
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 12px; padding: 8px 10px;
-  font-size:12px; font-weight:800;
-  cursor:pointer;
-}
-.hdpro-adv-hidden{ display:none !important; }
-
-/* Botões compactos coerentes com tema */
-.hd-btn{ 
-  background: linear-gradient(180deg, rgba(13,22,34,.7), rgba(9,14,22,.7));
-  border: 1px solid rgba(143,211,255,.18);
-  color: var(--fg);
-  border-radius: 12px; padding: 8px 10px; font-weight:800;
-}
-.hd-btn.danger{ border-color: rgba(255,107,107,.35); }
-.hd-btn.ok{ border-color: rgba(57,255,182,.35); }
-
-/* Toast simples */
-#hdToast{
-  position: fixed; left: 50%; transform: translateX(-50%);
-  bottom: calc(14px + env(safe-area-inset-bottom, 0));
-  background: rgba(12,16,24,.92);
-  border: 1px solid rgba(255,255,255,.18);
-  color: var(--fg);
-  border-radius: 14px; padding: 10px 14px;
-  font-weight:800; font-size:12px;
-  box-shadow: 0 14px 40px rgba(0,0,0,.45);
-  z-index: 1700; opacity: 0; pointer-events: none;
-  transition: opacity .25s ease, transform .25s ease;
-}
-#hdToast.show{ opacity: 1; transform: translateX(-50%) translateY(-4px); }
-
-</style>
 <style>
 /* Gradient icon tuning (Send/Voice/Text) */
 #homeInputOverlay button svg, #homeVoiceBtn svg, #homeTextBtn svg{
@@ -1514,26 +1368,12 @@ nav.tabbar{ padding:4px 12px calc(env(safe-area-inset-bottom) + 4px) }
 .icon-ghost{ color:#b9c6da }
 </style>
 
-<!-- OVERLAY: background-only patch -->
-<style id="OVERLAY_BG_ONLY">
-/* Mantém o overlay sempre no background (atrás de tudo). */
-body::after{ content:none !important; }
-/* Overlay como camada de background (1ª), gradiente Nebula/Blue atrás dela (2ª). */
-body{
-  background:
-    radial-gradient(120% 120% at 50% 40%,
-      var(--arch-overlay, rgba(0,0,0,0)) 0%,
-      rgba(0,0,0,0) 62%),
-    linear-gradient(42deg, var(--grad-a), var(--grad-b)) fixed !important;
-}
-</style>
 <script id="OVERLAY_DEFAULT_BOOT">
 // Overlay ON por padrão até o primeiro arquétipo aplicar a cor própria.
 try{ document.documentElement.style.setProperty('--arch-overlay','rgba(64,158,255,.22)'); }catch{}
 </script>
 
-<style id="OVERLAY_CONSOLIDATION">
-/* === CONSOLIDATION: OVERLAY BACKGROUND-ONLY === */
+<style id="OVERLAY_BG_ONLY">
 body::after{ content:none !important; }
 body{
   background:
@@ -1542,126 +1382,32 @@ body{
       rgba(0,0,0,0) 62%),
     linear-gradient(42deg, var(--grad-a), var(--grad-b)) fixed !important;
 }
-:root{ --grad-a:#ff52e5; --grad-b:#00c5e5; }
-body[data-theme="blue1"]{ --grad-a:#0044ff; --grad-b:#00aaff; }
-.arch-circle{ box-shadow: 0 18px 50px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.06); }
-</style>
-<style id="TOP_SPACING_FIX">
-:root{
-  --hdrH: 56px;
-  --tabsH: 60px;
-}
-main{
-  padding-top: calc(var(--hdrH) + min(env(safe-area-inset-top, 0px), 10px)) !important;
-  padding-bottom: calc(var(--tabsH) + min(env(safe-area-inset-bottom, 0px), 8px)) !important;
-}
-.arch-container{
-  margin-top: clamp(6px, 1.2vh, 12px) !important;
-}
-.view{ padding-top: 8px !important; }
-</style>
-<style id="TOP_SPACING_TIGHT">
-/* Variante mais colada: ignora safe-area extra */
-main{ padding-top: var(--hdrH) !important; }
 </style>
 <style id="ULTRA_TIGHT_TOP">
 :root{ --hdrH: 52px; --tabsH: 58px; }
-header.mast{
-  position: fixed !important;
-  top: 0; left: 0; right: 0;
-  margin-top: 0 !important;
-  z-index: 100;
-}
-main{
-  padding-top: var(--hdrH) !important;
-  padding-bottom: calc(var(--tabsH) + min(env(safe-area-inset-bottom, 0), 8px)) !important;
-}
-.arch-container{
-  margin-top: clamp(0px, 0.6vh, 8px) !important;
-}
+header.mast{ position: fixed !important; top: 0; left: 0; right: 0; margin-top: 0 !important; z-index: 100; }
+main{ padding-top: var(--hdrH) !important; padding-bottom: calc(var(--tabsH) + min(env(safe-area-inset-bottom, 0), 8px)) !important; }
+.arch-container{ margin-top: clamp(0px, 0.6vh, 8px) !important; }
 .view{ padding-top: 0 !important; }
 </style>
-
-<style id="LSPANEL_REFINEMENT">
-/* Painel compacto, sem seções de debug/partículas/FPS */
-#panel, #lsPanel{
-  --pad:12px;
-  background: rgba(15,17,32,.92);
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 16px;
-  box-shadow: 0 12px 34px rgba(0,0,0,.55);
-  padding: var(--pad);
-  max-height: 72vh;
-  overflow: auto;
-}
-#panel .row, #lsPanel .row{ margin: 8px 0; display: grid; gap: 8px; }
-#panel .row.inline, #lsPanel .row.inline{ display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-#panel .mut, #lsPanel .mut{ color: var(--mut); font-size: 12px; }
-#panel .footer, #lsPanel .footer{
-  position: sticky; bottom: 0; padding-top: var(--pad);
-  background: linear-gradient(180deg, transparent, rgba(0,0,0,.2));
-  display: flex; gap: 8px; justify-content: flex-end;
-}
-/* Esconde linhas marcadas como dev ou com classes comuns de debug */
-#panel [data-dev], #lsPanel [data-dev], 
-#panel .dev, #lsPanel .dev,
-#panel .debug, #lsPanel .debug,
-#panel .perf, #lsPanel .perf { display: none !important; }
-</style>
-
-
-<style id="UPLOAD_BUTTONS_CSS">
-/* Upload (Nebula/Blue) — botão bonito, acessível e mobile-first */
-.input-file-wrap{position:relative;display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap}
-.btn-upload{
-  --h:44px;
-  display:inline-flex;align-items:center;gap:10px;cursor:pointer;
-  height:var(--h); padding:0 14px;border-radius:12px;
-  border:1px solid rgba(255,255,255,.14);
-  background:linear-gradient(90deg,var(--grad-a),var(--grad-b));
-  color:#0b0f14;font-weight:800; letter-spacing:.02em;
-  box-shadow:0 8px 24px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.08) inset;
-  transition:transform .12s ease, box-shadow .2s ease, opacity .2s ease;
-}
-.btn-upload:hover{ transform:translateY(-1px); }
-.btn-upload:active{ transform:translateY(0); opacity:.9; }
-.btn-upload.ghost{
-  background:linear-gradient(180deg,#11162a,#0b1122);
-  color:var(--fg);
-}
-/* Ícone SVG via mask (data-URI), herda o gradiente */
-.btn-upload .ico{
-  width:18px;height:18px;display:inline-block;flex:0 0 18px;
-  background: #0b0f14; /* não aparece, só base pro mask */
-  -webkit-mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path d="M12 16l4-4 2 2-7 7-7-7 2-2 4 4V3h2v13zM5 21h14v-2H5v2z"/></svg>');
-  mask-image: url("data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\"><path d=\"M12 16l4-4 2 2-7 7-7-7 2-2 4 4V3h2v13zM5 21h14v-2H5v2z\"/></svg>");
-  -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
-  -webkit-mask-size:contain; mask-size:contain;
-  background:linear-gradient(90deg,var(--grad-a),var(--grad-b));
-}
-/* input “nativo” invisível, mas clicável */
-.btn-upload input[type=file]{
-  position:absolute; inset:0; opacity:0; cursor:pointer;
-  width:100%; height:100%;
-}
-/* Metadata do arquivo selecionado */
-.file-meta{font-size:12px;color:var(--mut);max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-/* Preview de imagem pequeno */
-.file-thumb{
-  width:40px;height:40px;border-radius:10px;object-fit:cover;display:none;
-  box-shadow:0 2px 10px rgba(0,0,0,.35); border:1px solid rgba(255,255,255,.08);
-}
-.input-file-wrap.has-thumb .file-thumb{ display:block; }
-</style>
-
+<script id="ULTRA_TIGHT_RUNTIME">
+document.addEventListener('DOMContentLoaded', ()=>{
+  try{
+    const hdr = document.querySelector('header.mast');
+    if(!hdr) return;
+    const hh = Math.round(hdr.getBoundingClientRect().height);
+    document.documentElement.style.setProperty('--hdrH', hh + 'px');
+  }catch(e){}
+});
+</script>
+<link rel="manifest" href="./manifest.webmanifest"/>
+<link rel="icon" href="./icons/icon-192.png" sizes="192x192"/>
+<link rel="apple-touch-icon" href="./icons/icon-192.png"/>
 </head>
 <body>
-  <!-- Splash screen displayed on initial load -->
-  
-  <!-- Som do splash: coloque seu arquivo de áudio na pasta especificada e ajuste o caminho abaixo.
-       O som será reproduzido automaticamente quando o splash aparecer. -->
+
   <audio id="splashSound" src="Cassettes/Barra Sounds/Suave Underline e Portal.mp3" preload="auto"></audio>
-  <!-- ===== Header ===== -->
+
   <header class="mast">
     <button class="ib fx-trans fx-press ring" id="btnBack" title="Voltar" aria-label="Voltar">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -1733,19 +1479,15 @@ main{
 </button>
   </header>
 
-  <!-- Âncora para sessões abertas quando o usuário optar por abrir dentro da página -->
   <section id="sessionsAnchor"></section>
 
-  <!-- Container para fundo personalizado (imagem ou vídeo).  Será preenchido via JS quando o usuário escolher
-       um tema customizado.  Fica no início do body para garantir que fique abaixo de todos os conteúdos -->
   <div id="custom-bg" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;overflow:hidden;pointer-events:none"></div>
 
-  <!-- ===== Views ===== -->
   <main>
-    <!-- HOME -->
+
     <section id="v-home" class="view">
       <div class="grid">
-          <!-- Saudação / chamada para cadastro. Visível quando o usuário precisa ativar a Dual Infodose ou quando já houver nome salvo -->
+
           <div id="greetingCard" class="card fx-trans fx-lift" style="display:none">
             <div id="greetingMsg" style="font-weight:800"></div>
           </div>
@@ -1769,10 +1511,9 @@ main{
             </div>
           </div>
         </div>
-        <!-- Área de Arquétipos incorporada -->
+
         <div class="arch-container">
-          <!-- Mover o seletor de arquétipos para fora do círculo.  Ele ficará acima
-               da bolinha e seguirá o layout vertical da arch-container. -->
+
           <div class="arch-switcher">
             <button class="btn fx-trans fx-press ring" id="arch-prev" title="Anterior">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -1787,18 +1528,18 @@ main{
 </svg>
             <span class="ripple"></span></button>
             <select id="arch-select" title="Escolher arquétipo">
-  <option value="./archetypes/atlas.html">atlas</option>
-  <option value="./archetypes/nova.html">nova</option>
-  <option value="./archetypes/vitalis.html">vitalis</option>
-  <option value="./archetypes/pulse.html">pulse</option>
-  <option value="./archetypes/artemis.html">artemis</option>
-  <option value="./archetypes/serena.html">serena</option>
-  <option value="./archetypes/kaos.html">kaos</option>
-  <option value="./archetypes/genus.html">genus</option>
-  <option value="./archetypes/lumine.html">lumine</option>
-  <option value="./archetypes/rhea.html">rhea</option>
-  <option value="./archetypes/solus.html">solus</option>
-  <option value="./archetypes/aion.html">aion</option>
+  <option value="atlas.html">atlas</option>
+  <option value="nova.html">nova</option>
+  <option value="vitalis.html">vitalis</option>
+  <option value="pulse.html">pulse</option>
+  <option value="artemis.html">artemis</option>
+  <option value="serena.html">serena</option>
+  <option value="kaos.html">kaos</option>
+  <option value="genus.html">genus</option>
+  <option value="lumine.html">lumine</option>
+  <option value="rhea.html">rhea</option>
+  <option value="solus.html">solus</option>
+  <option value="aion.html">aion</option>
 </select>
             <button class="btn fx-trans fx-press ring" id="arch-next" title="Próximo">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -1815,9 +1556,9 @@ main{
           </div>
           <div class="arch-circle">
             <div id="arch-fadeCover"></div>
-            <!-- Camada de ripple auditivo fica sobre o conteúdo do círculo -->
+
             <div id="audioRipple" class="audio-ripple"></div>
-            <!-- ORB Nebula (WebGL + Partículas) — integrado no HUB -->
+
             <div class="orb-wrap" id="orbWrap" aria-label="Orbe Nebula">
               <canvas id="orb"></canvas>
               <div class="orb-glow" id="orbGlow"></div>
@@ -1828,9 +1569,9 @@ main{
 
             <iframe id="arch-frame" title="Archetype Core" sandbox="allow-scripts" referrerpolicy="no-referrer" src="./archetypes/atlas.html"></iframe>
           </div>
-          <!-- Mensagem de feedback aparece fora da bolinha, logo abaixo dela -->
+
           <div id="archMsg" class="arch-msg show" style="background: rgba(57, 255, 182, 0.75); color: rgb(11, 15, 20);">Bem-vindo de volta, KODUX. UNO está ao seu lado.</div>
-          <!-- Menu de arquétipos: permite acessar Apps, Stack, Usuário, Revo e Home -->
+
           <div id="archMenu" class="arch-menu">
             <button data-nav="apps">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -1997,21 +1738,20 @@ main{
             <span class="ripple"></span>
           </button>
         </div>
-        <!-- Feed de texto da IA -->
+
         <div id="iaFeed" aria-live="polite" aria-atomic="false">
           <div class="status">Toque a bolinha para falar com a IA.</div>
         </div>
-        
+
       </div>
     </section>
 
-    <!-- APPS -->
     <section id="v-apps" class="view">
       <div class="grid">
         <div class="card fx-trans fx-lift" style="display:block">
           <div class="grid" style="gap:8px">
             <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-              <!-- Removemos a busca e o sort. Agora apenas a opção de abrir dentro e o botão para mostrar locais -->
+
               <label class="mut" style="display:inline-flex;gap:6px;align-items:center">
                 <input id="openInside" type="checkbox" checked=""> abrir dentro
               </label>
@@ -2030,7 +1770,7 @@ main{
               </button>
             </div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-              <!-- Aceita arquivos .json além de HTML/TXT para permitir upload de catálogos personalizados -->
+
               <input id="fileLocal" type="file" accept=".html,.htm,.txt,.json" multiple="" class="input ring">
               <button id="btnImport" class="btn fx-trans fx-press ring">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -2232,7 +1972,6 @@ main{
       </div>
     </section>
 
-    <!-- STACK -->
     <section id="v-stack" class="view">
       <div class="grid">
         <div class="card fx-trans fx-lift" style="display:block">
@@ -2252,7 +1991,7 @@ main{
 </svg>
               Fechar todas<span class="ripple"></span>
             </button>
-            <!-- Botão para criar grupos de sessões -->
+
             <button id="btnAddGroup" class="btn fx-trans fx-press ring" title="Novo grupo">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
 
@@ -2267,7 +2006,7 @@ main{
 </svg>
               Novo grupo<span class="ripple"></span>
             </button>
-            <!-- Botão para enviar um HTML local e abrir como sessão -->
+
             <button id="btnStackUpload" class="btn fx-trans fx-press ring" title="Upload HTML">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
 
@@ -2286,12 +2025,11 @@ main{
           </div>
           <div class="mut">Reabra rápido pelo dock abaixo.</div>
         </div>
-        <!-- Área de grupos e sessões -->
+
         <div id="stackWrap" class="grid"></div>
       </div>
     </section>
 
-    <!-- BRAIN -->
     <section id="v-brain" class="view active">
       <div class="grid">
         <div class="card fx-trans fx-lift" style="display:block">
@@ -2301,7 +2039,7 @@ main{
             <button id="saveName" class="btn prime fx-trans fx-press ring">Salvar<span class="ripple"></span></button>
           </div>
         </div>
-        <!-- Configuração do assistente (Dual) -->
+
         <div class="card fx-trans fx-lift" style="display:block">
           <div style="font-weight:800">Assistente</div>
           <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
@@ -2309,7 +2047,7 @@ main{
             <button id="saveAssistant" class="btn prime fx-trans fx-press ring">Salvar<span class="ripple"></span></button>
           </div>
         </div>
-        <!-- Seleção da voz de boas-vindas -->
+
         <div class="card fx-trans fx-lift" style="display:block">
           <div style="font-weight:800">Voz do assistente</div>
           <div style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap">
@@ -2325,7 +2063,6 @@ main{
             <button id="saveSK" class="btn fx-trans fx-press ring">Salvar<span class="ripple"></span></button>
           </div>
 
-          <!-- Modelo personalizado e treino -->
           <div style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap">
             <input id="customModel" class="input ring" placeholder="Modelo personalizado (ex: openai/gpt-4-custom)" style="flex:1">
             <button id="addModel" class="btn fx-trans fx-press ring">Adicionar Modelo<span class="ripple"></span></button>
@@ -2336,7 +2073,6 @@ main{
           </div>
         </div>
 
-          <!-- Tema e Fundo personalizados -->
           <div class="card fx-trans fx-lift" style="display:block">
             <div style="font-weight:800">Tema &amp; Fundo</div>
             <div style="margin-top:8px;display:flex;flex-direction:column;gap:12px">
@@ -2356,7 +2092,6 @@ main{
             </div>
           </div>
 
-          <!-- CSS personalizado -->
           <div class="card fx-trans fx-lift" style="display:block">
             <div style="font-weight:800">CSS Personalizado</div>
             <div style="margin-top:8px">
@@ -2369,15 +2104,11 @@ main{
             </div>
           </div>
 
-          <!-- Vozes dos Arquétipos -->
           <div class="card fx-trans fx-lift" style="display:block">
             <div style="font-weight:800; margin-bottom:6px">Vozes dos Arquétipos</div>
-            <!-- Área de seleção de voz por arquétipo.  Cada arquétipo possui
-                 um seletor de voz e um botão de teste.  Essa grade será
-                 preenchida dinamicamente pelo código em initVoices(). -->
+
             <div id="voicesWrap" style="display:grid; gap:10px"><div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;"><span style="min-width: 70px; font-weight: 700;">Atlas</span><select class="input ring" style="max-width: 220px;"><option value="Karen">Karen (en-AU)</option><option value="Rocko">Rocko (en-GB)</option><option value="Shelley">Shelley (en-GB)</option><option value="Daniel">Daniel (en-GB)</option><option value="Grandma">Grandma (en-GB)</option><option value="Grandpa">Grandpa (en-GB)</option><option value="Flo">Flo (en-GB)</option><option value="Eddy">Eddy (en-GB)</option><option value="Reed">Reed (en-GB)</option><option value="Sandy">Sandy (en-GB)</option><option value="Moira">Moira (en-IE)</option><option value="Rishi">Rishi (en-IN)</option><option value="Flo">Flo (en-US)</option><option value="Bahh">Bahh (en-US)</option><option value="Albert">Albert (en-US)</option><option value="Fred">Fred (en-US)</option><option value="Jester">Jester (en-US)</option><option value="Organ">Organ (en-US)</option><option value="Cellos">Cellos (en-US)</option><option value="Zarvox">Zarvox (en-US)</option><option value="Rocko">Rocko (en-US)</option><option value="Shelley">Shelley (en-US)</option><option value="Superstar">Superstar (en-US)</option><option value="Grandma">Grandma (en-US)</option><option value="Eddy">Eddy (en-US)</option><option value="Bells">Bells (en-US)</option><option value="Grandpa">Grandpa (en-US)</option><option value="Trinoids">Trinoids (en-US)</option><option value="Kathy">Kathy (en-US)</option><option value="Reed">Reed (en-US)</option><option value="Boing">Boing (en-US)</option><option value="Whisper">Whisper (en-US)</option><option value="Good News">Good News (en-US)</option><option value="Wobble">Wobble (en-US)</option><option value="Bad News">Bad News (en-US)</option><option value="Bolhas">Bolhas (en-US)</option><option value="Samantha">Samantha (en-US)</option><option value="Sandy">Sandy (en-US)</option><option value="Junior">Junior (en-US)</option><option value="Ralph">Ralph (en-US)</option><option value="Tessa">Tessa (en-ZA)</option><option value="Reed">Reed (pt-BR)</option><option value="Luciana">Luciana (pt-BR)</option><option value="Shelley">Shelley (pt-BR)</option><option value="Grandma">Grandma (pt-BR)</option><option value="Grandpa">Grandpa (pt-BR)</option><option value="Rocko">Rocko (pt-BR)</option><option value="Flo">Flo (pt-BR)</option><option value="Sandy">Sandy (pt-BR)</option><option value="Eddy">Eddy (pt-BR)</option><option value="Joana">Joana (pt-PT)</option><option value="Daniel">Daniel (en-GB)</option><option value="Samantha">Samantha (en-US)</option><option value="Luciana">Luciana (pt-BR)</option><option value="Moira">Moira (en-IE)</option><option value="Rishi">Rishi (en-IN)</option><option value="Karen">Karen (en-AU)</option><option value="Joana">Joana (pt-PT)</option><option value="Tessa">Tessa (en-ZA)</option></select><button class="btn fx-trans fx-press ring">Teste<span class="ripple"></span></button></div><div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;"><span style="min-width: 70px; font-weight: 700;">Nova</span><select class="input ring" style="max-width: 220px;"><option value="Karen">Karen (en-AU)</option><option value="Rocko">Rocko (en-GB)</option><option value="Shelley">Shelley (en-GB)</option><option value="Daniel">Daniel (en-GB)</option><option value="Grandma">Grandma (en-GB)</option><option value="Grandpa">Grandpa (en-GB)</option><option value="Flo">Flo (en-GB)</option><option value="Eddy">Eddy (en-GB)</option><option value="Reed">Reed (en-GB)</option><option value="Sandy">Sandy (en-GB)</option><option value="Moira">Moira (en-IE)</option><option value="Rishi">Rishi (en-IN)</option><option value="Flo">Flo (en-US)</option><option value="Bahh">Bahh (en-US)</option><option value="Albert">Albert (en-US)</option><option value="Fred">Fred (en-US)</option><option value="Jester">Jester (en-US)</option><option value="Organ">Organ (en-US)</option><option value="Cellos">Cellos (en-US)</option><option value="Zarvox">Zarvox (en-US)</option><option value="Rocko">Rocko (en-US)</option><option value="Shelley">Shelley (en-US)</option><option value="Superstar">Superstar (en-US)</option><option value="Grandma">Grandma (en-US)</option><option value="Eddy">Eddy (en-US)</option><option value="Bells">Bells (en-US)</option><option value="Grandpa">Grandpa (en-US)</option><option value="Trinoids">Trinoids (en-US)</option><option value="Kathy">Kathy (en-US)</option><option value="Reed">Reed (en-US)</option><option value="Boing">Boing (en-US)</option><option value="Whisper">Whisper (en-US)</option><option value="Good News">Good News (en-US)</option><option value="Wobble">Wobble (en-US)</option><option value="Bad News">Bad News (en-US)</option><option value="Bolhas">Bolhas (en-US)</option><option value="Samantha">Samantha (en-US)</option><option value="Sandy">Sandy (en-US)</option><option value="Junior">Junior (en-US)</option><option value="Ralph">Ralph (en-US)</option><option value="Tessa">Tessa (en-ZA)</option><option value="Reed">Reed (pt-BR)</option><option value="Luciana">Luciana (pt-BR)</option><option value="Shelley">Shelley (pt-BR)</option><option value="Grandma">Grandma (pt-BR)</option><option value="Grandpa">Grandpa (pt-BR)</option><option value="Rocko">Rocko (pt-BR)</option><option value="Flo">Flo (pt-BR)</option><option value="Sandy">Sandy (pt-BR)</option><option value="Eddy">Eddy (pt-BR)</option><option value="Joana">Joana (pt-PT)</option><option value="Daniel">Daniel (en-GB)</option><option value="Samantha">Samantha (en-US)</option><option value="Luciana">Luciana (pt-BR)</option><option value="Moira">Moira (en-IE)</option><option value="Rishi">Rishi (en-IN)</option><option value="Karen">Karen (en-AU)</option><option value="Joana">Joana (pt-PT)</option><option value="Tessa">Tessa (en-ZA)</option></select><button class="btn fx-trans fx-press ring">Teste<span class="ripple"></span></button></div><div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;"><span style="min-width: 70px; font-weight: 700;">Vitalis</span><select class="input ring" style="max-width: 220px;"><option value="Karen">Karen (en-AU)</option><option value="Rocko">Rocko (en-GB)</option><option value="Shelley">Shelley (en-GB)</option><option value="Daniel">Daniel (en-GB)</option><option value="Grandma">Grandma (en-GB)</option><option value="Grandpa">Grandpa (en-GB)</option><option value="Flo">Flo (en-GB)</option><option value="Eddy">Eddy (en-GB)</option><option value="Reed">Reed (en-GB)</option><option value="Sandy">Sandy (en-GB)</option><option value="Moira">Moira (en-IE)</option><option value="Rishi">Rishi (en-IN)</option><option value="Flo">Flo (en-US)</option><option value="Bahh">Bahh (en-US)</option><option value="Albert">Albert (en-US)</option><option value="Fred">Fred (en-US)</option><option value="Jester">Jester (en-US)</option><option value="Organ">Organ (en-US)</option><option value="Cellos">Cellos (en-US)</option><option value="Zarvox">Zarvox (en-US)</option><option value="Rocko">Rocko (en-US)</option><option value="Shelley">Shelley (en-US)</option><option value="Superstar">Superstar (en-US)</option><option value="Grandma">Grandma (en-US)</option><option value="Eddy">Eddy (en-US)</option><option value="Bells">Bells (en-US)</option><option value="Grandpa">Grandpa (en-US)</option><option value="Trinoids">Trinoids (en-US)</option><option value="Kathy">Kathy (en-US)</option><option value="Reed">Reed (en-US)</option><option value="Boing">Boing (en-US)</option><option value="Whisper">Whisper (en-US)</option><option value="Good News">Good News (en-US)</option><option value="Wobble">Wobble (en-US)</option><option value="Bad News">Bad News (en-US)</option><option value="Bolhas">Bolhas (en-US)</option><option value="Samantha">Samantha (en-US)</option><option value="Sandy">Sandy (en-US)</option><option value="Junior">Junior (en-US)</option><option value="Ralph">Ralph (en-US)</option><option value="Tessa">Tessa (en-ZA)</option><option value="Reed">Reed (pt-BR)</option><option value="Luciana">Luciana (pt-BR)</option><option value="Shelley">Shelley (pt-BR)</option><option value="Grandma">Grandma (pt-BR)</option><option value="Grandpa">Grandpa (pt-BR)</option><option value="Rocko">Rocko (pt-BR)</option><option value="Flo">Flo (pt-BR)</option><option value="Sandy">Sandy (pt-BR)</option><option value="Eddy">Eddy (pt-BR)</option><option value="Joana">Joana (pt-PT)</option><option value="Daniel">Daniel (en-GB)</option><option value="Samantha">Samantha (en-US)</option><option value="Luciana">Luciana (pt-BR)</option><option value="Moira">Moira (en-IE)</option><option value="Rishi">Rishi (en-IN)</option><option value="Karen">Karen (en-AU)</option><option value="Joana">Joana (pt-PT)</option><option value="Tessa">Tessa (en-ZA)</option></select><button class="btn fx-trans fx-press ring">Teste<span class="ripple"></span></button></div><div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;"><span style="min-width: 70px; font-weight: 700;">Pulse</span><select class="input ring" style="max-width: 220px;"><option value="Karen">Karen (en-AU)</option><option value="Rocko">Rocko (en-GB)</option><option value="Shelley">Shelley (en-GB)</option><option value="Daniel">Daniel (en-GB)</option><option value="Grandma">Grandma (en-GB)</option><option value="Grandpa">Grandpa (en-GB)</option><option value="Flo">Flo (en-GB)</option><option value="Eddy">Eddy (en-GB)</option><option value="Reed">Reed (en-GB)</option><option value="Sandy">Sandy (en-GB)</option><option value="Moira">Moira (en-IE)</option><option value="Rishi">Rishi (en-IN)</option><option value="Flo">Flo (en-US)</option><option value="Bahh">Bahh (en-US)</option><option value="Albert">Albert (en-US)</option><option value="Fred">Fred (en-US)</option><option value="Jester">Jester (en-US)</option><option value="Organ">Organ (en-US)</option><option value="Cellos">Cellos (en-US)</option><option value="Zarvox">Zarvox (en-US)</option><option value="Rocko">Rocko (en-US)</option><option value="Shelley">Shelley (en-US)</option><option value="Superstar">Superstar (en-US)</option><option value="Grandma">Grandma (en-US)</option><option value="Eddy">Eddy (en-US)</option><option value="Bells">Bells (en-US)</option><option value="Grandpa">Grandpa (en-US)</option><option value="Trinoids">Trinoids (en-US)</option><option value="Kathy">Kathy (en-US)</option><option value="Reed">Reed (en-US)</option><option value="Boing">Boing (en-US)</option><option value="Whisper">Whisper (en-US)</option><option value="Good News">Good News (en-US)</option><option value="Wobble">Wobble (en-US)</option><option value="Bad News">Bad News (en-US)</option><option value="Bolhas">Bolhas (en-US)</option><option value="Samantha">Samantha (en-US)</option><option value="Sandy">Sandy (en-US)</option><option value="Junior">Junior (en-US)</option><option value="Ralph">Ralph (en-US)</option><option value="Tessa">Tessa (en-ZA)</option><option value="Reed">Reed (pt-BR)</option><option value="Luciana">Luciana (pt-BR)</option><option value="Shelley">Shelley (pt-BR)</option><option value="Grandma">Grandma (pt-BR)</option><option value="Grandpa">Grandpa (pt-BR)</option><option value="Rocko">Rocko (pt-BR)</option><option value="Flo">Flo (pt-BR)</option><option value="Sandy">Sandy (pt-BR)</option><option value="Eddy">Eddy (pt-BR)</option><option value="Joana">Joana (pt-PT)</option><option value="Daniel">Daniel (en-GB)</option><option value="Samantha">Samantha (en-US)</option><option value="Luciana">Luciana (pt-BR)</option><option value="Moira">Moira (en-IE)</option><option value="Rishi">Rishi (en-IN)</option><option value="Karen">Karen (en-AU)</option><option value="Joana">Joana (pt-PT)</option><option value="Tessa">Tessa (en-ZA)</option></select><button class="btn fx-trans fx-press ring">Teste<span class="ripple"></span></button></div><div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;"><span style="min-width: 70px; font-weight: 700;">Artemis</span><select class="input ring" style="max-width: 220px;"><option value="Karen">Karen (en-AU)</option><option value="Rocko">Rocko (en-GB)</option><option value="Shelley">Shelley (en-GB)</option><option value="Daniel">Daniel (en-GB)</option><option value="Grandma">Grandma (en-GB)</option><option value="Grandpa">Grandpa (en-GB)</option><option value="Flo">Flo (en-GB)</option><option value="Eddy">Eddy (en-GB)</option><option value="Reed">Reed (en-GB)</option><option value="Sandy">Sandy (en-GB)</option><option value="Moira">Moira (en-IE)</option><option value="Rishi">Rishi (en-IN)</option><option value="Flo">Flo (en-US)</option><option value="Bahh">Bahh (en-US)</option><option value="Albert">Albert (en-US)</option><option value="Fred">Fred (en-US)</option><option value="Jester">Jester (en-US)</option><option value="Organ">Organ (en-US)</option><option value="Cellos">Cellos (en-US)</option><option value="Zarvox">Zarvox (en-US)</option><option value="Rocko">Rocko (en-US)</option><option value="Shelley">Shelley (en-US)</option><option value="Superstar">Superstar (en-US)</option><option value="Grandma">Grandma (en-US)</option><option value="Eddy">Eddy (en-US)</option><option value="Bells">Bells (en-US)</option><option value="Grandpa">Grandpa (en-US)</option><option value="Trinoids">Trinoids (en-US)</option><option value="Kathy">Kathy (en-US)</option><option value="Reed">Reed (en-US)</option><option value="Boing">Boing (en-US)</option><option value="Whisper">Whisper (en-US)</option><option value="Good News">Good News (en-US)</option><option value="Wobble">Wobble (en-US)</option><option value="Bad News">Bad News (en-US)</option><option value="Bolhas">Bolhas (en-US)</option><option value="Samantha">Samantha (en-US)</option><option value="Sandy">Sandy (en-US)</option><option value="Junior">Junior (en-US)</option><option value="Ralph">Ralph (en-US)</option><option value="Tessa">Tessa (en-ZA)</option><option value="Reed">Reed (pt-BR)</option><option value="Luciana">Luciana (pt-BR)</option><option value="Shelley">Shelley (pt-BR)</option><option value="Grandma">Grandma (pt-BR)</option><option value="Grandpa">Grandpa (pt-BR)</option><option value="Rocko">Rocko (pt-BR)</option><option value="Flo">Flo (pt-BR)</option><option value="Sandy">Sandy (pt-BR)</option><option value="Eddy">Eddy (pt-BR)</option><option value="Joana">Joana (pt-PT)</option><option value="Daniel">Daniel (en-GB)</option><option value="Samantha">Samantha (en-US)</option><option value="Luciana">Luciana (pt-BR)</option><option value="Moira">Moira (en-IE)</option><option value="Rishi">Rishi (en-IN)</option><option value="Karen">Karen (en-AU)</option><option value="Joana">Joana (pt-PT)</option><option value="Tessa">Tessa (en-ZA)</option></select><button class="btn fx-trans fx-press ring">Teste<span class="ripple"></span></button></div><div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;"><span style="min-width: 70px; font-weight: 700;">Serena</span><select class="input ring" style="max-width: 220px;"><option value="Karen">Karen (en-AU)</option><option value="Rocko">Rocko (en-GB)</option><option value="Shelley">Shelley (en-GB)</option><option value="Daniel">Daniel (en-GB)</option><option value="Grandma">Grandma (en-GB)</option><option value="Grandpa">Grandpa (en-GB)</option><option value="Flo">Flo (en-GB)</option><option value="Eddy">Eddy (en-GB)</option><option value="Reed">Reed (en-GB)</option><option value="Sandy">Sandy (en-GB)</option><option value="Moira">Moira (en-IE)</option><option value="Rishi">Rishi (en-IN)</option><option value="Flo">Flo (en-US)</option><option value="Bahh">Bahh (en-US)</option><option value="Albert">Albert (en-US)</option><option value="Fred">Fred (en-US)</option><option value="Jester">Jester (en-US)</option><option value="Organ">Organ (en-US)</option><option value="Cellos">Cellos (en-US)</option><option value="Zarvox">Zarvox (en-US)</option><option value="Rocko">Rocko (en-US)</option><option value="Shelley">Shelley (en-US)</option><option value="Superstar">Superstar (en-US)</option><option value="Grandma">Grandma (en-US)</option><option value="Eddy">Eddy (en-US)</option><option value="Bells">Bells (en-US)</option><option value="Grandpa">Grandpa (en-US)</option><option value="Trinoids">Trinoids (en-US)</option><option value="Kathy">Kathy (en-US)</option><option value="Reed">Reed (en-US)</option><option value="Boing">Boing (en-US)</option><option value="Whisper">Whisper (en-US)</option><option value="Good News">Good News (en-US)</option><option value="Wobble">Wobble (en-US)</option><option value="Bad News">Bad News (en-US)</option><option value="Bolhas">Bolhas (en-US)</option><option value="Samantha">Samantha (en-US)</option><option value="Sandy">Sandy (en-US)</option><option value="Junior">Junior (en-US)</option><option value="Ralph">Ralph (en-US)</option><option value="Tessa">Tessa (en-ZA)</option><option value="Reed">Reed (pt-BR)</option><option value="Luciana">Luciana (pt-BR)</option><option value="Shelley">Shelley (pt-BR)</option><option value="Grandma">Grandma (pt-BR)</option><option value="Grandpa">Grandpa (pt-BR)</option><option value="Rocko">Rocko (pt-BR)</option><option value="Flo">Flo (pt-BR)</option><option value="Sandy">Sandy (pt-BR)</option><option value="Eddy">Eddy (pt-BR)</option><option value="Joana">Joana (pt-PT)</option><option value="Daniel">Daniel (en-GB)</option><option value="Samantha">Samantha (en-US)</option><option value="Luciana">Luciana (pt-BR)</option><option value="Moira">Moira (en-IE)</option><option value="Rishi">Rishi (en-IN)</option><option value="Karen">Karen (en-AU)</option><option value="Joana">Joana (pt-PT)</option><option value="Tessa">Tessa (en-ZA)</option></select><button class="btn fx-trans fx-press ring">Teste<span class="ripple"></span></button></div><div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;"><span style="min-width: 70px; font-weight: 700;">Kaos</span><select class="input ring" style="max-width: 220px;"><option value="Karen">Karen (en-AU)</option><option value="Rocko">Rocko (en-GB)</option><option value="Shelley">Shelley (en-GB)</option><option value="Daniel">Daniel (en-GB)</option><option value="Grandma">Grandma (en-GB)</option><option value="Grandpa">Grandpa (en-GB)</option><option value="Flo">Flo (en-GB)</option><option value="Eddy">Eddy (en-GB)</option><option value="Reed">Reed (en-GB)</option><option value="Sandy">Sandy (en-GB)</option><option value="Moira">Moira (en-IE)</option><option value="Rishi">Rishi (en-IN)</option><option value="Flo">Flo (en-US)</option><option value="Bahh">Bahh (en-US)</option><option value="Albert">Albert (en-US)</option><option value="Fred">Fred (en-US)</option><option value="Jester">Jester (en-US)</option><option value="Organ">Organ (en-US)</option><option value="Cellos">Cellos (en-US)</option><option value="Zarvox">Zarvox (en-US)</option><option value="Rocko">Rocko (en-US)</option><option value="Shelley">Shelley (en-US)</option><option value="Superstar">Superstar (en-US)</option><option value="Grandma">Grandma (en-US)</option><option value="Eddy">Eddy (en-US)</option><option value="Bells">Bells (en-US)</option><option value="Grandpa">Grandpa (en-US)</option><option value="Trinoids">Trinoids (en-US)</option><option value="Kathy">Kathy (en-US)</option><option value="Reed">Reed (en-US)</option><option value="Boing">Boing (en-US)</option><option value="Whisper">Whisper (en-US)</option><option value="Good News">Good News (en-US)</option><option value="Wobble">Wobble (en-US)</option><option value="Bad News">Bad News (en-US)</option><option value="Bolhas">Bolhas (en-US)</option><option value="Samantha">Samantha (en-US)</option><option value="Sandy">Sandy (en-US)</option><option value="Junior">Junior (en-US)</option><option value="Ralph">Ralph (en-US)</option><option value="Tessa">Tessa (en-ZA)</option><option value="Reed">Reed (pt-BR)</option><option value="Luciana">Luciana (pt-BR)</option><option value="Shelley">Shelley (pt-BR)</option><option value="Grandma">Grandma (pt-BR)</option><option value="Grandpa">Grandpa (pt-BR)</option><option value="Rocko">Rocko (pt-BR)</option><option value="Flo">Flo (pt-BR)</option><option value="Sandy">Sandy (pt-BR)</option><option value="Eddy">Eddy (pt-BR)</option><option value="Joana">Joana (pt-PT)</option><option value="Daniel">Daniel (en-GB)</option><option value="Samantha">Samantha (en-US)</option><option value="Luciana">Luciana (pt-BR)</option><option value="Moira">Moira (en-IE)</option><option value="Rishi">Rishi (en-IN)</option><option value="Karen">Karen (en-AU)</option><option value="Joana">Joana (pt-PT)</option><option value="Tessa">Tessa (en-ZA)</option></select><button class="btn fx-trans fx-press ring">Teste<span class="ripple"></span></button></div><div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;"><span style="min-width: 70px; font-weight: 700;">Genus</span><select class="input ring" style="max-width: 220px;"><option value="Karen">Karen (en-AU)</option><option value="Rocko">Rocko (en-GB)</option><option value="Shelley">Shelley (en-GB)</option><option value="Daniel">Daniel (en-GB)</option><option value="Grandma">Grandma (en-GB)</option><option value="Grandpa">Grandpa (en-GB)</option><option value="Flo">Flo (en-GB)</option><option value="Eddy">Eddy (en-GB)</option><option value="Reed">Reed (en-GB)</option><option value="Sandy">Sandy (en-GB)</option><option value="Moira">Moira (en-IE)</option><option value="Rishi">Rishi (en-IN)</option><option value="Flo">Flo (en-US)</option><option value="Bahh">Bahh (en-US)</option><option value="Albert">Albert (en-US)</option><option value="Fred">Fred (en-US)</option><option value="Jester">Jester (en-US)</option><option value="Organ">Organ (en-US)</option><option value="Cellos">Cellos (en-US)</option><option value="Zarvox">Zarvox (en-US)</option><option value="Rocko">Rocko (en-US)</option><option value="Shelley">Shelley (en-US)</option><option value="Superstar">Superstar (en-US)</option><option value="Grandma">Grandma (en-US)</option><option value="Eddy">Eddy (en-US)</option><option value="Bells">Bells (en-US)</option><option value="Grandpa">Grandpa (en-US)</option><option value="Trinoids">Trinoids (en-US)</option><option value="Kathy">Kathy (en-US)</option><option value="Reed">Reed (en-US)</option><option value="Boing">Boing (en-US)</option><option value="Whisper">Whisper (en-US)</option><option value="Good News">Good News (en-US)</option><option value="Wobble">Wobble (en-US)</option><option value="Bad News">Bad News (en-US)</option><option value="Bolhas">Bolhas (en-US)</option><option value="Samantha">Samantha (en-US)</option><option value="Sandy">Sandy (en-US)</option><option value="Junior">Junior (en-US)</option><option value="Ralph">Ralph (en-US)</option><option value="Tessa">Tessa (en-ZA)</option><option value="Reed">Reed (pt-BR)</option><option value="Luciana">Luciana (pt-BR)</option><option value="Shelley">Shelley (pt-BR)</option><option value="Grandma">Grandma (pt-BR)</option><option value="Grandpa">Grandpa (pt-BR)</option><option value="Rocko">Rocko (pt-BR)</option><option value="Flo">Flo (pt-BR)</option><option value="Sandy">Sandy (pt-BR)</option><option value="Eddy">Eddy (pt-BR)</option><option value="Joana">Joana (pt-PT)</option><option value="Daniel">Daniel (en-GB)</option><option value="Samantha">Samantha (en-US)</option><option value="Luciana">Luciana (pt-BR)</option><option value="Moira">Moira (en-IE)</option><option value="Rishi">Rishi (en-IN)</option><option value="Karen">Karen (en-AU)</option><option value="Joana">Joana (pt-PT)</option><option value="Tessa">Tessa (en-ZA)</option></select><button class="btn fx-trans fx-press ring">Teste<span class="ripple"></span></button></div><div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;"><span style="min-width: 70px; font-weight: 700;">Lumine</span><select class="input ring" style="max-width: 220px;"><option value="Karen">Karen (en-AU)</option><option value="Rocko">Rocko (en-GB)</option><option value="Shelley">Shelley (en-GB)</option><option value="Daniel">Daniel (en-GB)</option><option value="Grandma">Grandma (en-GB)</option><option value="Grandpa">Grandpa (en-GB)</option><option value="Flo">Flo (en-GB)</option><option value="Eddy">Eddy (en-GB)</option><option value="Reed">Reed (en-GB)</option><option value="Sandy">Sandy (en-GB)</option><option value="Moira">Moira (en-IE)</option><option value="Rishi">Rishi (en-IN)</option><option value="Flo">Flo (en-US)</option><option value="Bahh">Bahh (en-US)</option><option value="Albert">Albert (en-US)</option><option value="Fred">Fred (en-US)</option><option value="Jester">Jester (en-US)</option><option value="Organ">Organ (en-US)</option><option value="Cellos">Cellos (en-US)</option><option value="Zarvox">Zarvox (en-US)</option><option value="Rocko">Rocko (en-US)</option><option value="Shelley">Shelley (en-US)</option><option value="Superstar">Superstar (en-US)</option><option value="Grandma">Grandma (en-US)</option><option value="Eddy">Eddy (en-US)</option><option value="Bells">Bells (en-US)</option><option value="Grandpa">Grandpa (en-US)</option><option value="Trinoids">Trinoids (en-US)</option><option value="Kathy">Kathy (en-US)</option><option value="Reed">Reed (en-US)</option><option value="Boing">Boing (en-US)</option><option value="Whisper">Whisper (en-US)</option><option value="Good News">Good News (en-US)</option><option value="Wobble">Wobble (en-US)</option><option value="Bad News">Bad News (en-US)</option><option value="Bolhas">Bolhas (en-US)</option><option value="Samantha">Samantha (en-US)</option><option value="Sandy">Sandy (en-US)</option><option value="Junior">Junior (en-US)</option><option value="Ralph">Ralph (en-US)</option><option value="Tessa">Tessa (en-ZA)</option><option value="Reed">Reed (pt-BR)</option><option value="Luciana">Luciana (pt-BR)</option><option value="Shelley">Shelley (pt-BR)</option><option value="Grandma">Grandma (pt-BR)</option><option value="Grandpa">Grandpa (pt-BR)</option><option value="Rocko">Rocko (pt-BR)</option><option value="Flo">Flo (pt-BR)</option><option value="Sandy">Sandy (pt-BR)</option><option value="Eddy">Eddy (pt-BR)</option><option value="Joana">Joana (pt-PT)</option><option value="Daniel">Daniel (en-GB)</option><option value="Samantha">Samantha (en-US)</option><option value="Luciana">Luciana (pt-BR)</option><option value="Moira">Moira (en-IE)</option><option value="Rishi">Rishi (en-IN)</option><option value="Karen">Karen (en-AU)</option><option value="Joana">Joana (pt-PT)</option><option value="Tessa">Tessa (en-ZA)</option></select><button class="btn fx-trans fx-press ring">Teste<span class="ripple"></span></button></div><div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;"><span style="min-width: 70px; font-weight: 700;">Rhea</span><select class="input ring" style="max-width: 220px;"><option value="Karen">Karen (en-AU)</option><option value="Rocko">Rocko (en-GB)</option><option value="Shelley">Shelley (en-GB)</option><option value="Daniel">Daniel (en-GB)</option><option value="Grandma">Grandma (en-GB)</option><option value="Grandpa">Grandpa (en-GB)</option><option value="Flo">Flo (en-GB)</option><option value="Eddy">Eddy (en-GB)</option><option value="Reed">Reed (en-GB)</option><option value="Sandy">Sandy (en-GB)</option><option value="Moira">Moira (en-IE)</option><option value="Rishi">Rishi (en-IN)</option><option value="Flo">Flo (en-US)</option><option value="Bahh">Bahh (en-US)</option><option value="Albert">Albert (en-US)</option><option value="Fred">Fred (en-US)</option><option value="Jester">Jester (en-US)</option><option value="Organ">Organ (en-US)</option><option value="Cellos">Cellos (en-US)</option><option value="Zarvox">Zarvox (en-US)</option><option value="Rocko">Rocko (en-US)</option><option value="Shelley">Shelley (en-US)</option><option value="Superstar">Superstar (en-US)</option><option value="Grandma">Grandma (en-US)</option><option value="Eddy">Eddy (en-US)</option><option value="Bells">Bells (en-US)</option><option value="Grandpa">Grandpa (en-US)</option><option value="Trinoids">Trinoids (en-US)</option><option value="Kathy">Kathy (en-US)</option><option value="Reed">Reed (en-US)</option><option value="Boing">Boing (en-US)</option><option value="Whisper">Whisper (en-US)</option><option value="Good News">Good News (en-US)</option><option value="Wobble">Wobble (en-US)</option><option value="Bad News">Bad News (en-US)</option><option value="Bolhas">Bolhas (en-US)</option><option value="Samantha">Samantha (en-US)</option><option value="Sandy">Sandy (en-US)</option><option value="Junior">Junior (en-US)</option><option value="Ralph">Ralph (en-US)</option><option value="Tessa">Tessa (en-ZA)</option><option value="Reed">Reed (pt-BR)</option><option value="Luciana">Luciana (pt-BR)</option><option value="Shelley">Shelley (pt-BR)</option><option value="Grandma">Grandma (pt-BR)</option><option value="Grandpa">Grandpa (pt-BR)</option><option value="Rocko">Rocko (pt-BR)</option><option value="Flo">Flo (pt-BR)</option><option value="Sandy">Sandy (pt-BR)</option><option value="Eddy">Eddy (pt-BR)</option><option value="Joana">Joana (pt-PT)</option><option value="Daniel">Daniel (en-GB)</option><option value="Samantha">Samantha (en-US)</option><option value="Luciana">Luciana (pt-BR)</option><option value="Moira">Moira (en-IE)</option><option value="Rishi">Rishi (en-IN)</option><option value="Karen">Karen (en-AU)</option><option value="Joana">Joana (pt-PT)</option><option value="Tessa">Tessa (en-ZA)</option></select><button class="btn fx-trans fx-press ring">Teste<span class="ripple"></span></button></div><div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;"><span style="min-width: 70px; font-weight: 700;">Solus</span><select class="input ring" style="max-width: 220px;"><option value="Karen">Karen (en-AU)</option><option value="Rocko">Rocko (en-GB)</option><option value="Shelley">Shelley (en-GB)</option><option value="Daniel">Daniel (en-GB)</option><option value="Grandma">Grandma (en-GB)</option><option value="Grandpa">Grandpa (en-GB)</option><option value="Flo">Flo (en-GB)</option><option value="Eddy">Eddy (en-GB)</option><option value="Reed">Reed (en-GB)</option><option value="Sandy">Sandy (en-GB)</option><option value="Moira">Moira (en-IE)</option><option value="Rishi">Rishi (en-IN)</option><option value="Flo">Flo (en-US)</option><option value="Bahh">Bahh (en-US)</option><option value="Albert">Albert (en-US)</option><option value="Fred">Fred (en-US)</option><option value="Jester">Jester (en-US)</option><option value="Organ">Organ (en-US)</option><option value="Cellos">Cellos (en-US)</option><option value="Zarvox">Zarvox (en-US)</option><option value="Rocko">Rocko (en-US)</option><option value="Shelley">Shelley (en-US)</option><option value="Superstar">Superstar (en-US)</option><option value="Grandma">Grandma (en-US)</option><option value="Eddy">Eddy (en-US)</option><option value="Bells">Bells (en-US)</option><option value="Grandpa">Grandpa (en-US)</option><option value="Trinoids">Trinoids (en-US)</option><option value="Kathy">Kathy (en-US)</option><option value="Reed">Reed (en-US)</option><option value="Boing">Boing (en-US)</option><option value="Whisper">Whisper (en-US)</option><option value="Good News">Good News (en-US)</option><option value="Wobble">Wobble (en-US)</option><option value="Bad News">Bad News (en-US)</option><option value="Bolhas">Bolhas (en-US)</option><option value="Samantha">Samantha (en-US)</option><option value="Sandy">Sandy (en-US)</option><option value="Junior">Junior (en-US)</option><option value="Ralph">Ralph (en-US)</option><option value="Tessa">Tessa (en-ZA)</option><option value="Reed">Reed (pt-BR)</option><option value="Luciana">Luciana (pt-BR)</option><option value="Shelley">Shelley (pt-BR)</option><option value="Grandma">Grandma (pt-BR)</option><option value="Grandpa">Grandpa (pt-BR)</option><option value="Rocko">Rocko (pt-BR)</option><option value="Flo">Flo (pt-BR)</option><option value="Sandy">Sandy (pt-BR)</option><option value="Eddy">Eddy (pt-BR)</option><option value="Joana">Joana (pt-PT)</option><option value="Daniel">Daniel (en-GB)</option><option value="Samantha">Samantha (en-US)</option><option value="Luciana">Luciana (pt-BR)</option><option value="Moira">Moira (en-IE)</option><option value="Rishi">Rishi (en-IN)</option><option value="Karen">Karen (en-AU)</option><option value="Joana">Joana (pt-PT)</option><option value="Tessa">Tessa (en-ZA)</option></select><button class="btn fx-trans fx-press ring">Teste<span class="ripple"></span></button></div><div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;"><span style="min-width: 70px; font-weight: 700;">Aion</span><select class="input ring" style="max-width: 220px;"><option value="Karen">Karen (en-AU)</option><option value="Rocko">Rocko (en-GB)</option><option value="Shelley">Shelley (en-GB)</option><option value="Daniel">Daniel (en-GB)</option><option value="Grandma">Grandma (en-GB)</option><option value="Grandpa">Grandpa (en-GB)</option><option value="Flo">Flo (en-GB)</option><option value="Eddy">Eddy (en-GB)</option><option value="Reed">Reed (en-GB)</option><option value="Sandy">Sandy (en-GB)</option><option value="Moira">Moira (en-IE)</option><option value="Rishi">Rishi (en-IN)</option><option value="Flo">Flo (en-US)</option><option value="Bahh">Bahh (en-US)</option><option value="Albert">Albert (en-US)</option><option value="Fred">Fred (en-US)</option><option value="Jester">Jester (en-US)</option><option value="Organ">Organ (en-US)</option><option value="Cellos">Cellos (en-US)</option><option value="Zarvox">Zarvox (en-US)</option><option value="Rocko">Rocko (en-US)</option><option value="Shelley">Shelley (en-US)</option><option value="Superstar">Superstar (en-US)</option><option value="Grandma">Grandma (en-US)</option><option value="Eddy">Eddy (en-US)</option><option value="Bells">Bells (en-US)</option><option value="Grandpa">Grandpa (en-US)</option><option value="Trinoids">Trinoids (en-US)</option><option value="Kathy">Kathy (en-US)</option><option value="Reed">Reed (en-US)</option><option value="Boing">Boing (en-US)</option><option value="Whisper">Whisper (en-US)</option><option value="Good News">Good News (en-US)</option><option value="Wobble">Wobble (en-US)</option><option value="Bad News">Bad News (en-US)</option><option value="Bolhas">Bolhas (en-US)</option><option value="Samantha">Samantha (en-US)</option><option value="Sandy">Sandy (en-US)</option><option value="Junior">Junior (en-US)</option><option value="Ralph">Ralph (en-US)</option><option value="Tessa">Tessa (en-ZA)</option><option value="Reed">Reed (pt-BR)</option><option value="Luciana">Luciana (pt-BR)</option><option value="Shelley">Shelley (pt-BR)</option><option value="Grandma">Grandma (pt-BR)</option><option value="Grandpa">Grandpa (pt-BR)</option><option value="Rocko">Rocko (pt-BR)</option><option value="Flo">Flo (pt-BR)</option><option value="Sandy">Sandy (pt-BR)</option><option value="Eddy">Eddy (pt-BR)</option><option value="Joana">Joana (pt-PT)</option><option value="Daniel">Daniel (en-GB)</option><option value="Samantha">Samantha (en-US)</option><option value="Luciana">Luciana (pt-BR)</option><option value="Moira">Moira (en-IE)</option><option value="Rishi">Rishi (en-IN)</option><option value="Karen">Karen (en-AU)</option><option value="Joana">Joana (pt-PT)</option><option value="Tessa">Tessa (en-ZA)</option></select><button class="btn fx-trans fx-press ring">Teste<span class="ripple"></span></button></div></div>
 
-          <!-- Preferências de Performance -->
           <div class="card fx-trans fx-lift" style="display:block">
             <div style="font-weight:800">Performance</div>
             <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
@@ -2390,7 +2121,6 @@ main{
             </div>
           </div>
 
-          <!-- Preferências de Voz -->
           <div class="card fx-trans fx-lift" style="display:block">
             <div style="font-weight:800">Voz</div>
             <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
@@ -2404,7 +2134,6 @@ main{
             </div>
           </div>
 
-          <!-- Logs -->
           <div class="card fx-trans fx-lift" style="display:block">
             <div style="font-weight:800">Logs</div>
             <div class="mut" style="font-size:11px;margin-bottom:4px">Eventos recentes</div>
@@ -2414,14 +2143,12 @@ main{
       </div>
     </section>
 
-    <!-- CHAT (Dual • Chat) -->
     <section id="v-chat" class="view">
-      <!-- Feed de mensagens do chat -->
-      <div id="chatFeed"><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: E aí beleza</div></div>
+
+      <div id="chatFeed"></div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: E aí beleza</div></div>
     </section>
   </main>
 
-  <!-- DOCK & TABS -->
   <div id="dock" class="dock"></div>
   <nav class="tabbar">
     <div class="inner">
@@ -2480,7 +2207,7 @@ main{
     stroke="url(#gradNebulaTab)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg><span style="display:none">Brain</span><span class="ripple"></span>
       </button>
-      <!-- Botão da nova aba Chat -->
+
       <button class="tab fx-trans fx-press ring" data-nav="chat">
 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
 
@@ -2496,10 +2223,9 @@ main{
       </button>
     </div>
   </nav>
-  <!-- Preview da última mensagem recebida (aparece na home e leva ao chat) -->
+
   <div id="msgPreview" style="display: none;"></div>
 
-  <!-- Controles de texto e voz empilhados acima da barra de navegação -->
   <div id="homeButtons" class="home-btns">
     <button id="homeTextBtn" class="home-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
   <defs>
@@ -2524,7 +2250,7 @@ main{
   <path d="M12 19v4"/>
 </svg><span class="ripple"></span></button>
   </div>
-  <!-- Overlay de input para envio rápido de mensagens na Home -->
+
   <div id="homeInputOverlay">
     <form id="homeInputForm" autocomplete="off">
       <input id="homeInput" type="text" placeholder="Escreva aqui…" autocomplete="off">
@@ -2540,7 +2266,6 @@ main{
     </form>
   </div>
 
-  <!-- HELP MODAL -->
   <div id="modalHelp" class="modal" aria-hidden="true">
     <div class="panel">
       <div style="display:flex;align-items:center;gap:10px;justify-content:space-between">
@@ -2560,7 +2285,6 @@ main{
     </div>
   </div>
 
-  <!-- ===== Catálogo Embutido (Monólito) ===== -->
   <script id="APPS_JSON" type="application/json">
   {
     "apps": [
@@ -2583,7 +2307,7 @@ main{
   <script>
   // Redefine the global toast function to suppress popup messages. If you
   // later decide to re-enable notifications, remove or comment out this line.
-  window.toast = function(){};
+
     /* ===================== Helpers ===================== */
     const $ = (q, r = document) => r.querySelector(q);
     const $$ = (q, r = document) => Array.from(r.querySelectorAll(q));
@@ -2931,7 +2655,7 @@ main{
         startDualInteraction();
       });
 
-      // Função global para alternar o modo de visualização do áudio (ripple).  
+      // Função global para alternar o modo de visualização do áudio (ripple).
       // Mantemos para compatibilidade com o botão de áudio no menu.
       window.toggleAudio = function () {
         enabled = !enabled;
@@ -3324,7 +3048,7 @@ main{
       }
     });
 
-    // Helper: se a aba Revo estiver ativa, envia a lista atual de apps ao iframe.  
+    // Helper: se a aba Revo estiver ativa, envia a lista atual de apps ao iframe.
     function maybeSendAppsToRevo() {
       // Revo foi substituído pelo Chat; nenhuma mensagem precisa ser enviada
       return;
@@ -4232,12 +3956,7 @@ main{
     })();
     $$('button').forEach(addRipple);
   </script><div style="position: fixed; right: 14px; bottom: calc(var(--tabsH) + 16px); display: grid; gap: 8px; z-index: 120;"></div><div style="position: fixed; right: 14px; bottom: calc(var(--tabsH) + 16px); display: grid; gap: 8px; z-index: 120;"></div>
-<!-- Local Storage Modal (safe-placed near end of body) -->
 
-
-
-<!-- Script para ocultar o splash screen após o carregamento completo da página -->
-<!-- Script adicional para o Stacks estendido: upload de HTML e criação de grupos -->
 <script>
 (() => {
   const uploadBtn = document.getElementById('btnStackUpload');
@@ -4319,7 +4038,6 @@ window.addEventListener('load', () => {
 });
 </script>
 
-<!-- Script para persistência de grupos/sessões e apps fixados na navegação -->
 <script>
 (() => {
   /**
@@ -4514,8 +4232,7 @@ window.addEventListener('load', () => {
   });
 })();
 </script>
-  <!-- Sons da interface.  Coloque os arquivos em sounds/ui/*.wav conforme distribuídos no pacote UNO_UISounds_Pack_v1. -->
-  <!-- Use o som Back Action como clique principal -->
+
   <audio id="sndClick" src="sounds/ui/back-action.wav" preload="auto"></audio>
   <audio id="sndHover" src="sounds/ui/hover.wav" preload="auto"></audio>
   <audio id="sndOpen" src="sounds/ui/open.wav" preload="auto"></audio>
@@ -4527,7 +4244,7 @@ window.addEventListener('load', () => {
   <audio id="sndSuccess" src="sounds/ui/success.wav" preload="auto"></audio>
   <audio id="sndWarn" src="sounds/ui/warn.wav" preload="auto"></audio>
   <audio id="sndError" src="sounds/ui/error.wav" preload="auto"></audio>
-  <!-- Som Tech Pop usado para ações especiais (ex: salvar nome) -->
+
   <audio id="sndTechPop" src="sounds/ui/tech-pop.wav" preload="auto"></audio>
   <script>
   // Associe sons aos principais elementos de interface.  Cada botão com a
@@ -5108,10 +4825,6 @@ window.addEventListener('load', () => {
 
 })(); // end ChatPlus
 </script>
-  <script src="dual_multiagent_v1.js"></script>
-  <script src="dual_multiagent_v12_locked.js"></script>
-  <script src="openrouter_hardlock_model_v1.js" defer=""></script>
-
 
 <style>
 /* --------------------------------------------
@@ -5183,7 +4896,7 @@ textarea {
 }
 
 /* Botão Único: respeita safe-area no iOS */
-#btnKOBLLUX { 
+#btnKOBLLUX {
   bottom: calc(1rem + env(safe-area-inset-bottom));
 }
 
@@ -5282,7 +4995,7 @@ pre { word-break: break-word; }
 /* Header único (nenhum footer fixo) — nenhuma regra extra de footer */
 
 /* Safe-area e “tap spacing” no rodapé de ações flutuantes/badges */
-.badge-reopen { 
+.badge-reopen {
   bottom: calc(1rem + env(safe-area-inset-bottom));
 }
 
@@ -5325,204 +5038,6 @@ main .row > * + * { margin-top: .5rem; }
 .stack { gap: .5rem !important; }
 
 </style>
-
-
-<script id="patch-visual-presets">
-(function(){
-  // Helpers
-  const $ = (q, r = document) => r.querySelector(q);
-  const LS = {
-    get: (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d } catch (e) { return d } },
-    set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)) } catch (e) {} }
-  };
-
-  // Inject "Blue‑1" into theme select if missing
-  document.addEventListener('DOMContentLoaded', function(){
-    try {
-      const sel = document.getElementById('themeSelect');
-      if (sel && !Array.from(sel.options).some(o => o.value === 'blue1')) {
-        const opt = document.createElement('option');
-        opt.value = 'blue1'; opt.textContent = 'Blue‑1 (azul)';
-        sel.appendChild(opt);
-      }
-    } catch(e){}
-  });
-
-  // Build and inject a Visual & 3D card into Brain view (non-destructive)
-  document.addEventListener('DOMContentLoaded', function(){
-    const grid = document.querySelector('#v-brain .grid');
-    if (!grid) return;
-    const panel = document.createElement('div');
-    panel.className = 'card fx-trans fx-lift';
-    panel.style.display = 'block';
-    panel.innerHTML = `
-      <div style="font-weight:800">Visual & 3D (presets)</div>
-      <div style="margin-top:8px;display:grid;gap:10px">
-        <label style="display:flex;align-items:center;gap:8px">
-          <span>Preset:</span>
-          <select id="visualPreset" class="input ring" style="max-width:260px">
-            <option value="blue1">Blue‑1 (shader)</option>
-            <option value="strong">Strong</option>
-            <option value="cinematic-soft">Cinematic Soft</option>
-          </select>
-        </label>
-        <label style="display:flex;align-items:center;gap:8px">
-          <input id="overlayToggle" type="checkbox" />
-          <span>Overlay de cor por arquétipo</span>
-        </label>
-        <label style="display:flex;align-items:center;gap:8px">
-          <input id="bloomToggle" type="checkbox" />
-          <span>Bloom fotográfico (post)</span>
-        </label>
-        <label style="display:flex;align-items:center;gap:8px">
-          <span>Glow/Toon:</span>
-          <input id="glowRange" type="range" min="0" max="1" step="0.05" style="flex:1" />
-          <span id="glowVal" class="mut" style="width:42px;text-align:right">0.80</span>
-        </label>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button id="applyVisual" class="btn prime fx-trans fx-press ring">Aplicar<span class="ripple"></span></button>
-          <button id="resetVisual" class="btn fx-trans fx-press ring">Padrão<span class="ripple"></span></button>
-        </div>
-        <div class="mut" style="font-size:11px">
-          As preferências são salvas no seu navegador e enviadas ao arquétipo ativo.
-        </div>
-      </div>
-    `;
-    grid.appendChild(panel);
-
-    // Defaults
-    const defaults = {
-      preset: LS.get('arch:visualPreset', 'blue1'),
-      overlayOn: LS.get('arch:overlayOn', false),
-      bloomOn: LS.get('arch:bloomOn', false),
-      glow: LS.get('arch:glowStrength', 0.80)
-    };
-
-    // UI references
-    const selPreset = $('#visualPreset', panel);
-    const chkOverlay = $('#overlayToggle', panel);
-    const chkBloom = $('#bloomToggle', panel);
-    const rngGlow = $('#glowRange', panel);
-    const spnGlow = $('#glowVal', panel);
-    const btnApply = $('#applyVisual', panel);
-    const btnReset = $('#resetVisual', panel);
-
-    // Populate
-    selPreset.value = defaults.preset;
-    chkOverlay.checked = !!defaults.overlayOn;
-    chkBloom.checked = !!defaults.bloomOn;
-    rngGlow.value = defaults.glow;
-    spnGlow.textContent = Number(defaults.glow).toFixed(2);
-
-    rngGlow.addEventListener('input', () => { spnGlow.textContent = Number(rngGlow.value).toFixed(2); });
-
-    function saveAndApply(){
-      const state = {
-        preset: selPreset.value,
-        overlayOn: !!chkOverlay.checked,
-        bloomOn: !!chkBloom.checked,
-        glow: Number(rngGlow.value)
-      };
-      LS.set('arch:visualPreset', state.preset);
-      LS.set('arch:overlayOn', state.overlayOn);
-      LS.set('arch:bloomOn', state.bloomOn);
-      LS.set('arch:glowStrength', state.glow);
-      // Update overlay color right away
-      try {
-        const sel = document.getElementById('arch-select');
-        const base = (sel?.value || '').replace(/\.html$/i, '');
-        if (window.applyArchOverlay) window.applyArchOverlay(base);
-      } catch(e){}
-      // Send to iframe
-      try { sendVisualSettingsToFrame(); } catch(e){}
-    }
-
-    btnApply.addEventListener('click', saveAndApply);
-    btnReset.addEventListener('click', () => {
-      selPreset.value = 'blue1';
-      chkOverlay.checked = false;
-      chkBloom.checked = false;
-      rngGlow.value = 0.80;
-      spnGlow.textContent = '0.80';
-      saveAndApply();
-    });
-  });
-
-  // Canonical overlay colors for the 12 archetypes
-  const ARCH_OVERLAYS_PATCHED = {
-    atlas:  'rgba(64,158,255,0.22)',
-    nova:   'rgba(255,82,177,0.22)',
-    vitalis:'rgba(87,207,112,0.22)',
-    pulse:  'rgba(0,191,255,0.22)',
-    artemis:'rgba(255,195,0,0.22)',
-    serena: 'rgba(186,130,219,0.22)',
-    kaos:   'rgba(255,77,109,0.22)',
-    genus:  'rgba(87,207,112,0.22)',
-    lumine: 'rgba(255,213,79,0.22)',
-    solus:  'rgba(186,130,219,0.22)',
-    rhea:   'rgba(0,209,178,0.22)',
-    aion:   'rgba(255,159,67,0.22)',
-    default:'rgba(255,255,255,0.0)'
-  };
-
-  // Override applyArchOverlay to honor overlay toggle
-  (function overrideApplyArchOverlay(){
-    const LSget = (k,d)=>{ try{ const v = localStorage.getItem(k); return v?JSON.parse(v):d }catch(e){ return d } };
-    window.applyArchOverlay = function(name){
-      const key = (name || '').toLowerCase();
-      const on = !!LSget('arch:overlayOn', false);
-      const color = on ? (ARCH_OVERLAYS_PATCHED[key] || ARCH_OVERLAYS_PATCHED.default) : 'rgba(0,0,0,0)';
-      document.documentElement.style.setProperty('--arch-overlay', color);
-    };
-    // Apply once at startup for current selection
-    document.addEventListener('DOMContentLoaded', function(){
-      const sel = document.getElementById('arch-select');
-      const base = (sel?.value || '').replace(/\.html$/i, '');
-      window.applyArchOverlay(base);
-    });
-  })();
-
-  // PostMessage: send visual settings to archetype iframe
-  function currentVisualSettings(){
-    const LSget = (k,d)=>{ try{ const v = localStorage.getItem(k); return v?JSON.parse(v):d }catch(e){ return d } };
-    return {
-      preset: LSget('arch:visualPreset','blue1'),
-      bloom: !!LSget('arch:bloomOn', false),
-      glow: Number(LSget('arch:glowStrength', 0.80)),
-      overlayOn: !!LSget('arch:overlayOn', false)
-    };
-  }
-  window.sendVisualSettingsToFrame = function(){
-    try {
-      const f = document.getElementById('arch-frame');
-      if (f && f.contentWindow) {
-        f.contentWindow.postMessage({ type:'visualSettings', data: currentVisualSettings() }, '*');
-      }
-    } catch(e){}
-  };
-
-  // Send settings whenever the iframe loads or signals readiness
-  document.addEventListener('DOMContentLoaded', function(){
-    const f = document.getElementById('arch-frame');
-    if (f) {
-      f.addEventListener('load', () => { try { sendVisualSettingsToFrame(); } catch(e){} });
-      // small delay to ensure child is ready
-      setTimeout(() => { try { sendVisualSettingsToFrame(); } catch(e){} }, 800);
-    }
-  });
-  window.addEventListener('message', (ev) => {
-    const msg = ev?.data || {};
-    if (msg && msg.type === 'archReady') {
-      try { sendVisualSettingsToFrame(); } catch(e){}
-    }
-  });
-
-})();
-</script>
-
-
-  <link rel="stylesheet" href="uno_showcase_patch.css">
-  <script src="uno_showcase_patch.js" defer></script>
 
 <div id="lsModal" class="ls-modal" aria-hidden="true">
   <div class="ls-panel" id="lsPanel">
@@ -5580,7 +5095,6 @@ main .row > * + * { margin-top: .5rem; }
   </div>
 
 </div>
-
 
 <script id="ls-panel-js">
 (() => {
@@ -5749,27 +5263,6 @@ main .row > * + * { margin-top: .5rem; }
 })();
 </script>
 
-
-<script id="ls-snpt-boot">
-(function(){
-  function ensure(){
-    if(document.getElementById('ls-panel-js') || document.getElementById('lsModal')) return;
-    fetch('lspanel.snpt', {cache:'no-store'}).then(r => r.ok ? r.text(): null).then(txt => {
-      if(!txt) return;
-      document.body.insertAdjacentHTML('beforeend', txt);
-      setTimeout(function(){
-        try{
-          if(window.DualLS && typeof window.DualLS.render==='function'){ window.DualLS.render(); }
-        }catch(e){}
-      }, 50);
-    }).catch(()=>{});
-  }
-  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', ensure); } else { ensure(); }
-})();
-</script>
-
-
-
 <script id="ls-sanitize-old-js">
 (function(){
   // Remove apenas ids legados conhecidos, preservando #lsModal e #lsPanel
@@ -5797,8 +5290,6 @@ main .row > * + * { margin-top: .5rem; }
 })();
 </script>
 
-
-
 <script id="arch-init-nonatlas">
 (function(){
   function initArchSelect(){
@@ -5815,44 +5306,6 @@ main .row > * + * { margin-top: .5rem; }
 })();
 </script>
 
-
-<!-- PATCH: overlay-hardlock -->
-<script id="overlay-hardlock">
-(function () {
-  const LSget = (k,d)=>{ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d }catch(e){ return d } };
-
-  function setOverlayTransparent(){
-    try{
-      document.documentElement.style.setProperty('--arch-overlay','rgba(0,0,0,0)');
-      document.documentElement.style.setProperty('--arch-overlay-strength','0%');
-    }catch(e){}
-  }
-
-  function gateApply(){
-    // Re-define applyArchOverlay ALWAYS last so it cannot be overridden later
-    window.applyArchOverlay = function(name){
-      const on = !!LSget('arch:overlayOn', false);
-      if(!on){ setOverlayTransparent(); return; }
-      const key = (name||'').toLowerCase();
-      const MAP = (window.ARCH_OVERLAYS_PATCHED||window.ARCH_OVERLAYS||{default:'rgba(0,0,0,0)'});
-      const color = MAP[key] || MAP.default || 'rgba(0,0,0,0)';
-      try{
-        document.documentElement.style.setProperty('--arch-overlay', color);
-        // If some panels manage strength separately, leave current value as-is when ON
-      }catch(e){}
-    };
-
-    // On load, keep OFF if toggle is OFF
-    const sel = document.getElementById('arch-select');
-    const base = (sel?.value || '').replace(/\.html$/i,'');
-    if(!LSget('arch:overlayOn', false)) setOverlayTransparent(); else window.applyArchOverlay(base);
-  }
-
-  if(document.readyState === 'complete') gateApply();
-  else window.addEventListener('load', gateApply);
-})();
-</script>
-<!-- PATCH: ls-refresh-binder -->
 <script>
 (function(){
   function bind(){
@@ -5862,43 +5315,7 @@ main .row > * + * { margin-top: .5rem; }
   if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', bind); } else { bind(); }
 })();
 </script>
-<!-- PATCH: overlay-guardian-js -->
-<script id="overlay-guardian-js">
-(function(){
-  function readLSBool(key, d){ try{ var v = localStorage.getItem(key); return v ? JSON.parse(v) : d; }catch(e){ return d; } }
-  function enforce(){
-    var on = !!readLSBool('arch:overlayOn', false);
-    document.documentElement.setAttribute('data-overlay', on ? 'on' : 'off');
-    if(!on){
-      try{
-        document.documentElement.style.setProperty('--arch-overlay','rgba(0,0,0,0)');
-        document.documentElement.style.setProperty('--arch-overlay-strength','0%');
-        var fade = document.getElementById('arch-fadeCover');
-        if(fade) fade.style.background = 'transparent';
-      }catch(e){}
-    }
-  }
-  function bind(){
-    enforce();
-    // Poll lightly to defeat late writers
-    setInterval(enforce, 500);
-    // Also react to storage changes (other tabs)
-    window.addEventListener('storage', function(ev){ if(ev && ev.key==='arch:overlayOn'){ enforce(); } });
-    // If there is a Brain toggle, hook it
-    document.addEventListener('click', function(e){
-      var t = e.target;
-      if(!t) return;
-      if(t.id==='overlayToggle' || t.closest && t.closest('#overlayToggle')){
-        setTimeout(enforce, 60);
-      }
-    }, true);
-  }
-  if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', bind); } else { bind(); }
-})();
-</script>
-<script type="module" src="./lib/UNO_patch_arch3d_bloom_loader.js"></script>
-<script src="./lib/UNO_patch_arch3d_particles.js"></script>
-<script src="./lib/dual_multiagent_v12_kobllux_locked.js"></script>
+
 <script>
 if ('serviceWorker' in navigator) {
   addEventListener('load', ()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
@@ -5998,7 +5415,6 @@ if ('serviceWorker' in navigator) {
 document.getElementById('orbWrap')?.addEventListener('click', function(){ try{ window.__orbGL__ && window.__orbGL__.pulse(); }catch(_){ } });
 </script>
 
-
 <script id="orb-slot-and-archpersist-patch">
 (function(){
   // ---- Helpers ----
@@ -6093,600 +5509,7 @@ document.getElementById('orbWrap')?.addEventListener('click', function(){ try{ w
 })();
 </script>
 
-
-<script id="arch-chips-3d-layers">
-// BLOOM TOGGLE: persist in localStorage('dual.ui.bloom'), add button above chips
-(function(){ 
-  const _bState = (localStorage.getItem('dual.ui.bloom') === '1');
-  function sendBloom(enabled){
-    try{
-      const fr = document.getElementById('arch-frame');
-      if(fr && fr.contentWindow) fr.contentWindow.postMessage({ type:'bloomToggle', enabled: !!enabled }, '*');
-      // Adjust overlay intensity when bloom enabled
-      document.documentElement.style.setProperty('--arch-overlay-intensity', enabled? '0.45' : '0.35');
-    }catch(e){}
-  }
-  // ensure we send initial state on boot after DOM ready
-  if (document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', ()=> sendBloom(_bState) );
-  } else sendBloom(_bState);
-  // expose helper for the chip script to create the button
-  window._dual_bloom_state = _bState;
-  window._dual_bloom_send = sendBloom;
-})();
-(function(){
-  // Minimal palettes (sync with your overlay colors)
-  const COLORS = {
-    atlas:'#409EFF', nova:'#FF52B1', vitalis:'#34D399', pulse:'#00BFFF',
-    artemis:'#FFC300', serena:'#B684FF', kaos:'#FF4D6D', genus:'#22C55E',
-    lumine:'#FFD54F', rhea:'#00D1B2', solus:'#6495ED', aion:'#8B5CF6'
-  };
-  const PRESET = name => ({
-    name,
-    color: COLORS[name] || '#88a',
-    count: (name==='nova'||name==='pulse'||name==='lumine') ? 340 : 260,
-    orbitRadius: (name==='nova'||name==='serena'||name==='lumine') ? 0.76 : 0.68,
-    spin: (name==='nova'||name==='pulse') ? 0.7 : 0.56,
-    size: 0.010, // sphere size
-    glow: 0.42
-  });
-
-  const ACTIVE = new Set();
-  function sendLayers(){
-    const fr = document.getElementById('arch-frame');
-    if (!fr || !fr.contentWindow) return;
-    const arr = Array.from(ACTIVE).map(n => PRESET(n));
-    fr.contentWindow.postMessage({ type:'atomConfigLayers', layers: arr }, '*');
-  }
-
-  function chipEl(name){
-    const b = document.createElement('button');
-    b.className = 'arch-chip';
-    b.textContent = name[0].toUpperCase()+name.slice(1);
-    b.style.borderColor = 'rgba(255,255,255,.18)';
-    b.style.background = 'rgba(255,255,255,.06)';
-    b.onclick = ()=>{
-      if (ACTIVE.has(name)) ACTIVE.delete(name); else ACTIVE.add(name);
-      b.classList.toggle('on', ACTIVE.has(name));
-      sendLayers();
-    };
-    return b;
-  }
-
-  function ensureStyles(){
-    if (document.getElementById('archChip3DStyles')) return;
-    const st = document.createElement('style'); st.id='archChip3DStyles';
-    st.textContent = `
-      .arch-chip-wrap{ display:grid; grid-template-columns: repeat(auto-fill,minmax(92px,1fr)); gap:8px; }
-      .arch-chip{ appearance:none; border:1px solid var(--ring, rgba(255,255,255,.18)); background: var(--glass, rgba(255,255,255,.06)); color: var(--txt, #eaf2ff);
-        padding:8px 10px; border-radius:999px; font-size:12px; letter-spacing:.2px; cursor:pointer; }
-      .arch-chip.on{ background: rgba(57,255,182,.18); border-color: rgba(57,255,182,.45); }
-      .arch-chip-title{ font-size:12px; color: var(--muted,#a6b0c0); margin: 6px 0 6px; font-weight:800; }
-    `;
-    document.head.appendChild(st);
-  }
-
-  function injectInLSPanel(){
-    ensureStyles();
-    const panel = document.getElementById('lsPanel') || document.querySelector('#lsModal .ls-panel');
-    if (!panel || document.getElementById('archChip3DSection')) return;
-    const sec = document.createElement('div');
-    sec.id = 'archChip3DSection';
-    sec.className = 'preset';
-    sec.style.marginTop = '10px';
-    sec.innerHTML = `<div class="arch-chip-title">Arquétipos (camadas no ORB · 3D)</div>`;
-    const wrap = document.createElement('div'); wrap.className = 'arch-chip-wrap';
-    ['atlas','nova','vitalis','pulse','artemis','serena','kaos','genus','lumine','rhea','solus','aion'].forEach(n=> wrap.appendChild(chipEl(n)));
-    sec.appendChild(wrap);
-    // === Bloom toggle (insert above chips) ===
-    const bloomWrap = document.createElement('div');
-    bloomWrap.style.display = 'flex'; bloomWrap.style.alignItems = 'center'; bloomWrap.style.justifyContent = 'space-between';
-    bloomWrap.style.marginBottom = '8px';
-    const lbl = document.createElement('div'); lbl.textContent = 'Bloom Nébula'; lbl.className='arch-chip-title'; lbl.style.margin='0'; lbl.style.fontSize='12px';
-    const toggle = document.createElement('button'); toggle.id='toggleBloomBtn'; toggle.className='arch-chip'; toggle.style.minWidth='92px';
-    const state = (localStorage.getItem('dual.ui.bloom') === '1') || !!window._dual_bloom_state;
-    if(state) toggle.classList.add('on');
-    toggle.textContent = state ? 'Bloom: ON' : 'Bloom: OFF';
-    toggle.onclick = function(){
-      const now = !toggle.classList.contains('on');
-      toggle.classList.toggle('on', now);
-      toggle.textContent = now ? 'Bloom: ON' : 'Bloom: OFF';
-      try{ localStorage.setItem('dual.ui.bloom', now? '1':'0'); }catch(_){}
-      if (window._dual_bloom_send) window._dual_bloom_send(now);
-      // send message to iframe as well for immediate toggle
-      try{ const f = document.getElementById('arch-frame'); if(f && f.contentWindow) f.contentWindow.postMessage({ type: 'bloomToggle', enabled: !!now }, '*'); }catch(_){}
-    };
-    sec.insertBefore(bloomWrap, sec.firstChild);
-    bloomWrap.appendChild(lbl);
-    bloomWrap.appendChild(toggle);
-    
-    // Coloca no topo do LS Panel
-    const hdr = panel.querySelector('.ls-hdr');
-    if (hdr && hdr.parentNode) hdr.parentNode.insertBefore(sec, hdr.nextSibling);
-    // Ativa por padrão a camada do arquétipo atual
-    try{
-      const sel = document.getElementById('arch-select');
-      const cur = (sel && sel.value || 'atlas.html').replace(/.*\//,'').replace(/\.html$/i,'');
-      const btn = wrap.querySelector('button.arch-chip:nth-child(' + (['atlas','nova','vitalis','pulse','artemis','serena','kaos','genus','lumine','rhea','solus','aion'].indexOf(cur)+1) + ')');
-      if (cur && btn){ ACTIVE.add(cur); btn.classList.add('on'); sendLayers(); }
-    }catch(_){}
-  }
-
-  function bindLSButton(){
-    const btn = document.getElementById('btnLS');
-    if (btn && !btn.dataset._chipsHook){
-      btn.dataset._chipsHook = '1';
-      btn.addEventListener('click', ()=> setTimeout(injectInLSPanel, 80), {passive:true});
-    } else {
-      // if already open
-      setTimeout(injectInLSPanel, 120);
-    }
-  }
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindLSButton);
-  else bindLSButton();
-
-  // Also re-inject if LS modal gets rebuilt
-  document.addEventListener('ls:disabled-changed', ()=> setTimeout(injectInLSPanel, 60));
-})();
-</script>
-
-
-<!-- LSPANEL MASTER FIX v3.7.1 — CSS -->
-<style id="lspanel-masterfix-css">
-:root{ --ls-fg:#eaf2ff; --ls-surface:rgba(15,17,32,.9); --ls-line:rgba(255,255,255,.14); --ls-gap:10px; --ls-h:40px; --ls-r:12px; }
-#lsModal .ls-panel{background:var(--ls-surface)!important;border:1px solid var(--ls-line)!important;border-radius:16px!important;padding:12px!important}
-#lsModal .ls-panel .section-title{font-weight:900;font-size:12px;color:var(--ls-fg);opacity:.95;margin:8px 0 6px}
-#lsModal .ls-panel .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:var(--ls-gap)}
-#lsModal .ls-panel .line{display:grid;grid-template-columns:1fr 1fr;gap:var(--ls-gap);align-items:center}
-#lsModal .ls-panel label{font-size:12px;opacity:.85}
-#lsModal .ls-panel .pill-btn, #lsModal .ls-panel button, #lsModal .ls-panel .arch-chip, #lsModal .ls-panel .btn{
-  min-height:var(--ls-h);border-radius:var(--ls-r);padding:8px 12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);color:var(--ls-fg);font-size:12px;letter-spacing:.2px
-}
-#lsModal .ls-panel .pill-btn.on, #lsModal .ls-panel .arch-chip.on{background:rgba(57,255,182,.18);border-color:rgba(57,255,182,.45)}
-#lsModal .ls-panel input[type="range"], #lsModal .ls-panel select{
-  min-height:var(--ls-h);border-radius:var(--ls-r);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);color:var(--ls-fg);padding:10px
-}
-#lsModal .ls-panel output{font-size:12px;opacity:.9}
-#perfHud{display:flex;gap:8px;align-items:center;justify-content:space-between;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:8px 10px;margin:8px 0}
-#perfHud .stats{display:flex;gap:10px;align-items:center}
-#perfHud .badge{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:4px 8px;background:rgba(255,255,255,.08);font-weight:800}
-</style>
-
-
-<!-- LSPANEL MASTER FIX v3.7.1 — robust injector -->
-<script id="lspanel-masterfix-js">
-(function(){
-  // helpers
-  const $ = (q,r=document)=>r.querySelector(q);
-  const $$ = (q,r=document)=>Array.from(r.querySelectorAll(q));
-  function setLS(k,v){ try{ localStorage.setItem(k,String(v)); }catch(_){ } }
-  function getNum(k,d){ try{ const v=localStorage.getItem(k); return v==null? d : parseFloat(v); }catch(_){ return d; } }
-  function getFlag(k,d){ try{ const v=localStorage.getItem(k); return v==null? d : v==='1'; }catch(_){ return d; } }
-
-  // defaults (perf + atom)
-  const DEF = { target:50, minS:96, minR:80, cap:360, dn:0.85, up:1.06 };
-  const KP  = {
-    en:'dual.perf.enable', tgt:'dual.perf.target', s:'dual.perf.minSingle', r:'dual.perf.minRing', cap:'dual.perf.maxCap', dn:'dual.perf.stepDown', up:'dual.perf.stepUp'
-  };
-  if(localStorage.getItem(KP.en)==null) setLS(KP.en,'1');
-  if(localStorage.getItem(KP.tgt)==null) setLS(KP.tgt, DEF.target);
-  if(localStorage.getItem(KP.s)==null)   setLS(KP.s,   DEF.minS);
-  if(localStorage.getItem(KP.r)==null)   setLS(KP.r,   DEF.minR);
-  if(localStorage.getItem(KP.cap)==null) setLS(KP.cap, DEF.cap);
-  if(localStorage.getItem(KP.dn)==null)  setLS(KP.dn,  DEF.dn);
-  if(localStorage.getItem(KP.up)==null)  setLS(KP.up,  DEF.up);
-  if(localStorage.getItem('dual.atom.count')==null) setLS('dual.atom.count', 160);
-  if(localStorage.getItem('dual.atom.orbit')==null) setLS('dual.atom.orbit', 0.74);
-  if(localStorage.getItem('dual.atom.glow')==null)  setLS('dual.atom.glow',  0.38);
-  if(localStorage.getItem('dual.ui.bloom')==null)   setLS('dual.ui.bloom',   0);
-  document.body.setAttribute('data-orb-solid','off');
-
-  function panel(){
-    return $('#lsPanel') || $('#lsModal .ls-panel') || $('.ls-panel') || $('.panel-ls') || $('.settings-panel');
-  }
-
-  function ensureSection(){
-    const p = panel();
-    if(!p || $('#perfControlsV371')) return;
-    const tgt=getNum(KP.tgt,DEF.target), ms=getNum(KP.s,DEF.minS), mr=getNum(KP.r,DEF.minR), cap=getNum(KP.cap,DEF.cap), dn=getNum(KP.dn,DEF.dn), up=getNum(KP.up,DEF.up), en=getFlag(KP.en,true);
-    const sec = document.createElement('section'); sec.id='perfControlsV371';
-    sec.innerHTML = `
-      <div class="section-title">Desempenho (FPS Target)</div>
-      <div id="perfHud">
-        <div class="stats">
-          <span class="badge">FPS: <strong id="hudFps">—</strong></span>
-          <span class="badge">Meta: <strong id="hudTarget">${tgt}</strong></span>
-        </div>
-        <button id="perfEnable" class="pill-btn ${en?'on':''}">${en?'Auto':'Manual'}</button>
-      </div>
-      <div class="line">
-        <label>Meta de FPS</label>
-        <div><input id="fpsTarget" type="range" min="30" max="60" step="1" value="${tgt}" /><output id="fpsTargetOut">${tgt}</output></div>
-      </div>
-      <div class="line">
-        <label>Min (single)</label>
-        <div><input id="minSingle" type="range" min="48" max="160" step="2" value="${ms}" /><output id="minSingleOut">${ms}</output></div>
-      </div>
-      <div class="line">
-        <label>Min por anel</label>
-        <div><input id="minRing" type="range" min="48" max="160" step="2" value="${mr}" /><output id="minRingOut">${mr}</output></div>
-      </div>
-      <div class="line">
-        <label>Máximo</label>
-        <div><input id="maxCap" type="range" min="160" max="680" step="10" value="${cap}" /><output id="maxCapOut">${cap}</output></div>
-      </div>
-      <div class="line">
-        <label>Passo Reduzir</label>
-        <div><input id="stepDn" type="range" min="0.70" max="0.95" step="0.01" value="${dn}" /><output id="stepDnOut">${dn.toFixed(2)}</output></div>
-      </div>
-      <div class="line">
-        <label>Passo Aumentar</label>
-        <div><input id="stepUp" type="range" min="1.01" max="1.15" step="0.01" value="${up}" /><output id="stepUpOut">${up.toFixed(2)}</output></div>
-      </div>
-      <div class="section-title">Partículas do Átomo — SAFE</div>
-      <div class="line">
-        <label>Quantidade</label>
-        <div><input id="safe-count" type="range" min="48" max="220" step="4" value="${getNum('dual.atom.count',160)}" /><output id="safe-count-out">${getNum('dual.atom.count',160)}</output></div>
-      </div>
-      <div class="line">
-        <label>Órbita</label>
-        <div><input id="safe-orbit" type="range" min="0.60" max="0.86" step="0.01" value="${getNum('dual.atom.orbit',0.74)}" /><output id="safe-orbit-out">${getNum('dual.atom.orbit',0.74).toFixed(2)}</output></div>
-      </div>
-      <div class="line">
-        <label>Glow</label>
-        <div><input id="safe-glow" type="range" min="0.00" max="1.00" step="0.01" value="${getNum('dual.atom.glow',0.38)}" /><output id="safe-glow-out">${getNum('dual.atom.glow',0.38).toFixed(2)}</output></div>
-      </div>
-    `;
-    p.prepend(sec);
-
-    // binds
-    function bindR(id, k, fmt=(v)=>v){
-      const el = $('#'+id), out=$('#'+id+'Out'); if(!el) return;
-      el.addEventListener('input', ()=>{ const val=parseFloat(el.value); out && (out.textContent=fmt(val)); setLS(k, val); $('#hudTarget') && (id==='fpsTarget') && ($('#hudTarget').textContent=String(val)); });
-    }
-    bindR('fpsTarget', KP.tgt);
-    bindR('minSingle', KP.s);
-    bindR('minRing',   KP.r);
-    bindR('maxCap',    KP.cap);
-    bindR('stepDn',    KP.dn, (v)=>v.toFixed(2));
-    bindR('stepUp',    KP.up, (v)=>v.toFixed(2));
-
-    ['safe-count','safe-orbit','safe-glow'].forEach(id=>{
-      const el=$('#'+id), out=$('#'+id+'-out'); el && el.addEventListener('input', ()=>{ out && (out.textContent = id==='safe-count'? el.value : parseFloat(el.value).toFixed(2)); setLS(el.id==='safe-count'?'dual.atom.count': el.id==='safe-orbit'?'dual.atom.orbit':'dual.atom.glow', el.value); });
-    });
-
-    const enBtn = $('#perfEnable'); enBtn && enBtn.addEventListener('click', ()=>{
-      const now=!enBtn.classList.contains('on'); enBtn.classList.toggle('on',now); enBtn.textContent = now? 'Auto':'Manual'; setLS(KP.en, now?'1':'0');
-    });
-
-    // Live HUD FPS
-    let L=performance.now(), F=0;
-    function hudTick(t){ F++; if(t-L>=1000){ const fps=F; F=0; L=t; $('#hudFps') && ($('#hudFps').textContent=fps); } requestAnimationFrame(hudTick); }
-    requestAnimationFrame(hudTick);
-  }
-
-  // robust triggers
-  function bind(){
-    // when LS opens
-    const btn = document.getElementById('btnLS') || [...document.querySelectorAll('button,[role="button"]')].find(b=>/ls|painel|config|settings/i.test((b.textContent||'')+(b.id||'')+(b.className||'')));
-    if(btn && !btn.dataset._masterfix){ btn.dataset._masterfix='1'; btn.addEventListener('click', ()=> setTimeout(ensureSection, 120), {passive:true}); }
-    // also try on boot and on modal toggle
-    setTimeout(ensureSection, 300);
-    document.addEventListener('ls:disabled-changed', ()=> setTimeout(ensureSection, 120));
-    document.getElementById('arch-frame')?.addEventListener('load', ()=> setTimeout(ensureSection, 200));
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', bind); else bind();
-})();
-</script>
-
-
-<script id="hdpro-override-js">
-
-// === HD•PRO Override (Dual UNO) ===================================
-(function(){
-  const $ = (s, r=document) => r.querySelector(s);
-  const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
-  const on = (el, ev, fn) => el && el.addEventListener(ev, fn);
-
-  function toast(msg, ms=1800){
-    let t = $('#hdToast'); 
-    if(!t){ t = document.createElement('div'); t.id='hdToast'; document.body.appendChild(t); }
-    t.textContent = msg;
-    t.classList.add('show');
-    clearTimeout(t.__t); t.__t = setTimeout(()=>t.classList.remove('show'), ms);
-  }
-
-  // 1) Handle quase invisível para abrir/fechar LS panel (#brain)
-  function mountHandle(){
-    if($('#lsHandle')) return;
-    const btn = document.createElement('button');
-    btn.id = 'lsHandle';
-    btn.title = 'Abrir/fechar painel (LS)';
-    document.body.appendChild(btn);
-
-    function toggleBrain(){
-      const brain = $('#brain');
-      if(!brain){ toast('Painel LS não encontrado (#brain)'); return; }
-      brain.classList.toggle('hide');
-      btn.classList.toggle('on', !brain.classList.contains('hide'));
-    }
-    on(btn, 'click', toggleBrain);
-  }
-
-  // 2) Painel HD Pro dentro do #brain (LS Panel)
-  function mountHDPro(){
-    const brain = $('#brain .popover') || $('#brain');
-    if(!brain || brain.__hdproMounted) return;
-    brain.__hdproMounted = true;
-
-    // Secção base
-    const sec = document.createElement('section');
-    sec.className = 'hdpro-sec';
-    sec.innerHTML = `
-      <div class="sec-hdr">
-        <h3>HD • Pro — Sistema</h3>
-        <button class="hd-btn ok" id="hdRefresh">Atualizar</button>
-      </div>
-
-      <div class="hdpro-grid">
-        <div class="hdpro-row">
-          <div>
-            <div class="hdpro-label">LocalStorage</div>
-            <div class="hdpro-meter"><div class="bar" id="barLS"></div></div>
-          </div>
-          <div class="hdpro-val" id="valLS">–</div>
-        </div>
-
-        <div class="hdpro-row">
-          <div>
-            <div class="hdpro-label">IndexedDB (estimado)</div>
-            <div class="hdpro-meter"><div class="bar" id="barIDB"></div></div>
-          </div>
-          <div class="hdpro-val" id="valIDB">–</div>
-        </div>
-
-        <div class="hdpro-row">
-          <div>
-            <div class="hdpro-label">Total (Storage API)</div>
-            <div class="hdpro-meter"><div class="bar" id="barTotal"></div></div>
-          </div>
-          <div class="hdpro-val" id="valTotal">–</div>
-        </div>
-
-        <div class="hdpro-actions">
-          <button class="hd-btn" id="btnToggleOrb">Ocultar opções avançadas do ORB/FPS</button>
-          <button class="hd-btn" id="btnImportFix">Importar HTML (corrigido)</button>
-          <input id="__fileImportHD" type="file" accept=".html,.htm" style="display:none" />
-          <button class="hd-btn danger" id="btnClearLS">Limpar LocalStorage</button>
-          <button class="hd-btn danger" id="btnClearIDB">Limpar IndexedDB</button>
-        </div>
-      </div>
-    `;
-    brain.appendChild(sec);
-
-    // 2a) Toggle avançados ORB/FPS
-    on($('#btnToggleOrb', sec), 'click', ()=>{
-      const advSelectors = [
-        '[data-orb-adv]',
-        '#orbAdv', '.orb-adv', '.orb-advanced', '[data-orb-advanced]',
-        '#fpsPanel', '.fps-adv', '#orbControls', '.orb-controls'
-      ];
-      let toggled = 0;
-      advSelectors.forEach(sel => {
-        $$(sel).forEach(el => { 
-          el.classList.toggle('hdpro-adv-hidden'); 
-          toggled++;
-        });
-      });
-      toast(toggled ? 'Avançados ORB/FPS alternados' : 'Nenhum bloco avançado encontrado');
-    });
-
-    // 2b) Import corrigido (abre HTML local numa sessão dentro do app, fallback nova aba)
-    const fileInput = $('#__fileImportHD', sec);
-    on($('#btnImportFix', sec), 'click', ()=> fileInput && fileInput.click());
-    on(fileInput, 'change', (e)=>{
-      const file = e.target.files && e.target.files[0];
-      if(!file) return;
-      const url = URL.createObjectURL(file);
-      const name = file.name || 'arquivo.html';
-      // destino preferencial
-      const anchor = $('#sessionsAnchor') || $('#stackWrap') || $('#v-stack') || $('main');
-      if(anchor){
-        const wrap = document.createElement('div');
-        wrap.className = 'session';
-        wrap.innerHTML = `
-          <div class="hdr">
-            <span class="app-icon">${(name[0]||'W').toUpperCase()}</span>
-            <span class="title">${name}</span>
-            <div class="tools">
-              <button class="btn" data-act="min">Min</button>
-              <button class="btn" data-act="full">Full</button>
-              <button class="btn" data-act="close">Fechar</button>
-            </div>
-          </div>
-          <iframe src="${url}" referrerpolicy="no-referrer"></iframe>
-          <div class="resize-handle" title="Arraste para ajustar altura"></div>
-        `;
-        anchor.appendChild(wrap);
-        // Tools
-        on(wrap.querySelector('[data-act="min"]'), 'click', ()=> wrap.classList.toggle('min'));
-        on(wrap.querySelector('[data-act="full"]'), 'click', ()=> document.body.classList.toggle('session-full'));
-        on(wrap.querySelector('[data-act="close"]'), 'click', ()=> wrap.remove());
-        toast('HTML importado dentro do Stack');
-      }else{
-        window.open(url, '_blank', 'noopener');
-        toast('HTML aberto em nova aba');
-      }
-      e.target.value = '';
-    });
-
-    // 2c) Limpar LocalStorage
-    on($('#btnClearLS', sec), 'click', ()=>{
-      if(confirm('Limpar todo o LocalStorage deste domínio?')){
-        try { localStorage.clear(); toast('LocalStorage limpo'); updateMeters(true); }
-        catch(err){ console.error(err); toast('Erro ao limpar LocalStorage'); }
-      }
-    });
-
-    // 2d) Limpar IndexedDB (melhor esforço)
-    on($('#btnClearIDB', sec), 'click', async ()=>{
-      if(!confirm('Apagar bancos IndexedDB deste domínio?')) return;
-      try{
-        if(indexedDB.databases){
-          const dbs = await indexedDB.databases();
-          await Promise.all((dbs||[]).map(d => d && d.name ? new Promise((res)=>{
-            const req = indexedDB.deleteDatabase(d.name);
-            req.onsuccess = req.onerror = req.onblocked = ()=>res();
-          }) : Promise.resolve()));
-        }else{
-          // Sem enumerate: tente deletar bases comuns do app
-          const common = ['dual', 'uno', 'app', 'db', 'files', 'store'];
-          await Promise.all(common.map(n => new Promise((res)=>{
-            const req = indexedDB.deleteDatabase(n); req.onsuccess = req.onerror = req.onblocked = ()=>res();
-          })));
-        }
-        toast('IndexedDB: pedido de exclusão enviado'); updateMeters(true);
-      }catch(err){
-        console.error(err); toast('IndexedDB: não suportado/erro');
-      }
-    });
-
-    // 2e) Atualizar medidores
-    on($('#hdRefresh', sec), 'click', ()=> updateMeters(true));
-
-    async function estimateStorage(){
-      const est = (navigator.storage && navigator.storage.estimate) ? await navigator.storage.estimate() : {};
-      // est.usage (bytes) inclui IDB + Cache + etc (depende do UA)
-      // LS estimado manualmente (2 bytes por char em UTF-16)
-      let lsBytes = 0;
-      try{
-        for(let i=0;i<localStorage.length;i++){
-          const k = localStorage.key(i);
-          const v = localStorage.getItem(k);
-          lsBytes += 2*((k||'').length + (v||'').length);
-        }
-      }catch{}
-      // Experimento: idbBytes ~ usage - lsBytes (aprox)
-      const usage = est.usage || 0;
-      const quota = est.quota || 0;
-      const idbBytes = Math.max(0, usage - lsBytes);
-
-      return { lsBytes, idbBytes, usage, quota };
-    }
-
-    function fmt(bytes){
-      const u = ['B','KB','MB','GB','TB'];
-      let i=0, n=bytes;
-      while(n>=1024 && i<u.length-1){ n/=1024; i++; }
-      return `${n.toFixed( (i<=1)?0:1)} ${u[i]}`;
-    }
-
-    async function updateMeters(animateNumbers){
-      try{
-        const {lsBytes, idbBytes, usage, quota} = await estimateStorage();
-        const els = {
-          barLS: $('#barLS'), valLS: $('#valLS'),
-          barIDB: $('#barIDB'), valIDB: $('#valIDB'),
-          barTotal: $('#barTotal'), valTotal: $('#valTotal'),
-        };
-        const percent = (num, den) => (den>0)? Math.min(100, Math.round((num/den)*100)) : 0;
-        // Total can use quota as denominator; LS use typical 5MB baseline to visualize
-        const lsCap = 5*1024*1024; // 5MB
-        const pLS = percent(lsBytes, lsCap);
-        const pIDB = quota ? percent(idbBytes, quota) : 0;
-        const pTot = percent(usage, quota);
-
-        if(els.barLS) els.barLS.style.width = pLS + '%';
-        if(els.barIDB) els.barIDB.style.width = pIDB + '%';
-        if(els.barTotal) els.barTotal.style.width = pTot + '%';
-
-        const setNum = (el, val) => { if(el) el.textContent = val; };
-        if(animateNumbers){
-          animateCount( $('#valLS'), lsBytes );
-          animateCount( $('#valIDB'), idbBytes );
-          animateCount( $('#valTotal'), usage );
-        }else{
-          setNum( $('#valLS'), fmt(lsBytes) );
-          setNum( $('#valIDB'), fmt(idbBytes) );
-          setNum( $('#valTotal'), `${fmt(usage)} / ${quota?fmt(quota):'–'}` );
-        }
-      }catch(err){ console.error(err); }
-    }
-
-    function animateCount(el, bytes){
-      if(!el) return;
-      const target = bytes;
-      const start = parseFloat(el.getAttribute('data-last')||'0');
-      const startTime = performance.now();
-      const dur = 600;
-      function step(t){
-        const k = Math.min(1, (t - startTime)/dur);
-        const v = Math.round(start + (target-start)*k);
-        el.textContent = ( (k<1) ? (v + ' B') : (fmt(target)) );
-        if(k<1) requestAnimationFrame(step);
-        else el.setAttribute('data-last', String(target));
-      }
-      requestAnimationFrame(step);
-    }
-
-    updateMeters(false);
-    // Atualização periódica (leve)
-    sec.__interval = setInterval(()=> updateMeters(false), 2500);
-  }
-
-  // 3) Start
-  function boot(){
-    mountHandle();
-    mountHDPro();
-  }
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
-  else boot();
-
-})();
-
-</script>
-<script id="ATOM_ENGINE_PATCH">
-(function(){
-  if (window.__ATOM_PATCH__) return; window.__ATOM_PATCH__ = true;
-  const ATOM_PALETTES = {
-    default : { core:'#7a5bff', ring:'#39ffb6', dust:'#8fd6ff', bg:'#0b0f14' },
-    dopamina: { core:'#ff2d7a', ring:'#ff77aa', dust:'#ffd1e2', bg:'#14080f' },
-    delta7  : { core:'#ffb300', ring:'#ff8400', dust:'#ffe0a6', bg:'#140f08' },
-    asc11   : { core:'#00e6ff', ring:'#39ffb6', dust:'#baf6ff', bg:'#0b0f14' },
-    quan    : { core:'#b347ff', ring:'#9d7aff', dust:'#e2ccff', bg:'#110b14' },
-    orionis : { core:'#00ffab', ring:'#00ffc9', dust:'#c8fff1', bg:'#08140f' },
-    lumenflux:{core:'#9fd3ff', ring:'#e7f0ff', dust:'#ffffff', bg:'#0c121a' },
-    vermiph : { core:'#ff6282', ring:'#ff3d5e', dust:'#ffc0cb', bg:'#14080b' }
-  };
-  const $=(s,r=document)=>r.querySelector(s);
-  const arc=$('.arch-circle'); if(!arc) return;
-  let fab=arc.querySelector('.arch-fab'); if(!fab){ fab=document.createElement('button'); fab.className='arch-fab'; fab.title='Trocar paleta do átomo'; fab.innerHTML='✦'; arc.appendChild(fab); }
-  let cvs=document.getElementById('atomCanvas'); if(!cvs){ cvs=document.createElement('canvas'); cvs.id='atomCanvas'; arc.appendChild(cvs); }
-  const ctx=cvs.getContext('2d');
-  const DPR=()=> (window.devicePixelRatio||1); let W=0,H=0,CX=0,CY=0;
-  function resize(){ const r=arc.getBoundingClientRect(); W=Math.floor(r.width); H=Math.floor(r.height);
-    const d=DPR(); cvs.width=Math.max(1,Math.floor(W*d)); cvs.height=Math.max(1,Math.floor(H*d)); cvs.style.width=W+'px'; cvs.style.height=H+'px'; ctx.setTransform(d,0,0,d,0,0); CX=W/2; CY=H/2;}
-  resize(); addEventListener('resize', resize);
-  const N=120, parts=[]; (function init(){ for(let i=0;i<N;i++){ const radius=0.18+Math.random()*0.34, speed=(Math.random()*0.6+0.2)*(Math.random()<.5?1:-1);
-    parts.push({phi:Math.random()*Math.PI*2,r:radius,s:speed,size:1+Math.random()*2,jitter:Math.random()*0.03}); } })();
-  let PALETTE=ATOM_PALETTES.asc11; function setAtomPalette(n){ PALETTE=ATOM_PALETTES[n]||ATOM_PALETTES.default; try{ fab.style.boxShadow=`0 0 0 1px ${PALETTE.core}55 inset, 0 10px 22px ${PALETTE.core}33`; }catch(_){} }
-  (function hookTheme(){ const map={dopamina:'dopamina',delta7:'delta7',asc11:'asc11',quan:'quan',orionis:'orionis',lumenflux:'lumenflux',vermiph:'vermiph'};
-    if(typeof window.setTheme==='function' && !window.__ATOM_WRAP_THEME__){ window.__ATOM_WRAP_THEME__=true; const orig=window.setTheme;
-      window.setTheme=function(type){ const r=orig.apply(this,arguments); setAtomPalette(map[type]||'default'); return r; };
-    } else { const th=document.body.getAttribute('data-theme'); setAtomPalette(th==='blue1'?'asc11':th==='medium'?'lumenflux':'default'); }
-  })();
-  const cycle=['asc11','dopamina','delta7','orionis','quan','lumenflux','vermiph']; let cidx=0; fab.addEventListener('click',()=>{ cidx=(cidx+1)%cycle.length; setAtomPalette(cycle[cidx]); });
-  function draw(){ ctx.clearRect(0,0,W,H); const m=Math.min(W,H);
-    const g=ctx.createRadialGradient(CX,CY,m*0.08,CX,CY,m*0.55); g.addColorStop(0,PALETTE.core+'22'); g.addColorStop(1,'transparent');
-    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(CX,CY,m*0.55,0,Math.PI*2); ctx.fill();
-    ctx.shadowColor=PALETTE.ring; ctx.shadowBlur=18; ctx.fillStyle=PALETTE.core; ctx.beginPath(); ctx.arc(CX,CY,m*0.06,0,Math.PI*2); ctx.fill(); ctx.shadowBlur=0;
-    ctx.strokeStyle=PALETTE.ring+'cc'; ctx.lineWidth=1.4; ctx.beginPath(); ctx.arc(CX,CY,m*0.28,0,Math.PI*2); ctx.stroke();
-    for(let i=0;i<parts.length;i++){ const p=parts[i]; p.phi+=(p.s*0.003); const rr=m*(0.14+p.r*0.42), x=CX+Math.cos(p.phi)*rr, y=CY+Math.sin(p.phi)*rr*(0.82+p.jitter*Math.sin(p.phi*3.0));
-      ctx.fillStyle=PALETTE.dust; ctx.globalAlpha=0.75; ctx.beginPath(); ctx.arc(x,y,p.size,0,Math.PI*2); ctx.fill(); } ctx.globalAlpha=1;
-    requestAnimationFrame(draw); } requestAnimationFrame(draw);
-})();
-</script> <style id="uno-superpatch-css">
+ <style id="uno-superpatch-css">
 /* === SUPER PATCH — estilos necessários === */
 /* Tabbar glass + alinhamento */
 .tabbar .inner{ background: rgba(255,255,255,.06) !important; border:1px solid rgba(255,255,255,.14) !important; backdrop-filter: blur(10px) !important; }
@@ -6702,180 +5525,4 @@ header.mast .ib svg{ display:block }
 /* Pequeno ajuste do LS modal dentro do glass theme */
 #lsModal .panel{ backdrop-filter: blur(8px) }
 </style>
-<script id="BOOTSTRAP_CONSOLIDATION">
-(function(){
-  try{
-    const theme = localStorage.getItem('uno:theme') || 'default';
-    document.body.dataset.theme = (theme === 'blue1') ? 'blue1' : '';
-    if (!localStorage.getItem('uno:overlayLevel')) localStorage.setItem('uno:overlayLevel','22');
-    function overlayAlpha(){ const v=parseInt(localStorage.getItem('uno:overlayLevel')||'22',10); return Math.min(30,Math.max(0,isNaN(v)?22:v))/100; }
-    function overlayColor(name,a){ const RGB={atlas:[64,158,255],nova:[255,82,177],vitalis:[72,218,168],pulse:[0,191,255],artemis:[186,130,219],serena:[140,190,255],kaos:[255,77,109],genus:[87,207,112],lumine:[255,213,79],rhea:[0,209,178],solus:[100,149,237],aion:[255,159,67]}; const rgb=RGB[name]||[64,158,255]; return `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a})`; }
-    const saved=(localStorage.getItem('uno:arch')||'atlas').toLowerCase();
-    const a = overlayAlpha(); document.documentElement.style.setProperty('--arch-overlay', overlayColor(saved,a));
-  }catch(e){ console.warn('bootstrap consolidation:', e); }
-})();
-</script>
-<script id="TOP_SPACING_RUNTIME_FIX">
-document.addEventListener('DOMContentLoaded', ()=>{
-  try{
-    const hdr = document.querySelector('header.mast');
-    if(!hdr) return;
-    const hh = Math.round(hdr.getBoundingClientRect().height);
-    document.documentElement.style.setProperty('--hdrH', hh + 'px');
-  }catch(e){}
-});
-</script>
-<script id="ULTRA_TIGHT_RUNTIME">
-document.addEventListener('DOMContentLoaded', ()=>{
-  try{
-    const hdr = document.querySelector('header.mast');
-    if(!hdr) return;
-    const hh = Math.round(hdr.getBoundingClientRect().height);
-    document.documentElement.style.setProperty('--hdrH', hh + 'px');
-  }catch(e){}
-});
-</script>
-
-<script id="LSPANEL_SANITIZE">
-(function(){
-  function closerRow(el){
-    while(el && el !== document && !el.classList?.contains('row') && !/card|item|line|group/i.test(el.className||'')){
-      el = el.parentElement;
-    }
-    return el;
-  }
-  function removeByText(root){
-    const bad = /(part[ií]cul|particle|fps|frames|bloom|grain|density|count|debug|perf|hud|pedal)/i;
-    const nodes = Array.from(root.querySelectorAll('label, .mut, .row, div, section'));
-    const toRemove = new Set();
-    nodes.forEach(n=>{
-      const t = (n.textContent||'').trim();
-      if(bad.test(t)){
-        const r = closerRow(n) || n;
-        toRemove.add(r);
-      }
-    });
-    toRemove.forEach(n=>{ try{ n.remove(); }catch(_){} });
-  }
-
-  function tidyFooter(panel){
-    if(!panel) return;
-    const btnSave = panel.querySelector('#panelSave, #lsSave');
-    const btnClose = panel.querySelector('#panelClose, #lsClose');
-    if(!btnSave && !btnClose) return;
-    let f = panel.querySelector('.footer');
-    if(!f){
-      f = document.createElement('div');
-      f.className = 'footer';
-      panel.appendChild(f);
-    }
-    if(btnClose) f.appendChild(btnClose);
-    if(btnSave) f.appendChild(btnSave);
-  }
-
-  function run(){
-    const p = document.getElementById('panel') || document.getElementById('lsPanel');
-    if(!p) return;
-    removeByText(p);
-    tidyFooter(p);
-  }
-  // Ao abrir o painel
-  document.addEventListener('click', (e)=>{
-    const id = (e.target && (e.target.id||'')).toLowerCase();
-    if(id.includes('btnsettings') || id.includes('btnls') || id.includes('panelopen')){
-      setTimeout(run, 30);
-    }
-  });
-  // Tenta rodar uma vez após carregamento (para painéis já visíveis)
-  setTimeout(run, 300);
-})();
-</script>
-
-
-
-<script id="UPLOAD_BUTTONS_JS">
-(function(){
-  function visible(el){
-    if(!el || el.type!=='file') return false;
-    const cs = getComputedStyle(el);
-    if(el.hidden || cs.display==='none' || cs.visibility==='hidden') return false;
-    if(el.id && /appsimportfile|hidden/i.test(el.id)) return false;
-    return el.offsetParent !== null;
-  }
-  function labelFor(input){
-    // Priority: data-label -> aria-label/title -> accept-based label -> fallback
-    const dl = input.getAttribute('data-label') || input.getAttribute('aria-label') || input.getAttribute('title');
-    if(dl) return dl;
-    const acc = (input.getAttribute('accept') || '').toLowerCase();
-    if(acc.includes('image/')) return 'Enviar imagem';
-    if(acc.includes('video/')) return 'Enviar vídeo';
-    if(acc.includes('audio/')) return 'Enviar áudio';
-    return 'Enviar arquivo';
-  }
-  function enhance(input){
-    if(input.__styled) return; input.__styled = true;
-    const wrap = document.createElement('span');
-    wrap.className = 'input-file-wrap';
-    const btn = document.createElement('label');
-    btn.className = 'btn-upload';
-    btn.innerHTML = '<i class="ico"></i><span class="txt"></span>';
-    btn.querySelector('.txt').textContent = labelFor(input);
-    const meta = document.createElement('span'); meta.className='file-meta'; meta.textContent='';
-    const thumb = document.createElement('img'); thumb.className='file-thumb'; thumb.alt='preview';
-    input.parentNode.insertBefore(wrap, input);
-    wrap.appendChild(btn);
-    btn.appendChild(input);
-    wrap.appendChild(thumb);
-    wrap.appendChild(meta);
-
-    input.addEventListener('change', ()=>{
-      const f = input.files && input.files[0];
-      if(!f){ meta.textContent=''; wrap.classList.remove('has-thumb'); thumb.src=''; return; }
-      meta.textContent = f.name || '';
-      if(/^image\//i.test(f.type)){
-        const url = URL.createObjectURL(f);
-        thumb.src = url;
-        wrap.classList.add('has-thumb');
-        setTimeout(()=>URL.revokeObjectURL(url), 1000);
-      }else{
-        wrap.classList.remove('has-thumb'); thumb.src='';
-      }
-    });
-  }
-  function scan(){
-    document.querySelectorAll('input[type=file]:not(.__styled)').forEach(el=>{
-      if(visible(el)) enhance(el);
-    });
-  }
-  document.addEventListener('DOMContentLoaded', scan);
-  const mo = new MutationObserver(scan);
-  mo.observe(document.documentElement, {subtree:true, childList:true, attributes:true, attributeFilter:['style','class','hidden','accept','title','aria-label','data-label']});
-})();
-</script>
-
-<style id="ARCH_FAB_ROUND_FIX">
-.arch-circle{
-  border-radius:50% !important;
-  overflow:hidden !important;
-  -webkit-clip-path: circle(50% at 50% 50%); clip-path: circle(50% at 50% 50%);
-  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 99.9%, transparent 100%);
-          mask-image: radial-gradient(circle at 50% 50%, #000 99.9%, transparent 100%);
-  isolation:isolate; contain: paint; transform: translateZ(0); will-change: transform;
-  background-clip: padding-box;
-}
-.arch-circle > .arch-fab{
-  background:none !important; mix-blend-mode: normal !important;
-  backface-visibility:hidden; -webkit-backface-visibility:hidden;
-}
-.arch-circle > .arch-fab::before{
-  content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
-  background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
-  box-shadow:0 6px 16px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.06) inset;
-}
-/* failsafe de recorte para camadas do orbe */
-.arch-circle > canvas, .arch-circle #orbWrap, .arch-circle .orb-slot, .arch-circle iframe#arch-frame{
-  -webkit-clip-path: circle(50% at 50% 50%); clip-path: circle(50% at 50% 50%);
-}
-</style>
-
 </body></html>
