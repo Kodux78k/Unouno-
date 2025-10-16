@@ -1,7 +1,5 @@
 <!doctype html>
 <html lang="pt-BR" style="--arch-overlay: rgba(64, 158, 255, 0.22);"><head>
-<!-- NOTE: bump your SW cache name to e.g. CACHE_V3 to avoid stale assets after refactor. -->
-
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
   <title>HUB UNO — PROD (safe)</title>
@@ -68,7 +66,7 @@
       font: 14px/1.45 Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
-      overflow-x: hidden; overflow-y: auto; -webkit-overflow-scrolling: touch;
+      overflow: hidden;
   /* Permite que o pseudo-elemento ::after fique posicionado em relação ao corpo */
   position: relative;
     }
@@ -108,9 +106,8 @@ body::after{content:'';position:fixed;inset:0;background:none !important;pointer
     .title small { display: block; color: var(--mut); letter-spacing: .1em }
 
     /* ===== Layout ===== */
-    main { position: relative; height: 100%; padding-top: calc(var(--hdrH) + env(safe-area-inset-top) + var(--hdrOffset)); padding-bottom: calc(var(--tabsH) + env(safe-area-inset-bottom)); overflow: auto; -webkit-overflow-scrolling: touch;}
-    .view { position: absolute; inset: 0; padding: 12px 14px; overflow: auto; display: none; -webkit-overflow-scrolling: touch;
-}
+    main { position: relative; height: 100%; padding-top: calc(var(--hdrH) + env(safe-area-inset-top) + var(--hdrOffset)); padding-bottom: calc(var(--tabsH) + env(safe-area-inset-bottom)); overflow: hidden }
+    .view { position: absolute; inset: 0; padding: 12px 14px; overflow: auto; display: none }
     .view.active {
       display: block;
       /* Animação de transição mais simples: apenas fade com leve zoom. */
@@ -1234,15 +1231,7 @@ body[data-theme="blue1"] #chatFeed .msg.user { background: rgba(232,240,255,0.10
 
 </style>
 
-<style id="overlay-defaults">
-:root{
-  --arch-color: #8a2be2;
-  --arch-overlay-strength: 12%; /* −1 default */
-  --arch-overlay: color-mix(in srgb, var(--arch-color) var(--arch-overlay-strength), transparent);
-}
-body::after{content:'';position:fixed;inset:0;background:var(--arch-overlay, transparent)!important;pointer-events:none;z-index:0}
-#arch-fadeCover{background:var(--arch-overlay, transparent);z-index:2}
-</style>
+
 
 
 <style id="ls-panel-css">
@@ -1291,22 +1280,9 @@ body::after{content:'';position:fixed;inset:0;background:var(--arch-overlay, tra
 <style id="show-app-title-css">.app-title{display:inline-flex;align-items:center;gap:6px}</style>
 
 <!-- PATCH: overlay-css-unify -->
-<style id="overlay-css-unify">
-/* Ensure overlay rendering is unified across variants */
-body::after{
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: var(--arch-overlay, transparent) !important;
-  pointer-events: none;
-  z-index: 0;
-}
-</style>
+
 <!-- PATCH: overlay-guardian-css -->
-<style id="overlay-guardian-css">
-html[data-overlay="off"] body::after{ background: transparent !important; }
-html[data-overlay="off"] #arch-fadeCover{ background: transparent !important; }
-</style>
+
 
 <style id="orb-slot-css">
 /* === ORB Slot (iframe "dentro" do orbe) === */
@@ -1359,119 +1335,7 @@ html[data-overlay="off"] #arch-fadeCover{ background: transparent !important; }
 </style>
 
 
-<style id="hdpro-override">
 
-/* === HD•PRO Override (Dual UNO) ==============================
-   - Handle (quase invisível) para abrir/fechar LS Panel (#brain)
-   - Painel "HD Pro" dentro do LS Panel (estatísticas + ações)
-   - Metrificadores animados de Storage (LocalStorage/IndexedDB/Total)
-   - Toggle para colapsar opções avançadas do ORB/FPS
-   ================================================================= */
-:root{
-  --hdpro-glass: rgba(12,16,24,.64);
-  --hdpro-line: 1px solid rgba(143,211,255,.14);
-  --hdpro-ok: var(--ok, #39ffb6);
-  --hdpro-warn: var(--warn, #ffb86b);
-  --hdpro-err: var(--err, #ff6b6b);
-}
-
-/* Botão/área de pega "tango" (quase invisível) */
-#lsHandle{
-  position: fixed;
-  top: calc(env(safe-area-inset-top, 8px) + 6px);
-  left: 8px;
-  width: 16px;
-  height: 16px;
-  border-radius: 999px;
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.18);
-  box-shadow: 0 8px 20px rgba(0,0,0,.45);
-  opacity: .14;
-  z-index: 1600;
-  transition: opacity .18s ease, transform .18s ease, background .18s ease;
-  backdrop-filter: blur(6px);
-}
-#lsHandle:hover, #lsHandle:active{ opacity:.42; transform: scale(1.06); }
-#lsHandle.on{ opacity:.8; background: rgba(57,255,182,.25); }
-
-/* Painel HD Pro embutido no LS (#brain .popover) */
-.hdpro-sec{
-  margin-top: 10px;
-  padding: 10px;
-  border-radius: 16px;
-  background: var(--hdpro-glass);
-  border: var(--hdpro-line);
-  box-shadow: 0 10px 24px rgba(0,0,0,.35);
-}
-.hdpro-sec .sec-hdr{
-  display:flex; align-items:center; justify-content:space-between;
-  gap:10px; margin-bottom:8px;
-}
-.hdpro-sec .sec-hdr h3{
-  margin:0; font-weight:900; font-size:14px; letter-spacing:.04em;
-}
-.hdpro-grid{
-  display:grid; grid-template-columns: 1fr; gap:10px;
-}
-.hdpro-row{ display:grid; grid-template-columns: 1fr auto; gap:8px; align-items:center; }
-.hdpro-actions{ display:flex; gap:8px; flex-wrap:wrap; }
-
-/* Meters */
-.hdpro-meter{
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 10px;
-  overflow: hidden;
-  height: 14px;
-  position: relative;
-}
-.hdpro-meter .bar{
-  position:absolute; left:0; top:0; height:100%;
-  width:0%;
-  background: linear-gradient(90deg, var(--grad-a), var(--grad-b));
-  transition: width .8s cubic-bezier(.22,.61,.36,1);
-  box-shadow: inset 0 0 12px rgba(0,0,0,.25);
-}
-.hdpro-label{ font-size:12px; color: var(--mut, rgba(245,247,255,.68)); }
-.hdpro-val{ font-size:12px; font-weight:800; }
-
-/* Toggle de avançados ORB/FPS */
-.hdpro-toggle{
-  display:flex; align-items:center; gap:8px;
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 12px; padding: 8px 10px;
-  font-size:12px; font-weight:800;
-  cursor:pointer;
-}
-.hdpro-adv-hidden{ display:none !important; }
-
-/* Botões compactos coerentes com tema */
-.hd-btn{ 
-  background: linear-gradient(180deg, rgba(13,22,34,.7), rgba(9,14,22,.7));
-  border: 1px solid rgba(143,211,255,.18);
-  color: var(--fg);
-  border-radius: 12px; padding: 8px 10px; font-weight:800;
-}
-.hd-btn.danger{ border-color: rgba(255,107,107,.35); }
-.hd-btn.ok{ border-color: rgba(57,255,182,.35); }
-
-/* Toast simples */
-#hdToast{
-  position: fixed; left: 50%; transform: translateX(-50%);
-  bottom: calc(14px + env(safe-area-inset-bottom, 0));
-  background: rgba(12,16,24,.92);
-  border: 1px solid rgba(255,255,255,.18);
-  color: var(--fg);
-  border-radius: 14px; padding: 10px 14px;
-  font-weight:800; font-size:12px;
-  box-shadow: 0 14px 40px rgba(0,0,0,.45);
-  z-index: 1700; opacity: 0; pointer-events: none;
-  transition: opacity .25s ease, transform .25s ease;
-}
-#hdToast.show{ opacity: 1; transform: translateX(-50%) translateY(-4px); }
-
-</style>
 <style>
 /* Gradient icon tuning (Send/Voice/Text) */
 #homeInputOverlay button svg, #homeVoiceBtn svg, #homeTextBtn svg{
@@ -1518,10 +1382,14 @@ nav.tabbar{ padding:4px 12px calc(env(safe-area-inset-bottom) + 4px) }
 </style>
 
 <!-- OVERLAY: background-only patch -->
+
+<script id="OVERLAY_DEFAULT_BOOT">
+// Overlay ON por padrão até o primeiro arquétipo aplicar a cor própria.
+try{ document.documentElement.style.setProperty('--arch-overlay','rgba(64,158,255,.22)'); }catch{}
+</script>
+
 <style id="OVERLAY_BG_ONLY">
-/* Mantém o overlay sempre no background (atrás de tudo). */
 body::after{ content:none !important; }
-/* Overlay como camada de background (1ª), gradiente Nebula/Blue atrás dela (2ª). */
 body{
   background:
     radial-gradient(120% 120% at 50% 40%,
@@ -1530,139 +1398,24 @@ body{
     linear-gradient(42deg, var(--grad-a), var(--grad-b)) fixed !important;
 }
 </style>
-<script id="OVERLAY_DEFAULT_BOOT">
-// Overlay ON por padrão até o primeiro arquétipo aplicar a cor própria.
-try{ document.documentElement.style.setProperty('--arch-overlay','rgba(64,158,255,.22)'); }catch{}
-</script>
-
-  
-
 <style id="ULTRA_TIGHT_TOP">
-/* Base */
-:root{
-  --hdrH: 52px;           /* altura real do header (calculada em runtime) */
-  --tabsH: 58px;          /* altura da barra de tabs / bottom area */
-  --hd-gap: 9px;          /* micro respiro entre header e conteúdo */
-}
-
-/* 1) Header fixo */
-header.mast{
-  position: fixed !important;
-  top: 0; left: 0; right: 0;
-  margin-top: 0 !important;
-  z-index: 100; /* reforço */
-  /* opcional: melhora contraste em fundos translúcidos */
-  /* backdrop-filter: blur(10px);
-  box-shadow: 0 1px 4px rgba(0,0,0,.25); */
-}
-
-/* 2) Compensação do conteúdo pelo header (+ micro-gap) */
-main{
-  padding-top: calc(var(--hdrH) + var(--hd-gap)) !important;
-  padding-bottom: calc(var(--tabsH) + min(env(safe-area-inset-bottom, 0), 8px)) !important;
-}
-
-/* 3) Orbe colado: remove 5vh e usa clamp curtinho */
-.arch-container{
-  margin-top: clamp(0px, 0.6vh, 8px) !important;
-}
-
-/* 4) Remove “respiro” adicional no topo das views */
-.view{
-  padding-top: 0 !important;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* 5) Navegação por âncoras não cola sob o header */
-[id]{
-  scroll-margin-top: calc(var(--hdrH) + var(--hd-gap) + 8px);
-}
+:root{ --hdrH: 52px; --tabsH: 58px; --hd-gap: 8px;}
+header.mast{ position: fixed !important; top: 0; left: 0; right: 0; margin-top: 0 !important; z-index: 100; }
+main{ padding-top: var(--hdrH) !important; padding-bottom: calc(var(--tabsH) + min(env(safe-area-inset-bottom, 0), 8px)) !important; }
+.arch-container{ margin-top: clamp(0px, 0.6vh,8px) !important; }
+.view{ padding-top: 0 !important; }
 </style>
-
 <script id="ULTRA_TIGHT_RUNTIME">
-(function(){
-  const setHdrH = () => {
-    try{
-      const hdr = document.querySelector('header.mast');
-      if(!hdr) return;
-      const hh = Math.round(hdr.getBoundingClientRect().height);
-      document.documentElement.style.setProperty('--hdrH', hh + 'px');
-    }catch(e){}
-  };
-
-  // 1) DOM pronto
-  document.addEventListener('DOMContentLoaded', setHdrH, {once:true});
-
-  // 2) Após assets/fontes (garante altura final renderizada)
-  window.addEventListener('load', ()=> {
-    setHdrH();
-    // 2.1) fonts.ready ajuda quando a família do header muda o line-height
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(()=> setHdrH()).catch(()=>{});
-    }
-  });
-
-  // 3) Observa resizing/orientação (debounced)
-  let t;
-  const debounced = () => { clearTimeout(t); t = setTimeout(setHdrH, 100); };
-  window.addEventListener('resize', debounced);
-  window.addEventListener('orientationchange', debounced);
-
-  // 4) Observa mudanças no próprio header (menus dinâmicos, barras, etc.)
-  const hdr = document.querySelector('header.mast');
-  if (hdr && 'ResizeObserver' in window) {
-    const ro = new ResizeObserver(()=> setHdrH());
-    try{ ro.observe(hdr); }catch(e){}
-  }
-})();
-</script>
-  
-  
-
-<style id="OVERSCROLL_GUARD">
-html, body { overscroll-behavior-y: contain; }
-</style>
-<script id="SCROLL_UNLOCK_GUARD">
-(function(){
-  function unlock(){ try{ document.documentElement.style.overflowY='auto'; document.body.style.overflowY='auto'; }catch(e){} }
-  document.addEventListener('DOMContentLoaded', unlock, {once:true});
-  window.addEventListener('load', unlock, {once:true});
-  window.addEventListener('WindexReady', unlock, {once:true});
-})();
+document.addEventListener('DOMContentLoaded', ()=>{
+  try{
+    const hdr = document.querySelector('header.mast');
+    if(!hdr) return;
+    const hh = Math.round(hdr.getBoundingClientRect().height);
+    document.documentElement.style.setProperty('--hdrH', hh + 'px');
+  }catch(e){}
+});
 </script>
 
-
-<style id="ARC_ORB_SQUARE_FADE">
-/* Patch focado: remove apenas o quadrado do ARC ORB,
-   preservando o fundo do iframe do arquétipo e adicionando fade circular. */
-
-/* 1) Zera fundos apenas do contêiner do ORB e filhos diretos */
-#orbWrap, #orbWrap * {
-  background: transparent !important;
-}
-
-/* 2) Mantém o fundo do arquétipo (fetch) intacto */
-.arch-circle > #arch-frame,
-.arch-circle > iframe#arch-frame {
-  background: #0b0f14 !important;
-}
-
-/* 3) Recria a “tinta” como overlay circular com fade suave */
-.arch-circle::after{
-  content:"";
-  position:absolute; inset:0;
-  border-radius:50%;
-  background: var(--arch-overlay, transparent);
-  mix-blend-mode: overlay;
-  pointer-events:none;
-  z-index: 6;
-  /* feather nas bordas (fade) */
-  -webkit-mask-image: radial-gradient(circle at 50% 50%, rgba(0,0,0,1) 62%, rgba(0,0,0,0) 86%);
-          mask-image: radial-gradient(circle at 50% 50%, rgba(0,0,0,1) 62%, rgba(0,0,0,0) 86%);
-  opacity:.35;
-  transition: opacity .25s ease;
-}
-</style>
 <style id="ARCH_FAB_ROUND_FIX">
 .arch-circle{
   border-radius:50% !important;
@@ -1682,11 +1435,18 @@ html, body { overscroll-behavior-y: contain; }
   background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
   box-shadow:0 6px 16px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.06) inset;
 }
-/* failsafe de recorte para camadas do orbe */
-.arch-circle > canvas, .arch-circle #orbWrap, .arch-circle .orb-slot, .arch-circle iframe#arch-frame{
+/* failsafe de recorte para camadas do orbe / iframe */
+.arch-circle > canvas,
+.arch-circle #orbWrap,
+.arch-circle .orb-slot,
+.arch-circle iframe#arch-frame{
   -webkit-clip-path: circle(50% at 50% 50%); clip-path: circle(50% at 50% 50%);
 }
+
+/* Display Hiding da frase (callout) */
+.arch-circle .call{ display:none !important; }
 </style>
+
 </head>
 <body>
   <!-- Splash screen displayed on initial load -->
@@ -1819,7 +1579,20 @@ html, body { overscroll-behavior-y: contain; }
   <polyline points="15 18 9 12 15 6" stroke="url(#g5)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
             <span class="ripple"></span></button>
-            <select id="arch-select" title="Escolher arquétipo"><option value="./archetypes/atlas.html">atlas.html</option><option value="./archetypes/nova.html">nova.html</option><option value="./archetypes/vitalis.html">vitalis.html</option><option value="./archetypes/pulse.html">pulse.html</option><option value="./archetypes/artemis.html">artemis.html</option><option value="./archetypes/serena.html">serena.html</option><option value="./archetypes/kaos.html">kaos.html</option><option value="./archetypes/genus.html">genus.html</option><option value="./archetypes/lumine.html">lumine.html</option><option value="./archetypes/rhea.html">rhea.html</option><option value="./archetypes/solus.html">solus.html</option><option value="./archetypes/aion.html">aion.html</option></select>
+            <select id="arch-select" title="Escolher arquétipo">
+  <option value="atlas.html">atlas</option>
+  <option value="nova.html">nova</option>
+  <option value="vitalis.html">vitalis</option>
+  <option value="pulse.html">pulse</option>
+  <option value="artemis.html">artemis</option>
+  <option value="serena.html">serena</option>
+  <option value="kaos.html">kaos</option>
+  <option value="genus.html">genus</option>
+  <option value="lumine.html">lumine</option>
+  <option value="rhea.html">rhea</option>
+  <option value="solus.html">solus</option>
+  <option value="aion.html">aion</option>
+</select>
             <button class="btn fx-trans fx-press ring" id="arch-next" title="Próximo">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
 
@@ -1843,7 +1616,7 @@ html, body { overscroll-behavior-y: contain; }
               <div class="orb-glow" id="orbGlow"></div>
               <canvas id="particles"></canvas>
               <div class="ring"></div>
-              <div class="call" id="orbCall"></div>
+              <div class="call" id="orbCall">Toque para pulsar · Nebula</div>
             </div>
 
             <iframe id="arch-frame" title="Archetype Core" sandbox="allow-scripts" referrerpolicy="no-referrer" src="./archetypes/atlas.html"></iframe>
@@ -2437,7 +2210,7 @@ html, body { overscroll-behavior-y: contain; }
     <!-- CHAT (Dual • Chat) -->
     <section id="v-chat" class="view">
       <!-- Feed de mensagens do chat -->
-      <div id="chatFeed"><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: E aí beleza</div></div>
+      <div id="chatFeed"></div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Essa versão tá daora</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: Dual e aí beleza como está</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí alô</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: E aí beleza</div><div class="msg user">Você: E aí beleza</div></div>
     </section>
   </main>
 
@@ -2603,7 +2376,7 @@ html, body { overscroll-behavior-y: contain; }
   <script>
   // Redefine the global toast function to suppress popup messages. If you
   // later decide to re-enable notifications, remove or comment out this line.
-  window.toast = function(){};
+  
     /* ===================== Helpers ===================== */
     const $ = (q, r = document) => r.querySelector(q);
     const $$ = (q, r = document) => Array.from(r.querySelectorAll(q));
@@ -5128,9 +4901,9 @@ window.addEventListener('load', () => {
 
 })(); // end ChatPlus
 </script>
-  <script src="dual_multiagent_v1.js"></script>
-  <script src="dual_multiagent_v12_locked.js"></script>
-  <script src="openrouter_hardlock_model_v1.js" defer=""></script>
+  
+  
+  
 
 
 <style>
@@ -5347,202 +5120,11 @@ main .row > * + * { margin-top: .5rem; }
 </style>
 
 
-<script id="patch-visual-presets">
-(function(){
-  // Helpers
-  const $ = (q, r = document) => r.querySelector(q);
-  const LS = {
-    get: (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d } catch (e) { return d } },
-    set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)) } catch (e) {} }
-  };
-
-  // Inject "Blue‑1" into theme select if missing
-  document.addEventListener('DOMContentLoaded', function(){
-    try {
-      const sel = document.getElementById('themeSelect');
-      if (sel && !Array.from(sel.options).some(o => o.value === 'blue1')) {
-        const opt = document.createElement('option');
-        opt.value = 'blue1'; opt.textContent = 'Blue‑1 (azul)';
-        sel.appendChild(opt);
-      }
-    } catch(e){}
-  });
-
-  // Build and inject a Visual & 3D card into Brain view (non-destructive)
-  document.addEventListener('DOMContentLoaded', function(){
-    const grid = document.querySelector('#v-brain .grid');
-    if (!grid) return;
-    const panel = document.createElement('div');
-    panel.className = 'card fx-trans fx-lift';
-    panel.style.display = 'block';
-    panel.innerHTML = `
-      <div style="font-weight:800">Visual & 3D (presets)</div>
-      <div style="margin-top:8px;display:grid;gap:10px">
-        <label style="display:flex;align-items:center;gap:8px">
-          <span>Preset:</span>
-          <select id="visualPreset" class="input ring" style="max-width:260px">
-            <option value="blue1">Blue‑1 (shader)</option>
-            <option value="strong">Strong</option>
-            <option value="cinematic-soft">Cinematic Soft</option>
-          </select>
-        </label>
-        <label style="display:flex;align-items:center;gap:8px">
-          <input id="overlayToggle" type="checkbox" />
-          <span>Overlay de cor por arquétipo</span>
-        </label>
-        <label style="display:flex;align-items:center;gap:8px">
-          <input id="bloomToggle" type="checkbox" />
-          <span>Bloom fotográfico (post)</span>
-        </label>
-        <label style="display:flex;align-items:center;gap:8px">
-          <span>Glow/Toon:</span>
-          <input id="glowRange" type="range" min="0" max="1" step="0.05" style="flex:1" />
-          <span id="glowVal" class="mut" style="width:42px;text-align:right">0.80</span>
-        </label>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button id="applyVisual" class="btn prime fx-trans fx-press ring">Aplicar<span class="ripple"></span></button>
-          <button id="resetVisual" class="btn fx-trans fx-press ring">Padrão<span class="ripple"></span></button>
-        </div>
-        <div class="mut" style="font-size:11px">
-          As preferências são salvas no seu navegador e enviadas ao arquétipo ativo.
-        </div>
-      </div>
-    `;
-    grid.appendChild(panel);
-
-    // Defaults
-    const defaults = {
-      preset: LS.get('arch:visualPreset', 'blue1'),
-      overlayOn: LS.get('arch:overlayOn', false),
-      bloomOn: LS.get('arch:bloomOn', false),
-      glow: LS.get('arch:glowStrength', 0.80)
-    };
-
-    // UI references
-    const selPreset = $('#visualPreset', panel);
-    const chkOverlay = $('#overlayToggle', panel);
-    const chkBloom = $('#bloomToggle', panel);
-    const rngGlow = $('#glowRange', panel);
-    const spnGlow = $('#glowVal', panel);
-    const btnApply = $('#applyVisual', panel);
-    const btnReset = $('#resetVisual', panel);
-
-    // Populate
-    selPreset.value = defaults.preset;
-    chkOverlay.checked = !!defaults.overlayOn;
-    chkBloom.checked = !!defaults.bloomOn;
-    rngGlow.value = defaults.glow;
-    spnGlow.textContent = Number(defaults.glow).toFixed(2);
-
-    rngGlow.addEventListener('input', () => { spnGlow.textContent = Number(rngGlow.value).toFixed(2); });
-
-    function saveAndApply(){
-      const state = {
-        preset: selPreset.value,
-        overlayOn: !!chkOverlay.checked,
-        bloomOn: !!chkBloom.checked,
-        glow: Number(rngGlow.value)
-      };
-      LS.set('arch:visualPreset', state.preset);
-      LS.set('arch:overlayOn', state.overlayOn);
-      LS.set('arch:bloomOn', state.bloomOn);
-      LS.set('arch:glowStrength', state.glow);
-      // Update overlay color right away
-      try {
-        const sel = document.getElementById('arch-select');
-        const base = (sel?.value || '').replace(/\.html$/i, '');
-        if (window.applyArchOverlay) window.applyArchOverlay(base);
-      } catch(e){}
-      // Send to iframe
-      try { sendVisualSettingsToFrame(); } catch(e){}
-    }
-
-    btnApply.addEventListener('click', saveAndApply);
-    btnReset.addEventListener('click', () => {
-      selPreset.value = 'blue1';
-      chkOverlay.checked = false;
-      chkBloom.checked = false;
-      rngGlow.value = 0.80;
-      spnGlow.textContent = '0.80';
-      saveAndApply();
-    });
-  });
-
-  // Canonical overlay colors for the 12 archetypes
-  const ARCH_OVERLAYS_PATCHED = {
-    atlas:  'rgba(64,158,255,0.22)',
-    nova:   'rgba(255,82,177,0.22)',
-    vitalis:'rgba(87,207,112,0.22)',
-    pulse:  'rgba(0,191,255,0.22)',
-    artemis:'rgba(255,195,0,0.22)',
-    serena: 'rgba(186,130,219,0.22)',
-    kaos:   'rgba(255,77,109,0.22)',
-    genus:  'rgba(87,207,112,0.22)',
-    lumine: 'rgba(255,213,79,0.22)',
-    solus:  'rgba(186,130,219,0.22)',
-    rhea:   'rgba(0,209,178,0.22)',
-    aion:   'rgba(255,159,67,0.22)',
-    default:'rgba(255,255,255,0.0)'
-  };
-
-  // Override applyArchOverlay to honor overlay toggle
-  (function overrideApplyArchOverlay(){
-    const LSget = (k,d)=>{ try{ const v = localStorage.getItem(k); return v?JSON.parse(v):d }catch(e){ return d } };
-    window.applyArchOverlay = function(name){
-      const key = (name || '').toLowerCase();
-      const on = !!LSget('arch:overlayOn', false);
-      const color = on ? (ARCH_OVERLAYS_PATCHED[key] || ARCH_OVERLAYS_PATCHED.default) : 'rgba(0,0,0,0)';
-      document.documentElement.style.setProperty('--arch-overlay', color);
-    };
-    // Apply once at startup for current selection
-    document.addEventListener('DOMContentLoaded', function(){
-      const sel = document.getElementById('arch-select');
-      const base = (sel?.value || '').replace(/\.html$/i, '');
-      window.applyArchOverlay(base);
-    });
-  })();
-
-  // PostMessage: send visual settings to archetype iframe
-  function currentVisualSettings(){
-    const LSget = (k,d)=>{ try{ const v = localStorage.getItem(k); return v?JSON.parse(v):d }catch(e){ return d } };
-    return {
-      preset: LSget('arch:visualPreset','blue1'),
-      bloom: !!LSget('arch:bloomOn', false),
-      glow: Number(LSget('arch:glowStrength', 0.80)),
-      overlayOn: !!LSget('arch:overlayOn', false)
-    };
-  }
-  window.sendVisualSettingsToFrame = function(){
-    try {
-      const f = document.getElementById('arch-frame');
-      if (f && f.contentWindow) {
-        f.contentWindow.postMessage({ type:'visualSettings', data: currentVisualSettings() }, '*');
-      }
-    } catch(e){}
-  };
-
-  // Send settings whenever the iframe loads or signals readiness
-  document.addEventListener('DOMContentLoaded', function(){
-    const f = document.getElementById('arch-frame');
-    if (f) {
-      f.addEventListener('load', () => { try { sendVisualSettingsToFrame(); } catch(e){} });
-      // small delay to ensure child is ready
-      setTimeout(() => { try { sendVisualSettingsToFrame(); } catch(e){} }, 800);
-    }
-  });
-  window.addEventListener('message', (ev) => {
-    const msg = ev?.data || {};
-    if (msg && msg.type === 'archReady') {
-      try { sendVisualSettingsToFrame(); } catch(e){}
-    }
-  });
-
-})();
-</script>
 
 
-  <link rel="stylesheet" href="uno_showcase_patch.css">
-  <script src="uno_showcase_patch.js" defer></script>
+
+  
+  
 
 <div id="lsModal" class="ls-modal" aria-hidden="true">
   <div class="ls-panel" id="lsPanel">
@@ -5770,23 +5352,7 @@ main .row > * + * { margin-top: .5rem; }
 </script>
 
 
-<script id="ls-snpt-boot">
-(function(){
-  function ensure(){
-    if(document.getElementById('ls-panel-js') || document.getElementById('lsModal')) return;
-    fetch('lspanel.snpt', {cache:'no-store'}).then(r => r.ok ? r.text(): null).then(txt => {
-      if(!txt) return;
-      document.body.insertAdjacentHTML('beforeend', txt);
-      setTimeout(function(){
-        try{
-          if(window.DualLS && typeof window.DualLS.render==='function'){ window.DualLS.render(); }
-        }catch(e){}
-      }, 50);
-    }).catch(()=>{});
-  }
-  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', ensure); } else { ensure(); }
-})();
-</script>
+
 
 
 
@@ -5837,41 +5403,7 @@ main .row > * + * { margin-top: .5rem; }
 
 
 <!-- PATCH: overlay-hardlock -->
-<script id="overlay-hardlock">
-(function () {
-  const LSget = (k,d)=>{ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d }catch(e){ return d } };
 
-  function setOverlayTransparent(){
-    try{
-      document.documentElement.style.setProperty('--arch-overlay','rgba(0,0,0,0)');
-      document.documentElement.style.setProperty('--arch-overlay-strength','0%');
-    }catch(e){}
-  }
-
-  function gateApply(){
-    // Re-define applyArchOverlay ALWAYS last so it cannot be overridden later
-    window.applyArchOverlay = function(name){
-      const on = !!LSget('arch:overlayOn', false);
-      if(!on){ setOverlayTransparent(); return; }
-      const key = (name||'').toLowerCase();
-      const MAP = (window.ARCH_OVERLAYS_PATCHED||window.ARCH_OVERLAYS||{default:'rgba(0,0,0,0)'});
-      const color = MAP[key] || MAP.default || 'rgba(0,0,0,0)';
-      try{
-        document.documentElement.style.setProperty('--arch-overlay', color);
-        // If some panels manage strength separately, leave current value as-is when ON
-      }catch(e){}
-    };
-
-    // On load, keep OFF if toggle is OFF
-    const sel = document.getElementById('arch-select');
-    const base = (sel?.value || '').replace(/\.html$/i,'');
-    if(!LSget('arch:overlayOn', false)) setOverlayTransparent(); else window.applyArchOverlay(base);
-  }
-
-  if(document.readyState === 'complete') gateApply();
-  else window.addEventListener('load', gateApply);
-})();
-</script>
 <!-- PATCH: ls-refresh-binder -->
 <script>
 (function(){
@@ -5883,42 +5415,10 @@ main .row > * + * { margin-top: .5rem; }
 })();
 </script>
 <!-- PATCH: overlay-guardian-js -->
-<script id="overlay-guardian-js">
-(function(){
-  function readLSBool(key, d){ try{ var v = localStorage.getItem(key); return v ? JSON.parse(v) : d; }catch(e){ return d; } }
-  function enforce(){
-    var on = !!readLSBool('arch:overlayOn', false);
-    document.documentElement.setAttribute('data-overlay', on ? 'on' : 'off');
-    if(!on){
-      try{
-        document.documentElement.style.setProperty('--arch-overlay','rgba(0,0,0,0)');
-        document.documentElement.style.setProperty('--arch-overlay-strength','0%');
-        var fade = document.getElementById('arch-fadeCover');
-        if(fade) fade.style.background = 'transparent';
-      }catch(e){}
-    }
-  }
-  function bind(){
-    enforce();
-    // Poll lightly to defeat late writers
-    setInterval(enforce, 500);
-    // Also react to storage changes (other tabs)
-    window.addEventListener('storage', function(ev){ if(ev && ev.key==='arch:overlayOn'){ enforce(); } });
-    // If there is a Brain toggle, hook it
-    document.addEventListener('click', function(e){
-      var t = e.target;
-      if(!t) return;
-      if(t.id==='overlayToggle' || t.closest && t.closest('#overlayToggle')){
-        setTimeout(enforce, 60);
-      }
-    }, true);
-  }
-  if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', bind); } else { bind(); }
-})();
-</script>
-<script type="module" src="./lib/UNO_patch_arch3d_bloom_loader.js"></script>
-<script src="./lib/UNO_patch_arch3d_particles.js"></script>
-<script src="./lib/dual_multiagent_v12_kobllux_locked.js"></script>
+
+
+
+
 <script>
 if ('serviceWorker' in navigator) {
   addEventListener('load', ()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
@@ -6114,599 +5614,19 @@ document.getElementById('orbWrap')?.addEventListener('click', function(){ try{ w
 </script>
 
 
-<script id="arch-chips-3d-layers">
-// BLOOM TOGGLE: persist in localStorage('dual.ui.bloom'), add button above chips
-(function(){ 
-  const _bState = (localStorage.getItem('dual.ui.bloom') === '1');
-  function sendBloom(enabled){
-    try{
-      const fr = document.getElementById('arch-frame');
-      if(fr && fr.contentWindow) fr.contentWindow.postMessage({ type:'bloomToggle', enabled: !!enabled }, '*');
-      // Adjust overlay intensity when bloom enabled
-      document.documentElement.style.setProperty('--arch-overlay-intensity', enabled? '0.45' : '0.35');
-    }catch(e){}
-  }
-  // ensure we send initial state on boot after DOM ready
-  if (document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', ()=> sendBloom(_bState) );
-  } else sendBloom(_bState);
-  // expose helper for the chip script to create the button
-  window._dual_bloom_state = _bState;
-  window._dual_bloom_send = sendBloom;
-})();
-(function(){
-  // Minimal palettes (sync with your overlay colors)
-  const COLORS = {
-    atlas:'#409EFF', nova:'#FF52B1', vitalis:'#34D399', pulse:'#00BFFF',
-    artemis:'#FFC300', serena:'#B684FF', kaos:'#FF4D6D', genus:'#22C55E',
-    lumine:'#FFD54F', rhea:'#00D1B2', solus:'#6495ED', aion:'#8B5CF6'
-  };
-  const PRESET = name => ({
-    name,
-    color: COLORS[name] || '#88a',
-    count: (name==='nova'||name==='pulse'||name==='lumine') ? 340 : 260,
-    orbitRadius: (name==='nova'||name==='serena'||name==='lumine') ? 0.76 : 0.68,
-    spin: (name==='nova'||name==='pulse') ? 0.7 : 0.56,
-    size: 0.010, // sphere size
-    glow: 0.42
-  });
 
-  const ACTIVE = new Set();
-  function sendLayers(){
-    const fr = document.getElementById('arch-frame');
-    if (!fr || !fr.contentWindow) return;
-    const arr = Array.from(ACTIVE).map(n => PRESET(n));
-    fr.contentWindow.postMessage({ type:'atomConfigLayers', layers: arr }, '*');
-  }
-
-  function chipEl(name){
-    const b = document.createElement('button');
-    b.className = 'arch-chip';
-    b.textContent = name[0].toUpperCase()+name.slice(1);
-    b.style.borderColor = 'rgba(255,255,255,.18)';
-    b.style.background = 'rgba(255,255,255,.06)';
-    b.onclick = ()=>{
-      if (ACTIVE.has(name)) ACTIVE.delete(name); else ACTIVE.add(name);
-      b.classList.toggle('on', ACTIVE.has(name));
-      sendLayers();
-    };
-    return b;
-  }
-
-  function ensureStyles(){
-    if (document.getElementById('archChip3DStyles')) return;
-    const st = document.createElement('style'); st.id='archChip3DStyles';
-    st.textContent = `
-      .arch-chip-wrap{ display:grid; grid-template-columns: repeat(auto-fill,minmax(92px,1fr)); gap:8px; }
-      .arch-chip{ appearance:none; border:1px solid var(--ring, rgba(255,255,255,.18)); background: var(--glass, rgba(255,255,255,.06)); color: var(--txt, #eaf2ff);
-        padding:8px 10px; border-radius:999px; font-size:12px; letter-spacing:.2px; cursor:pointer; }
-      .arch-chip.on{ background: rgba(57,255,182,.18); border-color: rgba(57,255,182,.45); }
-      .arch-chip-title{ font-size:12px; color: var(--muted,#a6b0c0); margin: 6px 0 6px; font-weight:800; }
-    `;
-    document.head.appendChild(st);
-  }
-
-  function injectInLSPanel(){
-    ensureStyles();
-    const panel = document.getElementById('lsPanel') || document.querySelector('#lsModal .ls-panel');
-    if (!panel || document.getElementById('archChip3DSection')) return;
-    const sec = document.createElement('div');
-    sec.id = 'archChip3DSection';
-    sec.className = 'preset';
-    sec.style.marginTop = '10px';
-    sec.innerHTML = `<div class="arch-chip-title">Arquétipos (camadas no ORB · 3D)</div>`;
-    const wrap = document.createElement('div'); wrap.className = 'arch-chip-wrap';
-    ['atlas','nova','vitalis','pulse','artemis','serena','kaos','genus','lumine','rhea','solus','aion'].forEach(n=> wrap.appendChild(chipEl(n)));
-    sec.appendChild(wrap);
-    // === Bloom toggle (insert above chips) ===
-    const bloomWrap = document.createElement('div');
-    bloomWrap.style.display = 'flex'; bloomWrap.style.alignItems = 'center'; bloomWrap.style.justifyContent = 'space-between';
-    bloomWrap.style.marginBottom = '8px';
-    const lbl = document.createElement('div'); lbl.textContent = 'Bloom Nébula'; lbl.className='arch-chip-title'; lbl.style.margin='0'; lbl.style.fontSize='12px';
-    const toggle = document.createElement('button'); toggle.id='toggleBloomBtn'; toggle.className='arch-chip'; toggle.style.minWidth='92px';
-    const state = (localStorage.getItem('dual.ui.bloom') === '1') || !!window._dual_bloom_state;
-    if(state) toggle.classList.add('on');
-    toggle.textContent = state ? 'Bloom: ON' : 'Bloom: OFF';
-    toggle.onclick = function(){
-      const now = !toggle.classList.contains('on');
-      toggle.classList.toggle('on', now);
-      toggle.textContent = now ? 'Bloom: ON' : 'Bloom: OFF';
-      try{ localStorage.setItem('dual.ui.bloom', now? '1':'0'); }catch(_){}
-      if (window._dual_bloom_send) window._dual_bloom_send(now);
-      // send message to iframe as well for immediate toggle
-      try{ const f = document.getElementById('arch-frame'); if(f && f.contentWindow) f.contentWindow.postMessage({ type: 'bloomToggle', enabled: !!now }, '*'); }catch(_){}
-    };
-    sec.insertBefore(bloomWrap, sec.firstChild);
-    bloomWrap.appendChild(lbl);
-    bloomWrap.appendChild(toggle);
-    
-    // Coloca no topo do LS Panel
-    const hdr = panel.querySelector('.ls-hdr');
-    if (hdr && hdr.parentNode) hdr.parentNode.insertBefore(sec, hdr.nextSibling);
-    // Ativa por padrão a camada do arquétipo atual
-    try{
-      const sel = document.getElementById('arch-select');
-      const cur = (sel && sel.value || 'atlas.html').replace(/.*\//,'').replace(/\.html$/i,'');
-      const btn = wrap.querySelector('button.arch-chip:nth-child(' + (['atlas','nova','vitalis','pulse','artemis','serena','kaos','genus','lumine','rhea','solus','aion'].indexOf(cur)+1) + ')');
-      if (cur && btn){ ACTIVE.add(cur); btn.classList.add('on'); sendLayers(); }
-    }catch(_){}
-  }
-
-  function bindLSButton(){
-    const btn = document.getElementById('btnLS');
-    if (btn && !btn.dataset._chipsHook){
-      btn.dataset._chipsHook = '1';
-      btn.addEventListener('click', ()=> setTimeout(injectInLSPanel, 80), {passive:true});
-    } else {
-      // if already open
-      setTimeout(injectInLSPanel, 120);
-    }
-  }
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindLSButton);
-  else bindLSButton();
-
-  // Also re-inject if LS modal gets rebuilt
-  document.addEventListener('ls:disabled-changed', ()=> setTimeout(injectInLSPanel, 60));
-})();
-</script>
 
 
 <!-- LSPANEL MASTER FIX v3.7.1 — CSS -->
-<style id="lspanel-masterfix-css">
-:root{ --ls-fg:#eaf2ff; --ls-surface:rgba(15,17,32,.9); --ls-line:rgba(255,255,255,.14); --ls-gap:10px; --ls-h:40px; --ls-r:12px; }
-#lsModal .ls-panel{background:var(--ls-surface)!important;border:1px solid var(--ls-line)!important;border-radius:16px!important;padding:12px!important}
-#lsModal .ls-panel .section-title{font-weight:900;font-size:12px;color:var(--ls-fg);opacity:.95;margin:8px 0 6px}
-#lsModal .ls-panel .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:var(--ls-gap)}
-#lsModal .ls-panel .line{display:grid;grid-template-columns:1fr 1fr;gap:var(--ls-gap);align-items:center}
-#lsModal .ls-panel label{font-size:12px;opacity:.85}
-#lsModal .ls-panel .pill-btn, #lsModal .ls-panel button, #lsModal .ls-panel .arch-chip, #lsModal .ls-panel .btn{
-  min-height:var(--ls-h);border-radius:var(--ls-r);padding:8px 12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);color:var(--ls-fg);font-size:12px;letter-spacing:.2px
-}
-#lsModal .ls-panel .pill-btn.on, #lsModal .ls-panel .arch-chip.on{background:rgba(57,255,182,.18);border-color:rgba(57,255,182,.45)}
-#lsModal .ls-panel input[type="range"], #lsModal .ls-panel select{
-  min-height:var(--ls-h);border-radius:var(--ls-r);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);color:var(--ls-fg);padding:10px
-}
-#lsModal .ls-panel output{font-size:12px;opacity:.9}
-#perfHud{display:flex;gap:8px;align-items:center;justify-content:space-between;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:8px 10px;margin:8px 0}
-#perfHud .stats{display:flex;gap:10px;align-items:center}
-#perfHud .badge{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:4px 8px;background:rgba(255,255,255,.08);font-weight:800}
-</style>
+
 
 
 <!-- LSPANEL MASTER FIX v3.7.1 — robust injector -->
-<script id="lspanel-masterfix-js">
-(function(){
-  // helpers
-  const $ = (q,r=document)=>r.querySelector(q);
-  const $$ = (q,r=document)=>Array.from(r.querySelectorAll(q));
-  function setLS(k,v){ try{ localStorage.setItem(k,String(v)); }catch(_){ } }
-  function getNum(k,d){ try{ const v=localStorage.getItem(k); return v==null? d : parseFloat(v); }catch(_){ return d; } }
-  function getFlag(k,d){ try{ const v=localStorage.getItem(k); return v==null? d : v==='1'; }catch(_){ return d; } }
-
-  // defaults (perf + atom)
-  const DEF = { target:50, minS:96, minR:80, cap:360, dn:0.85, up:1.06 };
-  const KP  = {
-    en:'dual.perf.enable', tgt:'dual.perf.target', s:'dual.perf.minSingle', r:'dual.perf.minRing', cap:'dual.perf.maxCap', dn:'dual.perf.stepDown', up:'dual.perf.stepUp'
-  };
-  if(localStorage.getItem(KP.en)==null) setLS(KP.en,'1');
-  if(localStorage.getItem(KP.tgt)==null) setLS(KP.tgt, DEF.target);
-  if(localStorage.getItem(KP.s)==null)   setLS(KP.s,   DEF.minS);
-  if(localStorage.getItem(KP.r)==null)   setLS(KP.r,   DEF.minR);
-  if(localStorage.getItem(KP.cap)==null) setLS(KP.cap, DEF.cap);
-  if(localStorage.getItem(KP.dn)==null)  setLS(KP.dn,  DEF.dn);
-  if(localStorage.getItem(KP.up)==null)  setLS(KP.up,  DEF.up);
-  if(localStorage.getItem('dual.atom.count')==null) setLS('dual.atom.count', 160);
-  if(localStorage.getItem('dual.atom.orbit')==null) setLS('dual.atom.orbit', 0.74);
-  if(localStorage.getItem('dual.atom.glow')==null)  setLS('dual.atom.glow',  0.38);
-  if(localStorage.getItem('dual.ui.bloom')==null)   setLS('dual.ui.bloom',   0);
-  document.body.setAttribute('data-orb-solid','off');
-
-  function panel(){
-    return $('#lsPanel') || $('#lsModal .ls-panel') || $('.ls-panel') || $('.panel-ls') || $('.settings-panel');
-  }
-
-  function ensureSection(){
-    const p = panel();
-    if(!p || $('#perfControlsV371')) return;
-    const tgt=getNum(KP.tgt,DEF.target), ms=getNum(KP.s,DEF.minS), mr=getNum(KP.r,DEF.minR), cap=getNum(KP.cap,DEF.cap), dn=getNum(KP.dn,DEF.dn), up=getNum(KP.up,DEF.up), en=getFlag(KP.en,true);
-    const sec = document.createElement('section'); sec.id='perfControlsV371';
-    sec.innerHTML = `
-      <div class="section-title">Desempenho (FPS Target)</div>
-      <div id="perfHud">
-        <div class="stats">
-          <span class="badge">FPS: <strong id="hudFps">—</strong></span>
-          <span class="badge">Meta: <strong id="hudTarget">${tgt}</strong></span>
-        </div>
-        <button id="perfEnable" class="pill-btn ${en?'on':''}">${en?'Auto':'Manual'}</button>
-      </div>
-      <div class="line">
-        <label>Meta de FPS</label>
-        <div><input id="fpsTarget" type="range" min="30" max="60" step="1" value="${tgt}" /><output id="fpsTargetOut">${tgt}</output></div>
-      </div>
-      <div class="line">
-        <label>Min (single)</label>
-        <div><input id="minSingle" type="range" min="48" max="160" step="2" value="${ms}" /><output id="minSingleOut">${ms}</output></div>
-      </div>
-      <div class="line">
-        <label>Min por anel</label>
-        <div><input id="minRing" type="range" min="48" max="160" step="2" value="${mr}" /><output id="minRingOut">${mr}</output></div>
-      </div>
-      <div class="line">
-        <label>Máximo</label>
-        <div><input id="maxCap" type="range" min="160" max="680" step="10" value="${cap}" /><output id="maxCapOut">${cap}</output></div>
-      </div>
-      <div class="line">
-        <label>Passo Reduzir</label>
-        <div><input id="stepDn" type="range" min="0.70" max="0.95" step="0.01" value="${dn}" /><output id="stepDnOut">${dn.toFixed(2)}</output></div>
-      </div>
-      <div class="line">
-        <label>Passo Aumentar</label>
-        <div><input id="stepUp" type="range" min="1.01" max="1.15" step="0.01" value="${up}" /><output id="stepUpOut">${up.toFixed(2)}</output></div>
-      </div>
-      <div class="section-title">Partículas do Átomo — SAFE</div>
-      <div class="line">
-        <label>Quantidade</label>
-        <div><input id="safe-count" type="range" min="48" max="220" step="4" value="${getNum('dual.atom.count',160)}" /><output id="safe-count-out">${getNum('dual.atom.count',160)}</output></div>
-      </div>
-      <div class="line">
-        <label>Órbita</label>
-        <div><input id="safe-orbit" type="range" min="0.60" max="0.86" step="0.01" value="${getNum('dual.atom.orbit',0.74)}" /><output id="safe-orbit-out">${getNum('dual.atom.orbit',0.74).toFixed(2)}</output></div>
-      </div>
-      <div class="line">
-        <label>Glow</label>
-        <div><input id="safe-glow" type="range" min="0.00" max="1.00" step="0.01" value="${getNum('dual.atom.glow',0.38)}" /><output id="safe-glow-out">${getNum('dual.atom.glow',0.38).toFixed(2)}</output></div>
-      </div>
-    `;
-    p.prepend(sec);
-
-    // binds
-    function bindR(id, k, fmt=(v)=>v){
-      const el = $('#'+id), out=$('#'+id+'Out'); if(!el) return;
-      el.addEventListener('input', ()=>{ const val=parseFloat(el.value); out && (out.textContent=fmt(val)); setLS(k, val); $('#hudTarget') && (id==='fpsTarget') && ($('#hudTarget').textContent=String(val)); });
-    }
-    bindR('fpsTarget', KP.tgt);
-    bindR('minSingle', KP.s);
-    bindR('minRing',   KP.r);
-    bindR('maxCap',    KP.cap);
-    bindR('stepDn',    KP.dn, (v)=>v.toFixed(2));
-    bindR('stepUp',    KP.up, (v)=>v.toFixed(2));
-
-    ['safe-count','safe-orbit','safe-glow'].forEach(id=>{
-      const el=$('#'+id), out=$('#'+id+'-out'); el && el.addEventListener('input', ()=>{ out && (out.textContent = id==='safe-count'? el.value : parseFloat(el.value).toFixed(2)); setLS(el.id==='safe-count'?'dual.atom.count': el.id==='safe-orbit'?'dual.atom.orbit':'dual.atom.glow', el.value); });
-    });
-
-    const enBtn = $('#perfEnable'); enBtn && enBtn.addEventListener('click', ()=>{
-      const now=!enBtn.classList.contains('on'); enBtn.classList.toggle('on',now); enBtn.textContent = now? 'Auto':'Manual'; setLS(KP.en, now?'1':'0');
-    });
-
-    // Live HUD FPS
-    let L=performance.now(), F=0;
-    function hudTick(t){ F++; if(t-L>=1000){ const fps=F; F=0; L=t; $('#hudFps') && ($('#hudFps').textContent=fps); } requestAnimationFrame(hudTick); }
-    requestAnimationFrame(hudTick);
-  }
-
-  // robust triggers
-  function bind(){
-    // when LS opens
-    const btn = document.getElementById('btnLS') || [...document.querySelectorAll('button,[role="button"]')].find(b=>/ls|painel|config|settings/i.test((b.textContent||'')+(b.id||'')+(b.className||'')));
-    if(btn && !btn.dataset._masterfix){ btn.dataset._masterfix='1'; btn.addEventListener('click', ()=> setTimeout(ensureSection, 120), {passive:true}); }
-    // also try on boot and on modal toggle
-    setTimeout(ensureSection, 300);
-    document.addEventListener('ls:disabled-changed', ()=> setTimeout(ensureSection, 120));
-    document.getElementById('arch-frame')?.addEventListener('load', ()=> setTimeout(ensureSection, 200));
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', bind); else bind();
-})();
-</script>
 
 
-<script id="hdpro-override-js">
 
-// === HD•PRO Override (Dual UNO) ===================================
-(function(){
-  const $ = (s, r=document) => r.querySelector(s);
-  const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
-  const on = (el, ev, fn) => el && el.addEventListener(ev, fn);
 
-  function toast(msg, ms=1800){
-    let t = $('#hdToast'); 
-    if(!t){ t = document.createElement('div'); t.id='hdToast'; document.body.appendChild(t); }
-    t.textContent = msg;
-    t.classList.add('show');
-    clearTimeout(t.__t); t.__t = setTimeout(()=>t.classList.remove('show'), ms);
-  }
-
-  // 1) Handle quase invisível para abrir/fechar LS panel (#brain)
-  function mountHandle(){
-    if($('#lsHandle')) return;
-    const btn = document.createElement('button');
-    btn.id = 'lsHandle';
-    btn.title = 'Abrir/fechar painel (LS)';
-    document.body.appendChild(btn);
-
-    function toggleBrain(){
-      const brain = $('#brain');
-      if(!brain){ toast('Painel LS não encontrado (#brain)'); return; }
-      brain.classList.toggle('hide');
-      btn.classList.toggle('on', !brain.classList.contains('hide'));
-    }
-    on(btn, 'click', toggleBrain);
-  }
-
-  // 2) Painel HD Pro dentro do #brain (LS Panel)
-  function mountHDPro(){
-    const brain = $('#brain .popover') || $('#brain');
-    if(!brain || brain.__hdproMounted) return;
-    brain.__hdproMounted = true;
-
-    // Secção base
-    const sec = document.createElement('section');
-    sec.className = 'hdpro-sec';
-    sec.innerHTML = `
-      <div class="sec-hdr">
-        <h3>HD • Pro — Sistema</h3>
-        <button class="hd-btn ok" id="hdRefresh">Atualizar</button>
-      </div>
-
-      <div class="hdpro-grid">
-        <div class="hdpro-row">
-          <div>
-            <div class="hdpro-label">LocalStorage</div>
-            <div class="hdpro-meter"><div class="bar" id="barLS"></div></div>
-          </div>
-          <div class="hdpro-val" id="valLS">–</div>
-        </div>
-
-        <div class="hdpro-row">
-          <div>
-            <div class="hdpro-label">IndexedDB (estimado)</div>
-            <div class="hdpro-meter"><div class="bar" id="barIDB"></div></div>
-          </div>
-          <div class="hdpro-val" id="valIDB">–</div>
-        </div>
-
-        <div class="hdpro-row">
-          <div>
-            <div class="hdpro-label">Total (Storage API)</div>
-            <div class="hdpro-meter"><div class="bar" id="barTotal"></div></div>
-          </div>
-          <div class="hdpro-val" id="valTotal">–</div>
-        </div>
-
-        <div class="hdpro-actions">
-          <button class="hd-btn" id="btnToggleOrb">Ocultar opções avançadas do ORB/FPS</button>
-          <button class="hd-btn" id="btnImportFix">Importar HTML (corrigido)</button>
-          <input id="__fileImportHD" type="file" accept=".html,.htm" style="display:none" />
-          <button class="hd-btn danger" id="btnClearLS">Limpar LocalStorage</button>
-          <button class="hd-btn danger" id="btnClearIDB">Limpar IndexedDB</button>
-        </div>
-      </div>
-    `;
-    brain.appendChild(sec);
-
-    // 2a) Toggle avançados ORB/FPS
-    on($('#btnToggleOrb', sec), 'click', ()=>{
-      const advSelectors = [
-        '[data-orb-adv]',
-        '#orbAdv', '.orb-adv', '.orb-advanced', '[data-orb-advanced]',
-        '#fpsPanel', '.fps-adv', '#orbControls', '.orb-controls'
-      ];
-      let toggled = 0;
-      advSelectors.forEach(sel => {
-        $$(sel).forEach(el => { 
-          el.classList.toggle('hdpro-adv-hidden'); 
-          toggled++;
-        });
-      });
-      toast(toggled ? 'Avançados ORB/FPS alternados' : 'Nenhum bloco avançado encontrado');
-    });
-
-    // 2b) Import corrigido (abre HTML local numa sessão dentro do app, fallback nova aba)
-    const fileInput = $('#__fileImportHD', sec);
-    on($('#btnImportFix', sec), 'click', ()=> fileInput && fileInput.click());
-    on(fileInput, 'change', (e)=>{
-      const file = e.target.files && e.target.files[0];
-      if(!file) return;
-      const url = URL.createObjectURL(file);
-      const name = file.name || 'arquivo.html';
-      // destino preferencial
-      const anchor = $('#sessionsAnchor') || $('#stackWrap') || $('#v-stack') || $('main');
-      if(anchor){
-        const wrap = document.createElement('div');
-        wrap.className = 'session';
-        wrap.innerHTML = `
-          <div class="hdr">
-            <span class="app-icon">${(name[0]||'W').toUpperCase()}</span>
-            <span class="title">${name}</span>
-            <div class="tools">
-              <button class="btn" data-act="min">Min</button>
-              <button class="btn" data-act="full">Full</button>
-              <button class="btn" data-act="close">Fechar</button>
-            </div>
-          </div>
-          <iframe src="${url}" referrerpolicy="no-referrer"></iframe>
-          <div class="resize-handle" title="Arraste para ajustar altura"></div>
-        `;
-        anchor.appendChild(wrap);
-        // Tools
-        on(wrap.querySelector('[data-act="min"]'), 'click', ()=> wrap.classList.toggle('min'));
-        on(wrap.querySelector('[data-act="full"]'), 'click', ()=> document.body.classList.toggle('session-full'));
-        on(wrap.querySelector('[data-act="close"]'), 'click', ()=> wrap.remove());
-        toast('HTML importado dentro do Stack');
-      }else{
-        window.open(url, '_blank', 'noopener');
-        toast('HTML aberto em nova aba');
-      }
-      e.target.value = '';
-    });
-
-    // 2c) Limpar LocalStorage
-    on($('#btnClearLS', sec), 'click', ()=>{
-      if(confirm('Limpar todo o LocalStorage deste domínio?')){
-        try { localStorage.clear(); toast('LocalStorage limpo'); updateMeters(true); }
-        catch(err){ console.error(err); toast('Erro ao limpar LocalStorage'); }
-      }
-    });
-
-    // 2d) Limpar IndexedDB (melhor esforço)
-    on($('#btnClearIDB', sec), 'click', async ()=>{
-      if(!confirm('Apagar bancos IndexedDB deste domínio?')) return;
-      try{
-        if(indexedDB.databases){
-          const dbs = await indexedDB.databases();
-          await Promise.all((dbs||[]).map(d => d && d.name ? new Promise((res)=>{
-            const req = indexedDB.deleteDatabase(d.name);
-            req.onsuccess = req.onerror = req.onblocked = ()=>res();
-          }) : Promise.resolve()));
-        }else{
-          // Sem enumerate: tente deletar bases comuns do app
-          const common = ['dual', 'uno', 'app', 'db', 'files', 'store'];
-          await Promise.all(common.map(n => new Promise((res)=>{
-            const req = indexedDB.deleteDatabase(n); req.onsuccess = req.onerror = req.onblocked = ()=>res();
-          })));
-        }
-        toast('IndexedDB: pedido de exclusão enviado'); updateMeters(true);
-      }catch(err){
-        console.error(err); toast('IndexedDB: não suportado/erro');
-      }
-    });
-
-    // 2e) Atualizar medidores
-    on($('#hdRefresh', sec), 'click', ()=> updateMeters(true));
-
-    async function estimateStorage(){
-      const est = (navigator.storage && navigator.storage.estimate) ? await navigator.storage.estimate() : {};
-      // est.usage (bytes) inclui IDB + Cache + etc (depende do UA)
-      // LS estimado manualmente (2 bytes por char em UTF-16)
-      let lsBytes = 0;
-      try{
-        for(let i=0;i<localStorage.length;i++){
-          const k = localStorage.key(i);
-          const v = localStorage.getItem(k);
-          lsBytes += 2*((k||'').length + (v||'').length);
-        }
-      }catch{}
-      // Experimento: idbBytes ~ usage - lsBytes (aprox)
-      const usage = est.usage || 0;
-      const quota = est.quota || 0;
-      const idbBytes = Math.max(0, usage - lsBytes);
-
-      return { lsBytes, idbBytes, usage, quota };
-    }
-
-    function fmt(bytes){
-      const u = ['B','KB','MB','GB','TB'];
-      let i=0, n=bytes;
-      while(n>=1024 && i<u.length-1){ n/=1024; i++; }
-      return `${n.toFixed( (i<=1)?0:1)} ${u[i]}`;
-    }
-
-    async function updateMeters(animateNumbers){
-      try{
-        const {lsBytes, idbBytes, usage, quota} = await estimateStorage();
-        const els = {
-          barLS: $('#barLS'), valLS: $('#valLS'),
-          barIDB: $('#barIDB'), valIDB: $('#valIDB'),
-          barTotal: $('#barTotal'), valTotal: $('#valTotal'),
-        };
-        const percent = (num, den) => (den>0)? Math.min(100, Math.round((num/den)*100)) : 0;
-        // Total can use quota as denominator; LS use typical 5MB baseline to visualize
-        const lsCap = 5*1024*1024; // 5MB
-        const pLS = percent(lsBytes, lsCap);
-        const pIDB = quota ? percent(idbBytes, quota) : 0;
-        const pTot = percent(usage, quota);
-
-        if(els.barLS) els.barLS.style.width = pLS + '%';
-        if(els.barIDB) els.barIDB.style.width = pIDB + '%';
-        if(els.barTotal) els.barTotal.style.width = pTot + '%';
-
-        const setNum = (el, val) => { if(el) el.textContent = val; };
-        if(animateNumbers){
-          animateCount( $('#valLS'), lsBytes );
-          animateCount( $('#valIDB'), idbBytes );
-          animateCount( $('#valTotal'), usage );
-        }else{
-          setNum( $('#valLS'), fmt(lsBytes) );
-          setNum( $('#valIDB'), fmt(idbBytes) );
-          setNum( $('#valTotal'), `${fmt(usage)} / ${quota?fmt(quota):'–'}` );
-        }
-      }catch(err){ console.error(err); }
-    }
-
-    function animateCount(el, bytes){
-      if(!el) return;
-      const target = bytes;
-      const start = parseFloat(el.getAttribute('data-last')||'0');
-      const startTime = performance.now();
-      const dur = 600;
-      function step(t){
-        const k = Math.min(1, (t - startTime)/dur);
-        const v = Math.round(start + (target-start)*k);
-        el.textContent = ( (k<1) ? (v + ' B') : (fmt(target)) );
-        if(k<1) requestAnimationFrame(step);
-        else el.setAttribute('data-last', String(target));
-      }
-      requestAnimationFrame(step);
-    }
-
-    updateMeters(false);
-    // Atualização periódica (leve)
-    sec.__interval = setInterval(()=> updateMeters(false), 2500);
-  }
-
-  // 3) Start
-  function boot(){
-    mountHandle();
-    mountHDPro();
-  }
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
-  else boot();
-
-})();
-
-</script>
-<script id="ATOM_ENGINE_PATCH">
-(function(){
-  if (window.__ATOM_PATCH__) return; window.__ATOM_PATCH__ = true;
-  const ATOM_PALETTES = {
-    default : { core:'#7a5bff', ring:'#39ffb6', dust:'#8fd6ff', bg:'#0b0f14' },
-    dopamina: { core:'#ff2d7a', ring:'#ff77aa', dust:'#ffd1e2', bg:'#14080f' },
-    delta7  : { core:'#ffb300', ring:'#ff8400', dust:'#ffe0a6', bg:'#140f08' },
-    asc11   : { core:'#00e6ff', ring:'#39ffb6', dust:'#baf6ff', bg:'#0b0f14' },
-    quan    : { core:'#b347ff', ring:'#9d7aff', dust:'#e2ccff', bg:'#110b14' },
-    orionis : { core:'#00ffab', ring:'#00ffc9', dust:'#c8fff1', bg:'#08140f' },
-    lumenflux:{core:'#9fd3ff', ring:'#e7f0ff', dust:'#ffffff', bg:'#0c121a' },
-    vermiph : { core:'#ff6282', ring:'#ff3d5e', dust:'#ffc0cb', bg:'#14080b' }
-  };
-  const $=(s,r=document)=>r.querySelector(s);
-  const arc=$('.arch-circle'); if(!arc) return;
-  let fab=arc.querySelector('.arch-fab'); if(!fab){ fab=document.createElement('button'); fab.className='arch-fab'; fab.title='Trocar paleta do átomo'; fab.innerHTML='✦'; arc.appendChild(fab); }
-  let cvs=document.getElementById('atomCanvas'); if(!cvs){ cvs=document.createElement('canvas'); cvs.id='atomCanvas'; arc.appendChild(cvs); }
-  const ctx=cvs.getContext('2d');
-  const DPR=()=> (window.devicePixelRatio||1); let W=0,H=0,CX=0,CY=0;
-  function resize(){ const r=arc.getBoundingClientRect(); W=Math.floor(r.width); H=Math.floor(r.height);
-    const d=DPR(); cvs.width=Math.max(1,Math.floor(W*d)); cvs.height=Math.max(1,Math.floor(H*d)); cvs.style.width=W+'px'; cvs.style.height=H+'px'; ctx.setTransform(d,0,0,d,0,0); CX=W/2; CY=H/2;}
-  resize(); addEventListener('resize', resize);
-  const N=120, parts=[]; (function init(){ for(let i=0;i<N;i++){ const radius=0.18+Math.random()*0.34, speed=(Math.random()*0.6+0.2)*(Math.random()<.5?1:-1);
-    parts.push({phi:Math.random()*Math.PI*2,r:radius,s:speed,size:1+Math.random()*2,jitter:Math.random()*0.03}); } })();
-  let PALETTE=ATOM_PALETTES.asc11; function setAtomPalette(n){ PALETTE=ATOM_PALETTES[n]||ATOM_PALETTES.default; try{ fab.style.boxShadow=`0 0 0 1px ${PALETTE.core}55 inset, 0 10px 22px ${PALETTE.core}33`; }catch(_){} }
-  (function hookTheme(){ const map={dopamina:'dopamina',delta7:'delta7',asc11:'asc11',quan:'quan',orionis:'orionis',lumenflux:'lumenflux',vermiph:'vermiph'};
-    if(typeof window.setTheme==='function' && !window.__ATOM_WRAP_THEME__){ window.__ATOM_WRAP_THEME__=true; const orig=window.setTheme;
-      window.setTheme=function(type){ const r=orig.apply(this,arguments); setAtomPalette(map[type]||'default'); return r; };
-    } else { const th=document.body.getAttribute('data-theme'); setAtomPalette(th==='blue1'?'asc11':th==='medium'?'lumenflux':'default'); }
-  })();
-  const cycle=['asc11','dopamina','delta7','orionis','quan','lumenflux','vermiph']; let cidx=0; fab.addEventListener('click',()=>{ cidx=(cidx+1)%cycle.length; setAtomPalette(cycle[cidx]); });
-  function draw(){ ctx.clearRect(0,0,W,H); const m=Math.min(W,H);
-    const g=ctx.createRadialGradient(CX,CY,m*0.08,CX,CY,m*0.55); g.addColorStop(0,PALETTE.core+'22'); g.addColorStop(1,'transparent');
-    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(CX,CY,m*0.55,0,Math.PI*2); ctx.fill();
-    ctx.shadowColor=PALETTE.ring; ctx.shadowBlur=18; ctx.fillStyle=PALETTE.core; ctx.beginPath(); ctx.arc(CX,CY,m*0.06,0,Math.PI*2); ctx.fill(); ctx.shadowBlur=0;
-    ctx.strokeStyle=PALETTE.ring+'cc'; ctx.lineWidth=1.4; ctx.beginPath(); ctx.arc(CX,CY,m*0.28,0,Math.PI*2); ctx.stroke();
-    for(let i=0;i<parts.length;i++){ const p=parts[i]; p.phi+=(p.s*0.003); const rr=m*(0.14+p.r*0.42), x=CX+Math.cos(p.phi)*rr, y=CY+Math.sin(p.phi)*rr*(0.82+p.jitter*Math.sin(p.phi*3.0));
-      ctx.fillStyle=PALETTE.dust; ctx.globalAlpha=0.75; ctx.beginPath(); ctx.arc(x,y,p.size,0,Math.PI*2); ctx.fill(); } ctx.globalAlpha=1;
-    requestAnimationFrame(draw); } requestAnimationFrame(draw);
-})();
-</script> <style id="uno-superpatch-css">
+ <style id="uno-superpatch-css">
 /* === SUPER PATCH — estilos necessários === */
 /* Tabbar glass + alinhamento */
 .tabbar .inner{ background: rgba(255,255,255,.06) !important; border:1px solid rgba(255,255,255,.14) !important; backdrop-filter: blur(10px) !important; }
@@ -6723,113 +5643,284 @@ header.mast .ib svg{ display:block }
 #lsModal .panel{ backdrop-filter: blur(8px) }
 </style>
 
-  <script src="./arch_overlay_fix_scoped.js"></script>
-  <script src="./ls_pedal_anti_fps_patch.js"></script>
 
-<!-- RESET ALL • Safe Boot + LS/IDB/SW/Caches -->
-<script id="UNO_RESET_ALL">
-(function(){
-  // Expose a single entry point
-  async function resetAll({clearLS=true, clearIDB=true, clearCaches=true, unregisterSW=true}={}){
-    try{
-      if (clearLS) localStorage.clear();
-      if (clearIDB && 'indexedDB' in window){
-        if (indexedDB.databases){
-          const dbs = await indexedDB.databases();
-          for (const d of (dbs||[])){
-            if (d && d.name){
-              await new Promise(res=>{
-                const req = indexedDB.deleteDatabase(d.name);
-                req.onsuccess = req.onerror = req.onblocked = ()=>res();
-              });
-            }
-          }
-        } else {
-          // common names fallback
-          for (const name of ['dual','uno','app','db','files','store']) {
-            await new Promise(res=>{
-              const req = indexedDB.deleteDatabase(name);
-              req.onsuccess = req.onerror = req.onblocked = ()=>res();
-            });
-          }
-        }
-      }
-      if (clearCaches && window.caches?.keys){
-        const keys = await caches.keys();
-        for (const k of keys) await caches.delete(k);
-      }
-      if (unregisterSW && navigator.serviceWorker?.getRegistrations){
-        const regs = await navigator.serviceWorker.getRegistrations();
-        for (const r of regs) await r.unregister();
-      }
-      // small grace
-      setTimeout(()=>location.reload(), 200);
-    }catch(e){
-      console.error('ResetAll error', e);
-      alert('Reset falhou: ver Console.');
-    }
+<!-- Δ UNO_PATCH_DELTA (voices sync + scroll unlock + LSPanel accordion + dataURI→IDB + ranges + SW cache) -->
+<style id="UNO_PATCH_DELTA_styles">
+  html,body { overscroll-behavior: contain; }
+  main { overflow: auto; }
+  .view { overscroll-behavior-y: contain; -webkit-overflow-scrolling: touch; }
+  /* Garantir círculo 100% arredondado e sem vazamento de conteúdo */
+  .arch-circle{ border-radius:50%; overflow:hidden; }
+  /* FAB com recorte circular suave para não quadrar o fundo do círculo */
+  .arch-circle>.arch-fab{
+    background-clip: padding-box;
+    -webkit-mask-image: radial-gradient(circle at center, #000 69%, transparent 70%);
+            mask-image: radial-gradient(circle at center, #000 69%, transparent 70%);
   }
-  window.UNO_ResetAll = resetAll;
+  /* Acordeão do LS Panel (injeção) */
+  .ls-acc .acc { margin-top:10px; border:1px solid rgba(255,255,255,.12); border-radius:14px; background:rgba(15,17,32,.6); }
+  .ls-acc .acc-hdr{ width:100%; text-align:left; background:transparent; border:0; padding:10px 12px; display:flex; gap:8px; align-items:center; cursor:pointer; }
+  .ls-acc .acc-body{ padding:10px 12px; display:block; }
+  .ls-acc .row{ display:grid; grid-template-columns: 120px 1fr auto; gap:10px; align-items:center; margin:6px 0; }
+  .ls-acc .actions{ display:flex; gap:8px; flex-wrap: wrap; }
+</style>
+<script id="UNO_PATCH_DELTA_voices_sync">
+(() => {
+  if (window.__UNO_VOICE_PATCH__) return; window.__UNO_VOICE_PATCH__ = true;
+  const log=(...a)=>console.debug('[UNO/patch]',...a);
 
-  // Safe boot via ?safe=1
-  (function safeBoot(){
+  const CANON_KEY='uno:voice:v1';
+  const CANON_CFG='uno:voice:cfg:v1';
+  const LEGACY_KEYS=['brain:voice','brain:voiceId','brain:voice:settings','arch:voice','arch:voiceId','tts:voice','tts:rate','tts:pitch','tts:volume','uno:voice','uno:voice:rate','uno:voice:pitch','uno:voice:gain','voices:active'];
+
+  const readLS = (k)=>{ try{ return localStorage.getItem(k); }catch(e){ return null; } };
+  const writeLS = (k,v)=>{ try{ localStorage.setItem(k,v); }catch(e){} };
+
+  function latestProfile(){
+    let cand=null, now=Date.now();
+    const c = readLS(CANON_CFG);
+    if (c) { try { const j=JSON.parse(c); if (j && j.id) cand=j; } catch{} }
+    if (!cand) {
+      const b = readLS('brain:voice:settings');
+      if (b) { try {
+        const j=JSON.parse(b);
+        if (j && j.id) cand={id:j.id,name:j.name||j.id,rate:j.rate??1,pitch:j.pitch??0,volume:j.volume??1,provider:j.provider||'brain',savedAt:j.savedAt||now};
+      } catch{} }
+    }
+    if (!cand) {
+      const id = readLS('brain:voiceId')||readLS('arch:voiceId')||readLS('tts:voice')||readLS('uno:voice')||'alloy';
+      const rate = +(readLS('tts:rate')||readLS('uno:voice:rate')||1);
+      const pitch = +(readLS('tts:pitch')||readLS('uno:voice:pitch')||0);
+      const volume = +(readLS('tts:volume')||readLS('uno:voice:gain')||1);
+      cand={id,name:id,rate,pitch,volume,provider:'auto',savedAt:now};
+    }
+    return cand;
+  }
+
+  function applyToModules(profile){
     try{
-      const p = new URLSearchParams(location.search);
-      if (p.has('safe')){
-        // minimal: clear LS keys that are ours (prefix uno:/infodose:/dual.)
-        for (let i=localStorage.length-1;i>=0;i--){
-          const k = localStorage.key(i);
-          if (/^(uno:|infodose:|dual\.)/i.test(k)) localStorage.removeItem(k);
-        }
+      const w = window;
+      if (w.arch?.setVoice) w.arch.setVoice(profile);
+      if (w.ATOM?.setVoice) w.ATOM.setVoice(profile);
+      const iframe = document.querySelector('.arch-circle iframe');
+      if (iframe?.contentWindow) {
+        try { iframe.contentWindow.postMessage({type:'uno:voice', profile}, '*'); } catch {}
       }
     }catch{}
-  })();
-
-  // Storage versioning (bump to force soft reset on incompatible schema)
-  (function versioning(){
-    const VER = '3.1.0';
-    const KEY = 'uno:version';
     try{
-      const cur = localStorage.getItem(KEY);
-      if (cur !== VER){
-        // Soft migration: drop volatile keys known to corrupt state
-        const DROP = [
-          'unoStackGroups','unoStackSessions','unoPinnedApps',
-          'infodose:locals:v1','infodose:cssCustom','uno:bg'
-        ];
-        DROP.forEach(k=> localStorage.removeItem(k));
-        localStorage.setItem(KEY, VER);
-      }
+      const w = window;
+      if (w.brain?.setVoice) w.brain.setVoice(profile);
+      if (w.BRAIN?.setVoice) w.BRAIN.setVoice(profile);
+      window.dispatchEvent(new CustomEvent('uno:voice-change', {detail:profile}));
     }catch{}
-  })();
+  }
 
-  // Add hidden "Reset All" control into LS modal + keyboard shortcut (Ctrl+Alt+Backspace)
-  document.addEventListener('DOMContentLoaded', function(){
-    try{
-      const panel = document.querySelector('#lsModal .ls-panel') || document.getElementById('lsPanel');
-      if (panel && !document.getElementById('btnResetAll')){
-        const bar = panel.querySelector('.ls-actions') || panel;
-        const b = document.createElement('button');
-        b.id = 'btnResetAll';
-        b.textContent = 'Reset All (LS+IDB+Cache+SW)';
-        b.style.background = 'rgba(255,92,138,.22)';
-        b.style.borderColor = 'rgba(255,92,138,.38)';
-        b.addEventListener('click', async ()=>{
-          if (confirm('Zerar tudo? (LocalStorage + IndexedDB + Caches + SW)')){
-            await window.UNO_ResetAll({});
-          }
-        });
-        bar && bar.appendChild(b);
-      }
-    }catch(e){}
-  });
-  window.addEventListener('keydown', (e)=>{
-    if ((e.ctrlKey||e.metaKey) && e.altKey && e.key === 'Backspace'){
-      e.preventDefault();
-      if (confirm('Reset All agora?')) window.UNO_ResetAll({});
+  function saveCanonical(profile){
+    profile = {...profile, savedAt: Date.now()};
+    writeLS(CANON_CFG, JSON.stringify(profile));
+    writeLS(CANON_KEY, profile.id);
+    writeLS('brain:voiceId', profile.id);
+    writeLS('arch:voiceId', profile.id);
+    writeLS('tts:voice', profile.id);
+    writeLS('tts:rate', String(profile.rate ?? 1));
+    writeLS('tts:pitch', String(profile.pitch ?? 0));
+    writeLS('tts:volume', String(profile.volume ?? 1));
+  }
+
+  const current = latestProfile(); saveCanonical(current); applyToModules(current);
+
+  window.addEventListener('storage', (e) => {
+    if (!e.key) return;
+    if (e.key===CANON_CFG || e.key===CANON_KEY || LEGACY_KEYS.includes(e.key)) {
+      const p = latestProfile(); saveCanonical(p); applyToModules(p);
     }
   });
+
+  window.UNO_VOICES = {
+    get: () => latestProfile(),
+    set: (p) => { saveCanonical(p); applyToModules(p); }
+  };
+
+  // ===== LS Panel injection (accordion) =====
+  function injectLSPanel(){
+    const panel = document.querySelector('#lsPanel, #ls-panel, [data-ls-panel]');
+    if (!panel || panel.__unoVoiceInjected) return;
+    panel.__unoVoiceInjected = true;
+
+    const sec = document.createElement('section');
+    sec.className='ls-acc';
+    sec.innerHTML = `
+<div class="acc">
+  <button class="acc-hdr" data-acc="voice"><strong>Voz (arch ⇄ brain)</strong><span class="mut">sincronizadas</span></button>
+  <div class="acc-body" id="acc-voice" hidden>
+    <div class="row">
+      <label>Preset</label>
+      <select id="unoVoiceSelect"></select>
+    </div>
+    <div class="row">
+      <label>Velocidade</label>
+      <input id="unoRate" type="range" min="0.5" max="2" step="0.05">
+      <output id="unoRateOut"></output>
+    </div>
+    <div class="row">
+      <label>Tom</label>
+      <input id="unoPitch" type="range" min="-12" max="12" step="1">
+      <output id="unoPitchOut"></output>
+    </div>
+    <div class="row">
+      <label>Volume</label>
+      <input id="unoVol" type="range" min="0" max="1" step="0.05">
+      <output id="unoVolOut"></output>
+    </div>
+    <div class="row actions">
+      <button id="unoTest" class="btn">Testar</button>
+      <button id="unoSave" class="btn prime">Salvar</button>
+      <button id="unoReset" class="btn">Reset</button>
+      <button id="unoClearAll" class="btn" title="Limpa LS, IDB, caches e SW">Reset All</button>
+    </div>
+  </div>
+</div>`;
+
+    panel.appendChild(sec);
+
+    // accord
+    sec.querySelector('.acc-hdr').addEventListener('click',()=>{
+      const body = sec.querySelector('.acc-body'); body.hidden = !body.hidden;
+    });
+
+    // populate voices
+    const select = sec.querySelector('#unoVoiceSelect');
+    const catalog = (() => {
+      try {
+        const c1 = JSON.parse(localStorage.getItem('uno:voices:catalog')||'[]');
+        if (Array.isArray(c1) && c1.length) return c1;
+      } catch {}
+      try {
+        const c2 = JSON.parse(localStorage.getItem('brain:voices')||'[]');
+        if (Array.isArray(c2) && c2.length) return c2;
+      } catch {}
+      return ['alloy','aria','verse','bright','calypso','cobalt','nova','sage'].map(id=>({id,name:id}));
+    })();
+
+    catalog.forEach(v=>{
+      const opt=document.createElement('option');
+      const id = typeof v==='string'? v : (v.id || v.name);
+      opt.value=id; opt.textContent=v.name || id;
+      select.appendChild(opt);
+    });
+
+    function syncUI(p){
+      if(!p) return;
+      select.value = p.id;
+      sec.querySelector('#unoRate').value = p.rate ?? 1;
+      sec.querySelector('#unoPitch').value = p.pitch ?? 0;
+      sec.querySelector('#unoVol').value = p.volume ?? 1;
+      sec.querySelector('#unoRateOut').textContent = (p.rate ?? 1).toFixed(2);
+      sec.querySelector('#unoPitchOut').textContent = (p.pitch ?? 0);
+      sec.querySelector('#unoVolOut').textContent = (p.volume ?? 1).toFixed(2);
+    }
+    syncUI(window.UNO_VOICES.get());
+
+    select.addEventListener('change', () => {
+      const p = {...window.UNO_VOICES.get(), id: select.value, name: select.selectedOptions[0]?.textContent || select.value};
+      window.UNO_VOICES.set(p); syncUI(p);
+    });
+    ['#unoRate','#unoPitch','#unoVol'].forEach(sel=>{
+      const el = sec.querySelector(sel);
+      const out = sec.querySelector(sel+'Out');
+      el.addEventListener('input',()=>{ out.textContent = sel==='#unoPitch' ? el.value : (+el.value).toFixed(2); });
+    });
+    sec.querySelector('#unoSave').addEventListener('click',()=>{
+      const p = {
+        id: select.value,
+        name: select.selectedOptions[0]?.textContent || select.value,
+        rate: +sec.querySelector('#unoRate').value,
+        pitch: +sec.querySelector('#unoPitch').value,
+        volume: +sec.querySelector('#unoVol').value
+      };
+      window.UNO_VOICES.set(p);
+    });
+    sec.querySelector('#unoReset').addEventListener('click',()=>{
+      const p = {id:'alloy', name:'alloy', rate:1, pitch:0, volume:1};
+      window.UNO_VOICES.set(p); syncUI(p);
+    });
+    sec.querySelector('#unoTest').addEventListener('click', async ()=>{
+      const p = window.UNO_VOICES.get();
+      const utter = new SpeechSynthesisUtterance('Nebula pulse');
+      utter.rate = Math.max(0.1, Math.min(10, p.rate || 1));
+      utter.pitch = 1 + (p.pitch || 0)/12;
+      utter.volume = Math.max(0, Math.min(1, p.volume||1));
+      window.speechSynthesis?.speak(utter);
+    });
+    sec.querySelector('#unoClearAll').addEventListener('click', async ()=>{
+      try { localStorage.clear(); } catch {}
+      if (indexedDB?.databases) {
+        const dbs = await indexedDB.databases();
+        for (const d of dbs) if(d?.name) await new Promise(r=>{
+          const req = indexedDB.deleteDatabase(d.name); req.onsuccess=req.onerror=req.onblocked=()=>r();
+        });
+      }
+      if (window.caches?.keys) { const ks = await caches.keys(); for (const k of ks) await caches.delete(k); }
+      if (navigator.serviceWorker?.getRegistrations) { const regs = await navigator.serviceWorker.getRegistrations(); for (const r of regs) await r.unregister(); }
+      location.reload();
+    });
+  }
+
+  function tryInject(){ injectLSPanel(); }
+  tryInject();
+  const mo = new MutationObserver(()=>tryInject());
+  mo.observe(document.documentElement, {subtree:true, childList:true});
+
+  // ===== Overscroll / scroll unlock =====
+  function unlockScroll(){
+    const html = document.documentElement;
+    const body = document.body;
+    [html, body].forEach(el=>{
+      el.style.overscrollBehavior = 'contain';
+      el.style.overflow = '';
+    });
+    document.querySelectorAll('main, .view, [data-scroll], .scroll, .scroll-y').forEach(el=>{
+      el.style.overflowY = 'auto';
+      el.style.overscrollBehaviorY = 'contain';
+      el.style.webkitOverflowScrolling = 'touch';
+      el.style.touchAction = 'pan-y';
+    });
+  }
+  unlockScroll();
+
+  // ===== Data URI → IDB migration =====
+  (function migrateLargeLS(){
+    const TH = 60_000; // ~60KB
+    const storeName='unoLargeBlobs';
+    const req = indexedDB.open('uno-blobs', 1);
+    req.onupgradeneeded = () => req.result.createObjectStore(storeName);
+    req.onsuccess = () => {
+      const db = req.result;
+      const tx = db.transaction(storeName, 'readwrite');
+      const os = tx.objectStore(storeName);
+      for (let i=0;i<localStorage.length;i++){
+        const key = localStorage.key(i); if(!key) continue;
+        const val = localStorage.getItem(key)||'';
+        if (val.startsWith('data:') && val.length > TH){
+          os.put({key, data: val}, key);
+          localStorage.setItem(key, 'idb:uno-blobs:'+key);
+        }
+      }
+      tx.oncomplete = ()=> db.close();
+    };
+  })();
+
+  // ===== Defaults / ranges =====
+  try {
+    if (!localStorage.getItem('uno:arch:folder')) localStorage.setItem('uno:arch:folder','archetypes3d');
+    const fps = document.querySelector('[name=fps],[data-key="fps"]');
+    if (fps?.type==='range'){ fps.min='30'; fps.max='144'; fps.step='1'; }
+    const dens = document.querySelector('[name=density],[data-key="density"]');
+    if (dens?.type==='range'){ dens.min='10'; dens.max='300'; dens.step='1'; }
+  } catch {}
+
+  try { localStorage.setItem('uno:sw:cache', 'CACHE_V3'); } catch {}
 })();
 </script>
-
+<!-- /Δ -->
 </body></html>
