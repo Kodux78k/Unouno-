@@ -2204,71 +2204,156 @@ html[data-overlay="off"] #arch-fadeCover{ background: transparent !important; }
 .app-icon.badge-pink { color: #ff67c4; }
 .app-icon.badge-green { color: #39ffb6; }
 .app-icon.badge-orange { color: #ff9f43; }
-</style><style id="corner-badge-hide">
-/* Hide small corner badges often used as placeholders */
-.app-card .badge, .app-card .corner-badge, .app-card .status-badge, .app-item .badge, .menuItem .badge {
-  display:none !important;
-}
-</style><style id="kisara-field-style">
-/* Kisara — campo energético sutil nos ícones e cards de apps */
-.app-card, .app-item, .menuItem { color: inherit; }
-.app-icon {
+</style>
+<style id="APP_ACCENTS_KISARA_CSS">
+/* === App accent tokens + Kisara field (Luxara) === */
+.app-card{
+  --appA: var(--grad-a);
+  --appB: var(--grad-b);
+  --appInk: #f5f7ff;
   position: relative;
 }
-.app-icon::after{
-  content:""; position:absolute; inset:-6px; border-radius:12px;
-  background: radial-gradient(60% 60% at 50% 45%, currentColor, transparent 70%);
-  opacity:.12; filter: blur(6px);
-  animation: kisara-breathe 4.4s ease-in-out infinite;
+.app-card.accented{
+  border-color: color-mix(in oklab, var(--appA) 35%, #ffffff22);
+  box-shadow: 0 10px 26px color-mix(in oklab, var(--appA) 22%, transparent), var(--shadow);
 }
-@keyframes kisara-breathe{
-  0%,100% { transform: scale(0.96); opacity:.10; }
-  50%     { transform: scale(1.05); opacity:.22; }
+.app-card.accented::before{
+  content:"";
+  position:absolute; inset:-2px; border-radius: inherit;
+  background: radial-gradient(45% 60% at 15% 10%, color-mix(in oklab, var(--appA) 20%, transparent) 0%, transparent 60%),
+              radial-gradient(65% 85% at 85% 120%, color-mix(in oklab, var(--appB) 14%, transparent) 0%, transparent 70%);
+  filter: blur(8px);
+  opacity:.9;
+  mix-blend-mode: screen;
+  pointer-events:none;
+  z-index: 0;
 }
-/* Hover: brilho que acompanha a cor do app (usa currentColor) */
-.app-card:hover, .app-item:hover, .menuItem:hover {
-  box-shadow: 0 0 0 2px currentColor, 0 0 18px currentColor;
-  transform: translateY(-2px);
-  transition: box-shadow .25s ease, transform .2s ease;
+.app-card .app-icon{
+  position: relative;
+  background:
+    radial-gradient(120% 120% at 20% 10%, color-mix(in oklab, var(--appA) 22%, #ffffff00) 0%, rgba(255,255,255,.02) 60%);
+  border-color: color-mix(in oklab, var(--appA) 40%, #ffffff10);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--appB) 28%, #ffffff10);
 }
-</style><style id="upload-buttons-style">
-/* Upload buttons — Brain, Apps, geral */
-input[type="file"]{
-  color:#eaeef7;
-  font:600 13px/1 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-  background: rgba(10,14,24,.6);
-  border: 1px solid rgba(255,255,255,.16);
-  border-radius:12px;
-  padding:10px;
-  box-shadow: 0 3px 16px rgba(0,0,0,.25) inset, 0 1px 0 rgba(255,255,255,.06);
+.app-card .app-title{
+  background-image: linear-gradient(90deg, var(--appA), var(--appB));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
 }
-/* Botão interno (Chrome, Edge, Safari) */
-input[type="file"]::file-selector-button{
-  margin-right:10px;
-  padding:8px 12px;
-  border:1px solid rgba(255,255,255,.2);
-  border-radius:10px;
-  background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
-  color:#f8f0d0;
-  font-weight:800;
-  cursor:pointer;
-  transition: transform .15s ease, box-shadow .2s ease, background .2s ease;
+.app-card .btn{
+  background: linear-gradient(90deg, var(--appA), var(--appB));
+  color:#0b0f14; border-color: transparent;
 }
-input[type="file"]::file-selector-button:hover{
-  transform: translateY(-1px);
-  box-shadow: 0 0 0 2px rgba(212,175,55,.28), 0 0 18px rgba(212,175,55,.18);
+.app-card .btn:hover{
+  box-shadow: 0 12px 28px color-mix(in oklab, var(--appB) 22%, transparent),
+              0 0 0 1px rgba(255,255,255,.12) inset;
 }
-/* Firefox fallback */
-@supports (-moz-appearance: none){
-  input[type="file"]::-moz-focus-inner{ border:0; padding:0; }
+/* Badge (top-right) uses accent color, avoids duplicate fallback */
+.app-card .badge-ask{ display: none; } /* remove '?' fallback if present */
+</style>
+
+
+<style id="upload-buttons-css-patch">
+/* ==== Nebula Pro • Upload inputs (HTML/TXT/IMG) — coerente com .btn/.input ==== */
+
+/* Base: todos os file inputs do app */
+#v-apps #fileLocal[type="file"],
+#v-brain #trainingFile[type="file"],
+#v-brain #bgUpload[type="file"],
+#v-stack #stackUpload[type="file"] {
+  appearance: none;
+  -webkit-appearance: none;
+  font: inherit;
+  color: var(--fg, #e9f7ff);
+  background: #0f1426;                    /* igual à .input base */
+  border: var(--bd, 1px solid rgba(255,255,255,.12));
+  border-radius: 12px;
+  padding: 10px;                           /* corpo do controle */
+  min-height: 44px;                        /* tap target */
+  width: 100%;
+  max-width: 260px;                        /* segue seus campos do Brain */
+  cursor: pointer;
+  box-sizing: border-box;
 }
-/* Contextos comuns: Brain, Apps Section */
-#brain input[type="file"], .apps input[type="file"], .apps-section input[type="file"], .menuItem input[type="file"]{
-  width:100%;
-  max-width: 520px;
-  margin:8px 0 12px 0;
+
+/* Botão nativo do file input – estilizado como .btn do tema */
+#v-apps #fileLocal[type="file"]::file-selector-button,
+#v-brain #trainingFile[type="file"]::file-selector-button,
+#v-brain #bgUpload[type="file"]::file-selector-button,
+#v-stack #stackUpload[type="file"]::file-selector-button {
+  margin-right: 10px;
+  padding: .58rem .9rem;
+  border: none;
+  border-radius: 12px;
+  font-weight: 800;
+  color: var(--fg, #e9f7ff);
+  background: linear-gradient(180deg, #11162a, #0b1122); /* igual à .btn padrão */
+  box-shadow: 0 0 0 1px rgba(255,255,255,.10) inset;
+  transition: transform .16s var(--ease, ease), box-shadow .25s var(--ease, ease), filter .25s var(--ease, ease);
+  cursor: pointer;
 }
-</style></head>
+
+/* Hover/focus consistentes com .btn */
+#v-apps #fileLocal[type="file"]::file-selector-button:hover,
+#v-brain #trainingFile[type="file"]::file-selector-button:hover,
+#v-brain #bgUpload[type="file"]::file-selector-button:hover,
+#v-stack #stackUpload[type="file"]::file-selector-button:hover {
+  box-shadow: 0 8px 26px rgba(0,0,0,.36), 0 0 0 1px rgba(255,255,255,.16) inset;
+}
+
+#v-apps #fileLocal[type="file"]::file-selector-button:active,
+#v-brain #trainingFile[type="file"]::file-selector-button:active,
+#v-brain #bgUpload[type="file"]::file-selector-button:active,
+#v-stack #stackUpload[type="file"]::file-selector-button:active {
+  transform: translateY(0) scale(.98);
+  filter: saturate(1.02) brightness(.98);
+}
+
+/* Fallback Safari antigo / WebKit */
+#v-apps #fileLocal[type="file"]::-webkit-file-upload-button,
+#v-brain #trainingFile[type="file"]::-webkit-file-upload-button,
+#v-brain #bgUpload[type="file"]::-webkit-file-upload-button,
+#v-stack #stackUpload[type="file"]::-webkit-file-upload-button {
+  margin-right: 10px;
+  padding: .58rem .9rem;
+  border: none;
+  border-radius: 12px;
+  font-weight: 800;
+  color: var(--fg, #e9f7ff);
+  background: linear-gradient(180deg, #11162a, #0b1122);
+  box-shadow: 0 0 0 1px rgba(255,255,255,.10) inset;
+  transition: transform .16s var(--ease, ease), box-shadow .25s var(--ease, ease), filter .25s var(--ease, ease);
+  cursor: pointer;
+}
+
+/* Estado foco (acessibilidade, igual ao .ring/.focus-ring) */
+#v-apps #fileLocal[type="file"]:focus-visible,
+#v-brain #trainingFile[type="file"]:focus-visible,
+#v-brain #bgUpload[type="file"]:focus-visible,
+#v-stack #stackUpload[type="file"]:focus-visible {
+  outline: 0;
+  box-shadow: var(--focus-ring, 0 0 0 3px rgba(57,255,182,.18));
+}
+
+/* Variant “prime” opcional (use adicionando a classe .prime no input se quiser o degradê colorido) */
+input[type="file"].prime::file-selector-button {
+  background: linear-gradient(90deg, #a66fff, #6db4ff);
+  color: #0b0f14;
+  box-shadow: 0 10px 30px rgba(166,111,255,.26), 0 0 0 1px rgba(255,255,255,.18) inset;
+}
+
+/* Ajuste de largura quando lado a lado dentro de grids compactos */
+#v-apps #fileLocal[type="file"],
+#v-brain #trainingFile[type="file"],
+#v-brain #bgUpload[type="file"] {
+  max-width: 260px;
+}
+
+/* Mantém compatibilidade com o fluxo atual do Stack (input escondido por JS) */
+#v-stack #stackUpload[type="file"] {
+  display: none; /* já é acionado por #btnStackUpload */
+}
+</style>
+</head>
 <body data-theme="blue1">
 <!-- Splash screen displayed on initial load -->
 <!-- Som do splash: coloque seu arquivo de áudio na pasta especificada e ajuste o caminho abaixo.
@@ -8059,16 +8144,8 @@ window.kobDemo = () => pushAI(`[INTRO] **Kael Dominus** — núcleo sentiente qu
   window.__luxLog = { add: addLog, render: ()=>{ if (hud) renderLogs(); } };
 })();
 </script><script id="app-icons-script">
-// App icons (inline SVG) + per-app color + de-dupe + corner-badge cleanup
+// Inline SVG icon registry + auto-attach for known apps and local uploads (with de-dupe & cleanup)
 (function(){
-  function setElColor(el, color){
-    try{
-      // prefer coloring the card/container so :hover currentColor works
-      el.style.color = color;
-      const card = el.closest('.app-card, .app-item, .menuItem') || el;
-      card.style.color = color;
-    }catch(e){}
-  }
   const ICONS = {
     artemis: `<svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M12 3l3.5 6 6 3.5-6 3.5L12 21l-3.5-5.9L2 12.5 8.5 9 12 3z"></path>
@@ -8102,17 +8179,6 @@ window.kobDemo = () => pushAI(`[INTRO] **Kael Dominus** — núcleo sentiente qu
               </svg>`
   };
 
-  // Per-app color map (can be extended). You can also set data-app-color on the element.
-  const COLORS = {
-    artemis: '#ff9f43',
-    naviga:  '#00c5e5',
-    atlas:   '#409EFF',
-    nova:    '#ff67c4',
-    serena:  '#9b87ff',
-    kaion:   '#39ffb6',
-    manifesta:'#d4af37'
-  };
-
   function chooseBadge(name){
     const n = (name||'').toLowerCase();
     if (n.includes('nova')) return 'badge-pink';
@@ -8131,27 +8197,18 @@ window.kobDemo = () => pushAI(`[INTRO] **Kael Dominus** — núcleo sentiente qu
     if (key === 'manifest a' || key === 'manifesta' || key === 'manifesta a') return ICONS.manifesta;
     return ICONS._default;
   }
-  function resolveColor(name, el){
-    // priority: data-app-color on element > known color by name > CSS var --arch-color
-    const dataColor = el?.getAttribute('data-app-color');
-    if (dataColor) return dataColor;
-    const key = (name||'').toLowerCase();
-    if (COLORS[key]) return COLORS[key];
-    // fallback to computed --arch-color
-    const v = getComputedStyle(document.documentElement).getPropertyValue('--arch-color').trim();
-    return v || '#d4af37';
-  }
 
-  // Remove corner/fallback badges
+  // Remove fallback "?" badges/icons commonly used by templates
   function cleanupFallbacks(el){
-    // hide/remove common corner badges
-    el.querySelectorAll('.badge, .corner-badge, .status-badge, .avatar, [data-icon], [aria-label*="icon"], [aria-label*="ícone"]').forEach(node=>{
+    // Heuristic: elements that look like icon/badge and textContent is exactly "?"
+    el.querySelectorAll('.icon, .badge, .avatar, [data-icon], [aria-label*="icon"], [aria-label*="ícone"]').forEach(node=>{
       const t = (node.textContent||'').trim();
-      if (t === '?' || t.length === 1 || getComputedStyle(node).position === 'absolute'){
+      // remove only if it's a simple question mark or a single-char fallback
+      if (t === '?' || t.length === 1) {
         node.remove();
       }
     });
-    // Deduplicate .app-icon (keep first)
+    // Remove duplicated .app-icon (keep the first)
     const icons = el.querySelectorAll('.app-icon');
     if (icons.length > 1){
       for (let i=1;i<icons.length;i++) icons[i].remove();
@@ -8161,30 +8218,17 @@ window.kobDemo = () => pushAI(`[INTRO] **Kael Dominus** — núcleo sentiente qu
   function ensureIconFor(item){
     const { el, title } = item;
     if (!el) return;
-    const color = resolveColor(title, el);
+    // If already has one of OUR icons, bail
+    if (el.querySelector('.app-icon[data-kdx="icon"]')) return;
 
-    // If already has one of OUR icons, update its color and exit
-    const ours = el.querySelector('.app-icon[data-kdx="icon"]');
-    if (ours){
-      ours.style.color = color; setElColor(el, color);
-      return;
-    }
-
-    // If it has an .app-icon de outro lugar
+    // If it has an .app-icon de outro lugar: preferimos substituir se for vazio/fallback
     const existing = el.querySelector('.app-icon');
     if (existing){
-      if (existing.querySelector('svg')){
-        // Consider it valid; just apply color and class for consistency
-        existing.style.color = color; setElColor(el, color);
-        existing.classList.add(chooseBadge(title));
-        existing.setAttribute('data-kdx','icon-ext');
-        cleanupFallbacks(el);
-        return;
-      }
-      // Replace fallback content with our SVG
+      // If existing contains an SVG, assume it's valid and do not duplicate
+      if (existing.querySelector('svg')) return;
+      // else, replace contents
       existing.setAttribute('data-kdx','icon');
       existing.classList.add(chooseBadge(title));
-      existing.style.color = color; setElColor(el, color);
       existing.innerHTML = getIcon(title);
       cleanupFallbacks(el);
       return;
@@ -8196,7 +8240,6 @@ window.kobDemo = () => pushAI(`[INTRO] **Kael Dominus** — núcleo sentiente qu
     const wrap = document.createElement('span');
     wrap.className = 'app-icon ' + chooseBadge(title);
     wrap.setAttribute('data-kdx','icon');
-    wrap.style.color = color; setElColor(el, color);
     wrap.innerHTML = getIcon(title);
 
     const anchor = el.querySelector('.title, .app-title, [data-title], .label, .name, h3, h4, b, strong, span');
@@ -8215,16 +8258,19 @@ window.kobDemo = () => pushAI(`[INTRO] **Kael Dominus** — núcleo sentiente qu
       const id = el.getAttribute('data-app-id') || el.getAttribute('data-id') || '';
       const titleEl = el.querySelector('[data-title], .title, .app-title, .label, .name, h3, h4, b, strong');
       const title = (titleEl?.textContent || id || el.getAttribute('data-name') || '').trim();
-      if (title) candidates.push({ el, title });
+      candidates.push({ el, title });
     });
     document.querySelectorAll('[data-app], [data-app-name], a.app, button.app').forEach(el=>{
       const title = el.getAttribute('data-app-name') || el.getAttribute('data-app') || el.textContent.trim();
-      if (title) candidates.push({ el, title });
+      candidates.push({ el, title });
     });
     return candidates;
   }
 
-  function pass(){ findAppItems().forEach(ensureIconFor); }
+  function pass(){
+    const items = findAppItems();
+    items.forEach(ensureIconFor);
+  }
   pass();
 
   const obs = new MutationObserver((muts)=>{
@@ -8236,12 +8282,184 @@ window.kobDemo = () => pushAI(`[INTRO] **Kael Dominus** — núcleo sentiente qu
   });
   obs.observe(document.body, { childList:true, subtree:true });
 
-  // Public API
-  window.__appIcons = { refresh: pass, setColor: (elOrSelector, color)=>{
-    const el = typeof elOrSelector==='string' ? document.querySelector(elOrSelector) : elOrSelector;
-    const icon = el?.querySelector('.app-icon');
-    if (icon){ icon.style.color = color; }
-  }};
+  window.__appIcons = { refresh: pass };
 })();
-</script></body>
+</script>
+<script id="APP_ACCENTS_KISARA_JS">
+(() => {
+  const APP_COLORS = {
+    'Atlas': ['#409EFF','#8fd3ff'],
+    'Nova': ['#ff52e5','#f8c058'],
+    'Vitalis': ['#ff9f43','#39ffb6'],
+    'Pulse': ['#8a2be2','#00e5ff'],
+    'Artemis': ['#00c2ff','#39ffb6'],
+    'Serena': ['#b08fff','#ffadad'],
+    'Kaos': ['#ff9f43','#ff4d6d'],
+    'Genus': ['#a3ff4d','#00e5ff'],
+    'Lumine': ['#ffd700','#ff7ab6'],
+    'Rhea': ['#ff7aa2','#ffa5d8'],
+    'Solus': ['#4b6fff','#8fd3ff'],
+    'Aion': ['#2dd4bf','#10b981'],
+  };
+
+  // Apply per-app accent
+  function applyAppAccents(){
+    document.querySelectorAll('.app-card').forEach(card => {
+      const titleEl = card.querySelector('.app-title');
+      if (!titleEl) return;
+      const full = titleEl.getAttribute('title') || titleEl.textContent || '';
+      // Expected format "Atlas · Cartesius" or "Atlas ·…"
+      const root = full.split('·')[0].trim();
+      const colors = APP_COLORS[root];
+      if (!colors) return;
+      card.style.setProperty('--appA', colors[0]);
+      card.style.setProperty('--appB', colors[1]);
+      card.classList.add('accented');
+    });
+  }
+
+  // Prevent duplicate icon fallback (safety, replica correção da base)
+  function dedupeAppIcons(){
+    document.querySelectorAll('.app-card .app-icon').forEach(ico => {
+      const icons = Array.from(ico.querySelectorAll('svg,img'));
+      if (icons.length <= 1) return;
+      let keep = icons.find(n => n.tagName === 'SVG') || icons[0];
+      icons.forEach(n => { if (n !== keep) n.remove(); });
+    });
+  }
+
+  // Archetype overlay sync (tone matches archetype)
+  const ARCH_COLORS = {
+    'atlas':  { color: '#409EFF', overlay: 'rgba(64,158,255,0.22)' },
+    'nova':   { color: '#ff52e5', overlay: 'rgba(255,82,229,0.22)' },
+    'vitalis':{ color: '#2dd4bf', overlay: 'rgba(45,212,191,0.20)' },
+    'pulse':  { color: '#8a2be2', overlay: 'rgba(138,43,226,0.20)' },
+    'artemis':{ color: '#00c2ff', overlay: 'rgba(0,194,255,0.20)' },
+    'serena': { color: '#b08fff', overlay: 'rgba(176,143,255,0.20)' },
+    'kaos':   { color: '#ff9f43', overlay: 'rgba(255,159,67,0.20)' },
+    'genus':  { color: '#a3ff4d', overlay: 'rgba(163,255,77,0.18)' },
+    'lumine': { color: '#ffd700', overlay: 'rgba(255,215,0,0.18)' },
+    'rhea':   { color: '#ff7aa2', overlay: 'rgba(255,122,162,0.20)' },
+    'solus':  { color: '#4b6fff', overlay: 'rgba(75,111,255,0.20)' },
+    'aion':   { color: '#10b981', overlay: 'rgba(16,185,129,0.20)' },
+  };
+  function currentArchKey(){
+     const sel = document.getElementById('arch-select');
+     if (!sel) return 'atlas';
+     const opt = sel.value || '';
+     const m = opt.match(/\/([a-z]+)\.html$/i);
+     return m ? m[1].toLowerCase() : 'atlas';
+  }
+  function applyOverlayFromArch(){
+     const key = currentArchKey();
+     const cfg = ARCH_COLORS[key] || ARCH_COLORS['atlas'];
+     document.documentElement.style.setProperty('--arch-color', cfg.color);
+     document.documentElement.style.setProperty('--arch-overlay', cfg.overlay);
+     const call = document.getElementById('orbCall');
+     if (call) call.style.textShadow = `0 0 12px ${cfg.color}80`;
+  }
+  function wireArchSelect(){
+    const sel = document.getElementById('arch-select');
+    if (!sel) return;
+    sel.addEventListener('change', applyOverlayFromArch);
+  }
+
+  // "Toque o pulso" CTA + synth
+  function ensurePulseCTA(){
+    const wrap = document.getElementById('orbWrap');
+    if (!wrap || wrap.querySelector('.pulse-cta')) return;
+    const cta = document.createElement('div');
+    cta.className = 'pulse-cta hidden';
+    cta.innerHTML = '<div class="dot"></div><div class="label">toque o pulso</div>';
+    wrap.appendChild(cta);
+    cta.addEventListener('click', () => {
+      hideCTA();
+      startSynthSplash();
+      tryResumeAudio();
+    }, { once: true });
+    window._pulseCTA = { show: showCTA, hide: hideCTA };
+    function showCTA(){ cta.classList.remove('hidden'); }
+    function hideCTA(){ cta.classList.add('hidden'); }
+  }
+
+  function tryResumeAudio(){
+    const ctx = window.__AUDIO_CTX__ || (window.AudioContext ? new AudioContext() : null);
+    if (ctx && ctx.state === 'suspended') { ctx.resume().catch(()=>{}); }
+    const el = document.getElementById('splashSound');
+    if (el) { el.volume = 0.0; el.play().catch(()=>{}); setTimeout(()=>{ try{ el.pause(); el.currentTime = 0; }catch{} }, 200); }
+    window.dispatchEvent(new CustomEvent('kobllux:audio:resume'));
+  }
+
+  function startSynthSplash(){
+    const wrap = document.getElementById('orbWrap');
+    if (!wrap) return;
+    let canvas = wrap.querySelector('canvas#pulseSynth');
+    if (!canvas) {
+      canvas = document.createElement('canvas');
+      canvas.id = 'pulseSynth';
+      canvas.className = 'pulse-synth';
+      wrap.appendChild(canvas);
+    }
+    const ctx = canvas.getContext('2d');
+    function resize(){ canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight; }
+    resize(); window.addEventListener('resize', resize);
+    canvas.classList.add('active');
+    const t0 = performance.now();
+    const dur = 1500;
+    const rootStyles = getComputedStyle(document.documentElement);
+    const colorA = rootStyles.getPropertyValue('--arch-color').trim() || '#d4af37';
+    function paint(t){
+      const p = Math.min(1, (t - t0)/dur);
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      const cx = canvas.width/2, cy = canvas.height/2;
+      const maxR = Math.min(cx,cy);
+      for (let i=0;i<4;i++){
+        const k = p*1.1 - i*0.18;
+        if (k <= 0) continue;
+        const r = maxR * k;
+        const g = ctx.createRadialGradient(cx, cy, Math.max(0,r-28), cx, cy, r);
+        g.addColorStop(0, colorA + '80');
+        g.addColorStop(1, '#0000');
+        ctx.beginPath();
+        ctx.fillStyle = g;
+        ctx.arc(cx, cy, r, 0, Math.PI*2);
+        ctx.fill();
+      }
+      if (p < 1){ requestAnimationFrame(paint); } else {
+        canvas.classList.remove('active');
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+      }
+    }
+    requestAnimationFrame(paint);
+  }
+
+  // Detect autoplay block → show CTA
+  function detectAudioGate(){
+    const el = document.getElementById('splashSound');
+    if (!el) return;
+    el.play().then(() => {
+      el.pause(); el.currentTime = 0;
+      if (window._pulseCTA) window._pulseCTA.hide();
+    }).catch(() => {
+      if (window._pulseCTA) window._pulseCTA.show();
+    });
+  }
+
+  function boot(){
+    applyAppAccents();
+    dedupeAppIcons();
+    applyOverlayFromArch();
+    wireArchSelect();
+    ensurePulseCTA();
+    detectAudioGate();
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+})();
+</script>
+
+</body>
 </html>
