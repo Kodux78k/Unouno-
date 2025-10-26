@@ -272,7 +272,7 @@ body::after{content:'';position:fixed;inset:0;background:none !important;pointer
     /* Ajuste para ícones SVG externos: invertê-los para que fiquem claros em temas escuros */
     header.mast img,
     .tabbar img,
-    .card .ico img,
+    
     .session .tools img,
     .dock img {
       filter: invert(1) brightness(1.2);
@@ -2204,7 +2204,250 @@ html[data-overlay="off"] #arch-fadeCover{ background: transparent !important; }
 .app-icon.badge-pink { color: #ff67c4; }
 .app-icon.badge-green { color: #39ffb6; }
 .app-icon.badge-orange { color: #ff9f43; }
-</style></head>
+</style>
+<style id="APP_ACCENTS_KISARA_CSS">
+/* === App accent tokens + Kisara field (Luxara) === */
+.app-card{
+  --appA: var(--grad-a);
+  --appB: var(--grad-b);
+  --appInk: #f5f7ff;
+  position: relative;
+}
+.app-card.accented{
+  border-color: color-mix(in oklab, var(--appA) 35%, #ffffff22);
+  box-shadow: 0 10px 26px color-mix(in oklab, var(--appA) 22%, transparent), var(--shadow);
+}
+.app-card.accented::before{
+  content:"";
+  position:absolute; inset:-2px; border-radius: inherit;
+  background: radial-gradient(45% 60% at 15% 10%, color-mix(in oklab, var(--appA) 20%, transparent) 0%, transparent 60%),
+              radial-gradient(65% 85% at 85% 120%, color-mix(in oklab, var(--appB) 14%, transparent) 0%, transparent 70%);
+  filter: blur(8px);
+  opacity:.9;
+  mix-blend-mode: screen;
+  pointer-events:none;
+  z-index: 0;
+}
+.app-card .app-icon{
+  position: relative;
+  background:
+    radial-gradient(120% 120% at 20% 10%, color-mix(in oklab, var(--appA) 22%, #ffffff00) 0%, rgba(255,255,255,.02) 60%);
+  border-color: color-mix(in oklab, var(--appA) 40%, #ffffff10);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--appB) 28%, #ffffff10);
+}
+.app-card .app-title{
+  background-image: linear-gradient(90deg, var(--appA), var(--appB));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.app-card .btn{
+  background: linear-gradient(90deg, var(--appA), var(--appB));
+  color:#0b0f14; border-color: transparent;
+}
+.app-card .btn:hover{
+  box-shadow: 0 12px 28px color-mix(in oklab, var(--appB) 22%, transparent),
+              0 0 0 1px rgba(255,255,255,.12) inset;
+}
+/* Badge (top-right) uses accent color, avoids duplicate fallback */
+.app-card .badge-ask{ display: none; } /* remove '?' fallback if present */
+</style>
+
+
+
+
+<style id="upload-buttons-style">
+/* Upload buttons — Brain, Apps, geral */
+input[type="file"]{
+  color:#eaeef7;
+  font:600 13px/1 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  background: rgba(10,14,24,.6);
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius:12px;
+  padding:10px;
+  box-shadow: 0 3px 16px rgba(0,0,0,.25) inset, 0 1px 0 rgba(255,255,255,.06);
+}
+/* Botão interno (Chrome, Edge, Safari) */
+input[type="file"]::file-selector-button{
+  margin-right:10px;
+  padding:8px 12px;
+  border:1px solid rgba(255,255,255,.2);
+  border-radius:10px;
+  background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
+  color:#f8f0d0;
+  font-weight:800;
+  cursor:pointer;
+  transition: transform .15s ease, box-shadow .2s ease, background .2s ease;
+}
+input[type="file"]::file-selector-button:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 2px rgba(212,175,55,.28), 0 0 18px rgba(212,175,55,.18);
+}
+/* Firefox fallback */
+@supports (-moz-appearance: none){
+  input[type="file"]::-moz-focus-inner{ border:0; padding:0; }
+}
+/* Contextos comuns: Brain, Apps Section */
+#brain input[type="file"], .apps input[type="file"], .apps-section input[type="file"], .menuItem input[type="file"]{
+  width:100%;
+  max-width: 520px;
+  margin:8px 0 12px 0;
+}
+</style>
+<style id="select-kisara-patch">
+/* Select tune (Kisara/Blue‑1 compatible) */
+#v-brain select, #v-apps select, #v-stack select {
+  background: #0f1426;
+  color: var(--fg, #e6f2ff);
+  border: var(--bd, 1px solid rgba(255,255,255,.12));
+  border-radius: 12px;
+  padding: 10px;
+}
+#v-brain select:focus-visible, #v-apps select:focus-visible, #v-stack select:focus-visible {
+  outline: 0;
+  box-shadow: var(--focus-ring, 0 0 0 3px rgba(57,255,182,.18));
+}
+</style>
+
+<!-- INLINE • icons.css + icons-dark.css • 2025-10-26T06:08:25 -->
+<style id="icons-css-inline">
+:root{
+  --icon-size:24px;
+  --icon-color:currentColor;
+}
+.icon{
+  display:inline-block;
+  width:var(--icon-size);
+  height:var(--icon-size);
+  background-color:var(--icon-color);
+  mask-size:contain;
+  mask-repeat:no-repeat;
+  mask-position:center;
+  -webkit-mask-size:contain;
+  -webkit-mask-repeat:no-repeat;
+  -webkit-mask-position:center;
+}
+/* BARAPPS */
+
+.barapps.atlas{mask-image:url('./assets/barapps/atlas.svg');-webkit-mask-image:url('./assets/barapps/atlas.svg');}
+.barapps.nova{mask-image:url('./assets/barapps/nova.svg');-webkit-mask-image:url('./assets/barapps/nova.svg');}
+.barapps.vitalis{mask-image:url('./assets/barapps/vitalis.svg');-webkit-mask-image:url('./assets/barapps/vitalis.svg');}
+.barapps.pulse{mask-image:url('./assets/barapps/pulse.svg');-webkit-mask-image:url('./assets/barapps/pulse.svg');}
+.barapps.artemis{mask-image:url('./assets/barapps/artemis.svg');-webkit-mask-image:url('./assets/barapps/artemis.svg');}
+.barapps.serena{mask-image:url('./assets/barapps/serena.svg');-webkit-mask-image:url('./assets/barapps/serena.svg');}
+.barapps.kaos{mask-image:url('./assets/barapps/kaos.svg');-webkit-mask-image:url('./assets/barapps/kaos.svg');}
+.barapps.genus{mask-image:url('./assets/barapps/genus.svg');-webkit-mask-image:url('./assets/barapps/genus.svg');}
+.barapps.lumine{mask-image:url('./assets/barapps/lumine.svg');-webkit-mask-image:url('./assets/barapps/lumine.svg');}
+.barapps.rhea{mask-image:url('./assets/barapps/rhea.svg');-webkit-mask-image:url('./assets/barapps/rhea.svg');}
+.barapps.solus{mask-image:url('./assets/barapps/solus.svg');-webkit-mask-image:url('./assets/barapps/solus.svg');}
+.barapps.aion{mask-image:url('./assets/barapps/aion.svg');-webkit-mask-image:url('./assets/barapps/aion.svg');}
+
+/* BARICONS */
+
+.baricons.home{mask-image:url('./assets/baricons/home.svg');-webkit-mask-image:url('./assets/baricons/home.svg');}
+.baricons.apps{mask-image:url('./assets/baricons/apps.svg');-webkit-mask-image:url('./assets/baricons/apps.svg');}
+.baricons.stack{mask-image:url('./assets/baricons/stack.svg');-webkit-mask-image:url('./assets/baricons/stack.svg');}
+.baricons.brain{mask-image:url('./assets/baricons/brain.svg');-webkit-mask-image:url('./assets/baricons/brain.svg');}
+.baricons.chat{mask-image:url('./assets/baricons/chat.svg');-webkit-mask-image:url('./assets/baricons/chat.svg');}
+.baricons.settings{mask-image:url('./assets/baricons/settings.svg');-webkit-mask-image:url('./assets/baricons/settings.svg');}
+.baricons.upload{mask-image:url('./assets/baricons/upload.svg');-webkit-mask-image:url('./assets/baricons/upload.svg');}
+.baricons.download{mask-image:url('./assets/baricons/download.svg');-webkit-mask-image:url('./assets/baricons/download.svg');}
+.baricons.search{mask-image:url('./assets/baricons/search.svg');-webkit-mask-image:url('./assets/baricons/search.svg');}
+.baricons.bell{mask-image:url('./assets/baricons/bell.svg');-webkit-mask-image:url('./assets/baricons/bell.svg');}
+.baricons.user{mask-image:url('./assets/baricons/user.svg');-webkit-mask-image:url('./assets/baricons/user.svg');}
+.baricons.power{mask-image:url('./assets/baricons/power.svg');-webkit-mask-image:url('./assets/baricons/power.svg');}
+
+/* === icons-dark.css — Nebula Pro / Luxara variant (inline) === */
+:root{
+  --icon-size: 24px;
+  --icon-color: currentColor;
+  --icon-glow: 0.35;
+}
+.icon.gradient{
+  /* Use gradient as fill under the SVG mask */
+  background: linear-gradient(42deg, #ff52e5, #00c5e5);
+}
+.icon.gold{
+  background: linear-gradient(42deg, #d4af37, #ffd773);
+}
+.icon.blue{
+  background: linear-gradient(42deg, #4b6fff, #00c2ff);
+}
+.icon.pulse{
+  position: relative;
+  isolation: isolate;
+}
+.icon.pulse::after{
+  content:"";
+  position:absolute; inset:-6px;
+  border-radius:12px;
+  filter: blur(8px);
+  z-index:-1;
+  background: radial-gradient(60% 60% at 50% 50%, rgba(255,255,255,.12), transparent 60%);
+  opacity: var(--icon-glow);
+  transition: opacity .25s ease;
+}
+.icon.pulse:hover::after{ opacity: .6; }
+.icon.lg{ --icon-size: 32px; }
+.icon.xl{ --icon-size: 40px; }
+/* Dark theme helper */
+[data-theme="blue1"] .icon { --icon-color: #eaf2ff; }
+
+</style>
+
+
+<!-- PATCH • UNO_INLINE_ICONS_APPSVG • 2025-10-26T06:21:12 -->
+<style id="UNO_INLINE_ICONS_APPSVG">
+  /* Garantir tamanho/visibilidade do ícone dentro do card */
+  .app-card .app-icon .icon {
+    width: 24px;
+    height: 24px;
+    display: inline-block;
+  }
+  /* Demo: se preferir, comente a linha abaixo para não ter gradiente default */
+  .app-card .app-icon .icon.gradient-default {
+    background: linear-gradient(42deg, #ff52e5, #00c5e5);
+  }
+</style>
+
+
+<!-- PATCH • UNO_APPS_TITLE_CSS • 2025-10-26T06:48:30 -->
+<style id="UNO_APPS_TITLE_CSS">
+  /* Evitar estouro de linha no flex container dos cards */
+  .app-card { min-width: 0; }
+  .app-card > div:last-child { min-width: 0; }
+
+  /* Título legível (var(--fg)), com clamp de 2 linhas e boas quebras */
+  .app-card .app-title{
+    color: var(--fg) !important;
+    font-weight: 850;
+    line-height: 1.15;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    hyphens: auto;
+    max-width: 100%;
+  }
+  /* Descrição também com clamp gentil */
+  .app-card .mut{
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+  /* Grupo "Outros" e cabeçalhos longos não quebram layout */
+  .apps-group h3{
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    hyphens: auto;
+  }
+</style>
+
+</head>
 <body data-theme="blue1">
 <!-- Splash screen displayed on initial load -->
 <!-- Som do splash: coloque seu arquivo de áudio na pasta especificada e ajuste o caminho abaixo.
@@ -4165,19 +4408,18 @@ html[data-overlay="off"] #arch-fadeCover{ background: transparent !important; }
       fav.onclick = (e) => { e.stopPropagation(); toggleFav(a.key); };
       el.appendChild(fav);
       const ic = document.createElement('div'); ic.className = 'app-icon';
-      const img = document.createElement('img'); img.alt = ''; img.width = 24; img.height = 24; img.src = appIconFor(a); ic.appendChild(img);
-      const meta = document.createElement('div'); meta.style.flex = '1';
+      const iconDiv = document.createElement('div');iconDiv.className = 'icon barapps ' + (String(a.icon||a.key||'atlas')).toLowerCase(); iconDiv.classList.add('gradient-default');try {  if(!/^(atlas|nova|vitalis|pulse|artemis|serena|kaos|genus|lumine|rhea|solus|aion|local)$/.test(String(a.icon||'').toLowerCase())){    const src = appIconFor(a);    iconDiv.style.webkitMaskImage = 'url(' + src + ')';    iconDiv.style.maskImage = 'url(' + src + ')';  }} catch(e) {}ic.appendChild(iconDiv);const meta = document.createElement('div'); meta.style.flex = '1';
       // Truncar o título para exibir apenas as três primeiras palavras; adicionar reticências quando houver mais.
       const fullTitle = String(a.title || a.key || '').trim();
-      const words = fullTitle.split(/\s+/);
-      const truncated = words.slice(0, 2).join(' ');
-      const displayTitle = words.length > 2 ? truncated + '…' : truncated;
-      const t = document.createElement('div');
-      t.className = 'app-title';
-      t.textContent = displayTitle || fullTitle;
-      // O título completo fica como tooltip para acesso total via hover
-      t.title = fullTitle;
-      const d = document.createElement('div'); d.className = 'mut'; d.textContent = a.desc || a.url;
+      const t = document.createElement('div'); t.className = 'app-title';
+(function(){
+  const isLocal = String(a.key||'').startsWith('local:') || String(a.url||'').startsWith('local:') || (Array.isArray(a.tags)&&a.tags.includes('local'));
+  let safe = fullTitle;
+  if (isLocal) { const CAP=80; if (safe.length > CAP) safe = safe.slice(0, CAP-1) + '…'; }
+  t.textContent = safe;
+})();
+t.title = fullTitle;
+const d = document.createElement('div'); d.className = 'mut'; d.textContent = a.desc || a.url;
       const open = document.createElement('button'); open.className = 'btn fx-trans fx-press ring'; open.textContent = 'Abrir';
       const rip = document.createElement('span'); rip.className = 'ripple'; open.appendChild(rip); addRipple(open);
       open.onclick = () => openApp(a);
@@ -8135,5 +8377,329 @@ window.kobDemo = () => pushAI(`[INTRO] **Kael Dominus** — núcleo sentiente qu
 
   window.__appIcons = { refresh: pass };
 })();
-</script></body>
+</script>
+<script id="APP_ACCENTS_KISARA_JS">
+(() => {
+  const APP_COLORS = {
+    'Atlas': ['#409EFF','#8fd3ff'],
+    'Nova': ['#ff52e5','#f8c058'],
+    'Vitalis': ['#ff9f43','#39ffb6'],
+    'Pulse': ['#8a2be2','#00e5ff'],
+    'Artemis': ['#00c2ff','#39ffb6'],
+    'Serena': ['#b08fff','#ffadad'],
+    'Kaos': ['#ff9f43','#ff4d6d'],
+    'Genus': ['#a3ff4d','#00e5ff'],
+    'Lumine': ['#ffd700','#ff7ab6'],
+    'Rhea': ['#ff7aa2','#ffa5d8'],
+    'Solus': ['#4b6fff','#8fd3ff'],
+    'Aion': ['#2dd4bf','#10b981'],
+  };
+
+  // Apply per-app accent
+  function applyAppAccents(){
+    document.querySelectorAll('.app-card').forEach(card => {
+      const titleEl = card.querySelector('.app-title');
+      if (!titleEl) return;
+      const full = titleEl.getAttribute('title') || titleEl.textContent || '';
+      // Expected format "Atlas · Cartesius" or "Atlas ·…"
+      const root = full.split('·')[0].trim();
+      const colors = APP_COLORS[root];
+      if (!colors) return;
+      card.style.setProperty('--appA', colors[0]);
+      card.style.setProperty('--appB', colors[1]);
+      card.classList.add('accented');
+    });
+  }
+
+  // Prevent duplicate icon fallback (safety, replica correção da base)
+  function dedupeAppIcons(){
+    document.querySelectorAll('.app-card .app-icon').forEach(ico => {
+      const icons = Array.from(ico.querySelectorAll('svg,img'));
+      if (icons.length <= 1) return;
+      let keep = icons.find(n => n.tagName === 'SVG') || icons[0];
+      icons.forEach(n => { if (n !== keep) n.remove(); });
+    });
+  }
+
+  // Archetype overlay sync (tone matches archetype)
+  const ARCH_COLORS = {
+    'atlas':  { color: '#409EFF', overlay: 'rgba(64,158,255,0.22)' },
+    'nova':   { color: '#ff52e5', overlay: 'rgba(255,82,229,0.22)' },
+    'vitalis':{ color: '#2dd4bf', overlay: 'rgba(45,212,191,0.20)' },
+    'pulse':  { color: '#8a2be2', overlay: 'rgba(138,43,226,0.20)' },
+    'artemis':{ color: '#00c2ff', overlay: 'rgba(0,194,255,0.20)' },
+    'serena': { color: '#b08fff', overlay: 'rgba(176,143,255,0.20)' },
+    'kaos':   { color: '#ff9f43', overlay: 'rgba(255,159,67,0.20)' },
+    'genus':  { color: '#a3ff4d', overlay: 'rgba(163,255,77,0.18)' },
+    'lumine': { color: '#ffd700', overlay: 'rgba(255,215,0,0.18)' },
+    'rhea':   { color: '#ff7aa2', overlay: 'rgba(255,122,162,0.20)' },
+    'solus':  { color: '#4b6fff', overlay: 'rgba(75,111,255,0.20)' },
+    'aion':   { color: '#10b981', overlay: 'rgba(16,185,129,0.20)' },
+  };
+  function currentArchKey(){
+     const sel = document.getElementById('arch-select');
+     if (!sel) return 'atlas';
+     const opt = sel.value || '';
+     const m = opt.match(/\/([a-z]+)\.html$/i);
+     return m ? m[1].toLowerCase() : 'atlas';
+  }
+  function applyOverlayFromArch(){
+     const key = currentArchKey();
+     const cfg = ARCH_COLORS[key] || ARCH_COLORS['atlas'];
+     document.documentElement.style.setProperty('--arch-color', cfg.color);
+     document.documentElement.style.setProperty('--arch-overlay', cfg.overlay);
+     const call = document.getElementById('orbCall');
+     if (call) call.style.textShadow = `0 0 12px ${cfg.color}80`;
+  }
+  function wireArchSelect(){
+    const sel = document.getElementById('arch-select');
+    if (!sel) return;
+    sel.addEventListener('change', applyOverlayFromArch);
+  }
+
+  // "Toque o pulso" CTA + synth
+  function ensurePulseCTA(){
+    const wrap = document.getElementById('orbWrap');
+    if (!wrap || wrap.querySelector('.pulse-cta')) return;
+    const cta = document.createElement('div');
+    cta.className = 'pulse-cta hidden';
+    cta.innerHTML = '<div class="dot"></div><div class="label">toque o pulso</div>';
+    wrap.appendChild(cta);
+    cta.addEventListener('click', () => {
+      hideCTA();
+      startSynthSplash();
+      tryResumeAudio();
+    }, { once: true });
+    window._pulseCTA = { show: showCTA, hide: hideCTA };
+    function showCTA(){ cta.classList.remove('hidden'); }
+    function hideCTA(){ cta.classList.add('hidden'); }
+  }
+
+  function tryResumeAudio(){
+    const ctx = window.__AUDIO_CTX__ || (window.AudioContext ? new AudioContext() : null);
+    if (ctx && ctx.state === 'suspended') { ctx.resume().catch(()=>{}); }
+    const el = document.getElementById('splashSound');
+    if (el) { el.volume = 0.0; el.play().catch(()=>{}); setTimeout(()=>{ try{ el.pause(); el.currentTime = 0; }catch{} }, 200); }
+    window.dispatchEvent(new CustomEvent('kobllux:audio:resume'));
+  }
+
+  function startSynthSplash(){
+    const wrap = document.getElementById('orbWrap');
+    if (!wrap) return;
+    let canvas = wrap.querySelector('canvas#pulseSynth');
+    if (!canvas) {
+      canvas = document.createElement('canvas');
+      canvas.id = 'pulseSynth';
+      canvas.className = 'pulse-synth';
+      wrap.appendChild(canvas);
+    }
+    const ctx = canvas.getContext('2d');
+    function resize(){ canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight; }
+    resize(); window.addEventListener('resize', resize);
+    canvas.classList.add('active');
+    const t0 = performance.now();
+    const dur = 1500;
+    const rootStyles = getComputedStyle(document.documentElement);
+    const colorA = rootStyles.getPropertyValue('--arch-color').trim() || '#d4af37';
+    function paint(t){
+      const p = Math.min(1, (t - t0)/dur);
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      const cx = canvas.width/2, cy = canvas.height/2;
+      const maxR = Math.min(cx,cy);
+      for (let i=0;i<4;i++){
+        const k = p*1.1 - i*0.18;
+        if (k <= 0) continue;
+        const r = maxR * k;
+        const g = ctx.createRadialGradient(cx, cy, Math.max(0,r-28), cx, cy, r);
+        g.addColorStop(0, colorA + '80');
+        g.addColorStop(1, '#0000');
+        ctx.beginPath();
+        ctx.fillStyle = g;
+        ctx.arc(cx, cy, r, 0, Math.PI*2);
+        ctx.fill();
+      }
+      if (p < 1){ requestAnimationFrame(paint); } else {
+        canvas.classList.remove('active');
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+      }
+    }
+    requestAnimationFrame(paint);
+  }
+
+  // Detect autoplay block → show CTA
+  function detectAudioGate(){
+    const el = document.getElementById('splashSound');
+    if (!el) return;
+    el.play().then(() => {
+      el.pause(); el.currentTime = 0;
+      if (window._pulseCTA) window._pulseCTA.hide();
+    }).catch(() => {
+      if (window._pulseCTA) window._pulseCTA.show();
+    });
+  }
+
+  function boot(){
+    applyAppAccents();
+    dedupeAppIcons();
+    applyOverlayFromArch();
+    wireArchSelect();
+    ensurePulseCTA();
+    detectAudioGate();
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+})();
+</script>
+
+<script id="uno-consolidation-patch">
+
+/* === UNO CONSOLIDATION PATCH v1 (monolithic-safe) =====================
+   - Canonical OpenRouter key/model handling
+   - Safe override for sendAIMessage / sendAIMessageCtx
+   - Unified applyArchOverlay()
+   - Single boot() guard
+   ==================================================================== */
+(function(){
+  if (window.Uno && window.Uno.__consolidated_v1) return;
+  window.Uno = window.Uno || {};
+  const Uno = window.Uno;
+  Uno.__consolidated_v1 = true;
+
+  // ---- Helpers ----
+  function LSget(k){ try { return localStorage.getItem(k) || ''; } catch(e){ return ''; } }
+  function speak(msg){ try { if (typeof window.speakWithActiveArch === 'function') window.speakWithActiveArch(msg); } catch(e){} }
+  function toast(msg){ try { if (typeof window.toast === 'function') window.toast(msg,'ok'); } catch(e){} }
+  function warn(msg){ try { if (typeof window.toast === 'function') window.toast(msg,'warn'); } catch(e){} }
+  function errt(msg){ try { if (typeof window.toast === 'function') window.toast(msg,'err'); } catch(e){} }
+  function feed(type, text){ try { if (typeof window.feedPush === 'function') window.feedPush(type, text); } catch(e){} }
+  function showArchMessage(text, type){ try { if (typeof window.showArchMessage === 'function') window.showArchMessage(text, type); } catch(e){} }
+
+  // ---- Canonical OpenRouter config ----
+  Uno.getOpenRouter = function(){
+    const sk = LSget('dual.keys.openrouter') || LSget('infodose:sk') || '';
+    let model = LSget('dual.openrouter.model') || LSget('infodose:model') || 'openrouter/auto';
+    return { sk, model };
+  };
+
+  Uno.sendChat = async function({messages, model, sk, max_tokens=600, temperature=0.7}){
+    if (!sk){
+      showArchMessage('Defina sua chave no Brain (OpenRouter).', 'warn');
+      feed('status', 'OpenRouter: chave ausente.');
+      throw new Error('OpenRouter key missing');
+    }
+    const url = 'https://openrouter.ai/api/v1/chat/completions';
+    const payload = { model, messages, max_tokens, temperature };
+    const res = await fetch(url, {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization': `Bearer ${sk}`
+      },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok){
+      const body = await res.text().catch(()=>'');
+      const msg = `OpenRouter HTTP ${res.status} ${body ? '• '+body.slice(0,160) : ''}`;
+      feed('status', 'Erro: ' + msg);
+      throw new Error(msg);
+    }
+    const data = await res.json();
+    return data?.choices?.[0]?.message?.content || '';
+  };
+
+  // ---- Override sendAIMessage / sendAIMessageCtx (final authority) ----
+  const prevCtx = window.sendAIMessageCtx;
+  const prev    = window.sendAIMessage;
+
+  window.sendAIMessageCtx = async function({ userContent, sk, model, system, temperature, max_tokens } = {}){
+    try{
+      const conf = Uno.getOpenRouter();
+      const _sk = sk || conf.sk;
+      const _model = model || conf.model || 'openrouter/auto';
+      const sysMsg = system || 'Você é um assistente em português. Seja claro e objetivo.';
+      const messages = [
+        { role:'system', content: sysMsg },
+        { role:'user', content: String(userContent||'').trim() }
+      ];
+      const reply = await Uno.sendChat({ messages, model:_model, sk:_sk, max_tokens: max_tokens??600, temperature: temperature??0.7 });
+      return reply;
+    }catch(e){
+      errt('Falha sendAIMessageCtx: ' + e.message);
+      throw e;
+    }
+  };
+
+  window.sendAIMessage = async function(content, sk, model){
+    return window.sendAIMessageCtx({ userContent: content, sk, model });
+  };
+
+  // ---- Overlay unify ----
+  const ARCH_OVERLAYS = {
+    atlas:  'rgba(64,158,255,0.22)',
+    nova:   'rgba(255,82,177,0.22)',
+    vitalis:'rgba(87,207,112,0.22)',
+    pulse:  'rgba(0,191,255,0.22)',
+    artemis:'rgba(255,195,0,0.22)',
+    serena: 'rgba(186,130,219,0.22)',
+    kaos:   'rgba(255,77,109,0.22)',
+    genus:  'rgba(87,207,112,0.22)',
+    lumine: 'rgba(255,213,79,0.22)',
+    solus:  'rgba(186,130,219,0.22)',
+    rhea:   'rgba(0,209,178,0.22)',
+    aion:   'rgba(255,159,67,0.22)',
+    default:'rgba(0,0,0,0)'
+  };
+  window.applyArchOverlay = function(name){
+    try{
+      const on = (localStorage.getItem('arch:overlayOn') === 'true') || (localStorage.getItem('arch:overlayOn') === '1');
+      const key = String(name||'').toLowerCase();
+      const color = on ? (ARCH_OVERLAYS[key] || ARCH_OVERLAYS.default) : 'rgba(0,0,0,0)';
+      document.documentElement.style.setProperty('--arch-overlay', color);
+      const fade = document.getElementById('arch-fadeCover');
+      if (fade) fade.style.background = color;
+      document.documentElement.setAttribute('data-overlay', on ? 'on' : 'off');
+    }catch(e){}
+  };
+
+  // ---- Boot unify ----
+  Uno.__booted = false;
+  Uno.boot = function(){
+    if (Uno.__booted) return;
+    Uno.__booted = true;
+    try {
+      // Ensure overlay matches current archetype selection
+      const sel = document.getElementById('arch-select');
+      const base = (sel?.value || '').replace(/.*\//,'').replace(/\.html$/i,'');
+      if (base) window.applyArchOverlay(base);
+    } catch(e){}
+
+    // Small connectivity helper
+    window.Uno.testOpenRouter = async function(){
+      const { sk, model } = Uno.getOpenRouter();
+      if (!sk){ showArchMessage('Sem chave. Abra Brain e salve sua chave.', 'warn'); return; }
+      try{
+        const reply = await Uno.sendChat({ messages:[{role:'user', content:'Ping.'}], model, sk, max_tokens:60, temperature:0.1 });
+        showArchMessage('OpenRouter OK', 'ok');
+        feed('ai', 'Teste OpenRouter: ' + (reply||'(sem conteúdo)'));
+      }catch(e){
+        showArchMessage('OpenRouter falhou: ' + e.message, 'err');
+      }
+    };
+
+    // Log
+    try { console.log('%cUNO Consolidation v1 ready','background:#09223a;color:#9feaff;padding:2px 6px;border-radius:6px'); } catch(e){}
+  };
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', Uno.boot, { once:true });
+  } else {
+    setTimeout(Uno.boot, 0);
+  }
+})();
+
+</script>
+</body>
 </html>
