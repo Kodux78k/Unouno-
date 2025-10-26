@@ -2252,105 +2252,58 @@ html[data-overlay="off"] #arch-fadeCover{ background: transparent !important; }
 </style>
 
 
-<style id="upload-buttons-css-patch">
-/* ==== Nebula Pro • Upload inputs (HTML/TXT/IMG) — coerente com .btn/.input ==== */
 
-/* Base: todos os file inputs do app */
-#v-apps #fileLocal[type="file"],
-#v-brain #trainingFile[type="file"],
-#v-brain #bgUpload[type="file"],
-#v-stack #stackUpload[type="file"] {
-  appearance: none;
-  -webkit-appearance: none;
-  font: inherit;
-  color: var(--fg, #e9f7ff);
-  background: #0f1426;                    /* igual à .input base */
+
+<style id="upload-buttons-style">
+/* Upload buttons — Brain, Apps, geral */
+input[type="file"]{
+  color:#eaeef7;
+  font:600 13px/1 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  background: rgba(10,14,24,.6);
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius:12px;
+  padding:10px;
+  box-shadow: 0 3px 16px rgba(0,0,0,.25) inset, 0 1px 0 rgba(255,255,255,.06);
+}
+/* Botão interno (Chrome, Edge, Safari) */
+input[type="file"]::file-selector-button{
+  margin-right:10px;
+  padding:8px 12px;
+  border:1px solid rgba(255,255,255,.2);
+  border-radius:10px;
+  background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
+  color:#f8f0d0;
+  font-weight:800;
+  cursor:pointer;
+  transition: transform .15s ease, box-shadow .2s ease, background .2s ease;
+}
+input[type="file"]::file-selector-button:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 2px rgba(212,175,55,.28), 0 0 18px rgba(212,175,55,.18);
+}
+/* Firefox fallback */
+@supports (-moz-appearance: none){
+  input[type="file"]::-moz-focus-inner{ border:0; padding:0; }
+}
+/* Contextos comuns: Brain, Apps Section */
+#brain input[type="file"], .apps input[type="file"], .apps-section input[type="file"], .menuItem input[type="file"]{
+  width:100%;
+  max-width: 520px;
+  margin:8px 0 12px 0;
+}
+</style>
+<style id="select-kisara-patch">
+/* Select tune (Kisara/Blue‑1 compatible) */
+#v-brain select, #v-apps select, #v-stack select {
+  background: #0f1426;
+  color: var(--fg, #e6f2ff);
   border: var(--bd, 1px solid rgba(255,255,255,.12));
   border-radius: 12px;
-  padding: 10px;                           /* corpo do controle */
-  min-height: 44px;                        /* tap target */
-  width: 100%;
-  max-width: 260px;                        /* segue seus campos do Brain */
-  cursor: pointer;
-  box-sizing: border-box;
+  padding: 10px;
 }
-
-/* Botão nativo do file input – estilizado como .btn do tema */
-#v-apps #fileLocal[type="file"]::file-selector-button,
-#v-brain #trainingFile[type="file"]::file-selector-button,
-#v-brain #bgUpload[type="file"]::file-selector-button,
-#v-stack #stackUpload[type="file"]::file-selector-button {
-  margin-right: 10px;
-  padding: .58rem .9rem;
-  border: none;
-  border-radius: 12px;
-  font-weight: 800;
-  color: var(--fg, #e9f7ff);
-  background: linear-gradient(180deg, #11162a, #0b1122); /* igual à .btn padrão */
-  box-shadow: 0 0 0 1px rgba(255,255,255,.10) inset;
-  transition: transform .16s var(--ease, ease), box-shadow .25s var(--ease, ease), filter .25s var(--ease, ease);
-  cursor: pointer;
-}
-
-/* Hover/focus consistentes com .btn */
-#v-apps #fileLocal[type="file"]::file-selector-button:hover,
-#v-brain #trainingFile[type="file"]::file-selector-button:hover,
-#v-brain #bgUpload[type="file"]::file-selector-button:hover,
-#v-stack #stackUpload[type="file"]::file-selector-button:hover {
-  box-shadow: 0 8px 26px rgba(0,0,0,.36), 0 0 0 1px rgba(255,255,255,.16) inset;
-}
-
-#v-apps #fileLocal[type="file"]::file-selector-button:active,
-#v-brain #trainingFile[type="file"]::file-selector-button:active,
-#v-brain #bgUpload[type="file"]::file-selector-button:active,
-#v-stack #stackUpload[type="file"]::file-selector-button:active {
-  transform: translateY(0) scale(.98);
-  filter: saturate(1.02) brightness(.98);
-}
-
-/* Fallback Safari antigo / WebKit */
-#v-apps #fileLocal[type="file"]::-webkit-file-upload-button,
-#v-brain #trainingFile[type="file"]::-webkit-file-upload-button,
-#v-brain #bgUpload[type="file"]::-webkit-file-upload-button,
-#v-stack #stackUpload[type="file"]::-webkit-file-upload-button {
-  margin-right: 10px;
-  padding: .58rem .9rem;
-  border: none;
-  border-radius: 12px;
-  font-weight: 800;
-  color: var(--fg, #e9f7ff);
-  background: linear-gradient(180deg, #11162a, #0b1122);
-  box-shadow: 0 0 0 1px rgba(255,255,255,.10) inset;
-  transition: transform .16s var(--ease, ease), box-shadow .25s var(--ease, ease), filter .25s var(--ease, ease);
-  cursor: pointer;
-}
-
-/* Estado foco (acessibilidade, igual ao .ring/.focus-ring) */
-#v-apps #fileLocal[type="file"]:focus-visible,
-#v-brain #trainingFile[type="file"]:focus-visible,
-#v-brain #bgUpload[type="file"]:focus-visible,
-#v-stack #stackUpload[type="file"]:focus-visible {
+#v-brain select:focus-visible, #v-apps select:focus-visible, #v-stack select:focus-visible {
   outline: 0;
   box-shadow: var(--focus-ring, 0 0 0 3px rgba(57,255,182,.18));
-}
-
-/* Variant “prime” opcional (use adicionando a classe .prime no input se quiser o degradê colorido) */
-input[type="file"].prime::file-selector-button {
-  background: linear-gradient(90deg, #a66fff, #6db4ff);
-  color: #0b0f14;
-  box-shadow: 0 10px 30px rgba(166,111,255,.26), 0 0 0 1px rgba(255,255,255,.18) inset;
-}
-
-/* Ajuste de largura quando lado a lado dentro de grids compactos */
-#v-apps #fileLocal[type="file"],
-#v-brain #trainingFile[type="file"],
-#v-brain #bgUpload[type="file"] {
-  max-width: 260px;
-}
-
-/* Mantém compatibilidade com o fluxo atual do Stack (input escondido por JS) */
-#v-stack #stackUpload[type="file"] {
-  display: none; /* já é acionado por #btnStackUpload */
 }
 </style>
 </head>
