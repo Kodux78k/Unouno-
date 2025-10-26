@@ -2470,7 +2470,7 @@ input[type="file"]::file-selector-button:hover{
 <h1>HUB UNO</h1>
 <small>Dual · Trinity</small>
 <!-- PATCH: Badge indicating 78K is active; hidden by default -->
-<span id="badge78k" style="display:none;margin-left:8px;font-size:0.75rem;color:#f5f7ff;" title="78K ativo">⚡ 78K ativo</span>
+<span id="badge78k" style="display:none;margin-left:8px;font-size:0.75rem;color:#f5f7ff;" title="78K ativo">78K ativo</span>
 </div>
 <button class="ib fx-trans fx-press ring" id="btnDownload" title="Baixar HTML">
 <svg aria-hidden="true" fill="none" height="20" viewbox="0 0 24 24" width="20">
@@ -4977,7 +4977,7 @@ const d = document.createElement('div'); d.className = 'mut'; d.textContent = a.
       }
     })();
     $$('button').forEach(addRipple);
-  </script><div style="position: fixed; right: 14px; bottom: calc(var(--tabsH) + 16px); display: grid; gap: 8px; z-index: 120;"></div><div style="position: fixed; right: 14px; bottom: calc(var(--tabsH) + 16px); display: grid; gap: 8px; z-index: 120;"></div>
+  </script><div style="position: fixed; right: 14px; bottom: calc(var(--tabsH) + 16px); display: grid; gap: 8px; z-index: 120;"></div>
 <!-- Local Storage Modal (safe-placed near end of body) -->
 <!-- Script para ocultar o splash screen após o carregamento completo da página -->
 <!-- Script adicional para o Stacks estendido: upload de HTML e criação de grupos -->
@@ -5988,7 +5988,7 @@ window.addEventListener('load', () => {
 <input accept="application/json" hidden="" id="lsImportFile" type="file"/>
 <button id="lsClearDisabled">Limpar desativados</button>
 <!-- PATCH: Toggle 78K within LS Panel -->
-<button aria-pressed="false" id="lsToggle78k" title="Ativar/Desativar estado 78K">⚡ 78K: OFF</button>
+<button aria-pressed="false" id="lsToggle78k" title="Ativar/Desativar estado 78K">78K: OFF</button>
 <button id="lsClose">Fechar</button></div>
 </div>
 <details class="presets" open="">
@@ -7398,7 +7398,7 @@ push('assistant','Pronto','<p>Chat 13-Blocos iniciado. Escreva sua intenção e 
       const lsBtn=document.getElementById('lsToggle78k');
       if(lsBtn){
         lsBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
-        lsBtn.textContent = on ? '⚡ 78K: ON' : '⚡ 78K: OFF';
+        lsBtn.textContent = on ? '78K: ON' : '78K: OFF';
         if(lsBtn.classList) lsBtn.classList.toggle('prime', !!on);
       }
       const badge=document.getElementById('badge78k');
@@ -8701,5 +8701,112 @@ window.kobDemo = () => pushAI(`[INTRO] **Kael Dominus** — núcleo sentiente qu
 })();
 
 </script>
+
+    <script id="uno-fallback-patch-v1">
+    (function(){ 
+      if (!window.Uno || window.Uno.__fallback_patch_v1) return;
+      const Uno = window.Uno; 
+      Uno.__fallback_patch_v1 = true;
+
+      function LSget(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
+      function LSset(k,v){ try{ localStorage.setItem(k,v); }catch(e){ } }
+      function feed(type, text){ try{ if (typeof window.feedPush === 'function') window.feedPush(type, text); }catch(e){ } }
+
+      const DEFAULT_CHAIN = [
+        'deepseek/deepseek-chat',
+        'meta/llama-3.1-8b-instruct',
+        'mistral/mistral-small-latest',
+        'openrouter/auto'
+      ];
+
+      function chainFromLS(){
+        const raw = LSget('dual.openrouter.fallback') || LSget('openrouter:fallback') || '';
+        if (!raw) return DEFAULT_CHAIN.slice();
+        return raw.split(',').map(s=>s.trim()).filter(Boolean);
+      }
+
+      // Wrap Uno.sendChat to add headers and timeout
+      const _baseSend = Uno.sendChat;
+      Uno.sendChat = async function({messages, model, sk, max_tokens=600, temperature=0.7, timeoutMs=30000}){
+        if (!sk) throw new Error('OpenRouter key missing');
+        const ctrl = new AbortController();
+        const id = setTimeout(() => ctrl.abort('timeout'), timeoutMs);
+        try {
+          const url = 'https://openrouter.ai/api/v1/chat/completions';
+          const payload = { model, messages, max_tokens, temperature };
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${sk}`,
+              'HTTP-Referer': location.origin || 'http://localhost',
+              'X-Title': 'HUB UNO'
+            },
+            body: JSON.stringify(payload),
+            signal: ctrl.signal
+          });
+          if (!res.ok) {
+            const body = await res.text().catch(()=>'');
+            throw new Error(`OpenRouter HTTP ${res.status}` + (body ? ' • ' + body.slice(0,160) : ''));
+          }
+          const data = await res.json();
+          return (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '';
+        } finally {
+          clearTimeout(id);
+        }
+      };
+
+      Uno.sendWithFallback = async function({messages, sk, preferredModel, max_tokens=600, temperature=0.7}){
+        const chain = [ preferredModel || (Uno.getOpenRouter && Uno.getOpenRouter().model) || 'openrouter/auto' ]
+                      .concat( chainFromLS() );
+        const tried = new Set();
+        let lastErr;
+        for (const mdl of chain) {
+          if (!mdl || tried.has(mdl)) continue;
+          tried.add(mdl);
+          try {
+            feed('status', 'OpenRouter tentando: ' + mdl);
+            const out = await Uno.sendChat({ messages, model: mdl, sk, max_tokens, temperature });
+            feed('status', 'OpenRouter OK: ' + mdl);
+            return out;
+          } catch(e) {
+            lastErr = e;
+            feed('status', 'Falhou: ' + mdl + ' -> ' + (e && e.message ? e.message : e));
+          }
+        }
+        throw lastErr || new Error('Nenhum modelo respondeu');
+      };
+
+      // Replace sendAIMessageCtx to use fallback
+      const prevCtx = window.sendAIMessageCtx;
+      window.sendAIMessageCtx = async function({ userContent, sk, model, system, temperature, max_tokens } = {}){
+        const conf = Uno.getOpenRouter ? Uno.getOpenRouter() : { sk: '', model: 'openrouter/auto' };
+        const _sk = sk || conf.sk;
+        const _model = model || conf.model;
+        const sysMsg = system || 'Você é um assistente em português. Seja claro e objetivo.';
+        const messages = [
+          { role: 'system', content: sysMsg },
+          { role: 'user', content: String(userContent||'').trim() }
+        ];
+        return Uno.sendWithFallback({ messages, sk: _sk, preferredModel: _model, temperature: temperature ?? 0.7, max_tokens: max_tokens ?? 600 });
+      };
+
+      // Key/model compatibility layer (mirror keys both ways)
+      (function syncKeys(){
+        const k1 = LSget('dual.keys.openrouter') || '';
+        const k2 = LSget('openrouter:key') || LSget('openrouter_key') || '';
+        const k  = k1 || k2;
+        if (k && !k1) LSset('dual.keys.openrouter', k);
+        if (k && !k2) LSset('openrouter:key', k);
+
+        const m1 = LSget('dual.openrouter.model') || '';
+        const m2 = LSget('openrouter:model') || LSget('openrouter_model') || '';
+        const m  = m1 || m2 || 'openrouter/auto';
+        if (m && !m1) LSset('dual.openrouter.model', m);
+        if (m && !m2) LSset('openrouter:model', m);
+      })();
+    })();
+    </script>
+    
 </body>
 </html>
