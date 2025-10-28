@@ -8808,5 +8808,515 @@ window.kobDemo = () => pushAI(`[INTRO] **Kael Dominus** — núcleo sentiente qu
     })();
     </script>
     
+
+<!-- === INFODOSE • Archetype-Bus + S‑Machine Line (merged) === -->
+<style id="ib-sline-style">
+  :root{ --ib-a:#00c5ff; --ib-b:#ff52e5; --ib-ring:#00d9ff; --ib-glow:rgba(0,197,255,.45); }
+  #ibSLine{ position:fixed; left:14px; right:14px;
+    top: calc(var(--hdrH,64px) + env(safe-area-inset-top, 0px) + 6px);
+    height:7px; border-radius:9999px; z-index:120;
+    background:linear-gradient(90deg,var(--ib-a),var(--ib-b));
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.08), 0 4px 18px rgba(0,0,0,.28);
+    overflow:hidden; opacity:.98;
+  }
+  #ibSLine::after{content:"";position:absolute;inset:0;mix-blend-mode:overlay;opacity:.9;
+    background:repeating-linear-gradient(90deg,rgba(255,255,255,.12) 0 12px, transparent 12px 24px);
+    animation:ib-scan 1600ms linear infinite;}
+  @keyframes ib-scan{to{transform:translateX(24px)}}
+  #ibSLine.flash{ box-shadow: inset 0 0 0 2px var(--ib-ring), 0 0 24px var(--ib-glow); }
+</style>
+<div id="ibSLine" role="presentation" aria-hidden="true"></div>
+
+<script id="ib-bus-sline">
+(function(){
+  // --- Bus v2 (safe install) ---
+  window.InfodoseBus = window.InfodoseBus || (function(){
+    const L = JSON.parse(localStorage.getItem('infodose:log')||'[]');
+    const H = {}; const last = new Map(); const MAX=400, THROTTLE_MS=60;
+    const SCHEMA = {
+      'ARCH_PULSE': { arch:'string', act:'string*' },
+      'ACTION'    : { arch:'string*', act:'string*', route:'string*' },
+      'HEAT_MARK' : { tag :'string*' }
+    };
+    const sane=(type,payload)=>{ const sch=SCHEMA[type]; if(!sch) return true;
+      for(const k in sch){ const need=sch[k], opt=need.endsWith('*'), typ=opt?need.slice(0,-1):need;
+        const v=payload[k]; if(v==null){ if(!opt) return false; } else if(typeof v!==typ) return false; } return true; };
+    const push=evt=>{ L.unshift(evt); if(L.length>MAX) L.length=MAX;
+      localStorage.setItem('infodose:log', JSON.stringify(L)); };
+    return {
+      emit(type, payload={}){
+        const now=Date.now(), lastTs=last.get(type)||0;
+        if (now-lastTs < THROTTLE_MS) return;
+        if (!sane(type,payload)) return;
+        last.set(type,now);
+        const evt={ type, ts:now, ...payload }; push(evt);
+        (H[type]||[]).forEach(fn=>{ try{ fn(evt) }catch(e){} });
+        return evt;
+      },
+      on(type, fn){ (H[type]||(H[type]=[])).push(fn); return ()=> H[type]=(H[type]||[]).filter(f=>f!==fn); },
+      dump(){ return L.slice(); }
+    };
+  })();
+
+  // --- Paletas por arquétipo para a S-Line ---
+  const SLC = {
+    nova   : {a:'#FF52B1', b:'#FF9AD9', ring:'#FF52B1', glow:'rgba(255,82,177,.55)'},
+    genus  : {a:'#52FFB1', b:'#9DFFC8', ring:'#52FFB1', glow:'rgba(82,255,177,.45)'},
+    lumine : {a:'#AEC6FF', b:'#D6E0FF', ring:'#A7C4FF', glow:'rgba(167,196,255,.45)'},
+    solus  : {a:'#CFE7FF', b:'#EAF2FF', ring:'#CFE7FF', glow:'rgba(207,231,255,.40)'},
+    atlas  : {a:'#409EFF', b:'#7ABEFF', ring:'#3DB2FF', glow:'rgba(64,158,255,.45)'},
+    rhea   : {a:'#FFD773', b:'#FFE6A3', ring:'#FFC84A', glow:'rgba(255,200,74,.45)'},
+    kaos   : {a:'#FF4D6D', b:'#FF8AA1', ring:'#FF5A7A', glow:'rgba(255,77,109,.48)'},
+    artemis: {a:'#FF8C3C', b:'#FFB06A', ring:'#FF9A52', glow:'rgba(255,140,60,.48)'},
+    serena : {a:'#78C8FF', b:'#AEE0FF', ring:'#90D6FF', glow:'rgba(120,200,255,.45)'},
+    aion   : {a:'#64F0FF', b:'#B4F9FF', ring:'#78F3FF', glow:'rgba(100,240,255,.45)'},
+    pulse  : {a:'#00BFFF', b:'#3CE0FF', ring:'#00D9FF', glow:'rgba(0,191,255,.48)'},
+    vitalis: {a:'#22D392', b:'#72E5BE', ring:'#29E3A3', glow:'rgba(34,211,146,.45)'}
+  };
+  const ARCH_EL = { nova:'madeira', genus:'madeira', lumine:'metal', solus:'metal',
+    atlas:'terra', rhea:'terra', kaos:'fogo', artemis:'fogo', serena:'água', aion:'água', pulse:'ar', vitalis:'ar' };
+
+  const SLINE = document.getElementById('ibSLine');
+  function slineVars(arch){
+    const C = SLC[arch] || {};
+    const st = document.documentElement.style;
+    st.setProperty('--ib-a', C.a || '#00c5ff');
+    st.setProperty('--ib-b', C.b || '#ff52e5');
+    st.setProperty('--ib-ring', C.ring || '#00d9ff');
+    st.setProperty('--ib-glow', C.glow || 'rgba(0,197,255,.45)');
+    if (SLINE){ SLINE.classList.add('flash'); setTimeout(()=>SLINE.classList.remove('flash'), 220); }
+  }
+
+  // --- WebAudio beeps simples + power-chord para METAL ---
+  let _ac;
+  function ac(){ return _ac || (_ac = new (window.AudioContext||window.webkitAudioContext)()); }
+  function beep(freq=432, ms=160){
+    try{ const ctx=ac(), o=ctx.createOscillator(), g=ctx.createGain();
+      o.type='sine'; o.frequency.value=freq; o.connect(g); g.connect(ctx.destination);
+      g.gain.setValueAtTime(.001,ctx.currentTime); g.gain.exponentialRampToValueAtTime(.22,ctx.currentTime+.02);
+      o.start(); o.stop(ctx.currentTime + ms/1000);
+    }catch(e){}
+  }
+  function powerChord(freq=220){
+    try{
+      const ctx=ac(); [1,1.5,2].forEach((m,i)=>{
+        const o=ctx.createOscillator(), g=ctx.createGain();
+        o.type= i? 'square':'sawtooth'; o.frequency.value=freq*m; o.connect(g); g.connect(ctx.destination);
+        g.gain.setValueAtTime(.0001,ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(.12/(i+1),ctx.currentTime+.01);
+        g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+.26);
+        o.start(); o.stop(ctx.currentTime+.28);
+      });
+    }catch(e){}
+  }
+
+  // --- Hook nas trocas do arquétipo do HUB ---
+  function currentArchBase(){
+    const sel = document.getElementById('arch-select');
+    if(!sel || sel.selectedIndex<0) return '';
+    return (sel.options[sel.selectedIndex].value||'').replace(/.*\\//,'').replace(/\\.html$/i,'');
+  }
+  function fireArch(arch, act){
+    slineVars(arch);
+    const el = ARCH_EL[arch]; const freq = (arch==='nova'||arch==='vitalis')?528 : (arch==='atlas'?144 : (arch==='serena'||arch==='genus'?396 : 432));
+    if (el==='metal') powerChord(freq); else beep(freq);
+    window.InfodoseBus.emit('ARCH_PULSE', { arch, act: act||'switch' });
+  }
+
+  function bindHooks(){
+    const sel  = document.getElementById('arch-select');
+    const prev = document.getElementById('arch-prev');
+    const next = document.getElementById('arch-next');
+    sel && sel.addEventListener('change', ()=> setTimeout(()=> fireArch(currentArchBase(),'select'), 0), {passive:true});
+    prev && prev.addEventListener('click', ()=> setTimeout(()=> fireArch(currentArchBase(),'prev'), 160), {passive:true});
+    next && next.addEventListener('click', ()=> setTimeout(()=> fireArch(currentArchBase(),'next'), 160), {passive:true});
+    // disparo inicial
+    const start = currentArchBase(); if (start) setTimeout(()=> fireArch(start,'boot'), 120);
+  }
+
+  if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', bindHooks); else bindHooks();
+})();
+</script>
+<!-- === /INFODOSE • end merge === -->
+
+<!-- === INFODOSE • Apps-on-Bus + S-Line HUD/Ronda addon === -->
+<style id="ib-hud-style">
+  #ibHUD{position:fixed;left:12px;right:12px;top:calc(env(safe-area-inset-top,0px)+14px+10px);
+    padding:10px 12px;border-radius:14px;background:rgba(8,12,20,.92);color:#eaf1ff;
+    box-shadow:0 10px 26px rgba(0,0,0,.35);z-index:130;backdrop-filter:blur(8px);display:none}
+  #ibHUD b{font-weight:700} #ibHUD small{opacity:.8}
+</style>
+<div id="ibHUD" role="status" aria-live="polite"></div>
+<script id="ib-apps-addon">
+(function(){
+  // --- Palette clone (for S-Line update) ---
+  const SLC = {
+    nova   : {a:'#FF52B1', b:'#FF9AD9', ring:'#FF52B1', glow:'rgba(255,82,177,.55)'},
+    genus  : {a:'#52FFB1', b:'#9DFFC8', ring:'#52FFB1', glow:'rgba(82,255,177,.45)'},
+    lumine : {a:'#AEC6FF', b:'#D6E0FF', ring:'#A7C4FF', glow:'rgba(167,196,255,.45)'},
+    solus  : {a:'#CFE7FF', b:'#EAF2FF', ring:'#CFE7FF', glow:'rgba(207,231,255,.40)'},
+    atlas  : {a:'#409EFF', b:'#7ABEFF', ring:'#3DB2FF', glow:'rgba(64,158,255,.45)'},
+    rhea   : {a:'#FFD773', b:'#FFE6A3', ring:'#FFC84A', glow:'rgba(255,200,74,.45)'},
+    kaos   : {a:'#FF4D6D', b:'#FF8AA1', ring:'#FF5A7A', glow:'rgba(255,77,109,.48)'},
+    artemis: {a:'#FF8C3C', b:'#FFB06A', ring:'#FF9A52', glow:'rgba(255,140,60,.48)'},
+    serena : {a:'#78C8FF', b:'#AEE0FF', ring:'#90D6FF', glow:'rgba(120,200,255,.45)'},
+    aion   : {a:'#64F0FF', b:'#B4F9FF', ring:'#78F3FF', glow:'rgba(100,240,255,.45)'},
+    pulse  : {a:'#00BFFF', b:'#3CE0FF', ring:'#00D9FF', glow:'rgba(0,191,255,.48)'},
+    vitalis: {a:'#22D392', b:'#72E5BE', ring:'#29E3A3', glow:'rgba(34,211,146,.45)'}
+  };
+  const ORDER = Object.keys(SLC);
+
+  function setSLineArch(arch){
+    const C = SLC[arch]||{}; const rs = document.documentElement.style;
+    rs.setProperty('--ib-a', C.a || '#00c5ff');
+    rs.setProperty('--ib-b', C.b || '#ff52e5');
+    rs.setProperty('--ib-ring', C.ring || '#00d9ff');
+    rs.setProperty('--ib-glow', C.glow || 'rgba(0,197,255,.45)');
+    const bar = document.getElementById('ibSLine'); if (bar){ bar.classList.add('flash'); setTimeout(()=>bar.classList.remove('flash'), 220); }
+  }
+  // Audio (tiny)
+  let _ac; function ac(){ return _ac || (_ac=new (window.AudioContext||window.webkitAudioContext)()); }
+  function beep(freq=432, ms=160){ try{ const c=ac(), o=c.createOscillator(), g=c.createGain(); o.type='sine'; o.frequency.value=freq; o.connect(g); g.connect(c.destination);
+    g.gain.setValueAtTime(.001,c.currentTime); g.gain.exponentialRampToValueAtTime(.22,c.currentTime+.02); o.start(); o.stop(c.currentTime+ms/1000);}catch(e){} }
+  function chord(freq=220){ try{ const c=ac(); [1,1.5,2].forEach((m,i)=>{ const o=c.createOscillator(), g=c.createGain(); o.type=i?'square':'sawtooth'; o.frequency.value=freq*m; o.connect(g); g.connect(c.destination);
+    g.gain.setValueAtTime(.0001,c.currentTime); g.gain.exponentialRampToValueAtTime(.12/(i+1),c.currentTime+.01); g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+.26); o.start(); o.stop(c.currentTime+.28);});}catch(e){} }
+
+  function currentArch(){
+    return localStorage.getItem('infodose:arch.active') || (document.querySelector('#arch-select option:checked')?.value||'atlas').replace(/.*\\//,'').replace(/\\.html$/i,'');
+  }
+
+  // --- Apps -> Bus (delegated) ---
+  function resolveApp(el){
+    const ds = el.dataset||{};
+    if (ds.app)  return ds.app;
+    if (ds.open) return ds.open;
+    if (ds.route) return ds.route.replace(/^app\\.|\\.open$/g,'').replace(/[^a-z0-9_\\-]+/gi,'').toLowerCase();
+    const href = el.getAttribute('href')||'';
+    if (/^app:/.test(href)) return href.slice(4);
+    const m = href.match(/#app-([a-z0-9_\\-]+)/i); if (m) return m[1];
+    const txt = (el.textContent||'').trim().toLowerCase().replace(/\\s+/g,'-').replace(/[^a-z0-9_\\-]+/g,'');
+    return txt || 'app';
+  }
+  document.addEventListener('click', (e)=>{
+    const sel = e.target.closest('[data-app],[data-route],[data-open],.app-card,.app,[href^=\"app:\"],[href*=\"#app-\"]');
+    if (!sel) return;
+    const app = resolveApp(sel);
+    const arch = sel.getAttribute('data-arch') || currentArch();
+    const route = sel.getAttribute('data-route') || `app.${app}.open`;
+    window.InfodoseBus && window.InfodoseBus.emit('ACTION', { arch, act:'open', route });
+    window.InfodoseBus && window.InfodoseBus.emit('APP_OPEN', { app, arch, route });
+    if (sel.getAttribute('data-arch')){ setSLineArch(arch); if (arch==='lumine'||arch==='solus') chord(ARCH_FREQ(arch)); else beep(ARCH_FREQ(arch)); }
+  }, {passive:true});
+
+  function ARCH_FREQ(arch){
+    switch(arch){ case 'nova': case 'vitalis': return 528; case 'atlas': return 144; case 'serena': case 'genus': return 396; default: return 432; }
+  }
+
+  // --- S-Line: HUD + interactions ---
+  const HUD = document.getElementById('ibHUD'); const BAR = document.getElementById('ibSLine');
+  function hudText(){
+    const arch = currentArch();
+    let size = 0, last = '—';
+    try{ const L = JSON.parse(localStorage.getItem('infodose:log')||'[]'); size = L.length||0; if (L[0]) last = `${L[0].type} @ ${new Date(L[0].ts).toLocaleTimeString()}`; }catch(e){}
+    return `<b>Status</b><br><small>pele:</small> ${arch} • <small>log:</small> ${size} • <small>último:</small> ${last}`;
+  }
+  function hudToggle(){ if(!HUD) return; if (HUD.style.display==='block'){ HUD.style.display='none'; } else { HUD.innerHTML=hudText(); HUD.style.display='block'; setTimeout(()=>{ if (HUD.style.display==='block') HUD.style.display='none'; }, 3000); } }
+
+  // double click => step next arch (visual/som/evento)
+  function stepNext(){
+    const arch = currentArch(); const i = Math.max(0, ORDER.indexOf(arch)); const nx = ORDER[(i+1)%ORDER.length];
+    setSLineArch(nx); if (nx==='lumine'||nx==='solus') chord(ARCH_FREQ(nx)); else beep(ARCH_FREQ(nx));
+    window.InfodoseBus && window.InfodoseBus.emit('ARCH_PULSE', { arch:nx, act:'sline-step' });
+    localStorage.setItem('infodose:arch.active', nx);
+  }
+
+  // long press => auto-ronda toggle
+  let pressT=null, rondaT=null, running=false;
+  function startRonda(){ if(running) return; running=true; const SEC=4; let i=0;
+    const arr=ORDER.slice(); function tick(){ const nx = arr[i%arr.length]; i++; setSLineArch(nx); (nx==='lumine'||nx==='solus')?chord(ARCH_FREQ(nx)):beep(ARCH_FREQ(nx));
+      window.InfodoseBus && window.InfodoseBus.emit('ARCH_PULSE', { arch:nx, act:'sline-ronda' });
+      localStorage.setItem('infodose:arch.active', nx); rondaT=setTimeout(tick, SEC*1000); } tick(); }
+  function stopRonda(){ running=false; if(rondaT) clearTimeout(rondaT); rondaT=null; }
+
+  if (BAR){
+    BAR.addEventListener('click', hudToggle, {passive:true});
+    BAR.addEventListener('dblclick', stepNext, {passive:true});
+    BAR.addEventListener('touchstart', ()=>{ pressT=setTimeout(()=>{ running?stopRonda():startRonda(); }, 520); }, {passive:true});
+    BAR.addEventListener('touchend', ()=>{ if(pressT){ clearTimeout(pressT); pressT=null; } }, {passive:true});
+  }
+})();
+</script>
+<!-- === /INFODOSE • end addon === -->
+
+<!-- === INFODOSE • Archetype Audio Engine (ADSR/LFO/Filter) === -->
+<style id="ib-audio-style">
+  .ib-io{display:flex;gap:8px;flex-wrap:wrap}
+  .ib-io .btn{flex:1 1 140px}
+  input[type="file"]#ibPackIn{display:none}
+</style>
+<div class="panel ib-io">
+  <button class="btn" id="ibPackSave">Salvar Pack</button>
+  <button class="btn" id="ibPackLoad">Importar Pack</button>
+  <input id="ibPackIn" type="file" accept="application/json"/>
+</div>
+<script id="ib-audio-engine">
+(() => {
+  const A4_432 = 432, A4_440 = 440, BASE_220 = 220;
+  const storage = {
+    get(k, def){ try{ return JSON.parse(localStorage.getItem(k) ?? JSON.stringify(def)); }catch(_){ return def; } },
+    set(k, v){ localStorage.setItem(k, JSON.stringify(v)); }
+  };
+
+  // ===== Synth plumbing =====
+  const AC = new (window.AudioContext || window.webkitAudioContext)();
+  const master = AC.createGain(); master.gain.value = 0.9; master.connect(AC.destination);
+
+  function envGain(a=0.01, d=0.15, s=0.6, r=0.2){
+    const g = AC.createGain();
+    g.gain.setValueAtTime(0.0001, AC.currentTime);
+    const now = AC.currentTime;
+    g.gain.exponentialRampToValueAtTime(1.0, now + a);
+    g.gain.exponentialRampToValueAtTime(s, now + a + d);
+    g.release = () => {
+      const t = AC.currentTime;
+      g.gain.cancelScheduledValues(t);
+      g.gain.setValueAtTime(g.gain.value || 0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + r);
+      setTimeout(()=> g.disconnect(), r*1000 + 50);
+    };
+    return g;
+  }
+
+  function biquad(type="lowpass", freq=1200, Q=0.7){
+    const f = AC.createBiquadFilter();
+    f.type = type; f.frequency.value = freq; f.Q.value = Q;
+    return f;
+  }
+
+  function lfo(targetParam, rate=4.0, depth=30, isHz=true){
+    const o = AC.createOscillator(); o.type = "sine";
+    const g = AC.createGain(); g.gain.value = isHz ? depth : targetParam.value * depth;
+    o.connect(g); g.connect(targetParam); o.start();
+    o.onended = () => { try{g.disconnect();}catch(_){} };
+    o.frequency.value = rate;
+    return o;
+  }
+
+  function noise(){
+    const b = AC.createBuffer(1, AC.sampleRate * 1.5, AC.sampleRate);
+    const d = b.getChannelData(0);
+    for(let i=0;i<d.length;i++) d[i] = Math.random()*2-1;
+    const src = AC.createBufferSource(); src.buffer = b; src.loop = true;
+    return src;
+  }
+
+  function waveshaper(amount=2.0){
+    const n = 1024, c = new Float32Array(n);
+    for(let i=0;i<n;i++){ const x = i*2/n-1; c[i] = Math.tanh(amount*x); }
+    const ws = AC.createWaveShaper(); ws.curve = c; ws.oversample = '4x';
+    return ws;
+  }
+
+  function delay(ms=120, fb=0.25, wet=0.3){
+    const d = AC.createDelay(); d.delayTime.value = ms/1000;
+    const g = AC.createGain(); g.gain.value = fb;
+    const mix = AC.createGain(); mix.gain.value = wet;
+    d.connect(g); g.connect(d); // feedback loop
+    return { node:d, fb:g, mix };
+  }
+
+  // ===== Archetype param table (visual already exists) =====
+  const defs = {
+    atlas:   { phrase:"Eu organizo o fluxo com sabedoria cósmica", overlay:"rgba(64,158,255,.22)", osc:"sawtooth",  env:[0.02,0.18,0.7,0.18], filt:["lowpass",1400,0.9], lfo:{rate:2.0, depth:8, target:"filter"} },
+    nova:    { phrase:"Ideias são sementes! Vamos colorir fora das linhas", overlay:"rgba(255,82,177,.22)", osc:"sine", env:[0.01,0.10,0.4,0.18], glide:true, noise:true, filt:["highpass",900,0.6], lfo:{rate:5.5, depth:20, target:"pitch"} },
+    vitalis: { phrase:"Ação agora! Cada segundo é combustível", overlay:"rgba(34,211,146,.22)", osc:"sawtooth", env:[0.005,0.06,0.5,0.09], filt:["lowpass",1600,0.6], lfo:{rate:7.5, depth:0.25, target:"amp"} },
+    pulse:   { phrase:"Sinta a corrente… você não está sozinho", overlay:"rgba(0,191,255,.22)",  osc:"sine", env:[0.02,0.18,0.8,0.25], filt:["lowpass",1100,0.7], lfo:{rate:1.8, depth:0.45, target:"amp"}, delay:[140,0.35,0.25] },
+    artemis: { phrase:"O mapa é só o começo. Onde queremos ir?", overlay:"rgba(255,140,60,.22)", osc:"triangle", env:[0.01,0.12,0.6,0.16], sweep:true, filt:["bandpass",1500,1.2], lfo:{rate:3.0, depth:60, target:"filter"} },
+    serena:  { phrase:"Respire. Este espaço é seu.", overlay:"rgba(120,200,255,.18)", osc:"sine", env:[0.25,0.6,0.85,0.8], filt:["lowpass",800,0.9], lfo:{rate:0.6, depth:0.2, target:"amp"}, delay:[220,0.45,0.35] },
+    kaos:    { phrase:"Quebre as regras. O caos é a verdadeira ordem.", overlay:"rgba(255,77,109,.22)", osc:"square", env:[0.004,0.05,0.5,0.06], filt:["highpass",1200,0.4], noise:true, drive:3.2, lfo:{rate:9.0, depth:120, target:"filter"} },
+    genus:   { phrase:"Mãos à obra! Vamos construir o impossível.", overlay:"rgba(82,255,177,.20)", osc:"square", env:[0.01,0.10,0.5,0.14], fm:{ratio:2.0, index:70}, filt:["bandpass",1400,1.1] },
+    lumine:  { phrase:"Ria! A luz está em você!", overlay:"rgba(180,200,255,.20)", osc:"triangle", env:[0.005,0.08,0.6,0.12], arp:[0,4,7,12], lfo:{rate:5.5, depth:40, target:"pitch"} },
+    solus:   { phrase:"O silêncio guarda respostas que o barulho ignora.", overlay:"rgba(220,240,255,.16)", osc:"sine", env:[0.6,0.8,0.9,1.2], filt:["lowpass",620,1.0] },
+    rhea:    { phrase:"Somos fios da mesma teia cósmica", overlay:"rgba(255,220,120,.18)", osc:"sawtooth", env:[0.08,0.35,0.75,0.5], phaser:true, filt:["lowpass",1000,0.7] },
+    aion:    { phrase:"Sou o tempo vivo, ritmo da eternidade", overlay:"rgba(100,240,255,.16)", osc:"sine", env:[0.005,0.05,0.6,0.05], clock:true, filt:["highpass",400,0.8] }
+  };
+
+  // Persist/restore custom packs
+  const packKey = "infodose:archetypes.pack";
+  const saved = storage.get(packKey, null);
+  if (saved) Object.assign(defs, saved);
+
+  // Global tuning
+  const tuneKey = "infodose:tuning";
+  const tuning = storage.get(tuneKey, {A4:A4_432});
+  const hz = (semi=0) => (tuning.A4 || A4_432) * Math.pow(2, semi/12);
+
+  function trig(arch){
+    const d = defs[arch]; if(!d) return;
+    // voice chain
+    const out = master;
+    const g = envGain(...(d.env||[0.01,0.1,0.6,0.2])); g.connect(out);
+
+    // filter
+    const f = d.filt ? biquad(...d.filt) : null;
+    if (f) { f.connect(g); }
+
+    // source(s)
+    const carrier = AC.createOscillator();
+    carrier.type = d.osc || "sine";
+    // base freq pick: a simple chord degree mapping per arch
+    let base = BASE_220; // A3 ~ 220Hz base
+    if (arch==="atlas") base = hz(-12);
+    if (arch==="nova") base = hz(0);
+    if (arch==="vitalis") base = hz(2);
+    if (arch==="pulse") base = hz(-5);
+    if (arch==="artemis") base = hz(7);
+    if (arch==="serena") base = hz(-9);
+    if (arch==="kaos") base = hz(5);
+    if (arch==="genus") base = hz(12);
+    if (arch==="lumine") base = hz(9);
+    if (arch==="solus") base = hz(-12);
+    if (arch==="rhea") base = hz(-7);
+    if (arch==="aion") base = hz(0);
+
+    carrier.frequency.value = base;
+
+    // FM (Genus)
+    let mod=null, modGain=null;
+    if (d.fm){
+      mod = AC.createOscillator(); mod.type = "sine"; mod.frequency.value = base * (d.fm.ratio||2);
+      modGain = AC.createGain(); modGain.gain.value = d.fm.index||50;
+      mod.connect(modGain); modGain.connect(carrier.frequency);
+      mod.start();
+    }
+
+    // Noise / Drive
+    let ns=null, ws=null;
+    if (d.noise){
+      ns = noise();
+      if (f) ns.connect(f); else ns.connect(g);
+      ns.start();
+    }
+    if (d.drive){
+      ws = waveshaper(d.drive);
+    }
+
+    // Arp (Lumine)
+    if (d.arp){
+      const seq = d.arp; let i=0;
+      const timer = setInterval(()=>{ carrier.frequency.setTargetAtTime(base*Math.pow(2, seq[i%seq.length]/12), AC.currentTime, .01); i++; }, 90);
+      setTimeout(()=> clearInterval(timer), 500);
+    }
+
+    // Sweeps / Glide (Artemis/Nova)
+    if (d.sweep){
+      const now=AC.currentTime;
+      const tgt = base*1.5;
+      carrier.frequency.setTargetAtTime(tgt, now, .12);
+      carrier.frequency.setTargetAtTime(base, now+.25, .22);
+    }
+    if (d.glide){
+      const now=AC.currentTime;
+      carrier.frequency.setTargetAtTime(base*1.25, now, .06);
+      carrier.frequency.setTargetAtTime(base, now+.12, .08);
+    }
+
+    // Phaser (Rhea) rudimentary
+    let phLFO=null, phaser=[];
+    if (d.phaser){
+      for(let k=0;k<3;k++){ const bp=biquad("bandpass", 400*(k+1), 8); phaser.push(bp); if(k===0){ if(f) f.connect(bp); else carrier.connect(bp); } else phaser[k-1].connect(bp); }
+      phaser[phaser.length-1].connect(g);
+      phLFO = lfo(phaser[0].frequency, 0.25, 220, true);
+    }
+
+    // Clock (Aion)
+    if (d.clock){
+      // simple click train synced to 90 bpm (change with ronda)
+      const bpm = 90; const beat = 60/bpm;
+      for(let k=0;k<6;k++){
+        const t = AC.currentTime + k*beat;
+        const kosc = AC.createOscillator(); kosc.type="square"; kosc.frequency.value = hz(24);
+        const kg = AC.createGain(); kg.gain.value = 0.0001;
+        kosc.connect(kg); if (f) kg.connect(f); else kg.connect(g);
+        kg.gain.setValueAtTime(0.6, t); kg.gain.exponentialRampToValueAtTime(0.0001, t+0.08);
+        kosc.start(t); kosc.stop(t+0.09);
+      }
+    }
+
+    // Delay (Pulse, Serena)
+    let dnode=null;
+    if (d.delay){
+      const {node, fb, mix} = delay(...d.delay);
+      dnode = node; const tap = AC.createGain(); tap.gain.value = 1.0;
+      if (f) { if (ws){ carrier.connect(ws); ws.connect(f); } else { carrier.connect(f); } f.connect(node); node.connect(fb); node.connect(mix); mix.connect(g); }
+      else   { if (ws){ carrier.connect(ws); ws.connect(node); } else { carrier.connect(node); } node.connect(fb); node.connect(mix); mix.connect(g); }
+    }
+
+    // LFO target
+    let oLFO=null;
+    if (d.lfo){
+      if (d.lfo.target==="filter" && f) oLFO = lfo(f.frequency, d.lfo.rate, d.lfo.depth, true);
+      else if (d.lfo.target==="amp")     oLFO = lfo(g.gain, d.lfo.rate, d.lfo.depth, false);
+      else if (d.lfo.target==="pitch")   oLFO = lfo(carrier.frequency, d.lfo.rate, d.lfo.depth, true);
+    }
+
+    // Connect & start
+    if (!d.phaser){
+      if (f) { if (ws){ carrier.connect(ws); ws.connect(f); } else { carrier.connect(f); } f.connect(g); }
+      else   { if (ws){ carrier.connect(ws); ws.connect(g); } else { carrier.connect(g); } }
+    }
+    carrier.start();
+
+    // Release
+    setTimeout(()=>{
+      try{carrier.stop();}catch(_){}
+      if (ns) try{ns.stop();}catch(_){}
+      g.release();
+      [f, ws, dnode, mod, modGain, oLFO, phLFO, ...phaser].forEach(n=>{ try{n.disconnect();}catch(_){} });
+    }, 520);
+  }
+
+  // Hook BUS
+  if (window.InfodoseBus && window.InfodoseBus.on){
+    InfodoseBus.on('ARCH_PULSE', e => {
+      // tuning hooks (central modulators)
+      const a = (e.arch||"").toLowerCase();
+      if (a==="koblux" || a==="kobllux" || a==="kobluxx"){ tuning.A4 = A4_432; storage.set(tuneKey, tuning); }
+      if (a==="kodux"){ tuning.A4 = A4_440; storage.set(tuneKey, tuning); }
+      if (a==="bllue" || a==="blue"){ tuning.A4 = BASE_220*2; storage.set(tuneKey, tuning); } // 220*2=440 as variant
+      trig(e.arch);
+    });
+  }
+
+  // Save / Load pack
+  function savePack(){
+    const blob = new Blob([JSON.stringify(defs,null,2)], {type:"application/json"});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = "infodose_archetypes_pack.json";
+    a.click();
+    storage.set(packKey, defs);
+  }
+  function loadPack(obj){
+    try{
+      Object.assign(defs, obj||{});
+      storage.set(packKey, defs);
+      alert("Pack importado!");
+    }catch(e){ alert("Falha ao importar pack."); }
+  }
+
+  // Wire buttons
+  const btnSv = document.getElementById('ibPackSave');
+  const btnLd = document.getElementById('ibPackLoad');
+  const inLd  = document.getElementById('ibPackIn');
+  if (btnSv) btnSv.addEventListener('click', savePack);
+  if (btnLd) btnLd.addEventListener('click', ()=> inLd.click());
+  if (inLd)  inLd.addEventListener('change', async (ev)=>{
+    const file = ev.target.files && ev.target.files[0]; if(!file) return;
+    const txt = await file.text(); loadPack(JSON.parse(txt));
+  });
+})();
+</script>
+<!-- === /INFODOSE • end audio engine === -->
 </body>
 </html>
