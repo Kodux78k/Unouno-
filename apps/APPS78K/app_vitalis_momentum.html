@@ -1,0 +1,374 @@
+
+    <!-- App do Arquétipo VITALIS - Momentum A.Infodose · Theme v2.6 -->
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>VITALIS · Momentum A.Infodose</title>
+      <style>
+        /* MOBILE-FIRST VERTICAL HARD-LOCK — THEME v2.6 */
+        :root {
+          --accent: #ff3333;
+          --bg: #0b0c10;
+          --paper: #101218;
+          --paper-2: #0e1015;
+          --ink: #eef2f6;
+          --muted: #9aa3ad;
+          --grad-a: #f0f;
+          --grad-b: #0ff;
+          --radius: 22px;
+          --radius-sm: 14px;
+          --shadow: 0 14px 40px rgba(0,0,0,.40);
+          --stroke: rgba(255,255,255,.08);
+          --stroke-2: rgba(255,255,255,.12);
+        }
+        * { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink);
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Ubuntu, "Helvetica Neue", Arial; }
+        body { min-height: 100svh; }
+        .wrap { max-width: 520px; margin: 0 auto; padding: 20px 16px calc(28px + env(safe-area-inset-bottom)); }
+
+        header {
+          position: sticky; top: 0; z-index: 30;
+          background: linear-gradient(135deg,rgba(16,18,24,.95),rgba(16,18,24,.72));
+          backdrop-filter: blur(10px);
+          padding: 14px 16px; border-bottom: 1px solid var(--stroke);
+        }
+        .title { display: grid; gap: 6px; }
+        h1 { margin: 0; font-size: 1.38rem; letter-spacing: .2px; }
+        .sub { font-size: .9rem; color: var(--muted); }
+        .badge {
+          display: inline-flex; align-items: center; gap: 6px;
+          padding: 6px 12px; border-radius: 999px;
+          background: linear-gradient(135deg,var(--grad-a),var(--grad-b));
+          color: #000; font-weight: 800; font-size: .74rem;
+          box-shadow: inset 0 -2px 8px rgba(0,0,0,.15);
+        }
+        .badge .dot { width: 8px; height: 8px; border-radius: 50%; background: #000; opacity: .3; animation: blip 1.8s infinite; }
+        @keyframes blip { 0%,100% {transform: scale(.8); opacity:.4} 50% {transform: scale(1); opacity:1} }
+
+        .card { background: linear-gradient(180deg,var(--paper),var(--paper-2));
+          border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; margin: 14px 0;
+          border: 1px solid var(--stroke); }
+        .kv { line-height: 1.6; font-size: .96rem; }
+
+        .accent-ring { height: 9px; border-radius: 999px;
+          background: linear-gradient(90deg, var(--accent), transparent 70%);
+          opacity: .95; margin: 10px 0 0 0; filter: saturate(1.2); }
+
+        .accordion { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+          background: #151925; color: var(--ink); border: 1px solid var(--stroke-2);
+          border-radius: var(--radius-sm); padding: 12px 14px; margin: 10px 0; cursor: pointer;
+          transition: border-color .2s; }
+        .accordion:hover { border-color: rgba(255,255,255,.2); }
+        .panel { display: none; padding: 10px; background: #0f121a; border: 1px solid var(--stroke); border-radius: var(--radius-sm); }
+
+        .ico { flex: 0 0 auto; opacity: .9; }
+        .chev { transition: transform .24s ease; transform: rotate(0deg); }
+        .accordion.open .chev { transform: rotate(180deg); }
+
+        iframe { width: 100%; height: 200px; border: 0; border-radius: var(--radius-sm); }
+
+        .code-area { display: grid; gap: 8px; }
+        .input { width: 100%; padding: 12px 12px; background: #0a0d13; color: var(--ink);
+          border: 1px solid var(--stroke-2); border-radius: var(--radius-sm); }
+        .btn { width: 100%; padding: 12px 16px; border: 0; border-radius: var(--radius-sm); cursor: pointer;
+          background: var(--accent); color: #000; font-weight: 800; box-shadow: inset 0 -2px 10px rgba(0,0,0,.18); }
+        .btn:active { transform: translateY(1px); }
+        .btn .ico { margin-right: 6px; }
+
+        .agents { display: grid; gap: 8px; }
+        .agent-btn { display:flex; align-items:center; gap:10px; border: 1px solid var(--stroke-2); background: #131722; color: var(--ink);
+          border-radius: var(--radius-sm); padding: 10px 12px; text-align: left; width: 100%; cursor: pointer; }
+        .agent-btn .bolt { color: var(--accent); filter: drop-shadow(0 0 6px rgba(255,255,255,.1)); animation: floaty 3s ease-in-out infinite; }
+        @keyframes floaty { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-2px) } }
+
+        .agent-panel { display: none; margin-top: 6px; }
+        .panel-inner { background: #0c1018; border: 1px solid var(--stroke); border-radius: var(--radius-sm); padding: 12px; }
+        .panel-title { font-weight: 800; margin-bottom: 6px; }
+        .checklist { list-style: none; padding: 0; margin: 6px 0; }
+        .checklist li { padding: 4px 0; }
+
+        .ritual-btn { display:inline-flex; align-items:center; gap:8px; width: 100%; padding: 10px 12px; border: 1px solid var(--stroke-2);
+          border-radius: var(--radius-sm); background: linear-gradient(135deg,var(--grad-a),var(--grad-b)); color: #000; font-weight: 900; }
+        .ritual-btn .star { animation: twinkle 1.8s infinite; }
+        @keyframes twinkle { 0%,100% {opacity:.7; transform: rotate(0deg) scale(1)} 50% {opacity:1; transform: rotate(8deg) scale(1.06)} }
+
+        .secret { display: none; }
+        .secret .grid { display: grid; gap: 8px; grid-auto-flow: row; }
+        .pill { display: inline-block; padding: 6px 10px; border-radius: 999px; border: 1px dashed rgba(255,255,255,.22); color: var(--muted); font-size: .85rem; }
+
+        /* Toast stack (bottom) */
+        .toasts { position: fixed; left: 0; right: 0; bottom: calc(12px + env(safe-area-inset-bottom));
+          display: grid; justify-items: center; gap: 8px; z-index: 40; pointer-events: none; }
+        .toast { pointer-events: auto; background: #0d1119; color: var(--ink); border: 1px solid var(--stroke);
+          border-radius: var(--radius-sm); padding: 10px 12px; box-shadow: var(--shadow); max-width: 520px; width: calc(100% - 24px);
+          display:flex; align-items:center; gap:10px; }
+        .toast .ico { color: var(--accent); }
+        .toast b { color: var(--ink); }
+        .pulse { animation: pulse 1.2s infinite; }
+        @keyframes pulse { 0% {opacity:.6} 50% {opacity:1} 100% {opacity:.6} }
+      </style>
+    </head>
+    <body data-archetype="VITALIS" data-assistant="Momentum">
+      <header>
+        <div class="title">
+          <h1>VITALIS · Momentum</h1>
+          <div class="sub">A.Infodose · <span class="badge"><span class="dot"></span> Campo de Código Simbólico</span></div>
+        </div>
+      </header>
+
+      <div class="wrap">
+        <div class="card">
+          <div class="kv"><strong>Função:</strong> Treinamento Vital</div>
+          <div class="kv"><strong>Aroma:</strong> Pimenta Rubra</div>
+          <div class="kv"><strong>Mídia:</strong> Vídeo dedicado · VITALIS</div>
+          <div class="accent-ring"></div>
+        </div>
+
+        <button class="accordion">Playlist Integrada
+          <svg class="ico chev" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+        <div class="panel">
+          <iframe src="https://www.youtube.com/embed/TyOGzkcjT4k" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
+
+        <button class="accordion">Agentes · Momentum
+          <svg class="ico chev" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+        <div class="panel">
+          <div class="agents">
+            <button class="agent-btn" data-agent="0">
+              <svg class="ico bolt" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                <path d="M13 2 L3 14 h6 l-2 8 10-12 h-6 z" fill="currentColor"></path>
+              </svg>
+              <span>Treinador</span>
+            </button>
+<button class="agent-btn" data-agent="1">
+              <svg class="ico bolt" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                <path d="M13 2 L3 14 h6 l-2 8 10-12 h-6 z" fill="currentColor"></path>
+              </svg>
+              <span>Biohacker</span>
+            </button>
+<button class="agent-btn" data-agent="2">
+              <svg class="ico bolt" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                <path d="M13 2 L3 14 h6 l-2 8 10-12 h-6 z" fill="currentColor"></path>
+              </svg>
+              <span>Motivador</span>
+            </button>
+<button class="agent-btn" data-agent="3">
+              <svg class="ico bolt" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                <path d="M13 2 L3 14 h6 l-2 8 10-12 h-6 z" fill="currentColor"></path>
+              </svg>
+              <span>Respiração/Movimento</span>
+            </button>
+<button class="agent-btn" data-agent="4">
+              <svg class="ico bolt" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                <path d="M13 2 L3 14 h6 l-2 8 10-12 h-6 z" fill="currentColor"></path>
+              </svg>
+              <span>Mestre de Rotina</span>
+            </button>
+          </div>
+
+      <div class="agent-panel" data-agent="0">
+        <div class="panel-inner">
+          <div class="panel-title">Treinador</div>
+          <ul class="checklist">
+            <li><label><input type="checkbox"> Passo 1</label></li>
+            <li><label><input type="checkbox"> Passo 2</label></li>
+            <li><label><input type="checkbox"> Passo 3</label></li>
+          </ul>
+          <button class="ritual-btn" data-agent="0">
+            <svg class="ico star" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path d="M12 2l2.9 6.5L22 9.3l-5 4.6L18.2 20 12 16.9 5.8 20 7 13.9 2 9.3l7.1-.8z" fill="#000"></path>
+            </svg>
+            Iniciar Ritual
+          </button>
+        </div>
+      </div>
+
+      <div class="agent-panel" data-agent="1">
+        <div class="panel-inner">
+          <div class="panel-title">Biohacker</div>
+          <ul class="checklist">
+            <li><label><input type="checkbox"> Passo 1</label></li>
+            <li><label><input type="checkbox"> Passo 2</label></li>
+            <li><label><input type="checkbox"> Passo 3</label></li>
+          </ul>
+          <button class="ritual-btn" data-agent="1">
+            <svg class="ico star" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path d="M12 2l2.9 6.5L22 9.3l-5 4.6L18.2 20 12 16.9 5.8 20 7 13.9 2 9.3l7.1-.8z" fill="#000"></path>
+            </svg>
+            Iniciar Ritual
+          </button>
+        </div>
+      </div>
+
+      <div class="agent-panel" data-agent="2">
+        <div class="panel-inner">
+          <div class="panel-title">Motivador</div>
+          <ul class="checklist">
+            <li><label><input type="checkbox"> Passo 1</label></li>
+            <li><label><input type="checkbox"> Passo 2</label></li>
+            <li><label><input type="checkbox"> Passo 3</label></li>
+          </ul>
+          <button class="ritual-btn" data-agent="2">
+            <svg class="ico star" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path d="M12 2l2.9 6.5L22 9.3l-5 4.6L18.2 20 12 16.9 5.8 20 7 13.9 2 9.3l7.1-.8z" fill="#000"></path>
+            </svg>
+            Iniciar Ritual
+          </button>
+        </div>
+      </div>
+
+      <div class="agent-panel" data-agent="3">
+        <div class="panel-inner">
+          <div class="panel-title">Respiração/Movimento</div>
+          <ul class="checklist">
+            <li><label><input type="checkbox"> Passo 1</label></li>
+            <li><label><input type="checkbox"> Passo 2</label></li>
+            <li><label><input type="checkbox"> Passo 3</label></li>
+          </ul>
+          <button class="ritual-btn" data-agent="3">
+            <svg class="ico star" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path d="M12 2l2.9 6.5L22 9.3l-5 4.6L18.2 20 12 16.9 5.8 20 7 13.9 2 9.3l7.1-.8z" fill="#000"></path>
+            </svg>
+            Iniciar Ritual
+          </button>
+        </div>
+      </div>
+
+      <div class="agent-panel" data-agent="4">
+        <div class="panel-inner">
+          <div class="panel-title">Mestre de Rotina</div>
+          <ul class="checklist">
+            <li><label><input type="checkbox"> Passo 1</label></li>
+            <li><label><input type="checkbox"> Passo 2</label></li>
+            <li><label><input type="checkbox"> Passo 3</label></li>
+          </ul>
+          <button class="ritual-btn" data-agent="4">
+            <svg class="ico star" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path d="M12 2l2.9 6.5L22 9.3l-5 4.6L18.2 20 12 16.9 5.8 20 7 13.9 2 9.3l7.1-.8z" fill="#000"></path>
+            </svg>
+            Iniciar Ritual
+          </button>
+        </div>
+      </div>
+        </div>
+
+        <div class="card">
+          <div style="font-weight:800; margin-bottom:8px; display:flex; align-items:center; gap:8px;">
+            <svg class="ico" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" fill="none" opacity=".3"/>
+              <path d="M6 12h12M12 6v12" stroke="currentColor" />
+            </svg>
+            Chave de Manifestação
+          </div>
+          <div class="code-area">
+            <input id="code" class="input" placeholder="Digite sua tríade (ex: 9999999, 369, kaos+nova)" autocomplete="off"/>
+            <button id="applyCode" class="btn">
+              <svg class="ico" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                <path d="M12 2l4 8H8l4-8zm0 20l-4-8h8l-4 8z" fill="#000"></path>
+              </svg>
+              Ativar Código
+            </button>
+          </div>
+          <div id="secret" class="secret" style="margin-top:10px;">
+            <div class="grid">
+              <span class="pill">Modo Oculto: Revelação</span>
+              <span class="pill">Loop de Missão Liberado</span>
+              <span class="pill">Interface Exclusiva</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="accordion">Missão Rápida
+          <svg class="ico chev" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+        <div class="panel">
+          <ul class="checklist">
+            <li><label><input type="checkbox"> Preparar o ambiente</label></li>
+            <li><label><input type="checkbox"> Executar 1 micro-ação alinhada</label></li>
+            <li><label><input type="checkbox"> Registrar sensação/insight</label></li>
+          </ul>
+        </div>
+      </div>
+
+      <div id="toasts" class="toasts"></div>
+
+      <script>
+        // Accordions with chevron rotation
+        document.querySelectorAll('.accordion').forEach(btn => {
+          btn.addEventListener('click', () => {
+            btn.classList.toggle('open');
+            const next = btn.nextElementSibling;
+            next.style.display = (next.style.display === 'block') ? 'none' : 'block';
+          });
+        });
+
+        // Toasts
+        function toast(msg) {
+          const t = document.createElement('div');
+          t.className = 'toast';
+          t.innerHTML = '<svg class="ico" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 2l9 21-9-4-9 4 9-21z" fill="currentColor"/></svg>' + msg;
+          const host = document.getElementById('toasts');
+          host.appendChild(t);
+          setTimeout(() => t.classList.add('pulse'), 50);
+          setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateY(6px)'; }, 2600);
+          setTimeout(() => host.removeChild(t), 3200);
+        }
+
+        // Agent activation
+        const agentPanels = document.querySelectorAll('.agent-panel');
+        document.querySelectorAll('.agent-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const idx = btn.getAttribute('data-agent');
+            agentPanels.forEach(p => p.style.display = 'none');
+            const p = document.querySelector('.agent-panel[data-agent="' + idx + '"]');
+            if(p) p.style.display = 'block';
+            toast('<b>Agente</b> ativado: VITALIS · ' + btn.textContent.trim());
+          });
+        });
+
+        document.querySelectorAll('.ritual-btn').forEach(b => {
+          b.addEventListener('click', () => {
+            toast('🔮 Ritual iniciado · foco de 2 minutos');
+          });
+        });
+
+        // Code field
+        const codeInput = document.getElementById('code');
+        const secret = document.getElementById('secret');
+        document.getElementById('applyCode').addEventListener('click', () => {
+          const v = (codeInput.value || '').trim().toLowerCase();
+          if(!v) { toast('Digite um código.'); return; }
+
+          if(v === '9999999') {
+            secret.style.display = 'block';
+            toast('<b>Modo Oculto liberado</b>: Revelação + Missão');
+          } else if(v === '369') {
+            document.querySelector('.accent-ring').classList.add('pulse');
+            toast('<b>Pulso 369</b> sincronizado · respire');
+          } else if(v.includes('+')) {
+            const parts = v.split('+').map(s => s.trim());
+            const known = ['kaos','nova','genus','pulse','lumine','serena','vitalis','atlas','artemis','solus','rhea','aion'];
+            const valid = parts.every(p => known.includes(p));
+            if(valid) {
+              toast('<b>Sinergia</b> ativada: ' + parts.join(' + ').toUpperCase());
+            } else {
+              toast('Código de sinergia desconhecido.');
+            }
+          } else {
+            toast('Código não reconhecido (ainda).');
+          }
+        });
+      </script>
+    </body>
+    </html>
