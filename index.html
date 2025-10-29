@@ -10687,5 +10687,38 @@ repaintLEDs();
 })();
 </script>
 
+
+
+<!-- PATCH INLINE: Atualiza URLs do APPS_JSON → ./apps/APPS78K/ -->
+<script>
+(function(){
+  const ASSISTANT_SLUG = {
+    kaos:'disruptor', nova:'inspira', genus:'fabricus', pulse:'resona', lumine:'brilhare',
+    serena:'ampara', vitalis:'momentum', atlas:'cartesius', artemis:'naviga',
+    solus:'arcana', rhea:'raizes', aion:'evolutia'
+  };
+  const baseDir = './apps/APPS78K';
+
+  function patchAppUrls(baseDir){
+    try{
+      const tag=document.getElementById('APPS_JSON');
+      if(!tag) return console.warn('[78K] APPS_JSON não encontrado.');
+      const data=JSON.parse(tag.textContent.trim());
+      if(!data.apps) return;
+      for(const app of data.apps){
+        const k=(app.key||'').toLowerCase();
+        if(k && ASSISTANT_SLUG[k]){
+          app.url=`${baseDir}/app_${k}_${ASSISTANT_SLUG[k]}.html`;
+        }
+      }
+      tag.textContent=JSON.stringify(data,null,2);
+      window.APPS_JSON=data;
+      console.log('[78K] APPS_JSON atualizado →', baseDir);
+    }catch(e){console.error('[78K] erro patchAppUrls',e);}
+  }
+
+  document.addEventListener('DOMContentLoaded',()=>patchAppUrls(baseDir));
+})();
+</script>
 </body>
 </html>
