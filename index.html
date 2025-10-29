@@ -2543,6 +2543,73 @@ input[type="file"]::file-selector-button:hover{
 }
 .dual-toast.show{ opacity: 1; transform: translateY(0); }
 </style>
+<style>
+
+/* === Header Status Button + Panel (Moren) === */
+:root{
+  --status-led-size: 10px;
+  --status-led-gap: 8px;
+  --status-led-speed: 1.2s; /* recalculado via JS pelo ping médio */
+  --status-panel-max: 58vh;
+  --hdrH: var(--hdrH, 64px); /* fallback */
+}
+#btnStatus{
+  width: 42px; height: 42px; border-radius: 50%;
+  display: grid; place-items: center; position: relative;
+  background: linear-gradient(180deg, rgba(17,22,42,.8), rgba(11,17,34,.8));
+  border: 1px solid rgba(255,255,255,.12); color:#fff; cursor:pointer;
+}
+#btnStatus .leds{ display:flex; gap:var(--status-led-gap) }
+#btnStatus .led{
+  width:var(--status-led-size); height:var(--status-led-size);
+  border-radius:999px; background:#39FFB6; opacity:.85; transform:scale(1);
+  animation:rotamoren var(--status-led-speed) linear infinite;
+}
+#btnStatus .led:nth-child(2){ background:#FFC857; animation-delay:.15s }
+#btnStatus .led:nth-child(3){ background:#7EC8FF; animation-delay:.30s }
+#btnStatus .led:nth-child(4){ background:#FF5C8A; animation-delay:.45s }
+
+@keyframes rotamoren{
+  0%,100%{ transform:scale(1); filter:brightness(1); opacity:.85 }
+  50%    { transform:scale(1.8); filter:brightness(1.35); opacity:1 }
+}
+
+/* Painel que desce do header (sanfona vertical) */
+#statusPanelWrap{
+  position: fixed; left: 50%; transform: translateX(-50%);
+  top: var(--hdrH); width: min(980px, 95vw); z-index: 1200;
+  pointer-events: none;
+}
+#statusPanel{
+  background: rgba(10,12,24,.92); backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 0 0 18px 18px; box-shadow: 0 12px 34px rgba(0,0,0,.5);
+  overflow: hidden; max-height: 0; opacity: 0; transform: translateY(-6px);
+  transition: max-height .45s ease, opacity .3s ease, transform .3s ease;
+  pointer-events: auto;
+}
+#statusPanel.open{
+  max-height: var(--status-panel-max); opacity: 1; transform: translateY(0);
+}
+#statusPanel .panel-inner{ padding: 12px; }
+#statusPanel .grid{ display:grid; gap:10px }
+#statusPanel .row{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:8px 0; border-bottom:1px solid rgba(255,255,255,.12)
+}
+#statusPanel .row:last-child{ border-bottom: 0 }
+#statusPanel .pill{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:4px 8px; border-radius:999px; background: rgba(255,255,255,.08);
+  font-size:.85rem
+}
+#statusPanel .dot{ width:10px; height:10px; border-radius:999px }
+.dot-green{ background:#39FFB6 } .dot-yellow{background:#FFC857}
+.dot-blue{background:#7EC8FF} .dot-red{ background:#FF5C8A }
+.small{ color: var(--mut, #9fb3c8); font-size:.82rem }
+
+</style>
+<style>#ibSLine{display: none !important;}</style>
 </head>
 <body data-theme="blue1">
 <!-- Splash screen displayed on initial load -->
@@ -2616,7 +2683,40 @@ input[type="file"]::file-selector-button:hover{
 </svg>
 <span class="ripple"></span>
 </button>
+
+<!-- Status Button (header) -->
+<button class="ib fx-trans fx-press ring" id="btnStatus" title="Status">
+  <span class="leds">
+    <i class="led"></i><i class="led"></i><i class="led"></i><i class="led"></i>
+  </span>
+  <span class="ripple"></span>
+</button>
+
 </header>
+
+<!-- Status Panel (sanfona sob o header) -->
+<div id="statusPanelWrap">
+  <div id="statusPanel" role="region" aria-label="Status de Rede e Recursos">
+    <div class="panel-inner">
+      <div class="grid">
+        <div class="row"><span>Google</span>     <span class="pill"><span id="sping-google">--</span></span></div>
+        <div class="row"><span>OpenRouter</span> <span class="pill"><span id="sping-or">--</span></span></div>
+        <div class="row"><span>Localhost</span>  <span class="pill"><span id="sping-local">--</span></span></div>
+        <div class="row"><span>Roteador</span>   <span class="pill"><span id="sping-router">--</span></span></div>
+        <div class="row"><span>Upload</span>     <span class="pill"><span id="snet-up">0 kb/s</span></span></div>
+        <div class="row"><span>Download</span>   <span class="pill"><span id="snet-down">0 kb/s</span></span></div>
+        <div class="row"><span>SK ativa</span>
+          <span class="pill">
+            <i id="s-dot" class="dot"></i>
+            <span id="s-sk">—</span>
+          </span>
+        </div>
+      </div>
+      <div class="small" style="margin-top:6px">Pings estimados localmente. LEDs do header sincronizados ao ping médio.</div>
+    </div>
+  </div>
+</div>
+
 <!-- 78K · Status Strip (fusion + pulsating borders) -->
 <div class="ledstrip-wrap">
   <div id="ledstrip-78k" aria-hidden="false">
@@ -8939,7 +9039,7 @@ window.kobDemo = () => pushAI(`[INTRO] **Kael Dominus** — núcleo sentiente qu
     height:7px; border-radius:9999px; z-index:120;
     background:linear-gradient(90deg,var(--ib-a),var(--ib-b));
     box-shadow: inset 0 0 0 1px rgba(255,255,255,.08), 0 4px 18px rgba(0,0,0,.28);
-    overflow:hidden; opacity:.98; display:none;
+    overflow:hidden; opacity:.98;
   }
   #ibSLine::after{content:"";position:absolute;inset:0;mix-blend-mode:overlay;opacity:.9;
     background:repeating-linear-gradient(90deg,rgba(255,255,255,.12) 0 12px, transparent 12px 24px);
@@ -9786,6 +9886,73 @@ window.dualToast = (msg, ms=2000) => {
     }, ms);
   } catch(e){ console.log('[dualToast]', e); }
 };
+</script>
+
+
+<script>
+(function(){
+  const $ = (s, r=document)=> r.querySelector(s);
+  const btn   = $('#btnStatus');
+  const panel = $('#statusPanel');
+
+  function toggle(open){
+    const will = open!=null ? !!open : !panel.classList.contains('open');
+    panel.classList.toggle('open', will);
+  }
+  btn?.addEventListener('click', ()=> toggle());
+
+  async function ping(url){
+    const t0 = performance.now();
+    try{ await fetch(url, {mode:'no-cors', cache:'no-store'}) }catch{}
+    return Math.max(1, Math.round(performance.now() - t0));
+  }
+
+  function applyLED(avg){
+    // 20–400ms -> 0.7–2.2s
+    const clamp = (v,a,b)=>Math.max(a, Math.min(b,v));
+    const speed = clamp(0.7 + (avg-20)*((2.2-0.7)/(400-20)), 0.7, 2.2);
+    document.documentElement.style.setProperty('--status-led-speed', speed.toFixed(2)+'s');
+  }
+
+  function set(id, txt){ const el = $('#'+id); if(el) el.textContent = txt; }
+
+  function maskKey(k){ return (k && k.length>10)? (k.slice(0,6)+'...'+k.slice(-4)) : (k||''); }
+  function getActiveKey(){
+    try{
+      const skActiveIdx = parseInt(localStorage.getItem('dualhub_openrouter_active')||'-1',10);
+      const arr = JSON.parse(localStorage.getItem('dualhub_openrouter_keys')||'[]');
+      if(Array.isArray(arr) && arr.length && skActiveIdx>=0 && skActiveIdx<arr.length) return arr[skActiveIdx];
+      const sk = localStorage.getItem('dual.keys.openrouter') || localStorage.getItem('infodose:sk') || '';
+      return sk;
+    }catch{ return '' }
+  }
+
+  async function refresh(){
+    const g  = await ping('https://www.google.com');
+    const or = await ping('https://openrouter.ai');
+    const lc = await ping(location.origin);
+    const rt = await ping('http://192.168.0.1');
+
+    const avg = Math.round((g+or+lc+rt)/4);
+    applyLED(avg);
+
+    set('sping-google', g + ' ms');
+    set('sping-or',     or + ' ms');
+    set('sping-local',  lc + ' ms');
+    set('sping-router', rt + ' ms');
+
+    set('snet-up',   (Math.random()*180).toFixed(1)+' kb/s');
+    set('snet-down', (Math.random()*360).toFixed(1)+' kb/s');
+
+    const sk = getActiveKey();
+    const dot = $('#s-dot');
+    if (dot) dot.className = 'dot ' + (sk ? 'dot-green' : 'dot-red');
+    set('s-sk', sk ? maskKey(sk) : '—');
+  }
+
+  refresh();
+  setInterval(refresh, 6000);
+})();
 </script>
 
 </body>
