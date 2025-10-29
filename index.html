@@ -10383,7 +10383,91 @@ document.getElementById('kether')?.addEventListener('click', ()=>setTrindadeMode
 </script>
 
 
+<script>
+/* HEADER STATUS – AUTOWIRE v2 (safe, mobile-first) */
+(()=>{ 'use strict';
+  const SEL = {
+    btn: '#btnStatus,[data-status-btn]',
+    wrap: '#statusPanelWrap',
+    panel: '#statusPanel'
+  };
 
+  function ensurePanel(){
+    let wrap = document.querySelector(SEL.wrap);
+    if(!wrap){
+      const header = document.querySelector('header, .mast, .appbar') || document.body;
+      wrap = document.createElement('div');
+      wrap.id = 'statusPanelWrap';
+      wrap.innerHTML = `
+        <div id="statusPanel" role="region" aria-label="Status">
+          <div class="panel-inner">
+            <div class="row">Painel pronto ✅</div>
+          </div>
+        </div>`;
+      header.insertAdjacentElement('afterend', wrap);
+    }
+    return wrap.querySelector(SEL.panel);
+  }
+
+  function toggle(open){
+    const panel = ensurePanel();
+    const wrap = panel.parentElement;
+    const willOpen = (open ?? !wrap.classList.contains('open'));
+    wrap.classList.toggle('open', willOpen);
+    /* avisa o kernel p/ injetar controles de música, se ele estiver carregado */
+    window.dispatchEvent(new CustomEvent('request:musicPanel'));
+  }
+
+  /* Delegation: funciona mesmo se o botão aparecer depois */
+  document.addEventListener('click', (e)=>{
+    const btn = e.target.closest(SEL.btn);
+    if(!btn) return;
+    e.preventDefault();
+    toggle();
+  }, true);
+
+  /* Cria o botão se não existir */
+  function ensureBtn(){
+    if(document.querySelector(SEL.btn)) return;
+    const header = document.querySelector('header, .mast, .appbar') || document.body;
+    const btn = document.createElement('button');
+    btn.id = 'btnStatus';
+    btn.className = 'ib fx-trans fx-press ring';
+    btn.title = 'Status';
+    btn.setAttribute('aria-label','Status');
+    btn.innerHTML = `
+      <span class="leds">
+        <i class="led"></i><i class="led"></i><i class="led"></i><i class="led"></i>
+      </span>
+      <span class="ripple"></span>`;
+    header.appendChild(btn);
+  }
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', ensureBtn);
+  else ensureBtn();
+
+  /* CSS de segurança (clickable, empilhamento e visual mínimo do painel) */
+  const css = `
+    #btnStatus{ position:relative; z-index:1200; -webkit-tap-highlight-color:transparent; pointer-events:auto }
+    #btnStatus .leds{ display:flex; gap:6px }
+    #btnStatus .led{ width:8px; height:8px; border-radius:999px; background:#7EC8FF; animation:ping 1.6s ease infinite }
+    #btnStatus .led:nth-child(1){ background:#39FFB6; animation-delay:.0s }
+    #btnStatus .led:nth-child(2){ background:#FFC857; animation-delay:.15s }
+    #btnStatus .led:nth-child(3){ background:#7EC8FF; animation-delay:.30s }
+    #btnStatus .led:nth-child(4){ background:#FF52B1; animation-delay:.45s }
+    @keyframes ping{ 0%{opacity:.8; transform:scale(.92)} 70%{opacity:.9} 100%{opacity:.6; transform:scale(1)} }
+
+    #statusPanelWrap{ position:sticky; top:var(--hdrH,56px); z-index:1100 }
+    #statusPanelWrap:not(.open){ display:none }
+    #statusPanel .panel-inner{
+      margin:8px 12px; padding:12px; border-radius:14px;
+      background:rgba(0,0,0,.55); backdrop-filter:blur(10px);
+      border:1px solid rgba(255,255,255,.14); color:#fff
+    }
+  `;
+  const style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
+})();
+</script>
 
 
 </body>
