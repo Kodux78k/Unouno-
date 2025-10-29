@@ -9958,5 +9958,431 @@ window.dualToast = (msg, ms=2000) => {
 })();
 </script>
 
+
+
+<script id="AUDIO_FUSION_KERNEL">
+(()=>{ 'use strict';
+/* ===========================================================
+   AUDIO FUSION KERNEL v1.1 — Magos + Escalas + Pad Ambiente
+   =========================================================== */
+
+const $  = (q,root=document)=>root.querySelector(q);
+const $$ = (q,root=document)=>[...root.querySelectorAll(q)];
+
+// ---------- AudioContext & Master ----------
+let AC=null, master=null, isUnlocked=false;
+function ensureAC(){
+  if(!AC){
+    AC = new (window.AudioContext||window.webkitAudioContext)();
+    master = AC.createGain();
+    master.gain.value = 0;
+    master.connect(AC.destination);
+  }
+  return AC;
+}
+function unlock(){ try{ ensureAC(); if(AC.state==='suspended') AC.resume(); isUnlocked=true; }catch{} }
+window.addEventListener('pointerdown', unlock, {once:true,capture:true});
+
+// ---------- Volume perceptual global ----------
+window.__AUDIO_TET__ = 0.40; // teto perceptual (0..1). Aumente p/ 0.60 se quiser mais presença
+function setMasterVol(v01){ // v01: slider 0..1
+  ensureAC();
+  const target = (v01*v01) * window.__AUDIO_TET__;
+  master.gain.setTargetAtTime(target, AC.currentTime, .12);
+}
+window.setMasterVol = setMasterVol;
+
+// ---------- Perfis (TAMP = timbre + envelope) ----------
+const PROFILES = {
+  DRY_TIGHT:    { osc:'triangle', atk:0.008, dec:0.12, rel:0.14, filt:null,                               gain:.28 },
+  PLUCK_NOISE:  { osc:'square',   atk:0.006, dec:0.16, rel:0.18, filt:{type:'lowpass',fq:2200,Q:0.7},     gain:.25 },
+  SOFT_PAD:     { osc:'sine',     atk:0.22,  dec:0.0,  rel:0.9,  filt:{type:'lowpass',fq:1400,Q:0.5},     gain:.36 },
+  WARM_TAPE:    { osc:'sawtooth', atk:0.12,  dec:0.0,  rel:0.7,  filt:{type:'lowpass',fq:1200,Q:0.9},     gain:.28 },
+  AIRY_SHIMMER: { osc:'sine',     atk:0.18,  dec:0.0,  rel:0.8,  filt:{type:'highpass',fq:180,Q:0.3},     gain:.34 },
+  SUB_DRONE:    { osc:'sine',     atk:0.35,  dec:0.0,  rel:1.6,  filt:{type:'lowpass',fq:480,Q:0.4},      gain:.40 },
+  GLASS_TRI:    { osc:'triangle', atk:0.02,  dec:0.0,  rel:0.4,  filt:{type:'bandpass',fq:1600,Q:4},      gain:.24 },
+  VINTAGE_SAW:  { osc:'sawtooth', atk:0.02,  dec:0.0,  rel:0.36, filt:{type:'lowpass',fq:2200,Q:0.7},     gain:.30 },
+};
+let CURRENT_PROFILE = 'SOFT_PAD';
+
+// ---------- Modos/escala ----------
+const MODES = {
+  ionian:[0,2,4,5,7,9,11,12], lydian:[0,2,4,6,7,9,11,12], mixolydian:[0,2,4,5,7,9,10,12],
+  dorian:[0,2,3,5,7,9,10,12], phrygian:[0,1,3,5,7,8,10,12], aeolian:[0,2,3,5,7,8,10,12],
+  pentMajor:[0,2,4,7,9,12], pentMinor:[0,3,5,7,10,12],
+  harmonicMinor:[0,2,3,5,7,8,11,12], phrygDominant:[0,1,4,5,7,8,10,12],
+  wholeTone:[0,2,4,6,8,10,12], blues:[0,3,5,6,7,10,12]
+};
+const ROOTS = { 'A':220,'Bb':233.08,'B':246.94,'C':261.63,'Db':277.18,'D':293.66,'Eb':311.13,'E':329.63,'F':349.23,'Gb':369.99,'G':392.00,'Ab':415.30 };
+
+const ARCH_MODE = {
+  atlas:'ionian', nova:'lydian', vitalis:'mixolydian', pulse:'dorian', artemis:'phrygian',
+  serena:'pentMajor', kaos:'harmonicMinor', genus:'wholeTone', lumine:'lydian',
+  rhea:'pentMinor', solus:'aeolian', aion:'phrygDominant'
+};
+let ROOT_BY_ARCH = { atlas:'C', nova:'F', vitalis:'G', pulse:'D', artemis:'E', serena:'A',
+                     kaos:'A', genus:'C', lumine:'E', rhea:'D', solus:'A', aion:'E' };
+
+// ---------- Síntese de notas / escalas / drone ----------
+function playNote(freq, ms=280, prof=PROFILES[CURRENT_PROFILE]){
+  ensureAC(); if(AC.state==='suspended') AC.resume();
+  const t0=AC.currentTime, o=AC.createOscillator(), g=AC.createGain();
+  o.type = prof.osc||'sine';
+  o.frequency.value=freq;
+  let node = g;
+  if (prof.filt){
+    const f=AC.createBiquadFilter();
+    f.type = prof.filt.type; f.frequency.value=prof.filt.fq; f.Q.value=prof.filt.Q||0.7;
+    g.connect(f); f.connect(master); node = f;
+  } else {
+    g.connect(master);
+  }
+  o.connect(g);
+
+  // envelope
+  const A = Math.max(0.005, prof.atk ?? 0.02);
+  const D = prof.dec ?? 0;
+  const R = Math.max(0.08, prof.rel ?? 0.28);
+  g.gain.cancelScheduledValues(t0);
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.linearRampToValueAtTime((prof.gain ?? .3), t0 + A);
+  if (D>0) g.gain.linearRampToValueAtTime((prof.gain ?? .3)*0.7, t0 + A + D);
+  const tStop = t0 + (ms/1000);
+  g.gain.setTargetAtTime(0.0001, tStop, R);
+
+  o.start();
+  o.stop(tStop + R*2);
+}
+window.playNote = playNote;
+
+function playScale(arch, steps=8, tempo=120){
+  const mode = ARCH_MODE[arch] || 'ionian';
+  const root = ROOTS[ROOT_BY_ARCH[arch]||'C'] || 261.63;
+  const pat = MODES[mode] || MODES.ionian;
+  const dt = 60/Math.max(40,tempo);
+  pat.slice(0, steps).forEach((st,i)=>{
+    const f = root * Math.pow(2, st/12);
+    setTimeout(()=>playNote(f, 260), i*dt*500);
+  });
+}
+window.playScale = playScale;
+
+function playDrone(arch){
+  const mode = ARCH_MODE[arch] || 'ionian';
+  const root = ROOTS[ROOT_BY_ARCH[arch]||'C'] || 261.63;
+  [0,7,12].forEach((st,i)=>{ setTimeout(()=>playNote(root*Math.pow(2,st/12), 1600, PROFILES.SUB_DRONE), i*60) });
+}
+window.playDrone = playDrone;
+
+// ---------- AMBIENT PAD ENGINE ----------
+let ambientOsc=null, ambientGain=null, ambientFilter=null;
+let lfoTrem=null, lfoTremGain=null, lfoVib=null, lfoVibGain=null;
+
+const AMB_LS = {
+  on: 'metaux.trindade.ambient.on',
+  vol:'metaux.trindade.ambient.vol',
+  fq: 'metaux.trindade.ambient.freq'
+};
+
+let __AMBIENT_VOL__ = 0.18; // 0..1 (antes da curva master). Slider padrão ~18%
+function centsToHz(base, cents){
+  // depth em Hz aproximado a partir de cents
+  const ratio = Math.pow(2, cents/1200);
+  return Math.abs(base*(ratio-1));
+}
+function initAmbientNodes(){
+  ensureAC();
+  // Osc principal
+  ambientOsc    = AC.createOscillator();
+  ambientGain   = AC.createGain();
+  ambientFilter = AC.createBiquadFilter();
+  ambientOsc.type = 'sine';
+  ambientGain.gain.value = 0; // começa desligado
+  ambientFilter.type = 'lowpass'; ambientFilter.frequency.value = 1200; ambientFilter.Q.value = 0.6;
+
+  // Tremolo (amp)
+  lfoTrem      = AC.createOscillator();
+  lfoTremGain  = AC.createGain();
+  lfoTrem.type='sine'; lfoTrem.frequency.value = 0.22; // 0.22 Hz default
+  lfoTremGain.gain.value = 0.25; // 25% de profundidade
+  lfoTrem.connect(lfoTremGain).connect(ambientGain.gain);
+
+  // Vibrato (pitch)
+  lfoVib      = AC.createOscillator();
+  lfoVibGain  = AC.createGain();
+  lfoVib.type='sine'; lfoVib.frequency.value = 0.16; // vibrato lento
+  lfoVibGain.gain.value = 0; // profundidade ajustada por setAmbientPad
+  lfoVib.connect(lfoVibGain).connect(ambientOsc.frequency);
+
+  ambientOsc.connect(ambientGain);
+  ambientGain.connect(ambientFilter);
+  ambientFilter.connect(master);
+
+  ambientOsc.start();
+  lfoTrem.start();
+  lfoVib.start();
+}
+
+function setAmbientVol(v01){ // 0..1
+  __AMBIENT_VOL__ = Math.max(0, Math.min(1, v01));
+  if(!ambientGain) return;
+  const t = AC.currentTime;
+  const target = __AMBIENT_VOL__;
+  ambientGain.gain.setTargetAtTime(target, t, .4);
+  try{ localStorage.setItem(AMB_LS.vol, String(v01)); }catch{}
+}
+window.setAmbientVol = setAmbientVol;
+
+function setAmbientOn(on=true, attack=0.8, release=0.8){
+  ensureAC(); if(!ambientOsc) initAmbientNodes();
+  const t=AC.currentTime;
+  ambientGain.gain.cancelScheduledValues(t);
+  const target = on ? (__AMBIENT_VOL__||0.18) : 0.0001;
+  ambientGain.gain.setTargetAtTime(target, t, on?attack:release);
+  try{ localStorage.setItem(AMB_LS.on, on?'1':'0'); }catch{}
+}
+window.setAmbientOn = setAmbientOn;
+
+function setAmbientPad(freq=432, opts={}){
+  ensureAC(); if(!ambientOsc) initAmbientNodes();
+  const {
+    type='sine',
+    attack=1.2,
+    tremolo=0.22,        // Hz
+    tremoloDepth=0.25,   // 0..1
+    vibrato=0.16,        // Hz
+    vibratoCents=3,      // ~3 cents → depth em Hz proporcional à base
+    filterHz=1200,
+  } = opts;
+
+  ambientOsc.type = type;
+  ambientFilter.frequency.setTargetAtTime(filterHz, AC.currentTime, .4);
+
+  // tremolo
+  lfoTrem.frequency.setTargetAtTime(Math.max(0.05,tremolo), AC.currentTime, .3);
+  lfoTremGain.gain.setTargetAtTime(Math.max(0,Math.min(1,tremoloDepth)), AC.currentTime, .3);
+
+  // vibrato
+  lfoVib.frequency.setTargetAtTime(Math.max(0.05,vibrato), AC.currentTime, .3);
+  const depthHz = centsToHz(freq, vibratoCents);
+  lfoVibGain.gain.setTargetAtTime(depthHz, AC.currentTime, .3);
+
+  // frequência base + fade in
+  ambientOsc.frequency.setTargetAtTime(freq, AC.currentTime, .2);
+  setAmbientOn(true, attack, .8);
+  try{ localStorage.setItem(AMB_LS.fq, String(freq)); }catch{}
+}
+window.setAmbientPad = setAmbientPad;
+
+// ---------- Painel (injeta controles no teu Status Panel) ----------
+function injectMusicPanel(){
+  const host = $('#statusPanel .panel-inner'); if(!host || $('#musicPanel')) return;
+  const box = document.createElement('div'); box.id='musicPanel';
+  box.innerHTML = `
+    <hr style="border-color:rgba(255,255,255,.12);opacity:.6;margin:8px 0">
+    <div class="row"><b>Música do Arquétipo</b><span class="small">perfil, escala, raiz, volume</span></div>
+    <div class="row">
+      <label class="pill">Perfil
+        <select id="mpProfile" class="mpSel">
+          ${Object.keys(PROFILES).map(k=>`<option>${k}</option>`).join('')}
+        </select>
+      </label>
+      <label class="pill">Escala
+        <select id="mpScale" class="mpSel">
+          ${Object.keys(MODES).map(k=>`<option>${k}</option>`).join('')}
+        </select>
+      </label>
+      <label class="pill">Raiz
+        <select id="mpRoot" class="mpSel">
+          ${Object.keys(ROOTS).map(k=>`<option>${k}</option>`).join('')}
+        </select>
+      </label>
+    </div>
+    <div class="row">
+      <label class="pill">Vol
+        <input id="mpVol" type="range" min="0" max="100" value="28" style="width:140px">
+      </label>
+      <label class="pill">Teto
+        <input id="mpTet" type="range" min="20" max="100" value="${Math.round(window.__AUDIO_TET__*100)}" style="width:120px">
+      </label>
+      <span class="small">Curva: v² × teto</span>
+    </div>
+
+    <div class="row" style="margin-top:6px">
+      <b>Pad Ambiente</b><span class="small">mago → 369 / 432 / 528 Hz</span>
+    </div>
+    <div class="row">
+      <button id="ambOn"  class="btn-fusion">Ligar</button>
+      <button id="ambOff" class="btn-fusion">Desligar</button>
+      <label class="pill">Vol Pad
+        <input id="ambVol" type="range" min="0" max="100" value="${Math.round((__AMBIENT_VOL__||0.18)*100)}" style="width:120px">
+      </label>
+      <label class="pill">Freq
+        <input id="ambFq" type="number" min="10" max="1200" step="1" value="${Number(localStorage.getItem(AMB_LS.fq))||432}" style="width:92px">
+      </label>
+    </div>
+    <div class="row">
+      <label class="pill">Tremolo Hz <input id="ambTrem" type="number" step="0.01" value="0.22" style="width:80px"></label>
+      <label class="pill">Trem Depth <input id="ambTremD" type="number" step="0.05" value="0.25" style="width:80px"></label>
+      <label class="pill">Vibrato Hz <input id="ambVib" type="number" step="0.01" value="0.16" style="width:80px"></label>
+      <label class="pill">Vib Cents <input id="ambVibC" type="number" step="1" value="3" style="width:64px"></label>
+    </div>
+
+    <div class="row" style="gap:8px;margin-top:6px">
+      <button id="mpTestScale" class="btn-fusion">Tocar escala</button>
+      <button id="mpTestDrone" class="btn-fusion">Drone</button>
+      <button id="mpTestPluck" class="btn-fusion">Pluck</button>
+    </div>
+  `;
+  host.appendChild(box);
+
+  // estilos mínimos (aproveita tua estética)
+  $$('.mpSel', box).forEach(el=>{ el.style.background='rgba(255,255,255,.06)'; el.style.border='1px solid rgba(255,255,255,.16)'; el.style.borderRadius='8px'; el.style.color='#fff'; el.style.padding='6px' });
+
+  // binds principais
+  $('#mpProfile').value = CURRENT_PROFILE;
+  $('#mpProfile').oninput = e=>{ CURRENT_PROFILE = e.target.value; toast('Perfil: '+CURRENT_PROFILE); };
+
+  $('#mpScale').oninput = e=>{ const a=window.__ARCH_ACTIVE__||'atlas'; ARCH_MODE[a]=e.target.value; toast(`Escala ${a}: ${e.target.value}`); };
+  $('#mpRoot').oninput  = e=>{ const a=window.__ARCH_ACTIVE__||'atlas'; ROOT_BY_ARCH[a]=e.target.value; toast(`Raiz ${a}: ${e.target.value}`); };
+
+  const vol = $('#mpVol'); vol.oninput = e=> setMasterVol(parseInt(e.target.value,10)/100);
+  $('#mpTet').oninput = e=>{ window.__AUDIO_TET__ = parseInt(e.target.value,10)/100; setMasterVol(parseInt(vol.value,10)/100); };
+
+  $('#mpTestScale').onclick = ()=> playScale(window.__ARCH_ACTIVE__||'atlas', 8, 110);
+  $('#mpTestDrone').onclick = ()=> playDrone(window.__ARCH_ACTIVE__||'atlas');
+  $('#mpTestPluck').onclick = ()=> playNote(ROOTS[ROOT_BY_ARCH[window.__ARCH_ACTIVE__||'atlas']], 240, PROFILES.DRY_TIGHT);
+
+  // Ambient pad binds
+  $('#ambOn').onclick  = ()=> setAmbientOn(true);
+  $('#ambOff').onclick = ()=> setAmbientOn(false);
+  $('#ambVol').oninput = e=> setAmbientVol(parseInt(e.target.value,10)/100);
+  const ambFq = $('#ambFq');
+  ambFq.onchange = ()=> setAmbientPad(parseFloat(ambFq.value)||432,{});
+  $('#ambTrem').onchange  = ()=> setAmbientPad(parseFloat(ambFq.value)||432, {tremolo:parseFloat($('#ambTrem').value), tremoloDepth:parseFloat($('#ambTremD').value), vibrato:parseFloat($('#ambVib').value), vibratoCents:parseFloat($('#ambVibC').value)});
+  $('#ambTremD').onchange = $('#ambTrem').onchange;
+  $('#ambVib').onchange   = $('#ambTrem').onchange;
+  $('#ambVibC').onchange  = $('#ambTrem').onchange;
+}
+
+// ---------- Toast helper (usa teu unificador se existir) ----------
+function toast(message){
+  window.dispatchEvent(new CustomEvent('app:toast',{detail:{message}}));
+}
+
+// ---------- Header + Barras ----------
+function colorizeHeaderLEDs(){
+  const leds = $$('#btnStatus .led'); if(!leds.length) return;
+  const overlay = getComputedStyle(document.documentElement).getPropertyValue('--arch-overlay').trim();
+  if(overlay && overlay!=='rgba(0, 0, 0, 0)'){ leds.forEach(el=>{ el.style.background = overlay; }); }
+}
+function toggleStatusPanel(open){
+  const wrap = $('#statusPanel'); if(!wrap) return;
+  wrap.classList[open?'add':'remove']('open');
+}
+function bindBars(){
+  const strip = $('#ledstrip-78k'); if(!strip) return;
+  strip.addEventListener('click', ()=>{ toggleStatusPanel(true); injectMusicPanel(); });
+}
+function bindHeader(){
+  const btn = $('#btnStatus');
+  if(btn){
+    btn.addEventListener('click', ()=>{
+      const panel = $('#statusPanel'); panel && panel.classList.toggle('open');
+      injectMusicPanel();
+    });
+  }
+}
+const mo = new MutationObserver(()=>colorizeHeaderLEDs());
+mo.observe(document.documentElement,{attributes:true,attributeFilter:['style','class']});
+
+// ---------- Bus hooks ----------
+function onArchetypeApply(aKey){
+  window.__ARCH_ACTIVE__ = aKey; colorizeHeaderLEDs();
+}
+function hookBus(){
+  const Bus = window.InfodoseBus; if(!Bus) return;
+  Bus.on('ARCH_PULSE', ({arch,act})=>{
+    onArchetypeApply(arch);
+    if(act==='ronda'){ playScale(arch, 6, 100); }
+    else if(act==='fusionar'){ playScale(arch, 8, 124); }
+    else { const root = ROOTS[ROOT_BY_ARCH[arch]||'C']; playNote(root, 260); }
+  });
+}
+
+// ---------- Trindade bridge → Pad Ambiente ----------
+const MAGO_FREQ = { anax:369, zara:432, kether:528 };
+window.addEventListener('trindade:mode', (e)=>{
+  const m=e.detail?.mode; if(!MAGO_FREQ[m]) return;
+  // presets por mago (ajuste fino se quiser)
+  const cfg={
+    anax:  { profile:'AIRY_SHIMMER', scale:'wholeTone',     root:'D', tet:.45, padHz:MAGO_FREQ.anax,  vibC:2, trem:0.18 },
+    zara:  { profile:'VINTAGE_SAW',  scale:'harmonicMinor', root:'A', tet:.55, padHz:MAGO_FREQ.zara,  vibC:3, trem:0.22 },
+    kether:{ profile:'SOFT_PAD',     scale:'lydian',        root:'F', tet:.40, padHz:MAGO_FREQ.kether,vibC:1, trem:0.16 },
+  }[m];
+
+  window.CURRENT_PROFILE = cfg.profile;
+  const arch = window.__ARCH_ACTIVE__ || 'atlas';
+  ARCH_MODE[arch] = cfg.scale;
+  ROOT_BY_ARCH[arch] = cfg.root;
+  window.__AUDIO_TET__ = cfg.tet;
+
+  // aplica volume global novamente
+  const volEl = $('#mpVol'); const v = volEl ? (parseInt(volEl.value,10)/100) : .28;
+  setMasterVol(v);
+
+  // liga/ajusta pad
+  setAmbientPad(cfg.padHz, { attack:1.2, tremolo:cfg.trem, vibrato:0.16, vibratoCents:cfg.vibC });
+  setAmbientOn(true);
+
+  playScale(arch, 6, 110);
+  toast(`Trindade: ${m} (Pad ${cfg.padHz} Hz)`);
+});
+
+// ---------- Boot ----------
+(function init(){
+  ensureAC();
+  bindBars(); bindHeader(); hookBus(); colorizeHeaderLEDs();
+
+  // Restaura estado
+  try{
+    const vTet = Number(localStorage.getItem('metaux:audio.tet')); if(vTet) window.__AUDIO_TET__ = Math.max(.2, Math.min(1, vTet));
+  }catch{}
+  setMasterVol(.28);
+
+  // Ambient restore
+  try{
+    const on  = localStorage.getItem(AMB_LS.on)==='1';
+    const vol = Number(localStorage.getItem(AMB_LS.vol)); if(!Number.isNaN(vol) && vol>0) __AMBIENT_VOL__ = Math.max(0,Math.min(1,vol));
+    const fq  = Number(localStorage.getItem(AMB_LS.fq))||432;
+    setAmbientPad(fq, {});
+    setAmbientOn(on, .6, .6);
+  }catch{}
+
+  // Arch inferido
+  const guess = (localStorage.getItem('infodose:arch.active')||'atlas');
+  onArchetypeApply(guess);
+})();
+})();
+</script>
+
+
+
+<script>
+/* envia o modo da Trindade para o kernel */
+function setTrindadeMode(mode){ 
+  window.dispatchEvent(new CustomEvent('trindade:mode',{detail:{mode}}));
+}
+
+/* exemplo: botões/ícones da Trindade */
+document.getElementById('anax')?.addEventListener('click', ()=>setTrindadeMode('anax'));
+document.getElementById('zara')?.addEventListener('click', ()=>setTrindadeMode('zara'));
+document.getElementById('kether')?.addEventListener('click', ()=>setTrindadeMode('kether'));
+</script>
+
+
+
+
+
 </body>
 </html>
