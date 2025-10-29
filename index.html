@@ -24,7 +24,9 @@ try{ document.documentElement.style.setProperty('--arch-overlay','rgba(64,158,25
 }
 </style>
   <style>
-#btnHelp { display: none !important; }
+#btnHelp { display: none !important; 
+  #btnBack{ display: none !important;
+}
 </style>
 <style>
     :root {
@@ -10468,7 +10470,222 @@ document.getElementById('kether')?.addEventListener('click', ()=>setTrindadeMode
   const style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
 })();
 </script>
+<style id="AUDIO_BTN_CSS">
+/* Botão de Áudio (header) + painel compacto — mobile-first */
+:root{ --audio-z: 1600; --audio-ok: var(--ok, #39ffb6); }
+#btnAudio{
+  --sz: 42px;
+  width: var(--sz); height: var(--sz);
+  display:grid; place-items:center; border-radius:50%;
+  background: var(--surface, rgba(15,17,32,.65));
+  border: var(--bd, 1px solid rgba(255,255,255,.12));
+  box-shadow: var(--shadow, 0 14px 40px rgba(0,0,0,.45));
+  position:relative;
+}
+#btnAudio .leds{ position:absolute; inset:auto 6px 6px auto; display:flex; gap:4px }
+#btnAudio .led{ width:7px; height:7px; border-radius:999px; opacity:.9; animation:audioPing 1.6s ease infinite }
+#btnAudio .led:nth-child(1){ animation-delay:.0s }
+#btnAudio .led:nth-child(2){ animation-delay:.15s }
+#btnAudio .led:nth-child(3){ animation-delay:.30s }
+#btnAudio .led:nth-child(4){ animation-delay:.45s }
+@keyframes audioPing{ 0%{transform:scale(.9)} 70%{opacity:.95} 100%{transform:scale(1)} }
 
+#btnAudio svg{ width:20px; height:20px; display:block; }
+#btnAudio.on{ outline:0; box-shadow: 0 0 0 2px color-mix(in oklab, var(--audio-arch,#39ffb6) 60%, transparent), var(--shadow) }
+
+#audioPanelWrap{
+  position: sticky; top: calc(var(--hdrH,64px));
+  z-index: var(--audio-z); display:none;
+}
+#audioPanelWrap.open{ display:block; }
+#audioPanel{
+  margin:8px 12px; padding:10px; border-radius:14px;
+  background: rgba(0,0,0,.55); color:#fff;
+  border: 1px solid rgba(255,255,255,.14);
+  backdrop-filter: blur(10px);
+}
+#audioPanel .row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap }
+#audioPanel .pill{ display:inline-flex; align-items:center; gap:8px; padding:6px 10px;
+  border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.16) }
+#audioPanel select, #audioPanel input[type="number"], #audioPanel input[type="range"]{
+  background:rgba(255,255,255,.06); color:#fff; border:1px solid rgba(255,255,255,.16);
+  border-radius:8px; padding:6px
+}
+#audioPanel .btn{ padding:8px 12px; border-radius:10px; font-weight:800;
+  background:linear-gradient(180deg, rgba(13,22,34,.7), rgba(9,14,22,.7));
+  border:1px solid rgba(143,211,255,.18); color:#fff;
+}
+@media (max-width:560px){ #audioPanel .row{ gap:8px } }
+</style>
+
+<script id="AUDIO_BTN_INIT">
+(()=>{ 'use strict';
+/* Helpers */
+const $=(q,r=document)=>r.querySelector(q), $$=(q,r=document)=>[...r.querySelectorAll(q)];
+const css= getComputedStyle(document.documentElement);
+
+/* 1) Injeta botão no header */
+function ensureAudioButton(){
+  if($('#btnAudio')) return $('#btnAudio');
+  const header = $('header.mast') || document.body; /* HUB UNO header existe */ 
+  const btn = document.createElement('button');
+  btn.id='btnAudio'; btn.className='ib fx-trans ring'; btn.title='Áudio';
+  btn.innerHTML = `
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 9v6h4l5 4V5L8 9H4zM16 8a5 5 0 0 1 0 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <span class="leds">
+      <i class="led"></i><i class="led"></i><i class="led"></i><i class="led"></i>
+    </span>`;
+  header.appendChild(btn);
+  return btn;
+}
+
+/* 2) Painel compacto (independe do LS panel) */
+function ensureAudioPanel(){
+  if($('#audioPanelWrap')) return $('#audioPanelWrap');
+  const wrap = document.createElement('div');
+  wrap.id='audioPanelWrap';
+  wrap.innerHTML = `
+    <div id="audioPanel">
+      <div class="row" style="justify-content:space-between">
+        <b>🎛️ Música do Arquétipo</b>
+        <div class="pill"><label style="display:flex;align-items:center;gap:6px">
+          Stereo <input id="apStereo" type="checkbox" checked>
+        </label></div>
+      </div>
+
+      <div class="row">
+        <label class="pill">Perfil
+          <select id="apProfile">
+            <option>SOFT_PAD</option><option>VINTAGE_SAW</option><option>AIRY_SHIMMER</option>
+            <option>DRY_TIGHT</option><option>SUB_DRONE</option>
+          </select>
+        </label>
+        <label class="pill">Escala
+          <select id="apScale">
+            <option>ionian</option><option>lydian</option><option>mixolydian</option>
+            <option>dorian</option><option>phrygian</option><option>aeolian</option>
+            <option>pentMajor</option><option>pentMinor</option>
+            <option>harmonicMinor</option><option>phrygDominant</option>
+            <option>wholeTone</option><option>blues</option>
+          </select>
+        </label>
+        <label class="pill">Raiz
+          <select id="apRoot">
+            <option>C</option><option>D</option><option>E</option><option>F</option>
+            <option>G</option><option>A</option><option>Bb</option><option>Db</option><option>Eb</option><option>Gb</option><option>Ab</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="row">
+        <label class="pill">Vol <input id="apVol" type="range" min="0" max="100" value="28" style="width:140px"></label>
+        <label class="pill">Teto <input id="apTet" type="range" min="20" max="100" value="40" style="width:120px"></label>
+        <label class="pill">Freq <input id="apFq" type="number" min="10" max="1200" value="432" style="width:88px"></label>
+      </div>
+
+      <div class="row">
+        <label class="pill">Width <input id="apWidth" type="range" min="0" max="100" value="75" style="width:120px"></label>
+        <label class="pill">Detune ¢ <input id="apDet" type="number" step="1" value="4" style="width:72px"></label>
+      </div>
+
+      <div class="row" style="gap:8px">
+        <button id="apOn"  class="btn">Ligar pad</button>
+        <button id="apOff" class="btn">Desligar pad</button>
+        <button id="apScaleTest" class="btn">Tocar escala</button>
+        <button id="apPluck" class="btn">Pluck</button>
+      </div>
+    </div>`;
+  /* adiciona logo abaixo do header */
+  const anchor = $('header.mast') || document.body;
+  anchor.insertAdjacentElement('afterend', wrap);
+  return wrap;
+}
+
+/* 3) Wire com o Kernel v1.2 (se presente) + fallbacks */
+function wireControls(){
+  const q = id => document.getElementById(id);
+  const haveKernel = typeof window.setAmbientPadStereo==='function' || typeof window.setAmbientPad==='function';
+
+  const apVol = q('apVol'), apTet=q('apTet'), apFq=q('apFq'), apStereo=q('apStereo'),
+        apWidth=q('apWidth'), apDet=q('apDet'), apProfile=q('apProfile'),
+        apScale=q('apScale'), apRoot=q('apRoot');
+
+  /* perfil/escala/raiz refletem no kernel, se houver */
+  apProfile.oninput = ()=>{ if(haveKernel) window.CURRENT_PROFILE = apProfile.value; };
+  apScale.oninput   = ()=>{ if(haveKernel){ const a=window.__ARCH_ACTIVE__||'atlas'; window.ARCH_MODE[a]=apScale.value; } };
+  apRoot.oninput    = ()=>{ if(haveKernel){ const a=window.__ARCH_ACTIVE__||'atlas'; window.ROOT_BY_ARCH[a]=apRoot.value; } };
+
+  apVol.oninput = ()=>{ if(haveKernel) window.setMasterVol(parseInt(apVol.value,10)/100); };
+  apTet.oninput = ()=>{ if(haveKernel){ window.__AUDIO_TET__ = parseInt(apTet.value,10)/100; window.setMasterVol(parseInt(apVol.value,10)/100); } };
+
+  function applyPad(){
+    if(!haveKernel) return;
+    const f = parseFloat(apFq.value)||432;
+    if(apStereo.checked && window.setAmbientPadStereo){
+      window.setAmbientPadStereo(f,{ width: parseInt(apWidth.value,10)/100, detuneCents: parseFloat(apDet.value)||4 });
+    }else{
+      window.setAmbientPad?.(f,{});
+    }
+    window.setAmbientOn?.(true);
+  }
+  apFq.onchange=applyPad; apWidth.oninput=applyPad; apDet.onchange=applyPad; apStereo.onchange=applyPad;
+
+  q('apOn').onclick  = ()=> window.setAmbientOn?.(true);
+  q('apOff').onclick = ()=> window.setAmbientOn?.(false);
+  q('apScaleTest').onclick = ()=> window.playScale?.(window.__ARCH_ACTIVE__||'atlas', 8, 110);
+  q('apPluck').onclick     = ()=> {
+    const ROOTS = window.ROOTS||{C:261.63,D:293.66,E:329.63,F:349.23,G:392,A:220,Bb:233.08,Db:277.18,Eb:311.13,Gb:369.99,Ab:415.30};
+    const arch=window.__ARCH_ACTIVE__||'atlas';
+    window.playNote?.(ROOTS[(window.ROOT_BY_ARCH||{})[arch]||'C']||261.63, 240, (window.PROFILES||{})['DRY_TIGHT']);
+  };
+
+  /* pinta LEDs conforme overlay do arquétipo */
+  repaintLEDs();
+}
+
+/* 4) LED color sincronizado com overlay/Trindade */
+function overlayColor(){
+  /* usa --arch-overlay se disponível, senão cai para ok */
+  const ov = css.getPropertyValue('--arch-overlay').trim();
+  return ov && ov!=='rgba(0, 0, 0, 0)' ? ov : getComputedStyle(document.body).getPropertyValue('--ok') || '#39ffb6';
+}
+function repaintLEDs(){
+  const leds = $$('#btnAudio .led'); if(!leds.length) return;
+  const col = overlayColor();
+  leds[0].style.background = col;
+  leds[1].style.background = col;
+  leds[2].style.background = col;
+  leds[3].style.background = col;
+  $('#btnAudio').style.setProperty('--audio-arch', col);
+}
+new MutationObserver(repaintLEDs).observe(document.documentElement,{attributes:true,attributeFilter:['style','class']});
+addEventListener('trindade:mode', repaintLEDs);
+
+/* 5) Toggle UI + iOS unlock */
+function togglePanel(open){
+  const wrap = ensureAudioPanel();
+  wrap.classList[ open ?? !wrap.classList.contains('open') ? 'add' : 'remove']('open');
+  if(wrap.classList.contains('open')){
+    /* garante que o AudioContext esteja ativo */
+    try{ const AC=(window.AudioContext||window.webkitAudioContext); if(AC){ const a=(window.__AC__ ||= new AC()); if(a.state==='suspended') a.resume(); } }catch{}
+  }
+}
+
+/* Boot */
+const btn = ensureAudioButton();
+btn.addEventListener('click', (e)=>{ e.preventDefault(); btn.classList.toggle('on'); togglePanel(); });
+/* cria painel na primeira interação pra manter leve */
+btn.addEventListener('click', ()=>{ ensureAudioPanel(); wireControls(); }, {once:true});
+
+/* se o header já existe, posiciona; caso contrário, aguarda DOM */
+if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', ()=>{ensureAudioButton();}); }
+
+/* primeira pintura dos LEDs */
+repaintLEDs();
+})();
+</script>
 
 </body>
 </html>
