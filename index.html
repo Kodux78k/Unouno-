@@ -4,19 +4,6 @@
 <!-- PREPAINT: enforce Blue‑1 tokens before any CSS -->
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" name="viewport"/>
-    <script id="EARLY_BOOT_ROOT_PATCH">
-    (function(){
-      try{
-        var raw = localStorage.getItem('design:rootPatch');
-        if(!raw) return;
-        var patch = JSON.parse(raw), el = document.documentElement;
-        if(patch.dataTheme) el.setAttribute('data-theme', patch.dataTheme);
-        if(patch.vars) for (var k in patch.vars)
-          if (Object.prototype.hasOwnProperty.call(patch.vars,k)) el.style.setProperty(k, patch.vars[k]);
-      }catch(e){}
-    })();
-    </script>
-    
 <title>HUB UNO — PROD (safe)</title>
 <meta content="#0b0f14" name="theme-color"/>
 <!-- PATCH: overlay-css-unify -->
@@ -942,6 +929,8 @@ body::after{content:'';position:fixed;inset:0;background:none !important;pointer
     body.session-full header.mast,
     body.session-full .tabs-wrap,
     body.session-full .fab { display: none !important; }
+
+
 
 /* === ORB + Particles (escopado dentro do círculo de arquétipos) === */
 .arch-circle .orb-wrap{
@@ -2090,6 +2079,7 @@ html[data-overlay="off"] #arch-fadeCover{ background: transparent !important; }
   .pulse-cta .label{ bottom:-34px; font-size:13px; }
 }
 
+
 /* Luxara — black & gold tuning */
 :root{
   --lux-gold:#d4af37;
@@ -2180,6 +2170,7 @@ html[data-overlay="off"] #arch-fadeCover{ background: transparent !important; }
 }
 #archDebugHUD .hint{ opacity:.6; margin-top:6px; font-weight:500; }
 
+
 #archDebugHUD .row.controls{ margin-top:8px; gap:10px; flex-wrap:wrap; }
 #archDebugHUD .btn{
   padding:6px 10px; border-radius:10px; background: rgba(255,255,255,.06);
@@ -2259,6 +2250,9 @@ html[data-overlay="off"] #arch-fadeCover{ background: transparent !important; }
 /* Badge (top-right) uses accent color, avoids duplicate fallback */
 .app-card .badge-ask{ display: none; } /* remove '?' fallback if present */
 </style>
+
+
+
 
 <style id="upload-buttons-style">
 /* Upload buttons — Brain, Apps, geral */
@@ -2399,6 +2393,7 @@ input[type="file"]::file-selector-button:hover{
 
 </style>
 
+
 <!-- PATCH • UNO_INLINE_ICONS_APPSVG • 2025-10-26T06:21:12 -->
 <style id="UNO_INLINE_ICONS_APPSVG">
   /* Garantir tamanho/visibilidade do ícone dentro do card */
@@ -2412,6 +2407,7 @@ input[type="file"]::file-selector-button:hover{
     background: linear-gradient(42deg, #ff52e5, #00c5e5);
   }
 </style>
+
 
 <!-- PATCH • UNO_APPS_TITLE_CSS • 2025-10-26T06:48:30 -->
 <style id="UNO_APPS_TITLE_CSS">
@@ -2450,6 +2446,7 @@ input[type="file"]::file-selector-button:hover{
     hyphens: auto;
   }
 </style>
+
 
 <style>
 /* 78K · Dual Strip (main + fusion) */
@@ -2512,67 +2509,41 @@ input[type="file"]::file-selector-button:hover{
 </style>
 
 <style>
+/* 78K · Strip Controls */
+.strip-controls{
+  display:flex; justify-content:flex-end; gap:8px;
+  margin: 6px 12px 0 12px;
+}
+.strip-controls .btn-fusion{
+  font:700 11px/1 ui-sans-serif,system-ui;
+  padding:8px 10px; border-radius:999px;
+  background:linear-gradient(135deg,rgba(255,255,255,.10),rgba(255,255,255,.04));
+  color:#eaf1ff; border:1px solid rgba(255,255,255,.16);
+  box-shadow:0 6px 18px rgba(0,0,0,.25);
+  -webkit-tap-highlight-color: transparent;
+}
+.strip-controls .btn-fusion:active{ transform: scale(.98); box-shadow:0 3px 10px rgba(0,0,0,.35); }
+</style>
 <style>
-/* 78K · LED Dots + Pointer + Toaster */
-#ledstrip-78k .dots{ position:absolute; inset:0; display:grid; grid-auto-flow:column; gap:4px; align-items:center; padding:0 8px; pointer-events:none; }
-#ledstrip-78k .dot{ width:4px; height:4px; border-radius:2px; background:rgba(255,255,255,.15); box-shadow: inset 0 0 0 1px rgba(255,255,255,.10); opacity:.6 }
-#ledstrip-78k .dot.on{ background:#6DFFCB; filter: drop-shadow(0 0 4px rgba(109,255,203,.65)); opacity:.95 }
-#ledstrip-78k .pointer{ position:absolute; top:-8px; width:0; height:0; border-left:4px solid transparent; border-right:4px solid transparent; border-top:6px solid rgba(255,255,255,.85); transform:translateX(-50%); pointer-events:none; filter: drop-shadow(0 0 4px rgba(255,255,255,.45)); }
-
-/* Toaster */
-.toast-wrap{ position: fixed; left: 50%; transform: translateX(-50%); top: 14px; z-index: 9999; display: grid; gap: 8px; }
-.toast{
-  font: 700 12px/1.2 ui-sans-serif,system-ui;
-  padding: 10px 12px; border-radius: 12px;
-  color: #eaf1ff;
-  background: linear-gradient(135deg, rgba(15,17,32,.92), rgba(15,17,32,.78));
-  border: 1px solid rgba(255,255,255,.14);
-  box-shadow: 0 10px 28px rgba(0,0,0,.35), inset 0 0 12px rgba(255,255,255,.04);
-  opacity: 0; transform: translateY(-8px);
-  transition: opacity .25s ease, transform .25s ease;
+/* Local Boost toast stack (bottom center) */
+#dual-toast-stack{
+  position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%);
+  display: flex; flex-direction: column; gap: 8px; z-index: 99999;
   pointer-events: none;
 }
-.toast.show{ opacity: 1; transform: translateY(0); }
-</style>
-
-<style>
-<style>
-/* 78K · z-index overrides (bring strips to front) */
-.ledstrip-wrap{ position: relative; z-index: 40; }
-#ledstrip-78k{ position: relative; z-index: 45; }
-#ledstrip-78k .lane{ z-index: 46; }
-#ledstrip-78k .tick{ z-index: 47; }
-#ledstrip-78k .spark{ z-index: 48; }
-#ledstrip-78k .dots, #ledstrip-78k .pointer{ z-index: 49; }
-#ledstrip-fusion{ position: relative; z-index: 35; }
-/* Toaster stays on top anyway (9999), keeping as-is */
+.dual-toast{
+  pointer-events:auto; -webkit-tap-highlight-color: transparent;
+  background: rgba(18,20,28,.9); color: #eaf1ff;
+  border: 1px solid rgba(255,255,255,.12);
+  backdrop-filter: blur(10px);
+  padding: 10px 12px; border-radius: 12px; font: 600 12px/1.1 system-ui;
+  box-shadow: 0 8px 24px rgba(0,0,0,.4);
+  opacity: 0; transform: translateY(10px);
+  transition: opacity .25s ease, transform .25s ease;
+}
+.dual-toast.show{ opacity: 1; transform: translateY(0); }
 </style>
 </head>
-    <style id="TOAST_BOTTOM_PATCH_CSS">
-      /* Bottom bar toast stack (inside tabbar .inner) */
-      nav.tabbar .inner{ position: relative; }
-      .toast-stack, .toast-wrap{
-        position: absolute !important;
-        left: 12px !important; right: 12px !important;
-        bottom: 8px !important; top: auto !important;
-        transform: none !important;
-        display: grid; gap: 8px;
-        pointer-events: none;
-        z-index: 2000;
-      }
-      .toast-stack .toast, .toast-wrap .toast{
-        pointer-events: auto;
-        border-radius: 10px;
-        padding: 10px 12px;
-        background: var(--surface, rgba(12,16,24,.9));
-        border: 1px solid rgba(255,255,255,.14);
-        box-shadow: 0 10px 28px rgba(0,0,0,.35);
-        color: var(--fg, #eaf1ff);
-        font: 700 12px/1.2 ui-sans-serif, system-ui, -apple-system;
-        opacity: 1; transform: none;
-      }
-    </style>
-    
 <body data-theme="blue1">
 <!-- Splash screen displayed on initial load -->
 <!-- Som do splash: coloque seu arquivo de áudio na pasta especificada e ajuste o caminho abaixo.
@@ -2663,6 +2634,13 @@ input[type="file"]::file-selector-button:hover{
   </div>
   <!-- fusion bar (sub) -->
   <div id="ledstrip-fusion" aria-hidden="true"></div>
+<!-- 78K · Strip Controls -->
+<div class="strip-controls">
+  <button id="btn-fusionar" class="btn-fusion" type="button" aria-label="Fusionar arquétipos">
+    ✦ Fusionar
+  </button>
+</div>
+
 </div>
 
 <!-- Âncora para sessões abertas quando o usuário optar por abrir dentro da página -->
@@ -7777,6 +7755,7 @@ export function renderResponse(txt) {
   if (pageIndicator) pageIndicator.textContent = "1 / " + pages.length;
 }
 
+
 ;try{window.renderResponse = renderResponse;}catch(e){}</script><script type="module">
 const feed = document.getElementById('chatFeed') || document.querySelector('#feed,#chat-feed,.chat-feed');
 function pushAI(text){
@@ -9463,10 +9442,8 @@ window.kobDemo = () => pushAI(`[INTRO] **Kael Dominus** — núcleo sentiente qu
 <!-- === /INFODOSE • end audio engine === -->
 
 <script>
-<script>
 // 78K · Dual Strip Controller (pulsating borders + fusion)
 (function(){
-  if(window.__LEDSTRIP78K_INSTALLED__) return; window.__LEDSTRIP78K_INSTALLED__ = true;
   // remove old panels
   ['led78k','led78k-micro'].forEach(id=>{ const n=document.getElementById(id); n && n.remove(); });
 
@@ -9561,44 +9538,45 @@ window.kobDemo = () => pushAI(`[INTRO] **Kael Dominus** — núcleo sentiente qu
     const cur = (sel?.value || 'Atlas').replace(/\.html$/,'');
     const idx = sel ? sel.selectedIndex : 0;
     const nxt = sel ? (sel.options[(idx+1) % sel.options.length].value.replace(/\.html$/,'')) : 'Nova';
-    window.__FUSION_ALREADY_INITIATED__ = true; if(!window.__FUSION_ALREADY_INITIATED__){ LEDSTRIP.setArchetypes(cur, nxt); window.__FUSION_ALREADY_INITIATED__ = true; }
+    LEDSTRIP.setArchetypes(cur, nxt);
   }catch{}
 })();
 </script>
 
 <script>
-<script>
-// 78K · Auto Fusion (on archetype change)
+// 78K · Fusion Ritual (button ✦ Fusionar)
 (function(){
-  if(window.__FUSION_HOOKED_ONCE__) return; window.__FUSION_HOOKED_ONCE__ = true;
-  if(!window.LEDSTRIP) { return; }
-
+  const btn = document.getElementById('btn-fusionar');
+  if(!btn || !window.LEDSTRIP) return;
   const fusionBar = document.getElementById('ledstrip-fusion');
+
+  // animate fusion gradient flow + loop advance to Liberação in ~3s
   function fusionRitual(duration=3000){
     try{
       const sel = document.getElementById('arch-select');
       const cur = (sel?.value || 'Atlas').replace(/\.html$/,'');
       const idx = sel ? sel.selectedIndex : 0;
       const nxt = sel ? (sel.options[(idx+1) % sel.options.length].value.replace(/\.html$/,'')) : 'Nova';
-      if(!window.__FUSION_ALREADY_INITIATED__){ LEDSTRIP.setArchetypes(cur, nxt); window.__FUSION_ALREADY_INITIATED__ = true; }
+      LEDSTRIP.setArchetypes(cur, nxt);
     }catch{}
 
+    // staged loop advancement
     const steps = [
       {t: 0.00, phase:'Isca'},
       {t: 0.33, phase:'Progresso'},
       {t: 0.66, phase:'Tensão'},
       {t: 1.00, phase:'Liberação'}
     ];
+
     const t0 = performance.now();
     const startPos = 0; const endPos = 100;
     const raf = (now)=>{
       const dt = Math.min(1, (now - t0) / duration);
+      // advance loop by milestones
       for(const s of steps){
-        if(Math.abs(dt - s.t) < 0.02){
-          LEDSTRIP.setLoopPhase(s.phase);
-          try{ if(s.phase==='Progresso') LEDSTRIP.pulseENG(); if(s.phase==='Tensão') LEDSTRIP.pulseHR(); }catch{}
-        }
+        if(Math.abs(dt - s.t) < 0.02){ LEDSTRIP.setLoopPhase(s.phase); }
       }
+      // background flow animation
       if(fusionBar){
         fusionBar.style.backgroundSize = '200% 100%';
         fusionBar.style.backgroundPosition = (startPos + (endPos-startPos)*dt) + '% 0%';
@@ -9606,6 +9584,7 @@ window.kobDemo = () => pushAI(`[INTRO] **Kael Dominus** — núcleo sentiente qu
       }
       if(dt < 1){ requestAnimationFrame(raf); }
       else{
+        // settle
         if(fusionBar){
           fusionBar.style.backgroundSize = '';
           fusionBar.style.backgroundPosition = '';
@@ -9616,675 +9595,198 @@ window.kobDemo = () => pushAI(`[INTRO] **Kael Dominus** — núcleo sentiente qu
     requestAnimationFrame(raf);
   }
 
-  // Hook on select change & initial load
-  function hook(){
-    const sel = document.getElementById('arch-select');
-    if(!sel) return;
-    ['change','input'].forEach(ev => sel.addEventListener(ev, ()=>fusionRitual(2600), {passive:true}));
-    // Optional: prev/next buttons if present
-    ['arch-prev','arch-next'].forEach(id=>{
-      const b = document.getElementById(id);
-      b && b.addEventListener('click', ()=>fusionRitual(2600), {passive:true});
-    });
-    // First-time gentle fusion
-    setTimeout(()=>fusionRitual(1800), 300);
-  }
-  if(document.readyState !== 'loading') hook();
-  else document.addEventListener('DOMContentLoaded', hook);
-})();
-</script>
-
-<script>
-<script>
-// 78K · Dynamic Fusion Speed (ENG/HR-driven)
-(function(){
-  if(window.__FUSION_DYNAMIC_ONCE__) return; window.__FUSION_DYNAMIC_ONCE__ = true;
-  function install(){
-    if(!window.LEDSTRIP) return false;
-
-    // rolling activity counters with gentle decay
-    let engScore = 0, hrScore = 0;
-    const origEng = LEDSTRIP.pulseENG?.bind(LEDSTRIP);
-    const origHr  = LEDSTRIP.pulseHR?.bind(LEDSTRIP);
-
-    if(origEng){
-      LEDSTRIP.pulseENG = function(){ engScore += 2; return origEng(); };
-    }
-    if(origHr){
-      LEDSTRIP.pulseHR = function(){ hrScore += 2; return origHr(); };
-    }
-
-    setInterval(()=>{
-      engScore = Math.max(0, engScore - 1);
-      hrScore  = Math.max(0, hrScore  - 1);
-    }, 800);
-
-    // expose for diagnostics
-    LEDSTRIP.getActivity = () => ({eng: engScore, hr: hrScore, total: engScore + hrScore});
-
-    // hook auto-fusion to use dynamic duration (override if previous was installed)
-    const fusionBar = document.getElementById('ledstrip-fusion');
-
-    function fusionRitualDynamic(){
-      // map activity → duration (ms)
-      // low activity -> slower (3200ms), high activity -> faster (1400ms)
-      const total = Math.min(24, (engScore + hrScore));
-      const duration = Math.round(3200 - (total/24)*1800); // 3200..1400
-
-      try{
-        const sel = document.getElementById('arch-select');
-        const cur = (sel?.value || 'Atlas').replace(/\.html$/,'');
-        const idx = sel ? sel.selectedIndex : 0;
-        const nxt = sel ? (sel.options[(idx+1) % sel.options.length].value.replace(/\.html$/,'')) : 'Nova';
-        if(!window.__FUSION_ALREADY_INITIATED__){ LEDSTRIP.setArchetypes(cur, nxt); window.__FUSION_ALREADY_INITIATED__ = true; }
-      }catch{}
-
-      const steps = [
-        {t: 0.00, phase:'Isca'},
-        {t: 0.33, phase:'Progresso'},
-        {t: 0.66, phase:'Tensão'},
-        {t: 1.00, phase:'Liberação'}
-      ];
-      const t0 = performance.now();
-      const startPos = 0, endPos = 100;
-
-      const raf = (now)=>{
-        const dt = Math.min(1, (now - t0) / duration);
-        for(const s of steps){ if(Math.abs(dt - s.t) < 0.02){ LEDSTRIP.setLoopPhase(s.phase); } }
-        if(fusionBar){
-          fusionBar.style.backgroundSize = '200% 100%';
-          fusionBar.style.backgroundPosition = (startPos + (endPos-startPos)*dt) + '% 0%';
-          fusionBar.style.opacity = String(.62 + .28*Math.sin(dt*Math.PI));
-        }
-        if(dt < 1){ requestAnimationFrame(raf); }
-        else if(fusionBar){
-          fusionBar.style.backgroundSize = '';
-          fusionBar.style.backgroundPosition = '';
-          fusionBar.style.opacity = '.72';
-        }
-      };
-      requestAnimationFrame(raf);
-    }
-
-    // attach to select & prev/next (replace previous listeners by adding ours on capture phase)
-    function wire(){
-      const sel = document.getElementById('arch-select');
-      sel && ['change','input'].forEach(ev => sel.addEventListener(ev, fusionRitualDynamic, {passive:true, capture:true}));
-      ['arch-prev','arch-next'].forEach(id=>{
-        const b = document.getElementById(id);
-        b && b.addEventListener('click', fusionRitualDynamic, {passive:true, capture:true});
-      });
-      // initial run uses current activity too
-      setTimeout(fusionRitualDynamic, 350);
-    }
-    wire();
-    return true;
-  }
-
-  if(document.readyState !== 'loading'){
-    install() || setTimeout(install, 200);
-  }else{
-    document.addEventListener('DOMContentLoaded', ()=>install() || setTimeout(install, 200));
-  }
-})();
-</script>
-
-<script>
-<script>
-// 78K · LED Dots + Pointer + Toaster Enhancer
-(function(){
-  if(window.__LED_DOTS_ENHANCER_ONCE__) return; window.__LED_DOTS_ENHANCER_ONCE__ = true;
-  function ready(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
-  ready(function(){
-    const main = document.getElementById('ledstrip-78k');
-    if(!main || !window.LEDSTRIP) return;
-
-    // Build dots line (24) and moving pointer
-    let dotsWrap = main.querySelector('.dots');
-    if(!dotsWrap){
-      dotsWrap = document.createElement('div');
-      dotsWrap.className = 'dots';
-      main.appendChild(dotsWrap);
-      for(let i=0;i<24;i++){
-        const d = document.createElement('i');
-        d.className = 'dot';
-        dotsWrap.appendChild(d);
-      }
-      const ptr = document.createElement('i');
-      ptr.className = 'pointer';
-      ptr.style.left = '0%';
-      main.appendChild(ptr);
-    }
-    const dots = Array.from(main.querySelectorAll('.dot'));
-    const pointer = main.querySelector('.pointer');
-
-    // Toaster
-    let toastWrap = document.querySelector('.toast-wrap');
-    if(!toastWrap){
-      toastWrap = document.createElement('div');
-      toastWrap.className = 'toast-wrap';
-      document.body.appendChild(toastWrap);
-    }
-    function toast(msg){
-      const t = document.createElement('div');
-      t.className = 'toast';
-      t.textContent = msg;
-      toastWrap.appendChild(t);
-      // show
-      requestAnimationFrame(()=> t.classList.add('show'));
-      // hide
-      setTimeout(()=>{
-        t.classList.remove('show');
-        setTimeout(()=> t.remove(), 250);
-      }, 2200);
-    }
-
-    // Wrap LEDSTRIP.setArchetypes to show toast and sync colors
-    const origSetArch = LEDSTRIP.setArchetypes?.bind(LEDSTRIP);
-    if(origSetArch){
-      LEDSTRIP.setArchetypes = function(a,b){ if(LEDSTRIP.__setArchWrapped) return origSetArch(a,b); LEDSTRIP.__setArchWrapped = true; toast('Fusão: ' + (a||'—') + ' × ' + (b||'—'));
-        toast('Fusão: ' + (a||'—') + ' × ' + (b||'—'));
-        return origSetArch(a,b);
-      };
-    }
-
-    // Blink logic linked to pulses
-    let blinkBudget = 0;
-    const origEng = LEDSTRIP.pulseENG?.bind(LEDSTRIP);
-    const origHr  = LEDSTRIP.pulseHR?.bind(LEDSTRIP);
-    if(origEng){
-      LEDSTRIP.pulseENG = function(){
-        blinkBudget += 4;
-        return origEng();
-      };
-    }
-    if(origHr){
-      LEDSTRIP.pulseHR = function(){
-        blinkBudget += 3;
-        return origHr();
-      };
-    }
-
-    // Pointer & blinking updater
-    let pos = 0;
-    setInterval(()=>{
-      pos = (pos+1) % 100;
-      if(pointer){ pointer.style.left = pos + '%'; }
-      // decay dots
-      dots.forEach(d=>d.classList.remove('on'));
-      // base pattern from loop progress (use LEDSTRIP.getActivity if present for density)
-      const activity = (LEDSTRIP.getActivity ? LEDSTRIP.getActivity().total : 0);
-      const count = Math.min(24, Math.max(2, Math.round(activity/3)+2));
-      for(let k=0;k<count;k++){
-        const idx = Math.floor(Math.random()*dots.length);
-        dots[idx] && dots[idx].classList.add('on');
-      }
-      // extra sparkle from blinkBudget
-      while(blinkBudget-- > 0){
-        const idx = Math.floor(Math.random()*dots.length);
-        dots[idx] && dots[idx].classList.add('on');
-      }
-      blinkBudget = Math.max(0, blinkBudget);
-    }, 600);
+  btn.addEventListener('click', ()=>{
+    fusionRitual(3000);
+    // give some feedback
+    try{ LEDSTRIP.pulseENG(); LEDSTRIP.pulseHR(); }catch{}
   });
+  // expose for console
+  window.LEDSTRIP && (window.LEDSTRIP.fusionRitual = fusionRitual);
 })();
 </script>
 
-<script>
-// 78K · Pulse Audio Engine — sync with LEDSTRIP (auto)
-(function(){
-  const AC = window.AudioContext || window.webkitAudioContext;
-  let ac = null, master=null, busGain=null, kick=null, clickGain=null, filt=null, reverb=null, reverbGain=null;
-  let started = false;
-  let bpm = 78; // base symbolic tempo
-  let lastActivity = 0;
+<!-- PATCH: Fusionar button wiring (no toasts) -->
 
-  function initAudio(){
-    if(ac) return;
-    ac = new AC();
-    master = ac.createGain(); master.gain.value = 0.6; master.connect(ac.destination);
-    // light reverb
-    reverb = ac.createConvolver(); reverb.buffer = makeImpulse(ac, 2.0, 2.2);
-    reverbGain = ac.createGain(); reverbGain.gain.value = 0.18; reverb.connect(reverbGain); reverbGain.connect(master);
 
-    busGain = ac.createGain(); busGain.gain.value = 1.0; busGain.connect(master);
-    filt = ac.createBiquadFilter(); filt.type='lowpass'; filt.frequency.value = 1400; filt.connect(busGain);
+<script id="dual-fusionar-patch">
+(() => {
+  const $ = (q, r=document)=>r.querySelector(q);
+  const LS = {
+    get:(k,d)=>{ try{ const v=localStorage.getItem(k); return v!=null? JSON.parse(v): d }catch(_){ return d } },
+    set:(k,v)=>{ try{ localStorage.setItem(k, JSON.stringify(v)) }catch(_){ } },
+  };
+  const COLORS = {
+    atlas:'#409EFF', nova:'#FF52B1', vitalis:'#22C55E', pulse:'#00BFFF',
+    artemis:'#FFC300', serena:'#B684FF', kaos:'#FF4D6D', genus:'#57CF70',
+    lumine:'#FFD54F', rhea:'#00D1B2', solus:'#6495ED', aion:'#FF9F43'
+  };
+  const btn = document.getElementById('btn-fusionar');
+  const bar = document.getElementById('ledstrip-fusion');
+  const stripMain = document.getElementById('ledstrip-78k');
+  const sel = $('#arch-select');
 
-    // click osc for ENG/HR ticks
-    const clickOsc = ac.createOscillator(); clickOsc.type='square'; clickGain = ac.createGain();
-    clickGain.gain.value = 0.0;
-    clickOsc.connect(clickGain); clickGain.connect(filt);
-    clickOsc.start();
-
-    // kick synth for loop phases
-    kick = { g: ac.createGain(), o: ac.createOscillator() };
-    kick.g.gain.value = 0; kick.o.type='sine';
-    kick.o.connect(kick.g); kick.g.connect(filt); kick.g.connect(reverb);
-    kick.o.start();
-
-    // bootstrap flag
-    started = true;
-    window.dispatchEvent(new CustomEvent('pulse:ready'));
+  function baseName(path){ return String(path||'').replace(/^.*\//,'').replace(/\.html$/i,'').toLowerCase(); }
+  function cap(s){ return s? s[0].toUpperCase()+s.slice(1): s; }
+  function currentArch(){
+    if (!sel) return 'atlas';
+    const v = sel.value || '';
+    return baseName(v) || 'atlas';
   }
+  function readEnabled(){ return !!LS.get('dual.fusion.enabled', false); }
+  function readPair(){ return String(LS.get('dual.fusion.pair','')||''); }
+  function writePair(p){ LS.set('dual.fusion.pair', p); }
+  function writeEnabled(v){ LS.set('dual.fusion.enabled', !!v); }
 
-  // Tiny impulse response for reverb
-  function makeImpulse(ac, seconds=2, decay=2){
-    const rate=ac.sampleRate, len=rate*seconds; const b=ac.createBuffer(2,len,rate);
-    for(let ch=0; ch<2; ch++){
-      const d=b.getChannelData(ch);
-      for(let i=0;i<len;i++){ d[i]=(Math.random()*2-1)*Math.pow(1-i/len, decay); }
+  function gradientFor(a,b){
+    const ca = COLORS[a] || '#00c2ff', cb = COLORS[b] || '#ff52e5';
+    return `linear-gradient(90deg, ${ca}, ${cb})`;
+  }
+  function clearStripVisuals(){
+    if (bar){
+      bar.setAttribute('aria-hidden','true');
+      bar.style.opacity = '0';
+      bar.style.background = 'transparent';
     }
-    return b;
-  }
-
-  // Guards autoplay: start/resume on first user gesture
-  function ensureStart(){
-    try{ initAudio(); ac.resume && ac.resume(); }catch(e){}
-  }
-  ['pointerdown','keydown','touchstart','click'].forEach(ev=>{
-    window.addEventListener(ev, ensureStart, {once:true, passive:true});
-  });
-
-  // Public triggers
-  function tickClick(){
-    if(!started) return;
-    const t = ac.currentTime;
-    clickGain.gain.cancelScheduledValues(t);
-    clickGain.gain.setValueAtTime(0.0, t);
-    clickGain.gain.linearRampToValueAtTime(0.18, t + 0.002);
-    clickGain.gain.exponentialRampToValueAtTime(0.0005, t + 0.06);
-  }
-  function boomKick(strength=1){
-    if(!started) return;
-    const t=ac.currentTime;
-    // pitch sweep
-    const base = 120; const top = 220 + 180*strength;
-    kick.o.frequency.cancelScheduledValues(t);
-    kick.o.frequency.setValueAtTime(top, t);
-    kick.o.frequency.exponentialRampToValueAtTime(base, t + 0.28);
-    // amp env
-    kick.g.gain.cancelScheduledValues(t);
-    kick.g.gain.setValueAtTime(0.0001, t);
-    kick.g.gain.exponentialRampToValueAtTime(0.9*strength, t + 0.01);
-    kick.g.gain.exponentialRampToValueAtTime(0.0001, t + 0.32);
-  }
-
-  // LEDSTRIP hooks: clicks for ENG/HR; kick on loop phase
-  function installHooks(){
-    if(!window.LEDSTRIP) return;
-    // wrap existing methods
-    const pENG = LEDSTRIP.pulseENG && LEDSTRIP.pulseENG.bind(LEDSTRIP);
-    const pHR  = LEDSTRIP.pulseHR  && LEDSTRIP.pulseHR.bind(LEDSTRIP);
-    const setLoop = LEDSTRIP.setLoopPhase && LEDSTRIP.setLoopPhase.bind(LEDSTRIP);
-
-    if(pENG){
-      LEDSTRIP.pulseENG = function(){
-        tickClick(); lastActivity = Date.now();
-        return pENG();
-      };
-    }
-    if(pHR){
-      LEDSTRIP.pulseHR = function(){
-        tickClick(); lastActivity = Date.now();
-        return pHR();
-      };
-    }
-    if(setLoop){
-      LEDSTRIP.setLoopPhase = function(name){
-        const strength = (name==='Liberação')? 1.0 : (name==='Tensão'? 0.85 : (name==='Progresso'?0.7:0.55));
-        boomKick(strength);
-        return setLoop(name);
-      };
+    if (stripMain){
+      stripMain.style.removeProperty('--archA');
+      stripMain.style.removeProperty('--archB');
     }
   }
+  function labelFor(enabled, pairStr){
+    if (!enabled) return '✦ Fusionar';
+    return pairStr ? `✦ Fusão: ${pairStr}` : '✦ Fusão';
+  }
+  function applyVisuals(enabled, pair){
+    btn.classList.toggle('on', !!enabled);
+    btn.textContent = labelFor(enabled, pair);
+    if (!enabled){ clearStripVisuals(); return; }
+    const [a,b] = (pair||'').split('+').map(s=>s.trim().toLowerCase());
+    if (bar){
+      bar.setAttribute('aria-hidden','false');
+      bar.style.opacity = '0.92';
+      if (a && b) bar.style.background = gradientFor(a,b);
+    }
+    if (stripMain && a && b){
+      stripMain.style.setProperty('--archA', COLORS[a] || '#409eff');
+      stripMain.style.setProperty('--archB', COLORS[b] || '#ff52b1');
+    }
+  }
+  function emitChange(enabled, pair){
+    try {
+      const [a,b] = (pair||'').split('+').map(s=>s.trim().toLowerCase());
+      window.dispatchEvent(new CustomEvent('dual:fusion-change', { detail: { enabled, pair, a, b } }));
+    } catch(_){}
+  }
+  function pickDefaultPair(){
+    const a = currentArch();
+    const order = ['atlas','nova','vitalis','pulse','artemis','serena','kaos','genus','lumine','rhea','solus','aion'];
+    const i = Math.max(0, order.indexOf(a));
+    const b = order[(i+1) % order.length];
+    return `${cap(a)}+${cap(b)}`;
+  }
+  function normalizePairName(str){
+    if (!str) return '';
+    const parts = str.split('+').map(s=>baseName(s).replace(/[^a-z]/g,''));
+    if (parts.length<2) return '';
+    return `${cap(parts[0])}+${cap(parts[1])}`;
+  }
 
-  // Auto pulse scheduler: sync visual + audio at BPM, speed follows activity
-  let rafId = null, lastBeat = 0;
-  function loop(){
-    rafId = requestAnimationFrame(loop);
-    if(!started) return;
-    const now = ac.currentTime;
-    // activity -> bpm range: 68 .. 112
-    let act = 0;
-    if(window.LEDSTRIP && LEDSTRIP.getActivity){
-      const a = LEDSTRIP.getActivity(); act = Math.min(24, (a?.total||0));
+  function refreshFromLS(){
+    // ensure default OFF when absent
+    if (localStorage.getItem('dual.fusion.enabled') === null) writeEnabled(false);
+
+    let enabled = readEnabled();
+    let pair = readPair();
+
+    // If enabled and pair is missing or mismatched with current arch for slot A, realign A with current
+    if (enabled){
+      const arch = currentArch();
+      if (!pair){
+        pair = normalizePairName(pickDefaultPair());
+        writePair(pair);
+      } else {
+        const [A,B] = pair.split('+').map(s=>s.trim());
+        const aBase = baseName(A);
+        if (aBase !== arch){
+          pair = `${cap(arch)}+${B||'Nova'}`; // keep B if present
+          writePair(pair);
+        }
+      }
+    }
+
+    applyVisuals(enabled, pair);
+  }
+
+  function toggle(){
+    const enabled = !readEnabled();
+    writeEnabled(enabled);
+    if (enabled){
+      // ensure pair exists and aligns with current A
+      let pair = readPair();
+      if (!pair) pair = normalizePairName(pickDefaultPair());
+      const arch = currentArch();
+      const parts = pair.split('+').map(s=>s.trim());
+      const newPair = `${cap(baseName(arch))}+${cap(baseName(parts[1]||'Nova'))}`;
+      writePair(newPair);
+      applyVisuals(true, newPair);
+      emitChange(true, newPair);
+      // local toast hook (if defined in this page)
+      if (typeof window.dualToast === 'function') window.dualToast(`Fusão ON · ${newPair}`);
     } else {
-      // fallback: based on recency of interactions
-      const dt = Date.now() - lastActivity;
-      act = dt<3000 ? 12 : dt<8000 ? 6 : 0;
-    }
-    const bpmNow = 68 + (act/24)*(112-68);
-    if(Math.abs(bpmNow - bpm) > 0.1) bpm = bpmNow;
-
-    const spb = 60 / bpm; // seconds per beat
-    if(now - lastBeat >= spb){
-      lastBeat += spb;
-      // audio tick + small visual pulses if available
-      tickClick();
-      try{ LEDSTRIP.pulseHR(); }catch(e){}
+      applyVisuals(false, readPair());
+      emitChange(false, readPair());
+      if (typeof window.dualToast === 'function') window.dualToast('Fusão OFF');
     }
   }
 
-  // expose diagnostics
-  window.PULSE78K = {
-    start: ensureStart,
-    boom: (s)=>boomKick(s||1),
-    click: tickClick,
-    bpm: ()=>bpm
-  };
+  function init(){
+    // initial paint
+    refreshFromLS();
+    // click handler
+    btn.addEventListener('click', toggle);
+    // react to archetype select changes (only when enabled)
+    if (sel){
+      sel.addEventListener('change', () => {
+        if (!readEnabled()) return;
+        // update A slot to current arch, keep B
+        let pair = readPair();
+        const [A,B] = (pair||'').split('+').map(s=>s.trim());
+        const arch = currentArch();
+        const newPair = `${cap(baseName(arch))}+${cap(baseName(B||'Nova'))}`;
+        writePair(newPair);
+        applyVisuals(true, newPair);
+        emitChange(true, newPair);
+      });
+    }
+    // react to external changes
+    window.addEventListener('dual:fusion-change', () => refreshFromLS());
+  }
 
-  // init
-  installHooks();
-  loop();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
 })();
 </script>
 
+
+<div id="dual-toast-stack" aria-live="polite" aria-atomic="true"></div>
 <script>
-// 78K · Expose minimal audio internals to allow timbre control
-(function(){
-  // Best-effort: detect the AudioContext used in engine by creating a hidden one first on user gesture.
-  // We piggyback on previous script variables if they are in closure; here we create proxy objects at window.
-  if(!window.__PULSE_PRIV__){
-    window.__PULSE_PRIV__ = { clickOsc:null, clickGain:null, kickOsc:null, kickGain:null, filt:null };
-  }
-  // Monkey-patch the engine's start to expose nodes after initialization.
-  if(window.PULSE78K && typeof PULSE78K.start === 'function'){
-    const old = PULSE78K.start.bind(PULSE78K);
-    PULSE78K.start = function(){
-      const r = old();
-      try{
-        // Try attach via globals the previous script may have set on window (fallback friendly)
-        // If not available, nothing breaks — only timbre won't apply.
-        if(window.__ENGINE_CTX__){
-          // no-op placeholder
-        }
-      }catch(e){}
-      return r;
-    };
-  }
-})();
-</script>
-
-<script>
-// 78K · Audio Enhancements: Limiter + Archetype Timbres
-(function(){
-  function ready(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
-  ready(function(){
-    if(!window.PULSE78K){ return; }
-    // Add a light DynamicsCompressor (limiter-ish) in the existing graph if possible.
-    // We can't rewire internals from here, so we extend PULSE78K with a setup() call that reconfigures nodes if available.
-    const AC = window.AudioContext || window.webkitAudioContext;
-    let installed = false;
-
-    function installLimiterAndTimbre(){
-      try{
-        // Rebuild audio with limiter if engine exposes minimal handles via a re-init routine.
-        // If not, we attempt to detect known globals from previous script via closure side-effects.
-        // We'll create a new context chain and reuse the public triggers.
-        const oldStart = PULSE78K.start;
-        PULSE78K.start = function(){
-          oldStart && oldStart();
-          // After start, if a context exists, insert a DynamicsCompressor at the tail by creating a small auxiliary bus
-          try{
-            // Create ad-hoc nodes piggybacking on an opened context by making a short silent buffer to fetch context
-            const ctx = new (AC)();
-            ctx.close(); // not used; just in case
-          }catch(e){}
-
-          installed = true;
-        };
-
-      }catch(e){}
-    }
-
-    // Archetype → timbre map
-    const TIMBRE = {
-      nova:    { osc:'sawtooth', click: 'triangle',  lp: 2600, kick: 1.10 },
-      genus:   { osc:'triangle', click: 'triangle',  lp: 1800, kick: 0.95 },
-      lumine:  { osc:'triangle', click: 'sine',      lp: 2200, kick: 0.90 },
-      solus:   { osc:'sine',     click: 'sine',      lp: 1600, kick: 0.85 },
-      atlas:   { osc:'square',   click: 'square',    lp: 2000, kick: 1.00 },
-      rhea:    { osc:'triangle', click: 'triangle',  lp: 1700, kick: 0.90 },
-      kaos:    { osc:'sawtooth', click: 'square',    lp: 2800, kick: 1.15 },
-      artemis: { osc:'square',   click: 'square',    lp: 2400, kick: 1.05 },
-      serena:  { osc:'sine',     click: 'sine',      lp: 1500, kick: 0.85 },
-      aion:    { osc:'sine',     click: 'triangle',  lp: 1400, kick: 0.90 },
-      pulse:   { osc:'square',   click: 'square',    lp: 2100, kick: 1.05 },
-      vitalis: { osc:'triangle', click: 'triangle',  lp: 1900, kick: 0.95 }
-    };
-
-    // Patch LEDSTRIP.setArchetypes to also retune audio timbre (if audio engine provides handles)
-    if(window.LEDSTRIP && LEDSTRIP.setArchetypes){
-      const orig = LEDSTRIP.setArchetypes.bind(LEDSTRIP);
-      LEDSTRIP.setArchetypes = function(a,b){
-        const res = orig(a,b);
-        try{
-          const arch = (a||'').toLowerCase();
-          const t = TIMBRE[arch] || TIMBRE['atlas'];
-          // Store desired timbre on window for the audio loop to pick up
-          window.__PULSE_TMBRE__ = t;
-        }catch(e){}
-        return res;
-      };
-    }
-
-    // Small hook to the audio engine loop (if present) by overriding PULSE78K.click/boom to respect timbre
-    if(window.PULSE78K){
-      const oldClick = PULSE78K.click && PULSE78K.click.bind(PULSE78K);
-      const oldBoom  = PULSE78K.boom  && PULSE78K.boom.bind(PULSE78K);
-
-      // wrap to set osc types and filter cutoffs on the fly using WebAudio routing within the earlier engine if exposed
-      PULSE78K.click = function(){
-        try{
-          const t = window.__PULSE_TMBRE__;
-          if(t && window.__PULSE_PRIV__ && __PULSE_PRIV__.clickGain && __PULSE_PRIV__.clickOsc && __PULSE_PRIV__.filt){
-            __PULSE_PRIV__.clickOsc.type = t.click || 'square';
-            __PULSE_PRIV__.filt.frequency.value = t.lp || 2000;
-          }
-        }catch(e){}
-        return oldClick && oldClick();
-      };
-      PULSE78K.boom = function(s){
-        try{
-          const t = window.__PULSE_TMBRE__;
-          if(t && __PULSE_PRIV__ && __PULSE_PRIV__.kickOsc && __PULSE_PRIV__.kickGain){
-            // strength scaled by archetype
-            s = (s||1) * (t.kick || 1.0);
-          }
-        }catch(e){}
-        return oldBoom && oldBoom(s);
-      };
-    }
-
-    installLimiterAndTimbre();
-  });
-})();
-</script>
-
-<script>
-// 78K · Soft-Clip Waveshaper + Archetype Patterns
-(function(){
-  const AC = window.AudioContext || window.webkitAudioContext;
-  function ready(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
-
-  // Euclidean rhythm generator
-  function euclid(steps, pulses){
-    let pattern = new Array(steps).fill(0);
-    for(let i=0;i<pulses;i++){ pattern[Math.floor(i*steps/pulses)] = 1; }
-    return pattern;
-  }
-
-  // 12 archetype rhythmic signatures (bars of 16 steps)
-  const RHYTHM = {
-    atlas:   euclid(16, 4),        // straight 4
-    nova:    euclid(16, 5),        // shimmering 5
-    genus:   euclid(16, 3),        // explorer 3
-    lumine:  [1,0,0,1,0,0,1,0, 0,1,0,0,1,0,0,0], // skewed light
-    solus:   [1,0,0,0, 0,0,1,0, 0,0,0,1, 0,0,0,0],
-    rhea:    euclid(16, 2),        // gentle 2
-    kaos:    [1,1,0,1, 0,1,1,0, 1,0,1,1, 0,1,0,1], // bursty
-    artemis: [1,0,1,0, 0,1,0,1, 1,0,1,0, 0,1,0,1], // martial
-    serena:  [1,0,0,1, 0,0,1,0, 0,1,0,0, 1,0,0,0], // waltz-ish
-    aion:    [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0], // clock
-    pulse:   [1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0], // 8ths
-    vitalis: euclid(16, 6)         // energetic 6
-  };
-
-  // Soft-clip waveshaper curve
-  function makeSoftClipCurve(amount=0.8, n=2048){
-    const k = amount * 10; // intensity
-    const curve = new Float32Array(n);
-    for(let i=0;i<n;i++){
-      const x = (i/(n-1))*2-1;
-      curve[i] = Math.tanh(k * x) / Math.tanh(k);
-    }
-    return curve;
-  }
-
-  // Install soft clip + rhythmic scheduler on top of existing engine
-  ready(function(){
-    if(!window.PULSE78K || !window.LEDSTRIP) return;
-
-    // Build soft clipper if possible by inserting after master using an extra context chain
-    // We'll piggyback by generating a tiny WebAudio graph inside the engine if it exposed privates earlier.
-    // If not exposed, we fallback to a minimal auxiliary click to emulate warmth.
-    let ctx = null, shaper=null, postGain=null;
-    function installSoftClip(){
-      if(ctx) return;
-      try{
-        ctx = new (AC)();
-        // We can't rewire the original destination chain from here safely.
-        // So we create a tiny silent bed to keep mobile devices warm; real engine warmth was approximated earlier by filter+reverb.
-        // To still add flavor: we produce a very-low noise shaped by the soft-clip and mix at -36dB for perceived warmth.
-        const noise = ctx.createBufferSource();
-        const buf = ctx.createBuffer(1, ctx.sampleRate*2, ctx.sampleRate);
-        const d = buf.getChannelData(0);
-        for(let i=0;i<d.length;i++){ d[i] = (Math.random()*2-1)*0.002; }
-        noise.buffer = buf; noise.loop = true;
-        shaper = ctx.createWaveShaper(); shaper.curve = makeSoftClipCurve(0.75, 4096);
-        postGain = ctx.createGain(); postGain.gain.value = 0.015; // ~ -36 dB
-        noise.connect(shaper); shaper.connect(postGain); postGain.connect(ctx.destination);
-        // start after first user gesture
-        const boot = ()=>{ try{ ctx.resume(); noise.start(); cleanup(); }catch(e){} };
-        const cleanup = ()=>['pointerdown','touchstart','keydown','click'].forEach(ev=>window.removeEventListener(ev, boot));
-        ['pointerdown','touchstart','keydown','click'].forEach(ev=>window.addEventListener(ev, boot, {once:true, passive:true}));
-      }catch(e){}
-    }
-    installSoftClip();
-
-    // Rhythmic scheduler synced to BPM/steps
-    let step = 0, lastTs = 0;
-    const STEPS = 16;
-    function currentArchetype(){
-      try{
-        const sel = document.getElementById('arch-select');
-        return (sel?.value || 'Atlas').replace(/\.html$/,'').toLowerCase();
-      }catch(e){ return 'atlas'; }
-    }
-
-    function tickPattern(){
-      // Derive current BPM from PULSE78K
-      const bpm = (PULSE78K.bpm && PULSE78K.bpm()) || 78;
-      const sps = (60 / bpm) / 4; // 16th-note seconds per step
-      const now = performance.now() / 1000;
-      if(now - lastTs >= sps){
-        lastTs += sps;
-        const arch = currentArchetype();
-        const pat = RHYTHM[arch] || RHYTHM['atlas'];
-        const isHit = !!pat[step % STEPS];
-        if(isHit){
-          // accent: click + small boom; stronger on downbeat (step%4==0)
-          try{
-            PULSE78K.click();
-            const str = (step%4===0) ? 1.0 : 0.6;
-            PULSE78K.boom(str);
-            // give LED strip a little life too
-            LEDSTRIP.pulseENG(); if(step%2===0) LEDSTRIP.pulseHR();
-          }catch(e){}
-        }
-        step = (step + 1) % STEPS;
-      }
-      requestAnimationFrame(tickPattern);
-    }
-    requestAnimationFrame(tickPattern);
-
-    // Also retie pattern when archetype changes via fused auto listeners
-    const sel = document.getElementById('arch-select');
-    sel && ['change','input'].forEach(ev=> sel.addEventListener(ev, ()=>{ step = 0; }, {passive:true}));
-  });
-})();
+// Local toast (Boost) — scoped to this page only
+window.dualToast = (msg, ms=2000) => {
+  try {
+    let stack = document.getElementById('dual-toast-stack');
+    if (!stack){ stack = document.createElement('div'); stack.id='dual-toast-stack'; document.body.appendChild(stack); }
+    const el = document.createElement('div');
+    el.className = 'dual-toast';
+    el.textContent = msg;
+    stack.appendChild(el);
+    requestAnimationFrame(()=> el.classList.add('show'));
+    setTimeout(()=>{
+      el.classList.remove('show');
+      setTimeout(()=> el.remove(), 250);
+    }, ms);
+  } catch(e){ console.log('[dualToast]', e); }
+};
 </script>
 
 </body>
 </html>
-    <script id="TOAST_BOTTOM_PATCH_JS">
-    (function(){
-      if (window.__TOAST_BOTTOM_INSTALLED__) return; window.__TOAST_BOTTOM_INSTALLED__ = true;
-      function ensureStack(){
-        var tabInner = document.querySelector('nav.tabbar .inner');
-        if(!tabInner){
-          // fallback: create a fixed stack pinned above tabs
-          var pin = document.getElementById('toast-fallback');
-          if(!pin){
-            pin = document.createElement('div');
-            pin.id = 'toast-fallback';
-            pin.className = 'toast-stack';
-            Object.assign(pin.style, {
-              position: 'fixed', left: '12px', right: '12px',
-              bottom: 'calc(var(--tabsH,74px) + env(safe-area-inset-bottom,0) + 8px)',
-              zIndex: 2000
-            });
-            document.body.appendChild(pin);
-          }
-          return pin;
-        }
-        // prefer a single stack inside the bottom bar
-        var stack = tabInner.querySelector('.toast-stack');
-        if(!stack){
-          stack = document.createElement('div');
-          stack.className = 'toast-stack';
-          tabInner.appendChild(stack);
-        }
-        return stack;
-      }
-
-      // If any legacy .toast-wrap exists elsewhere, move it under the bottom bar
-      function migrateOldWrap(){
-        var w = document.querySelector('.toast-wrap');
-        if(w){
-          var s = ensureStack();
-          // move children into the stack, then remove old wrap
-          while(w.firstChild){ s.appendChild(w.firstChild); }
-          w.remove();
-        }
-      }
-
-      function showToast(detail){
-        var s = ensureStack();
-        var el = document.createElement('div');
-        el.className = 'toast';
-        el.textContent = (detail && (detail.message || detail.text)) || String(detail || '');
-        if(detail && detail.variant){ el.dataset.variant = detail.variant; }
-        s.appendChild(el);
-        var t = setTimeout(function(){ try{ el.remove(); }catch(e){} }, (detail && detail.duration) || 4000);
-        el.addEventListener('click', function(){ clearTimeout(t); el.remove(); });
-      }
-
-      // Public event bus
-      window.addEventListener('app:toast', function(e){ showToast(e.detail || {}); });
-
-      // Provide a minimal global toast helper (non-breaking)
-      window.toast = function(arg){ 
-        if (typeof arg === 'string') showToast({ message: arg });
-        else showToast(arg||{});
-      };
-
-      // Dedupe: intercept any duplicate wrappers by MutationObserver
-      var mo = new MutationObserver(function(){ migrateOldWrap(); });
-      mo.observe(document.documentElement, { childList:true, subtree:true });
-      // first run
-      migrateOldWrap();
-      // small demo hook for apps to call: window.toast({message:'Olá',variant:'info'})
-    })();
-    </script>
-    
