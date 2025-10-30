@@ -1,8 +1,102 @@
 <!DOCTYPE html>
 
-<html lang="pt-BR" 
-  <!--style="--arch-overlay: rgba(64, 158, 255, 0.22);"!-->
-  <head>
+<html lang="pt-BR" style="--arch-overlay: rgba(64, 158, 255, 0.22);"><head>
+  <!-- ===== BOOT • Atom Loader CSS ===== -->
+  <style id="boot-atom-style">
+    #bootLoader { display:flex; align-items:center; justify-content:center; }
+    #bootLoader .loader-wrap { display:flex; flex-direction:column; align-items:center; gap:.65rem; }
+    #bootLoader .tagline { font-weight:800; font-size:1.02rem; letter-spacing:.35px; text-transform:none; }
+    /* dots under the phrase */
+    #bootLoader .dots { display:flex; gap:.35rem; }
+    #bootLoader .dot { width:8px; height:8px; border-radius:50%; background:#fff; opacity:.85; animation: dotJump 1.2s infinite ease-in-out; }
+    #bootLoader .dot:nth-child(2){ animation-delay:.15s } 
+    #bootLoader .dot:nth-child(3){ animation-delay:.30s }
+    @keyframes dotJump { 0%,100%{ transform: translateY(0); opacity:.55 } 50%{ transform: translateY(-6px); opacity:1 } }
+
+    /* Atom */
+    #bootLoader .atom { width:128px; height:128px; position:relative; margin-top:.2rem; }
+    #bootLoader .nucleus { position:absolute; left:50%; top:50%; width:14px; height:14px; margin:-7px 0 0 -7px; border-radius:50%; background:#fff; box-shadow:0 0 20px rgba(255,255,255,.45); }
+    #bootLoader .orbit { position:absolute; left:50%; top:50%; width:100%; height:60%; margin:-30% 0 0 -50%; border:1.5px solid rgba(255,255,255,.25); border-radius:50%; transform-origin:center center; }
+    #bootLoader .orbit.o2 { transform: rotate(60deg); }
+    #bootLoader .orbit.o3 { transform: rotate(-60deg); }
+    #bootLoader .electron { position:absolute; left:50%; top:0; width:8px; height:8px; margin-left:-4px; border-radius:50%; background:#fff; box-shadow:0 0 10px rgba(255,255,255,.55); }
+    #bootLoader .spin { animation: spin 2.6s linear infinite; }
+    #bootLoader .spin.fast { animation-duration: 2.1s; }
+    #bootLoader .spin.slow { animation-duration: 3.1s; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    /* Respect reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      #bootLoader .spin, #bootLoader .dot { animation: none !important; }
+    }
+  </style>
+    
+  <!-- ===== BOOT • Atom Loader Transform ===== -->
+  <script>
+    (function(){
+      function ensureAtom(){
+        var host = document.getElementById('bootLoader');
+        if (!host) return;
+        // If markup already exists, rebuild as atom loader
+        var txt = (host.querySelector('.tagline') ? host.querySelector('.tagline').textContent : 'Sempre Único, Sempre seu');
+        host.innerHTML = '';
+        var wrap = document.createElement('div'); wrap.className = 'loader-wrap';
+        var atom = document.createElement('div'); atom.className = 'atom';
+        var nucleus = document.createElement('div'); nucleus.className = 'nucleus'; atom.appendChild(nucleus);
+        ['',' fast',' slow'].forEach(function(spd, idx){
+          var orbit = document.createElement('div'); orbit.className = 'orbit spin'+spd + (idx===1?' o2': (idx===2?' o3':''));
+          var e = document.createElement('div'); e.className = 'electron';
+          orbit.appendChild(e); atom.appendChild(orbit);
+        });
+        var title = document.createElement('span'); title.className = 'tagline'; title.textContent = txt;
+        var dots = document.createElement('div'); dots.className = 'dots';
+        dots.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
+        wrap.appendChild(atom); wrap.appendChild(title); wrap.appendChild(dots);
+        host.appendChild(wrap);
+      }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ensureAtom);
+      else ensureAtom();
+    })();
+  </script>
+    
+  <!-- ===== OVERRIDES: hide S-Line + fusion button ===== -->
+  <style id="overrides-hide">
+
+    #ibSLine, #btnBack, #btnHelp { display: none !important; }
+    .fusion-toggle, #fusion-toggle, .btn-fusion, [data-action="fusion-toggle"],
+    .fusion-btn, .btn[data-fusion], .btn-difusionar, #btn-difusionar,
+    button[aria-label*="Fusão"], button[aria-label*="Fus\u00e3o"], button[aria-label*="fusion"],
+    [data-testid*="fusion"], [data-analytics*="fusion"] { display: none !important; }
+  </style>
+  <script>
+  (function(){
+    function hideBtns(root){
+      var sel = ['button','a','.btn','#btn-difusionar','.btn-difusionar','.fusion-toggle','#fusion-toggle','.btn-fusion','[data-action="fusion-toggle"]','.fusion-btn','.btn[data-fusion]'];
+      var terms = /(fusion|fus\u00e3o|fusão|difusionar|difus[aã]o|fusionar)/i;
+      try{
+        (root.querySelectorAll ? root.querySelectorAll(sel.join(',')) : []).forEach(function(el){
+          try{
+            var t = ((el.innerText||'') + ' ' + (el.textContent||'') + ' ' + (el.getAttribute('title')||'') + ' ' + (el.getAttribute('aria-label')||'') + ' ' + (el.id||'') + ' ' + (el.className||''));
+            if (terms.test(t)) {
+              el.style.setProperty('display','none','important');
+              el.setAttribute('data-hidden-by','fusion-hide');
+            }
+          }catch(_){}
+        });
+      }catch(_){}
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ hideBtns(document); });
+    else hideBtns(document);
+    try{
+      new MutationObserver(function(muts){
+        muts.forEach(function(m){
+          (m.addedNodes||[]).forEach(function(n){ if (n && n.nodeType===1) hideBtns(n); });
+        });
+      }).observe(document.documentElement, {subtree:true, childList:true});
+    }catch(_){}
+  })();
+  </script>
+    
 <!-- PREPAINT: enforce Blue‑1 tokens before any CSS -->
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" name="viewport"/>
@@ -11,21 +105,16 @@
 <!-- PATCH: overlay-css-unify -->
 <!-- PATCH: overlay-guardian-css -->
 <!-- OVERLAY: background-only patch -->
-<!--script id="OVERLAY_DEFAULT_BOOT">
+<script id="OVERLAY_DEFAULT_BOOT">
 // Overlay ON por padrão até o primeiro arquétipo aplicar a cor própria.
 try{ document.documentElement.style.setProperty('--arch-overlay','rgba(64,158,255,.22)'); }catch{}
-</script!-->
+</script>
 <link href="./manifest.webmanifest" rel="manifest"/>
 <style id="prepaint-tokens">
 :root{
   --arch-overlay: rgba(64,158,255,.22);
   --arch-overlay-strength: 22%;
   --arch-overlay-intensity: .45;
-}
-</style>
-  <style>
-#btnHelp { display: none !important; 
-  #btnBack{ display: none !important;
 }
 </style>
 <style>
@@ -2550,73 +2639,6 @@ input[type="file"]::file-selector-button:hover{
 }
 .dual-toast.show{ opacity: 1; transform: translateY(0); }
 </style>
-<style>
-
-/* === Header Status Button + Panel (Moren) === */
-:root{
-  --status-led-size: 10px;
-  --status-led-gap: 8px;
-  --status-led-speed: 1.2s; /* recalculado via JS pelo ping médio */
-  --status-panel-max: 58vh;
-  --hdrH: var(--hdrH, 64px); /* fallback */
-}
-#btnStatus{
-  width: 42px; height: 42px; border-radius: 50%;
-  display: grid; place-items: center; position: relative;
-  background: linear-gradient(180deg, rgba(17,22,42,.8), rgba(11,17,34,.8));
-  border: 1px solid rgba(255,255,255,.12); color:#fff; cursor:pointer;
-}
-#btnStatus .leds{ display:flex; gap:var(--status-led-gap) }
-#btnStatus .led{
-  width:var(--status-led-size); height:var(--status-led-size);
-  border-radius:999px; background:#39FFB6; opacity:.85; transform:scale(1);
-  animation:rotamoren var(--status-led-speed) linear infinite;
-}
-#btnStatus .led:nth-child(2){ background:#FFC857; animation-delay:.15s }
-#btnStatus .led:nth-child(3){ background:#7EC8FF; animation-delay:.30s }
-#btnStatus .led:nth-child(4){ background:#FF5C8A; animation-delay:.45s }
-
-@keyframes rotamoren{
-  0%,100%{ transform:scale(1); filter:brightness(1); opacity:.85 }
-  50%    { transform:scale(1.8); filter:brightness(1.35); opacity:1 }
-}
-
-/* Painel que desce do header (sanfona vertical) */
-#statusPanelWrap{
-  position: fixed; left: 50%; transform: translateX(-50%);
-  top: var(--hdrH); width: min(980px, 95vw); z-index: 1200;
-  pointer-events: none;
-}
-#statusPanel{
-  background: rgba(10,12,24,.92); backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,.14);
-  border-radius: 0 0 18px 18px; box-shadow: 0 12px 34px rgba(0,0,0,.5);
-  overflow: hidden; max-height: 0; opacity: 0; transform: translateY(-6px);
-  transition: max-height .45s ease, opacity .3s ease, transform .3s ease;
-  pointer-events: auto;
-}
-#statusPanel.open{
-  max-height: var(--status-panel-max); opacity: 1; transform: translateY(0);
-}
-#statusPanel .panel-inner{ padding: 12px; }
-#statusPanel .grid{ display:grid; gap:10px }
-#statusPanel .row{
-  display:flex; align-items:center; justify-content:space-between;
-  padding:8px 0; border-bottom:1px solid rgba(255,255,255,.12)
-}
-#statusPanel .row:last-child{ border-bottom: 0 }
-#statusPanel .pill{
-  display:inline-flex; align-items:center; gap:8px;
-  padding:4px 8px; border-radius:999px; background: rgba(255,255,255,.08);
-  font-size:.85rem
-}
-#statusPanel .dot{ width:10px; height:10px; border-radius:999px }
-.dot-green{ background:#39FFB6 } .dot-yellow{background:#FFC857}
-.dot-blue{background:#7EC8FF} .dot-red{ background:#FF5C8A }
-.small{ color: var(--mut, #9fb3c8); font-size:.82rem }
-
-</style>
-<style>#ibSLine{display: none !important;}</style>
 </head>
 <body data-theme="blue1">
 <!-- Splash screen displayed on initial load -->
@@ -2690,40 +2712,7 @@ input[type="file"]::file-selector-button:hover{
 </svg>
 <span class="ripple"></span>
 </button>
-
-<!-- Status Button (header) -->
-<button class="ib fx-trans fx-press ring" id="btnStatus" title="Status">
-  <span class="leds">
-    <i class="led"></i><i class="led"></i><i class="led"></i><i class="led"></i>
-  </span>
-  <span class="ripple"></span>
-</button>
-
 </header>
-
-<!-- Status Panel (sanfona sob o header) -->
-<div id="statusPanelWrap">
-  <div id="statusPanel" role="region" aria-label="Status de Rede e Recursos">
-    <div class="panel-inner">
-      <div class="grid">
-        <div class="row"><span>Google</span>     <span class="pill"><span id="sping-google">--</span></span></div>
-        <div class="row"><span>OpenRouter</span> <span class="pill"><span id="sping-or">--</span></span></div>
-        <div class="row"><span>Localhost</span>  <span class="pill"><span id="sping-local">--</span></span></div>
-        <div class="row"><span>Roteador</span>   <span class="pill"><span id="sping-router">--</span></span></div>
-        <div class="row"><span>Upload</span>     <span class="pill"><span id="snet-up">0 kb/s</span></span></div>
-        <div class="row"><span>Download</span>   <span class="pill"><span id="snet-down">0 kb/s</span></span></div>
-        <div class="row"><span>SK ativa</span>
-          <span class="pill">
-            <i id="s-dot" class="dot"></i>
-            <span id="s-sk">—</span>
-          </span>
-        </div>
-      </div>
-      <div class="small" style="margin-top:6px">Pings estimados localmente. LEDs do header sincronizados ao ping médio.</div>
-    </div>
-  </div>
-</div>
-
 <!-- 78K · Status Strip (fusion + pulsating borders) -->
 <div class="ledstrip-wrap">
   <div id="ledstrip-78k" aria-hidden="false">
@@ -3526,25 +3515,25 @@ input[type="file"]::file-selector-button:hover{
 </ul>
 </div>
 </div>
-<!-- ===== Catálogo Embutido (Monólito) — ABS URLs (Unouno-) ===== -->
+<!-- ===== Catálogo Embutido (Monólito) ===== -->
 <script id="APPS_JSON" type="application/json">
-{
-  "apps": [
-    {"key":"atlas","title":"Atlas · Cartesius","desc":"Planejador estratégico com cronogramas e checklists.","url":"https://kodux78k.github.io/Unouno-/apps/APPS78K/app_atlas_cartesius.html","icon":"atlas"},
-    {"key":"nova","title":"Nova · Inspira","desc":"Criativa que desbloqueia ideias com mapas mentais e exercícios.","url":"https://kodux78k.github.io/Unouno-/apps/APPS78K/app_nova_inspira.html","icon":"nova"},
-    {"key":"vitalis","title":"Vitalis · Momentum","desc":"Rotinas físicas, hacks biológicos e motivação.","url":"https://kodux78k.github.io/Unouno-/apps/APPS78K/app_vitalis_momentum.html","icon":"vitalis"},
-    {"key":"pulse","title":"Pulse · Resona","desc":"Trilhas sonoras e ajuste de som emocional.","url":"https://kodux78k.github.io/Unouno-/apps/APPS78K/app_pulse_resona.html","icon":"pulse"},
-    {"key":"artemis","title":"Artemis · Naviga","desc":"Explora conhecimentos e rotas de aprendizado.","url":"https://kodux78k.github.io/Unouno-/apps/APPS78K/app_artemis_naviga.html","icon":"artemis"},
-    {"key":"serena","title":"Serena · Ampara","desc":"Acolhimento e suporte emocional.","url":"https://kodux78k.github.io/Unouno-/apps/APPS78K/app_serena_ampara.html","icon":"serena"},
-    {"key":"kaos","title":"Kaos · Disruptor","desc":"Questiona padrões e propõe soluções ousadas.","url":"https://kodux78k.github.io/Unouno-/apps/APPS78K/app_kaos_disruptor.html","icon":"kaos"},
-    {"key":"genus","title":"Genus · Fabricus","desc":"Protótipos e materialização de ideias.","url":"https://kodux78k.github.io/Unouno-/apps/APPS78K/app_genus_fabricus.html","icon":"genus"},
-    {"key":"lumine","title":"Lumine · Brilhare","desc":"Inspiração leve e atividades lúdicas.","url":"https://kodux78k.github.io/Unouno-/apps/APPS78K/app_lumine_brilhare.html","icon":"lumine"},
-    {"key":"rhea","title":"Rhea · Raízes","desc":"Vínculos e memórias emocionais.","url":"https://kodux78k.github.io/Unouno-/apps/APPS78K/app_rhea_raizes.html","icon":"rhea"},
-    {"key":"solus","title":"Solus · Arcana","desc":"Harmonização energética e meditação.","url":"https://kodux78k.github.io/Unouno-/apps/APPS78K/app_solus_arcana.html","icon":"solus"},
-    {"key":"aion","title":"Aion · Evolutia","desc":"Microações estratégicas e evolução.","url":"https://kodux78k.github.io/Unouno-/apps/APPS78K/app_aion_evolutia.html","icon":"aion"}
-  ]
-}
-</script>
+  {
+    "apps": [
+      {"key":"atlas","title":"Atlas · Cartesius","desc":"Planejador estratégico com cronogramas e checklists.","url":"about:blank","icon":"atlas"},
+      {"key":"nova","title":"Nova · Inspira","desc":"Criativa que desbloqueia ideias com mapas mentais e exercícios.","url":"about:blank","icon":"nova"},
+      {"key":"vitalis","title":"Vitalis · Momentum","desc":"Rotinas físicas, hacks biológicos e motivação.","url":"about:blank","icon":"vitalis"},
+      {"key":"pulse","title":"Pulse · Resona","desc":"Trilhas sonoras e ajuste de som emocional.","url":"about:blank","icon":"pulse"},
+      {"key":"artemis","title":"Artemis · Naviga","desc":"Explora conhecimentos e rotas de aprendizado.","url":"about:blank","icon":"artemis"},
+      {"key":"serena","title":"Serena · Ampara","desc":"Acolhimento e suporte emocional.","url":"about:blank","icon":"serena"},
+      {"key":"kaos","title":"Kaos · Disruptor","desc":"Questiona padrões e propõe soluções ousadas.","url":"about:blank","icon":"kaos"},
+      {"key":"genus","title":"Genus · Fabricus","desc":"Protótipos e materialização de ideias.","url":"about:blank","icon":"genus"},
+      {"key":"lumine","title":"Lumine · Brilhare","desc":"Inspiração leve e atividades lúdicas.","url":"about:blank","icon":"lumine"},
+      {"key":"rhea","title":"Rhea · Raízes","desc":"Vínculos e memórias emocionais.","url":"about:blank","icon":"rhea"},
+      {"key":"solus","title":"Solus · Arcana","desc":"Harmonização energética e meditação.","url":"about:blank","icon":"solus"},
+      {"key":"aion","title":"Aion · Evolutia","desc":"Microações estratégicas e evolução.","url":"about:blank","icon":"aion"}
+    ]
+  }
+  </script>
 <script>
   // Redefine the global toast function to suppress popup messages. If you
   // later decide to re-enable notifications, remove or comment out this line.
@@ -9046,7 +9035,7 @@ window.kobDemo = () => pushAI(`[INTRO] **Kael Dominus** — núcleo sentiente qu
     height:7px; border-radius:9999px; z-index:120;
     background:linear-gradient(90deg,var(--ib-a),var(--ib-b));
     box-shadow: inset 0 0 0 1px rgba(255,255,255,.08), 0 4px 18px rgba(0,0,0,.28);
-    overflow:hidden; opacity:.98;
+    overflow:hidden; opacity:.98; display:none;
   }
   #ibSLine::after{content:"";position:absolute;inset:0;mix-blend-mode:overlay;opacity:.9;
     background:repeating-linear-gradient(90deg,rgba(255,255,255,.12) 0 12px, transparent 12px 24px);
@@ -9896,829 +9885,487 @@ window.dualToast = (msg, ms=2000) => {
 </script>
 
 
+<!-- ===== INFODOSE • Generative Fusion Audio • CONTROL PANEL v1.0 ===== -->
 <script>
-(function(){
-  const $ = (s, r=document)=> r.querySelector(s);
-  const btn   = $('#btnStatus');
-  const panel = $('#statusPanel');
+(() => {
+  const CAP_MASTER = 0.08;
+  const DEFAULTS = { master: 0.035, pack: 'Lux', variant: 'UltraLow Seco', scaleMode: '432' };
+  const PACKS = {
+    Lux: { atlas:'sine', nova:'morph', vitalis:'triangle', pulse:'triangle', artemis:'triangle', serena:'sine', kaos:'saw', genus:'morph', lumine:'morph', rhea:'triangle', solus:'sine', aion:'saw' },
+    Terra: { atlas:'triangle', nova:'sine', vitalis:'triangle', pulse:'sine', artemis:'triangle', serena:'triangle', kaos:'saw', genus:'triangle', lumine:'sine', rhea:'triangle', solus:'sine', aion:'saw' },
+    Noir: { atlas:'saw', nova:'square', vitalis:'saw', pulse:'square', artemis:'square', serena:'sine', kaos:'saw', genus:'morph', lumine:'saw', rhea:'triangle', solus:'sine', aion:'saw' }
+  };
+  const PATTERNS = { major_penta:[0,2,4,7,9], dorian:[0,2,3,5,7,9,10], phrygian:[0,1,3,5,7,8,10], aeolian:[0,2,3,5,7,8,10] };
+  const LS = { get:(k,d)=>{ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d }catch(_){return d} }, set:(k,v)=>{ try{ localStorage.setItem(k,JSON.stringify(v)) }catch(_){} } };
+  const MAP = {
+    phases: LS.get('audio.scale.map.phases', { Isca:'major_penta', Progresso:'dorian', Tensão:'phrygian', Liberação:'aeolian' }),
+    actions: LS.get('audio.scale.map.actions', { home_apps:'major_penta', chat_brain:'dorian', stack_nav:'aeolian' })
+  };
+  const VARIANTS = {
+    'UltraLow Seco':  { master:0.030, baseGain:0.18, beatGain:0.12, kickF:68, atk:0.004, dec:0.18, clickGain:0.06, clickHP:2600, clickDec:0.08, scDepth:0.22, scRel:0.16, shaper:false, delay:false, airy:false, organic:false },
+    'UltraLow Macio': { master:0.030, baseGain:0.20, beatGain:0.14, kickF:54, atk:0.006, dec:0.30, clickGain:0.04, clickHP:2200, clickDec:0.06, scDepth:0.18, scRel:0.22, shaper:false, delay:false, airy:false, organic:false },
+    'TapeWarm':       { master:0.035, baseGain:0.20, beatGain:0.14, kickF:60, atk:0.005, dec:0.24, clickGain:0.05, clickHP:2300, clickDec:0.08, scDepth:0.20, scRel:0.18, shaper:true,  delay:false, airy:false, organic:false, drive:1.8 },
+    'AiryClick':      { master:0.035, baseGain:0.20, beatGain:0.14, kickF:64, atk:0.004, dec:0.20, clickGain:0.08, clickHP:3200, clickDec:0.09, scDepth:0.20, scRel:0.18, shaper:false, delay:false, airy:true,  organic:false },
+    'DubPulse':       { master:0.035, baseGain:0.20, beatGain:0.14, kickF:60, atk:0.004, dec:0.24, clickGain:0.06, clickHP:2600, clickDec:0.10, scDepth:0.22, scRel:0.22, shaper:false, delay:true,  airy:false, organic:false, dlyT:0.28, dlyFb:0.24 },
+    'Organic':        { master:0.035, baseGain:0.22, beatGain:0.16, kickF:58, atk:0.005, dec:0.22, clickGain:0.05, clickHP:2400, clickDec:0.08, scDepth:0.25, scRel:0.20, shaper:false, delay:false, airy:false, organic:true }
+  };
 
-  function toggle(open){
-    const will = open!=null ? !!open : !panel.classList.contains('open');
-    panel.classList.toggle('open', will);
-  }
-  btn?.addEventListener('click', ()=> toggle());
+  const AC = window.__INFODOSE_AC || new (window.AudioContext||window.webkitAudioContext)();
+  if (!window.__INFODOSE_AC) window.__INFODOSE_AC = AC;
+  const master = (()=>{ if (window.__INFODOSE_MASTER) return window.__INFODOSE_MASTER; const g=AC.createGain(); g.gain.value=Math.min(DEFAULTS.master, CAP_MASTER); g.connect(AC.destination); window.__INFODOSE_MASTER=g; return g; })();
+  (function(){ const once=()=>{ AC.resume().catch(()=>{}); document.removeEventListener('pointerdown', once, true); }; document.addEventListener('pointerdown', once, true); })();
 
-  async function ping(url){
-    const t0 = performance.now();
-    try{ await fetch(url, {mode:'no-cors', cache:'no-store'}) }catch{}
-    return Math.max(1, Math.round(performance.now() - t0));
-  }
+  const PW=(function(){ const n=2048, mk=(fn)=>{ const re=new Float32Array(n), im=new Float32Array(n); for(let k=1;k<16;k++){ re[k]=fn(k);} return AC.createPeriodicWave(re, im, {disableNormalization:true}); }; return { morphA: mk(k=> (k===1?1:0)), morphB: mk(k=> 1/k) }; })();
+  const ROOTS={ atlas:196, nova:220, vitalis:247, pulse:262, artemis:294, serena:330, kaos:349, genus:370, lumine:392, rhea:415, solus:440, aion:494 };
+  function toFreq(baseHz, step=0, mode='432'){ let f=baseHz*Math.pow(2, step/12); if(mode==='432') f*= (432/440); return f; }
+  function makeSource(type,f){ if(type==='noise'){ const node=AC.createScriptProcessor(512,1,1); node.onaudioprocess=e=>{ const ch=e.outputBuffer.getChannelData(0); for(let i=0;i<ch.length;i++) ch[i]=(Math.random()*2-1)*0.16; }; return { node, set:()=>{}, stop:()=>{try{node.disconnect()}catch(_){}}}; } const o=AC.createOscillator(); if(type==='morph'){ o.setPeriodicWave(PW.morphA);} else { o.type=type;} o.frequency.value=f; return { node:o, set:(nf)=>o.frequency.setTargetAtTime(nf, AC.currentTime, 0.02), stop:()=>{try{o.stop()}catch(_){ } try{o.disconnect()}catch(_){ }} }; }
+  function env(a=0.02,d=0.75,s=0.40,r=0.95){ const g=AC.createGain(); const t=AC.currentTime; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(1,t+a); g.gain.exponentialRampToValueAtTime(s,t+a+d); g.release=()=>{ const tt=AC.currentTime; g.gain.cancelScheduledValues(tt); g.gain.setValueAtTime(g.gain.value||0.0001, tt); g.gain.exponentialRampToValueAtTime(0.0001, tt+r); }; return g; }
 
-  function applyLED(avg){
-    // 20–400ms -> 0.7–2.2s
-    const clamp = (v,a,b)=>Math.max(a, Math.min(b,v));
-    const speed = clamp(0.7 + (avg-20)*((2.2-0.7)/(400-20)), 0.7, 2.2);
-    document.documentElement.style.setProperty('--status-led-speed', speed.toFixed(2)+'s');
-  }
+  const State={ variant:LS.get('audio.variant', DEFAULTS.variant), pack:LS.get('audio.pack', DEFAULTS.pack), scale:LS.get('audio.scale', DEFAULTS.scaleMode), master:LS.get('audio.master', DEFAULTS.master), pattern:PATTERNS[MAP.phases['Isca']]||PATTERNS.major_penta };
 
-  function set(id, txt){ const el = $('#'+id); if(el) el.textContent = txt; }
+  let busBase=null, busBeat=null, busGlint=null, shaper=null, preDrive=null, dly=null, dlyIn=null, dlyOut=null, dlyFb=null;
 
-  function maskKey(k){ return (k && k.length>10)? (k.slice(0,6)+'...'+k.slice(-4)) : (k||''); }
-  function getActiveKey(){
-    try{
-      const skActiveIdx = parseInt(localStorage.getItem('dualhub_openrouter_active')||'-1',10);
-      const arr = JSON.parse(localStorage.getItem('dualhub_openrouter_keys')||'[]');
-      if(Array.isArray(arr) && arr.length && skActiveIdx>=0 && skActiveIdx<arr.length) return arr[skActiveIdx];
-      const sk = localStorage.getItem('dual.keys.openrouter') || localStorage.getItem('infodose:sk') || '';
-      return sk;
-    }catch{ return '' }
-  }
-
-  async function refresh(){
-    const g  = await ping('https://www.google.com');
-    const or = await ping('https://openrouter.ai');
-    const lc = await ping(location.origin);
-    const rt = await ping('http://192.168.0.1');
-
-    const avg = Math.round((g+or+lc+rt)/4);
-    applyLED(avg);
-
-    set('sping-google', g + ' ms');
-    set('sping-or',     or + ' ms');
-    set('sping-local',  lc + ' ms');
-    set('sping-router', rt + ' ms');
-
-    set('snet-up',   (Math.random()*180).toFixed(1)+' kb/s');
-    set('snet-down', (Math.random()*360).toFixed(1)+' kb/s');
-
-    const sk = getActiveKey();
-    const dot = $('#s-dot');
-    if (dot) dot.className = 'dot ' + (sk ? 'dot-green' : 'dot-red');
-    set('s-sk', sk ? maskKey(sk) : '—');
+  function createBusses(v){
+    try{[busBase, busBeat, busGlint, shaper, preDrive, dly, dlyIn, dlyOut, dlyFb].forEach(x=>x&&x.disconnect&&x.disconnect());}catch(_){}
+    busBase=AC.createGain(); busBase.gain.value=v.baseGain; busBase.connect(master);
+    busBeat=AC.createGain(); busBeat.gain.value=v.beatGain;
+    if(v.shaper){ shaper=AC.createWaveShaper(); const n=1024,c=new Float32Array(n); for(let i=0;i<n;i++){ const x=i*2/n-1; c[i]=Math.tanh((v.drive||1.8)*x); } shaper.curve=c; preDrive=AC.createGain(); preDrive.gain.value=1.0; preDrive.connect(shaper); shaper.connect(busBeat); }
+    (v.shaper? busBeat.connect(master): busBeat.connect(master));
+    if(v.delay){ dly=AC.createDelay(1.0); dly.delayTime.value=v.dlyT||0.28; dlyFb=AC.createGain(); dlyFb.gain.value=v.dlyFb||0.24; dly.connect(dlyFb); dlyFb.connect(dly); dlyOut=AC.createGain(); dly.connect(dlyOut); dlyOut.connect(v.shaper? shaper: busBeat); dlyIn=AC.createGain(); }
+    busGlint=AC.createGain(); busGlint.gain.value=0.05; busGlint.connect(master);
   }
 
-  refresh();
-  setInterval(refresh, 6000);
+  let seed=Math.floor(Math.random()*1e9); function rnd(){ let x=Math.sin(seed++)*10000; return x-Math.floor(x); }
+  let BASE=null;
+  function makeBase({wave='morph', base=220, step=0}){ const src=makeSource(wave, toFreq(base, step, State.scale)); const e=env(); const f=AC.createBiquadFilter(); f.type='lowpass'; f.frequency.value=800; f.Q.value=0.8; src.node.connect(f); f.connect(e); e.connect(busBase); if(src.node.start) src.node.start(); let alive=true; (function loop(){ if(!alive) return; const drift=(rnd()-0.5)*0.10; src.set(toFreq(base, step+drift, State.scale)); const cf=650+Math.abs(rnd())*650; f.frequency.setTargetAtTime(cf, AC.currentTime, 0.7); setTimeout(loop, 1200+Math.floor(rnd()*900)); })(); return { stop(){ alive=false; try{src.stop()}catch(_){ } try{e.release()}catch(_){ } setTimeout(()=>{ try{f.disconnect()}catch(_){ } }, 600); } }; }
+
+  const RHY=(function(){ let v=VARIANTS[State.variant]; const kGain=AC.createGain(); kGain.gain.value=1.0; const cGain=AC.createGain(); cGain.gain.value=1.0;
+    function entry(){ return v.shaper? preDrive : busBeat; }
+    function wire(){ try{ kGain.disconnect(); cGain.disconnect(); }catch(_){ } kGain.connect(entry()); if(v.delay && dly && dlyIn){ cGain.connect(dlyIn); dlyIn.connect(dly); } else { cGain.connect(entry()); } }
+    function refreshParams(){ v=VARIANTS[State.variant]; wire(); }
+    function thump(f){ const o=AC.createOscillator(); o.type='sine'; o.frequency.setValueAtTime(f, AC.currentTime); const g=AC.createGain(); g.gain.setValueAtTime(0.0001, AC.currentTime); const t0=AC.currentTime; g.gain.exponentialRampToValueAtTime(0.75, t0+v.atk); g.gain.exponentialRampToValueAtTime(0.0001, t0+v.dec); o.connect(g); g.connect(kGain); o.start(); setTimeout(()=>{ try{o.stop();o.disconnect();g.disconnect();}catch(_ ){} }, Math.ceil(1000*v.dec+30)); }
+    function click(){ if(v.clickGain<=0) return; const n=AC.createScriptProcessor(256,1,1); n.onaudioprocess=e=>{ const ch=e.outputBuffer.getChannelData(0); for(let i=0;i<ch.length;i++){ const t=i/ch.length; ch[i]=(Math.random()*2-1) * (v.airy?0.9:0.6) * (1-t); } }; const f=AC.createBiquadFilter(); f.type='highpass'; f.frequency.value=v.clickHP; const g=AC.createGain(); g.gain.value=v.clickGain; n.connect(f); f.connect(g); if(v.delay && dlyIn){ g.connect(dlyIn); } else { g.connect(cGain); } const t=AC.currentTime; g.gain.setValueAtTime(v.clickGain,t); g.gain.exponentialRampToValueAtTime(0.0001, t+v.clickDec); setTimeout(()=>{ try{n.disconnect(); f.disconnect(); g.disconnect();}catch(_ ){} }, Math.ceil(1000*v.clickDec+40)); }
+    function sidechain(){ try{ busBase.gain.cancelScheduledValues(AC.currentTime); busBase.gain.setTargetAtTime(VARIANTS[State.variant].baseGain*(1-VARIANTS[State.variant].scDepth), AC.currentTime, 0.015); busBase.gain.setTargetAtTime(VARIANTS[State.variant].baseGain, AC.currentTime+VARIANTS[State.variant].scRel, 0.12); }catch(_){ } }
+    return { refreshParams, pulse(accent=0){ const vv=VARIANTS[State.variant]; const f=vv.kickF+14*accent; thump(f); if(vv.clickGain>0) click(); sidechain(); },
+      phase(name){ const vv=VARIANTS[State.variant]; const map={ "Isca": vv.beatGain*0.90, "Progresso": vv.beatGain*1.00, "Tensão": vv.beatGain*1.10, "Liberação": vv.beatGain*0.95 }; const vGain=map[name]!=null?map[name]:vv.beatGain; try{ busBeat.gain.setTargetAtTime(vGain, AC.currentTime, 0.2); }catch(_){ } const patName=MAP.phases[name]; if(patName && PATTERNS[patName]) State.pattern=PATTERNS[patName]; updatePanelScale(); } };
+  })();
+
+  function glint(base=220){ const pat=State.pattern||PATTERNS.major_penta; const step=pat[Math.floor(Math.random()*pat.length)] + (Math.random()<0.2?12:0); const f=toFreq(base, step, State.scale);
+    const o=AC.createOscillator(); o.type='triangle'; o.frequency.value=f; const g=AC.createGain(); g.gain.value=0.0001; const hp=AC.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=1200; o.connect(hp); hp.connect(g); g.connect(busGlint);
+    const t=AC.currentTime; g.gain.setValueAtTime(0.02, t); g.gain.exponentialRampToValueAtTime(0.0001, t+0.28); o.start(); setTimeout(()=>{ try{o.stop(); o.disconnect(); hp.disconnect(); g.disconnect();}catch(_){ } }, 360);
+  }
+
+  const WNAME=(n)=> (PACKS[State.pack][n]||'morph'); const ROOT=(n)=> (ROOTS[n]||220);
+  let cur={ A:null, names:null };
+  function stopAll(){ if(cur.A){ try{cur.A.stop()}catch(_ ){} } cur.A=null; cur.names=null; }
+  function startPair(A,B){ stopAll(); cur.A = makeBase({ wave:WNAME(A), base:ROOT(A), step:0 }); cur.names=[A,B]; updatePanelPair(A,B); }
+
+  function patchLED(){ const LED = window.LEDSTRIP || (window.LEDSTRIP={}); if (LED.__audioPatchedCtrl) return;
+    const _hr=LED.pulseHR?LED.pulseHR.bind(LED):null; LED.pulseHR=function(...args){ _hr && _hr(...args); RHY.pulse(0.65); glint(ROOT(cur?.names?.[0]||'nova')); };
+    const _eng=LED.pulseENG?LED.pulseENG.bind(LED):null; LED.pulseENG=function(...args){ _eng && _eng(...args); RHY.pulse(VARIANTS[State.variant].organic?0.45:0.30); glint(ROOT(cur?.names?.[1]||'lumine')); };
+    const _ph =LED.setLoopPhase?LED.setLoopPhase.bind(LED):null; LED.setLoopPhase=function(name){ _ph && _ph(name); RHY.phase(name); };
+    const _setAB=LED.setArchetypes?LED.setArchetypes.bind(LED):null; LED.setArchetypes=function(a,b){ _setAB && _setAB(a,b); if (!cur.names || cur.names.join('+') !== (a+'+'+b)) startPair(String(a).toLowerCase(), String(b).toLowerCase()); };
+    LED.__audioPatchedCtrl = true;
+  }
+  patchLED(); setInterval(patchLED, 1200);
+
+  window.addEventListener('dual:fusion-change', async (ev)=>{ try{ if (AC.state==='suspended') await AC.resume(); }catch(_ ){}; const { enabled, a, b } = ev.detail || {}; if (!enabled){ stopAll(); return; } if (a && b) startPair(a,b); });
+
+  (function busScale(){ const Bus=window.InfodoseBus; if(!Bus||!Bus.on) return; try{ Bus.on('ACTION', (evt)=>{ const r=(evt.route||'').toLowerCase();
+      if (r.includes('home') || r.includes('apps')) State.pattern = PATTERNS[MAP.actions.home_apps] || PATTERNS.major_penta;
+      else if (r.includes('chat') || r.includes('brain')) State.pattern = PATTERNS[MAP.actions.chat_brain] || PATTERNS.dorian;
+      else if (r.includes('stack') || r.includes('nav')) State.pattern = PATTERNS[MAP.actions.stack_nav] || PATTERNS.aeolian;
+      updatePanelScale(); }); }catch(_){}
+  })();
+
+  function mkBtn(){ const btn=document.createElement('button'); btn.id='btn-audio-panel'; btn.className='btn-audio-panel'; btn.innerHTML='<span class="dot"></span><span class="label">Áudio</span>'; btn.addEventListener('click', togglePanel); return btn; }
+  function placeBtn(btn){ const header=document.querySelector('header,.topbar,#header') || document.body; header.appendChild(btn); }
+  function styles(){ const css=document.createElement('style'); css.textContent=`
+      .btn-audio-panel { position: relative; display:flex; align-items:center; gap:.5rem; padding:.35rem .65rem; border:1px solid rgba(255,255,255,.18); border-radius:10px;
+        background: linear-gradient(90deg,var(--archA,#59f),var(--archB,#f59)); color:#fff; font-weight:600; letter-spacing:.3px; cursor:pointer; box-shadow:0 2px 10px rgba(0,0,0,.15); }
+      .btn-audio-panel .dot{ width:8px; height:8px; border-radius:50%; background:#fff; position:relative; }
+      .btn-audio-panel .dot::after{ content:''; position:absolute; left:-6px; top:-6px; width:20px; height:20px; border-radius:50%; border:2px solid rgba(255,255,255,.45); animation: ping 1.8s infinite; }
+      @keyframes ping { 0%{ transform: scale(.6); opacity:.9 } 80%{ transform: scale(1.6); opacity:0 } 100%{ opacity:0 } }
+      .audio-panel { position:fixed; right:16px; bottom:16px; width:360px; background:rgba(18,18,30,.92); color:#fff; border:1px solid rgba(255,255,255,.18); border-radius:12px; backdrop-filter: blur(10px); box-shadow:0 10px 30px rgba(0,0,0,.35); display:none; z-index:9999; }
+      .audio-panel.show{ display:block; }
+      .audio-panel header{ padding:.6rem .8rem; font-weight:700; border-bottom:1px solid rgba(255,255,255,.12); display:flex; justify-content:space-between; align-items:center;}
+      .audio-panel .body{ padding:.6rem .8rem; font-size:.9rem; line-height:1.25rem; }
+      .audio-panel .row{ display:flex; gap:.5rem; align-items:center; margin:.35rem 0; }
+      .audio-panel .row label{ width:110px; opacity:.9; }
+      .audio-panel select, .audio-panel input[type=range]{ flex:1; }
+      .audio-panel .kv{ display:flex; justify-content:space-between; margin:.25rem 0; opacity:.9; }
+      .audio-panel small{ opacity:.7; }
+      .chip{ display:inline-flex; align-items:center; gap:.35rem; padding:.15rem .5rem; border-radius:10px; background:rgba(255,255,255,.08); font-size:.78rem; }
+    `; document.head.appendChild(css); }
+  function panelEl(){ let el=document.getElementById('audioPanel'); if(!el){ el=document.createElement('div'); el.id='audioPanel'; el.className='audio-panel';
+      el.innerHTML = `<header>Áudio · Painel <button id="ap-close" title="Fechar" style="background:transparent;border:0;color:#fff;font-weight:700;font-size:1rem;cursor:pointer;">×</button></header>
+        <div class="body">
+          <div class="kv"><span>Pair</span><b id="ap-pair">—</b></div>
+          <div class="row"><label>Variante</label><select id="ap-variant"></select></div>
+          <div class="row"><label>Pack</label><select id="ap-pack"></select></div>
+          <div class="row"><label>Master</label><input id="ap-master" type="range" min="0" max="${0.08}" step="0.001"><span class="chip"><span id="ap-master-v"></span></span></div>
+          <div class="row"><label>Escala</label>
+            <select id="ap-scale">
+              <option value="432">432</option><option value="equal">equal</option><option value="just">just</option><option value="pythag">pythag</option>
+            </select>
+          </div>
+          <div style="margin:.6rem 0 .2rem;opacity:.9">Padrões por <b>Fase</b></div>
+          <div class="row"><label>Isca</label><select id="ap-ph-isc"></select></div>
+          <div class="row"><label>Progresso</label><select id="ap-ph-prog"></select></div>
+          <div class="row"><label>Tensão</label><select id="ap-ph-ten"></select></div>
+          <div class="row"><label>Liberação</label><select id="ap-ph-lib"></select></div>
+          <div style="margin:.6rem 0 .2rem;opacity:.9">Padrões por <b>Ação/Route</b></div>
+          <div class="row"><label>Home/Apps</label><select id="ap-ac-home"></select></div>
+          <div class="row"><label>Chat/Brain</label><select id="ap-ac-chat"></select></div>
+          <div class="row"><label>Stack/Nav</label><select id="ap-ac-stack"></select></div>
+          <div class="row" style="justify-content:flex-end"><button id="ap-reset" class="chip" title="Resetar para padrão">Reset</button></div>
+          <small>OBS: volume com cap, integra LEDSTRIP/Bus, e respeita PWA.</small>
+        </div>`; document.body.appendChild(el); el.querySelector('#ap-close').addEventListener('click', togglePanel); } return el; }
+  function togglePanel(){ panelEl().classList.toggle('show'); }
+  styles(); const btn=mkBtn(); placeBtn(btn); const strip=document.getElementById('ledstrip-78k'); if (strip) strip.addEventListener('click', togglePanel);
+
+  function fillSelect(id, options, current){ const s=document.getElementById(id); s.innerHTML=''; options.forEach(o=>{ const opt=document.createElement('option'); opt.value=o; opt.textContent=o; if(o===current) opt.selected=true; s.appendChild(opt); }); return s; }
+  function updatePanelPair(a,b){ const el=document.getElementById('ap-pair'); if (el) el.textContent=(a&&b)? (a+' + '+b):'—'; }
+  function updatePanelScale(){ const el=document.getElementById('ap-scale'); if (el) el.value = State.scale; }
+  function refreshPanelValues(){ const sm=document.getElementById('ap-master'); if (sm){ sm.value = Math.min(State.master, CAP_MASTER); } const smv=document.getElementById('ap-master-v'); if (smv) smv.textContent=(Math.min(State.master, CAP_MASTER)).toFixed(3);
+    const selVar=document.getElementById('ap-variant'); if (selVar) selVar.value=State.variant; const selPack=document.getElementById('ap-pack'); if (selPack) selPack.value=State.pack; updatePanelScale();
+    const keys=Object.keys(PATTERNS); fillSelect('ap-ph-isc', keys, MAP.phases['Isca']); fillSelect('ap-ph-prog', keys, MAP.phases['Progresso']); fillSelect('ap-ph-ten', keys, MAP.phases['Tensão']); fillSelect('ap-ph-lib', keys, MAP.phases['Liberação']); fillSelect('ap-ac-home', keys, MAP.actions['home_apps']); fillSelect('ap-ac-chat', keys, MAP.actions['chat_brain']); fillSelect('ap-ac-stack', keys, MAP.actions['stack_nav']); }
+
+  function bootPanel(){
+    fillSelect('ap-variant', Object.keys(VARIANTS), State.variant).addEventListener('change', (e)=>{ State.variant=e.target.value; LS.set('audio.variant', State.variant); applyVariant(); RHY.refreshParams(); });
+    fillSelect('ap-pack', Object.keys(PACKS), State.pack).addEventListener('change', (e)=>{ State.pack=e.target.value; LS.set('audio.pack', State.pack); if (cur.names){ const [a,b]=cur.names; startPair(a,b);} });
+    document.getElementById('ap-master').addEventListener('input', (e)=>{ const v=Math.min(parseFloat(e.target.value||DEFAULTS.master), CAP_MASTER); State.master=v; LS.set('audio.master', v); try{ master.gain.setTargetAtTime(v, AC.currentTime, 0.15);}catch(_){ } const smv=document.getElementById('ap-master-v'); if (smv) smv.textContent=v.toFixed(3); });
+    document.getElementById('ap-scale').addEventListener('change', (e)=>{ State.scale=e.target.value; LS.set('audio.scale', State.scale); if (cur.names){ const [a,b]=cur.names; startPair(a,b);} });
+    document.getElementById('ap-ph-isc').addEventListener('change', e=>{ MAP.phases['Isca']=e.target.value; LS.set('audio.scale.map.phases', MAP.phases); });
+    document.getElementById('ap-ph-prog').addEventListener('change', e=>{ MAP.phases['Progresso']=e.target.value; LS.set('audio.scale.map.phases', MAP.phases); });
+    document.getElementById('ap-ph-ten').addEventListener('change', e=>{ MAP.phases['Tensão']=e.target.value; LS.set('audio.scale.map.phases', MAP.phases); });
+    document.getElementById('ap-ph-lib').addEventListener('change', e=>{ MAP.phases['Liberação']=e.target.value; LS.set('audio.scale.map.phases', MAP.phases); });
+    document.getElementById('ap-ac-home').addEventListener('change', e=>{ MAP.actions['home_apps']=e.target.value; LS.set('audio.scale.map.actions', MAP.actions); });
+    document.getElementById('ap-ac-chat').addEventListener('change', e=>{ MAP.actions['chat_brain']=e.target.value; LS.set('audio.scale.map.actions', MAP.actions); });
+    document.getElementById('ap-ac-stack').addEventListener('change', e=>{ MAP.actions['stack_nav']=e.target.value; LS.set('audio.scale.map.actions', MAP.actions); });
+    document.getElementById('ap-reset').addEventListener('click', ()=>{ State.variant=DEFAULTS.variant; LS.set('audio.variant', State.variant); State.pack=DEFAULTS.pack; LS.set('audio.pack', State.pack); State.master=DEFAULTS.master; LS.set('audio.master', State.master); State.scale=DEFAULTS.scaleMode; LS.set('audio.scale', State.scale);
+      MAP.phases={ Isca:'major_penta', Progresso:'dorian', Tensão:'phrygian', Liberação:'aeolian' }; MAP.actions={ home_apps:'major_penta', chat_brain:'dorian', stack_nav:'aeolian' };
+      LS.set('audio.scale.map.phases', MAP.phases); LS.set('audio.scale.map.actions', MAP.actions); applyVariant(); RHY.refreshParams(); refreshPanelValues(); if(cur.names){ const [a,b]=cur.names; startPair(a,b);} });
+    refreshPanelValues();
+  }
+
+  function applyVariant(){ const v=VARIANTS[State.variant]; const target=Math.min(State.master ?? v.master, CAP_MASTER); try{ master.gain.setTargetAtTime(target, AC.currentTime, 0.15);}catch(_){ } createBusses(v); }
+
+  document.addEventListener('DOMContentLoaded', ()=>{ applyVariant(); bootPanel(); });
+  window.addEventListener('kobllux:audio:resume', ()=>{ try{ AC.resume() }catch(_ ){} });
+  window.__AUDIO_CTRL__ = { setVariant:(n)=>{ if(VARIANTS[n]){ State.variant=n; LS.set('audio.variant',n); applyVariant(); RHY.refreshParams(); } }, setPack:(p)=>{ if(PACKS[p]){ State.pack=p; LS.set('audio.pack',p); if(cur.names){ const [a,b]=cur.names; startPair(a,b);} } } };
 })();
 </script>
+<!-- ===== /INFODOSE • CONTROL PANEL ===== -->
 
-
-
-<script id="AUDIO_FUSION_KERNEL">
-(()=>{ 'use strict';
-/* ===========================================================
-   AUDIO FUSION KERNEL v1.1 — Magos + Escalas + Pad Ambiente
-   =========================================================== */
-
-const $  = (q,root=document)=>root.querySelector(q);
-const $$ = (q,root=document)=>[...root.querySelectorAll(q)];
-
-// ---------- AudioContext & Master ----------
-let AC=null, master=null, isUnlocked=false;
-function ensureAC(){
-  if(!AC){
-    AC = new (window.AudioContext||window.webkitAudioContext)();
-    master = AC.createGain();
-    master.gain.value = 0;
-    master.connect(AC.destination);
-  }
-  return AC;
-}
-function unlock(){ try{ ensureAC(); if(AC.state==='suspended') AC.resume(); isUnlocked=true; }catch{} }
-window.addEventListener('pointerdown', unlock, {once:true,capture:true});
-
-// ---------- Volume perceptual global ----------
-window.__AUDIO_TET__ = 0.40; // teto perceptual (0..1). Aumente p/ 0.60 se quiser mais presença
-function setMasterVol(v01){ // v01: slider 0..1
-  ensureAC();
-  const target = (v01*v01) * window.__AUDIO_TET__;
-  master.gain.setTargetAtTime(target, AC.currentTime, .12);
-}
-window.setMasterVol = setMasterVol;
-
-// ---------- Perfis (TAMP = timbre + envelope) ----------
-const PROFILES = {
-  DRY_TIGHT:    { osc:'triangle', atk:0.008, dec:0.12, rel:0.14, filt:null,                               gain:.28 },
-  PLUCK_NOISE:  { osc:'square',   atk:0.006, dec:0.16, rel:0.18, filt:{type:'lowpass',fq:2200,Q:0.7},     gain:.25 },
-  SOFT_PAD:     { osc:'sine',     atk:0.22,  dec:0.0,  rel:0.9,  filt:{type:'lowpass',fq:1400,Q:0.5},     gain:.36 },
-  WARM_TAPE:    { osc:'sawtooth', atk:0.12,  dec:0.0,  rel:0.7,  filt:{type:'lowpass',fq:1200,Q:0.9},     gain:.28 },
-  AIRY_SHIMMER: { osc:'sine',     atk:0.18,  dec:0.0,  rel:0.8,  filt:{type:'highpass',fq:180,Q:0.3},     gain:.34 },
-  SUB_DRONE:    { osc:'sine',     atk:0.35,  dec:0.0,  rel:1.6,  filt:{type:'lowpass',fq:480,Q:0.4},      gain:.40 },
-  GLASS_TRI:    { osc:'triangle', atk:0.02,  dec:0.0,  rel:0.4,  filt:{type:'bandpass',fq:1600,Q:4},      gain:.24 },
-  VINTAGE_SAW:  { osc:'sawtooth', atk:0.02,  dec:0.0,  rel:0.36, filt:{type:'lowpass',fq:2200,Q:0.7},     gain:.30 },
-};
-let CURRENT_PROFILE = 'SOFT_PAD';
-
-// ---------- Modos/escala ----------
-const MODES = {
-  ionian:[0,2,4,5,7,9,11,12], lydian:[0,2,4,6,7,9,11,12], mixolydian:[0,2,4,5,7,9,10,12],
-  dorian:[0,2,3,5,7,9,10,12], phrygian:[0,1,3,5,7,8,10,12], aeolian:[0,2,3,5,7,8,10,12],
-  pentMajor:[0,2,4,7,9,12], pentMinor:[0,3,5,7,10,12],
-  harmonicMinor:[0,2,3,5,7,8,11,12], phrygDominant:[0,1,4,5,7,8,10,12],
-  wholeTone:[0,2,4,6,8,10,12], blues:[0,3,5,6,7,10,12]
-};
-const ROOTS = { 'A':220,'Bb':233.08,'B':246.94,'C':261.63,'Db':277.18,'D':293.66,'Eb':311.13,'E':329.63,'F':349.23,'Gb':369.99,'G':392.00,'Ab':415.30 };
-
-const ARCH_MODE = {
-  atlas:'ionian', nova:'lydian', vitalis:'mixolydian', pulse:'dorian', artemis:'phrygian',
-  serena:'pentMajor', kaos:'harmonicMinor', genus:'wholeTone', lumine:'lydian',
-  rhea:'pentMinor', solus:'aeolian', aion:'phrygDominant'
-};
-let ROOT_BY_ARCH = { atlas:'C', nova:'F', vitalis:'G', pulse:'D', artemis:'E', serena:'A',
-                     kaos:'A', genus:'C', lumine:'E', rhea:'D', solus:'A', aion:'E' };
-
-// ---------- Síntese de notas / escalas / drone ----------
-function playNote(freq, ms=280, prof=PROFILES[CURRENT_PROFILE]){
-  ensureAC(); if(AC.state==='suspended') AC.resume();
-  const t0=AC.currentTime, o=AC.createOscillator(), g=AC.createGain();
-  o.type = prof.osc||'sine';
-  o.frequency.value=freq;
-  let node = g;
-  if (prof.filt){
-    const f=AC.createBiquadFilter();
-    f.type = prof.filt.type; f.frequency.value=prof.filt.fq; f.Q.value=prof.filt.Q||0.7;
-    g.connect(f); f.connect(master); node = f;
-  } else {
-    g.connect(master);
-  }
-  o.connect(g);
-
-  // envelope
-  const A = Math.max(0.005, prof.atk ?? 0.02);
-  const D = prof.dec ?? 0;
-  const R = Math.max(0.08, prof.rel ?? 0.28);
-  g.gain.cancelScheduledValues(t0);
-  g.gain.setValueAtTime(0.0001, t0);
-  g.gain.linearRampToValueAtTime((prof.gain ?? .3), t0 + A);
-  if (D>0) g.gain.linearRampToValueAtTime((prof.gain ?? .3)*0.7, t0 + A + D);
-  const tStop = t0 + (ms/1000);
-  g.gain.setTargetAtTime(0.0001, tStop, R);
-
-  o.start();
-  o.stop(tStop + R*2);
-}
-window.playNote = playNote;
-
-function playScale(arch, steps=8, tempo=120){
-  const mode = ARCH_MODE[arch] || 'ionian';
-  const root = ROOTS[ROOT_BY_ARCH[arch]||'C'] || 261.63;
-  const pat = MODES[mode] || MODES.ionian;
-  const dt = 60/Math.max(40,tempo);
-  pat.slice(0, steps).forEach((st,i)=>{
-    const f = root * Math.pow(2, st/12);
-    setTimeout(()=>playNote(f, 260), i*dt*500);
-  });
-}
-window.playScale = playScale;
-
-function playDrone(arch){
-  const mode = ARCH_MODE[arch] || 'ionian';
-  const root = ROOTS[ROOT_BY_ARCH[arch]||'C'] || 261.63;
-  [0,7,12].forEach((st,i)=>{ setTimeout(()=>playNote(root*Math.pow(2,st/12), 1600, PROFILES.SUB_DRONE), i*60) });
-}
-window.playDrone = playDrone;
-
-// ---------- AMBIENT PAD ENGINE ----------
-let ambientOsc=null, ambientGain=null, ambientFilter=null;
-let lfoTrem=null, lfoTremGain=null, lfoVib=null, lfoVibGain=null;
-
-const AMB_LS = {
-  on: 'metaux.trindade.ambient.on',
-  vol:'metaux.trindade.ambient.vol',
-  fq: 'metaux.trindade.ambient.freq'
-};
-
-let __AMBIENT_VOL__ = 0.18; // 0..1 (antes da curva master). Slider padrão ~18%
-function centsToHz(base, cents){
-  // depth em Hz aproximado a partir de cents
-  const ratio = Math.pow(2, cents/1200);
-  return Math.abs(base*(ratio-1));
-}
-function initAmbientNodes(){
-  ensureAC();
-  // Osc principal
-  ambientOsc    = AC.createOscillator();
-  ambientGain   = AC.createGain();
-  ambientFilter = AC.createBiquadFilter();
-  ambientOsc.type = 'sine';
-  ambientGain.gain.value = 0; // começa desligado
-  ambientFilter.type = 'lowpass'; ambientFilter.frequency.value = 1200; ambientFilter.Q.value = 0.6;
-
-  // Tremolo (amp)
-  lfoTrem      = AC.createOscillator();
-  lfoTremGain  = AC.createGain();
-  lfoTrem.type='sine'; lfoTrem.frequency.value = 0.22; // 0.22 Hz default
-  lfoTremGain.gain.value = 0.25; // 25% de profundidade
-  lfoTrem.connect(lfoTremGain).connect(ambientGain.gain);
-
-  // Vibrato (pitch)
-  lfoVib      = AC.createOscillator();
-  lfoVibGain  = AC.createGain();
-  lfoVib.type='sine'; lfoVib.frequency.value = 0.16; // vibrato lento
-  lfoVibGain.gain.value = 0; // profundidade ajustada por setAmbientPad
-  lfoVib.connect(lfoVibGain).connect(ambientOsc.frequency);
-
-  ambientOsc.connect(ambientGain);
-  ambientGain.connect(ambientFilter);
-  ambientFilter.connect(master);
-
-  ambientOsc.start();
-  lfoTrem.start();
-  lfoVib.start();
-}
-
-function setAmbientVol(v01){ // 0..1
-  __AMBIENT_VOL__ = Math.max(0, Math.min(1, v01));
-  if(!ambientGain) return;
-  const t = AC.currentTime;
-  const target = __AMBIENT_VOL__;
-  ambientGain.gain.setTargetAtTime(target, t, .4);
-  try{ localStorage.setItem(AMB_LS.vol, String(v01)); }catch{}
-}
-window.setAmbientVol = setAmbientVol;
-
-function setAmbientOn(on=true, attack=0.8, release=0.8){
-  ensureAC(); if(!ambientOsc) initAmbientNodes();
-  const t=AC.currentTime;
-  ambientGain.gain.cancelScheduledValues(t);
-  const target = on ? (__AMBIENT_VOL__||0.18) : 0.0001;
-  ambientGain.gain.setTargetAtTime(target, t, on?attack:release);
-  try{ localStorage.setItem(AMB_LS.on, on?'1':'0'); }catch{}
-}
-window.setAmbientOn = setAmbientOn;
-
-function setAmbientPad(freq=432, opts={}){
-  ensureAC(); if(!ambientOsc) initAmbientNodes();
-  const {
-    type='sine',
-    attack=1.2,
-    tremolo=0.22,        // Hz
-    tremoloDepth=0.25,   // 0..1
-    vibrato=0.16,        // Hz
-    vibratoCents=3,      // ~3 cents → depth em Hz proporcional à base
-    filterHz=1200,
-  } = opts;
-
-  ambientOsc.type = type;
-  ambientFilter.frequency.setTargetAtTime(filterHz, AC.currentTime, .4);
-
-  // tremolo
-  lfoTrem.frequency.setTargetAtTime(Math.max(0.05,tremolo), AC.currentTime, .3);
-  lfoTremGain.gain.setTargetAtTime(Math.max(0,Math.min(1,tremoloDepth)), AC.currentTime, .3);
-
-  // vibrato
-  lfoVib.frequency.setTargetAtTime(Math.max(0.05,vibrato), AC.currentTime, .3);
-  const depthHz = centsToHz(freq, vibratoCents);
-  lfoVibGain.gain.setTargetAtTime(depthHz, AC.currentTime, .3);
-
-  // frequência base + fade in
-  ambientOsc.frequency.setTargetAtTime(freq, AC.currentTime, .2);
-  setAmbientOn(true, attack, .8);
-  try{ localStorage.setItem(AMB_LS.fq, String(freq)); }catch{}
-}
-window.setAmbientPad = setAmbientPad;
-
-// ---------- Painel (injeta controles no teu Status Panel) ----------
-function injectMusicPanel(){
-  const host = $('#statusPanel .panel-inner'); if(!host || $('#musicPanel')) return;
-  const box = document.createElement('div'); box.id='musicPanel';
-  box.innerHTML = `
-    <hr style="border-color:rgba(255,255,255,.12);opacity:.6;margin:8px 0">
-    <div class="row"><b>Música do Arquétipo</b><span class="small">perfil, escala, raiz, volume</span></div>
-    <div class="row">
-      <label class="pill">Perfil
-        <select id="mpProfile" class="mpSel">
-          ${Object.keys(PROFILES).map(k=>`<option>${k}</option>`).join('')}
-        </select>
-      </label>
-      <label class="pill">Escala
-        <select id="mpScale" class="mpSel">
-          ${Object.keys(MODES).map(k=>`<option>${k}</option>`).join('')}
-        </select>
-      </label>
-      <label class="pill">Raiz
-        <select id="mpRoot" class="mpSel">
-          ${Object.keys(ROOTS).map(k=>`<option>${k}</option>`).join('')}
-        </select>
-      </label>
-    </div>
-    <div class="row">
-      <label class="pill">Vol
-        <input id="mpVol" type="range" min="0" max="100" value="28" style="width:140px">
-      </label>
-      <label class="pill">Teto
-        <input id="mpTet" type="range" min="20" max="100" value="${Math.round(window.__AUDIO_TET__*100)}" style="width:120px">
-      </label>
-      <span class="small">Curva: v² × teto</span>
-    </div>
-
-    <div class="row" style="margin-top:6px">
-      <b>Pad Ambiente</b><span class="small">mago → 369 / 432 / 528 Hz</span>
-    </div>
-    <div class="row">
-      <button id="ambOn"  class="btn-fusion">Ligar</button>
-      <button id="ambOff" class="btn-fusion">Desligar</button>
-      <label class="pill">Vol Pad
-        <input id="ambVol" type="range" min="0" max="100" value="${Math.round((__AMBIENT_VOL__||0.18)*100)}" style="width:120px">
-      </label>
-      <label class="pill">Freq
-        <input id="ambFq" type="number" min="10" max="1200" step="1" value="${Number(localStorage.getItem(AMB_LS.fq))||432}" style="width:92px">
-      </label>
-    </div>
-    <div class="row">
-      <label class="pill">Tremolo Hz <input id="ambTrem" type="number" step="0.01" value="0.22" style="width:80px"></label>
-      <label class="pill">Trem Depth <input id="ambTremD" type="number" step="0.05" value="0.25" style="width:80px"></label>
-      <label class="pill">Vibrato Hz <input id="ambVib" type="number" step="0.01" value="0.16" style="width:80px"></label>
-      <label class="pill">Vib Cents <input id="ambVibC" type="number" step="1" value="3" style="width:64px"></label>
-    </div>
-
-    <div class="row" style="gap:8px;margin-top:6px">
-      <button id="mpTestScale" class="btn-fusion">Tocar escala</button>
-      <button id="mpTestDrone" class="btn-fusion">Drone</button>
-      <button id="mpTestPluck" class="btn-fusion">Pluck</button>
-    </div>
+<!-- ===== INFODOSE • Control Panel FIX: pointer + non-fusion color + resume ===== -->
+<script>
+(function(){
+  const css = document.createElement('style');
+  css.textContent = `
+    #ibSLine, #ledstrip-78k { pointer-events: auto !important; cursor: pointer; }
+    #ledstrip-78k .lane { pointer-events: none !important; }
   `;
-  host.appendChild(box);
+  document.head.appendChild(css);
 
-  // estilos mínimos (aproveita tua estética)
-  $$('.mpSel', box).forEach(el=>{ el.style.background='rgba(255,255,255,.06)'; el.style.border='1px solid rgba(255,255,255,.16)'; el.style.borderRadius='8px'; el.style.color='#fff'; el.style.padding='6px' });
+  function togglePanel(){ document.getElementById('btn-audio-panel')?.click(); }
+  function bindClicks(){
+    const sline = document.getElementById('ibSLine');
+    const strip = document.getElementById('ledstrip-78k');
+    if (sline && !sline.__audioClickBound){ sline.addEventListener('click', togglePanel, true); sline.__audioClickBound = true; }
+    if (strip && !strip.__audioClickBound){ strip.addEventListener('click', togglePanel, true); strip.__audioClickBound = true; }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindClicks);
+  else bindClicks();
 
-  // binds principais
-  $('#mpProfile').value = CURRENT_PROFILE;
-  $('#mpProfile').oninput = e=>{ CURRENT_PROFILE = e.target.value; toast('Perfil: '+CURRENT_PROFILE); };
+  function archName(){
+    try{
+      if (typeof currentArch === 'function') return String(currentArch()).toLowerCase();
+      const sel = document.getElementById('arch-select');
+      if (sel) return String(sel.value||'atlas').replace(/.*\//,'').replace(/\.html$/i,'').toLowerCase();
+    }catch(_){}
+    return 'atlas';
+  }
+  function archColor(name){
+    try{
+      const ACOL = window.ARCH_COLORS || {};
+      return ACOL[name] || getComputedStyle(document.documentElement).getPropertyValue('--archA') || '#409eff';
+    }catch(_){ return '#409eff'; }
+  }
+  function colorFusionSingle(){
+    const bar = document.getElementById('ledstrip-fusion'); if (!bar) return;
+    const nm = archName(); const C = archColor(nm);
+    bar.style.background = `linear-gradient(90deg, ${C}, ${C})`;
+    bar.style.opacity = '0.72';
+  }
 
-  $('#mpScale').oninput = e=>{ const a=window.__ARCH_ACTIVE__||'atlas'; ARCH_MODE[a]=e.target.value; toast(`Escala ${a}: ${e.target.value}`); };
-  $('#mpRoot').oninput  = e=>{ const a=window.__ARCH_ACTIVE__||'atlas'; ROOT_BY_ARCH[a]=e.target.value; toast(`Raiz ${a}: ${e.target.value}`); };
+  window.addEventListener('dual:fusion-change', (ev)=>{
+    const d = ev.detail || {}; const bar = document.getElementById('ledstrip-fusion'); if (!bar) return;
+    if (d.enabled && d.a && d.b){
+      const A = archColor(String(d.a).toLowerCase());
+      const B = archColor(String(d.b).toLowerCase());
+      bar.style.background = `linear-gradient(90deg, ${A}, ${B})`;
+    } else {
+      colorFusionSingle();
+    }
+  });
 
-  const vol = $('#mpVol'); vol.oninput = e=> setMasterVol(parseInt(e.target.value,10)/100);
-  $('#mpTet').oninput = e=>{ window.__AUDIO_TET__ = parseInt(e.target.value,10)/100; setMasterVol(parseInt(vol.value,10)/100); };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', colorFusionSingle);
+  else colorFusionSingle();
 
-  $('#mpTestScale').onclick = ()=> playScale(window.__ARCH_ACTIVE__||'atlas', 8, 110);
-  $('#mpTestDrone').onclick = ()=> playDrone(window.__ARCH_ACTIVE__||'atlas');
-  $('#mpTestPluck').onclick = ()=> playNote(ROOTS[ROOT_BY_ARCH[window.__ARCH_ACTIVE__||'atlas']], 240, PROFILES.DRY_TIGHT);
+  (function armAudioResume(){
+    const AC = window.__INFODOSE_AC || (window.AudioContext? new AudioContext(): null);
+    if (!AC) return; window.__INFODOSE_AC = AC;
+    function resume(){ try{ AC.resume && AC.resume(); }catch(_){ } }
+    ['pointerdown','touchstart','mousedown','keydown','scroll','wheel','visibilitychange','focus'].forEach(ev=>{
+      document.addEventListener(ev, resume, true);
+    });
+    let kept = false;
+    function seedKeepAlive(){
+      if (kept) return; kept = true;
+      try{
+        const g = window.__INFODOSE_MASTER || (function(){ const gg=AC.createGain(); gg.gain.value=0.00001; gg.connect(AC.destination); window.__INFODOSE_MASTER=gg; return gg; })();
+        const o = AC.createOscillator(); o.type='sine'; o.frequency.value=25; o.connect(g); o.start();
+        setTimeout(()=>{ try{o.disconnect();}catch(_){ } }, 600);
+      }catch(_){}
+    }
+    document.addEventListener('pointerdown', seedKeepAlive, {once:true, capture:true});
+    window.addEventListener('kobllux:audio:resume', resume);
+  })();
+})();
+</script>
+<!-- ===== /Control Panel FIX ===== -->
 
-  // Ambient pad binds
-  $('#ambOn').onclick  = ()=> setAmbientOn(true);
-  $('#ambOff').onclick = ()=> setAmbientOn(false);
-  $('#ambVol').oninput = e=> setAmbientVol(parseInt(e.target.value,10)/100);
-  const ambFq = $('#ambFq');
-  ambFq.onchange = ()=> setAmbientPad(parseFloat(ambFq.value)||432,{});
-  $('#ambTrem').onchange  = ()=> setAmbientPad(parseFloat(ambFq.value)||432, {tremolo:parseFloat($('#ambTrem').value), tremoloDepth:parseFloat($('#ambTremD').value), vibrato:parseFloat($('#ambVib').value), vibratoCents:parseFloat($('#ambVibC').value)});
-  $('#ambTremD').onchange = $('#ambTrem').onchange;
-  $('#ambVib').onchange   = $('#ambTrem').onchange;
-  $('#ambVibC').onchange  = $('#ambTrem').onchange;
-}
+<!-- ===== INFODOSE • Fusion Toggle via Bars (no button) ===== -->
+<script>
+(function(){
+  const css = document.createElement('style');
+  css.textContent = `
+    .fusion-toggle, #fusion-toggle, .btn-fusion, [data-action="fusion-toggle"],
+    .fusion-btn, .btn[data-fusion], button[aria-label*="Fusão" i] { display:none !important; }
+    #ledstrip-fusion, #ledstrip-78k, #ibSLine { cursor: pointer; }
+  `;
+  document.head.appendChild(css);
 
-// ---------- Toast helper (usa teu unificador se existir) ----------
-function toast(message){
-  window.dispatchEvent(new CustomEvent('app:toast',{detail:{message}}));
-}
+  function getEnabled(){ try{ return JSON.parse(localStorage.getItem('dual.fusion.enabled')||'false'); }catch(_){ return false; } }
+  function setEnabled(v){ try{ localStorage.setItem('dual.fusion.enabled', JSON.stringify(!!v)); }catch(_){ } }
+  function normName(n){ return String(n||'').replace(/.*\//,'').replace(/\.html$/i,'').toLowerCase(); }
+  function currentArchSafe(){
+    try{
+      if (typeof currentArch === 'function') return normName(currentArch());
+      const sel = document.getElementById('arch-select');
+      if (sel){ const opt = sel.options[sel.selectedIndex]; if (opt) return normName(opt.value||opt.textContent||''); }
+    }catch(_){}
+    return '';
+  }
+  let trail = [];
+  function pushArch(n){
+    n = normName(n);
+    if (!n) return;
+    if (trail.length && trail[trail.length-1]===n) return;
+    trail.push(n);
+    if (trail.length>8) trail = trail.slice(-8);
+  }
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const sel = document.getElementById('arch-select');
+    if (sel){
+      const opt = sel.options[sel.selectedIndex];
+      if (opt) pushArch(opt.value||opt.textContent||'');
+      sel.addEventListener('change', ()=>{
+        const o = sel.options[sel.selectedIndex];
+        pushArch(o ? (o.value||o.textContent||'') : '');
+      });
+    }
+  });
+  (function hookLEDTrail(){
+    const LED = window.LEDSTRIP || (window.LEDSTRIP = {});
+    if (LED.__trailPatched) return;
+    const _setAB = LED.setArchetypes ? LED.setArchetypes.bind(LED) : null;
+    LED.setArchetypes = function(a,b){ _setAB && _setAB(a,b); pushArch(a); pushArch(b); };
+    LED.__trailPatched = true;
+  })();
 
-// ---------- Header + Barras ----------
-function colorizeHeaderLEDs(){
-  const leds = $$('#btnStatus .led'); if(!leds.length) return;
-  const overlay = getComputedStyle(document.documentElement).getPropertyValue('--arch-overlay').trim();
-  if(overlay && overlay!=='rgba(0, 0, 0, 0)'){ leds.forEach(el=>{ el.style.background = overlay; }); }
-}
-function toggleStatusPanel(open){
-  const wrap = $('#statusPanel'); if(!wrap) return;
-  wrap.classList[open?'add':'remove']('open');
-}
-function bindBars(){
-  const strip = $('#ledstrip-78k'); if(!strip) return;
-  strip.addEventListener('click', ()=>{ toggleStatusPanel(true); injectMusicPanel(); });
-}
-function bindHeader(){
-  const btn = $('#btnStatus');
-  if(btn){
-    btn.addEventListener('click', ()=>{
-      const panel = $('#statusPanel'); panel && panel.classList.toggle('open');
-      injectMusicPanel();
+  function dispatchFusion(enabled, a, b){
+    try{
+      const det = enabled ? {enabled:true, a: normName(a), b: normName(b)} : {enabled:false};
+      window.dispatchEvent(new CustomEvent('dual:fusion-change', { detail: det }));
+    }catch(_){}
+  }
+
+  function handleToggle(ev){
+    try{
+      const enabled = getEnabled();
+      if (enabled){
+        setEnabled(false);
+        dispatchFusion(false);
+      } else {
+        const A = currentArchSafe() || (trail.length? trail[trail.length-1]: 'atlas');
+        let B = A;
+        for (let i=trail.length-2; i>=0; i--){
+          if (trail[i] && trail[i] !== A){ B = trail[i]; break; }
+        }
+        setEnabled(true);
+        dispatchFusion(true, A, B);
+      }
+      const el = ev.currentTarget;
+      if (el && el.style){
+        const old = el.style.outline;
+        el.style.outline = '2px solid rgba(255,255,255,.65)';
+        setTimeout(()=>{ try{ el.style.outline = old || ''; }catch(_){ } }, 180);
+      }
+    }catch(_){}
+  }
+
+  function bindBars(){
+    ['ledstrip-fusion','ledstrip-78k','ibSLine'].forEach(id=>{
+      const el = document.getElementById(id);
+      if (el && !el.__fusionToggleBound){
+        el.addEventListener('click', handleToggle, true);
+        el.__fusionToggleBound = true;
+      }
     });
   }
-}
-const mo = new MutationObserver(()=>colorizeHeaderLEDs());
-mo.observe(document.documentElement,{attributes:true,attributeFilter:['style','class']});
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindBars);
+  else bindBars();
 
-// ---------- Bus hooks ----------
-function onArchetypeApply(aKey){
-  window.__ARCH_ACTIVE__ = aKey; colorizeHeaderLEDs();
-}
-function hookBus(){
-  const Bus = window.InfodoseBus; if(!Bus) return;
-  Bus.on('ARCH_PULSE', ({arch,act})=>{
-    onArchetypeApply(arch);
-    if(act==='ronda'){ playScale(arch, 6, 100); }
-    else if(act==='fusionar'){ playScale(arch, 8, 124); }
-    else { const root = ROOTS[ROOT_BY_ARCH[arch]||'C']; playNote(root, 260); }
-  });
-}
-
-// ---------- Trindade bridge → Pad Ambiente ----------
-const MAGO_FREQ = { anax:369, zara:432, kether:528 };
-window.addEventListener('trindade:mode', (e)=>{
-  const m=e.detail?.mode; if(!MAGO_FREQ[m]) return;
-  // presets por mago (ajuste fino se quiser)
-  const cfg={
-    anax:  { profile:'AIRY_SHIMMER', scale:'wholeTone',     root:'D', tet:.45, padHz:MAGO_FREQ.anax,  vibC:2, trem:0.18 },
-    zara:  { profile:'VINTAGE_SAW',  scale:'harmonicMinor', root:'A', tet:.55, padHz:MAGO_FREQ.zara,  vibC:3, trem:0.22 },
-    kether:{ profile:'SOFT_PAD',     scale:'lydian',        root:'F', tet:.40, padHz:MAGO_FREQ.kether,vibC:1, trem:0.16 },
-  }[m];
-
-  window.CURRENT_PROFILE = cfg.profile;
-  const arch = window.__ARCH_ACTIVE__ || 'atlas';
-  ARCH_MODE[arch] = cfg.scale;
-  ROOT_BY_ARCH[arch] = cfg.root;
-  window.__AUDIO_TET__ = cfg.tet;
-
-  // aplica volume global novamente
-  const volEl = $('#mpVol'); const v = volEl ? (parseInt(volEl.value,10)/100) : .28;
-  setMasterVol(v);
-
-  // liga/ajusta pad
-  setAmbientPad(cfg.padHz, { attack:1.2, tremolo:cfg.trem, vibrato:0.16, vibratoCents:cfg.vibC });
-  setAmbientOn(true);
-
-  playScale(arch, 6, 110);
-  toast(`Trindade: ${m} (Pad ${cfg.padHz} Hz)`);
-});
-
-// ---------- Boot ----------
-(function init(){
-  ensureAC();
-  bindBars(); bindHeader(); hookBus(); colorizeHeaderLEDs();
-
-  // Restaura estado
-  try{
-    const vTet = Number(localStorage.getItem('metaux:audio.tet')); if(vTet) window.__AUDIO_TET__ = Math.max(.2, Math.min(1, vTet));
-  }catch{}
-  setMasterVol(.28);
-
-  // Ambient restore
-  try{
-    const on  = localStorage.getItem(AMB_LS.on)==='1';
-    const vol = Number(localStorage.getItem(AMB_LS.vol)); if(!Number.isNaN(vol) && vol>0) __AMBIENT_VOL__ = Math.max(0,Math.min(1,vol));
-    const fq  = Number(localStorage.getItem(AMB_LS.fq))||432;
-    setAmbientPad(fq, {});
-    setAmbientOn(on, .6, .6);
-  }catch{}
-
-  // Arch inferido
-  const guess = (localStorage.getItem('infodose:arch.active')||'atlas');
-  onArchetypeApply(guess);
-})();
-})();
-</script>
-
-
-
-<script>
-/* envia o modo da Trindade para o kernel */
-function setTrindadeMode(mode){ 
-  window.dispatchEvent(new CustomEvent('trindade:mode',{detail:{mode}}));
-}
-
-/* exemplo: botões/ícones da Trindade */
-document.getElementById('anax')?.addEventListener('click', ()=>setTrindadeMode('anax'));
-document.getElementById('zara')?.addEventListener('click', ()=>setTrindadeMode('zara'));
-document.getElementById('kether')?.addEventListener('click', ()=>setTrindadeMode('kether'));
-</script>
-
-
-<script>
-/* HEADER STATUS – AUTOWIRE v2 (safe, mobile-first) */
-(()=>{ 'use strict';
-  const SEL = {
-    btn: '#btnStatus,[data-status-btn]',
-    wrap: '#statusPanelWrap',
-    panel: '#statusPanel'
-  };
-
-  function ensurePanel(){
-    let wrap = document.querySelector(SEL.wrap);
-    if(!wrap){
-      const header = document.querySelector('header, .mast, .appbar') || document.body;
-      wrap = document.createElement('div');
-      wrap.id = 'statusPanelWrap';
-      wrap.innerHTML = `
-        <div id="statusPanel" role="region" aria-label="Status">
-          <div class="panel-inner">
-            <div class="row">Painel pronto ✅</div>
-          </div>
-        </div>`;
-      header.insertAdjacentElement('afterend', wrap);
+  (function bootRestore(){
+    if (!getEnabled()) return;
+    const A = currentArchSafe() || (trail.length? trail[trail.length-1]: 'atlas');
+    let B = A;
+    for (let i=trail.length-2; i>=0; i--){
+      if (trail[i] && trail[i] !== A){ B = trail[i]; break; }
     }
-    return wrap.querySelector(SEL.panel);
-  }
-
-  function toggle(open){
-    const panel = ensurePanel();
-    const wrap = panel.parentElement;
-    const willOpen = (open ?? !wrap.classList.contains('open'));
-    wrap.classList.toggle('open', willOpen);
-    /* avisa o kernel p/ injetar controles de música, se ele estiver carregado */
-    window.dispatchEvent(new CustomEvent('request:musicPanel'));
-  }
-
-  /* Delegation: funciona mesmo se o botão aparecer depois */
-  document.addEventListener('click', (e)=>{
-    const btn = e.target.closest(SEL.btn);
-    if(!btn) return;
-    e.preventDefault();
-    toggle();
-  }, true);
-
-  /* Cria o botão se não existir */
-  function ensureBtn(){
-    if(document.querySelector(SEL.btn)) return;
-    const header = document.querySelector('header, .mast, .appbar') || document.body;
-    const btn = document.createElement('button');
-    btn.id = 'btnStatus';
-    btn.className = 'ib fx-trans fx-press ring';
-    btn.title = 'Status';
-    btn.setAttribute('aria-label','Status');
-    btn.innerHTML = `
-      <span class="leds">
-        <i class="led"></i><i class="led"></i><i class="led"></i><i class="led"></i>
-      </span>
-      <span class="ripple"></span>`;
-    header.appendChild(btn);
-  }
-
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', ensureBtn);
-  else ensureBtn();
-
-  /* CSS de segurança (clickable, empilhamento e visual mínimo do painel) */
-  const css = `
-    #btnStatus{ position:relative; z-index:1200; -webkit-tap-highlight-color:transparent; pointer-events:auto }
-    #btnStatus .leds{ display:flex; gap:6px }
-    #btnStatus .led{ width:8px; height:8px; border-radius:999px; background:#7EC8FF; animation:ping 1.6s ease infinite }
-    #btnStatus .led:nth-child(1){ background:#39FFB6; animation-delay:.0s }
-    #btnStatus .led:nth-child(2){ background:#FFC857; animation-delay:.15s }
-    #btnStatus .led:nth-child(3){ background:#7EC8FF; animation-delay:.30s }
-    #btnStatus .led:nth-child(4){ background:#FF52B1; animation-delay:.45s }
-    @keyframes ping{ 0%{opacity:.8; transform:scale(.92)} 70%{opacity:.9} 100%{opacity:.6; transform:scale(1)} }
-
-    #statusPanelWrap{ position:sticky; top:var(--hdrH,56px); z-index:1100 }
-    #statusPanelWrap:not(.open){ display:none }
-    #statusPanel .panel-inner{
-      margin:8px 12px; padding:12px; border-radius:14px;
-      background:rgba(0,0,0,.55); backdrop-filter:blur(10px);
-      border:1px solid rgba(255,255,255,.14); color:#fff
-    }
-  `;
-  const style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
+    dispatchFusion(true, A, B);
+  })();
 })();
 </script>
-<style id="AUDIO_BTN_CSS">
-/* Botão de Áudio (header) + painel compacto — mobile-first */
-:root{ --audio-z: 1600; --audio-ok: var(--ok, #39ffb6); }
-#btnAudio{
-  --sz: 42px;
-  width: var(--sz); height: var(--sz);
-  display:grid; place-items:center; border-radius:50%;
-  background: var(--surface, rgba(15,17,32,.65));
-  border: var(--bd, 1px solid rgba(255,255,255,.12));
-  box-shadow: var(--shadow, 0 14px 40px rgba(0,0,0,.45));
-  position:relative;
-}
-#btnAudio .leds{ position:absolute; inset:auto 6px 6px auto; display:flex; gap:4px }
-#btnAudio .led{ width:7px; height:7px; border-radius:999px; opacity:.9; animation:audioPing 1.6s ease infinite }
-#btnAudio .led:nth-child(1){ animation-delay:.0s }
-#btnAudio .led:nth-child(2){ animation-delay:.15s }
-#btnAudio .led:nth-child(3){ animation-delay:.30s }
-#btnAudio .led:nth-child(4){ animation-delay:.45s }
-@keyframes audioPing{ 0%{transform:scale(.9)} 70%{opacity:.95} 100%{transform:scale(1)} }
+<!-- ===== /INFODOSE • Fusion Toggle via Bars ===== -->
 
-#btnAudio svg{ width:20px; height:20px; display:block; }
-#btnAudio.on{ outline:0; box-shadow: 0 0 0 2px color-mix(in oklab, var(--audio-arch,#39ffb6) 60%, transparent), var(--shadow) }
-
-#audioPanelWrap{
-  position: sticky; top: calc(var(--hdrH,64px));
-  z-index: var(--audio-z); display:none;
-}
-#audioPanelWrap.open{ display:block; }
-#audioPanel{
-  margin:8px 12px; padding:10px; border-radius:14px;
-  background: rgba(0,0,0,.55); color:#fff;
-  border: 1px solid rgba(255,255,255,.14);
-  backdrop-filter: blur(10px);
-}
-#audioPanel .row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap }
-#audioPanel .pill{ display:inline-flex; align-items:center; gap:8px; padding:6px 10px;
-  border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.16) }
-#audioPanel select, #audioPanel input[type="number"], #audioPanel input[type="range"]{
-  background:rgba(255,255,255,.06); color:#fff; border:1px solid rgba(255,255,255,.16);
-  border-radius:8px; padding:6px
-}
-#audioPanel .btn{ padding:8px 12px; border-radius:10px; font-weight:800;
-  background:linear-gradient(180deg, rgba(13,22,34,.7), rgba(9,14,22,.7));
-  border:1px solid rgba(143,211,255,.18); color:#fff;
-}
-@media (max-width:560px){ #audioPanel .row{ gap:8px } }
+<!-- ===== INFODOSE • Hide Fusion/Difusionar Button (robust) ===== -->
+<style id="hide-fusion-btn-css">
+  .fusion-toggle, #fusion-toggle, .btn-fusion, .btnFusion, .fusion-btn,
+  .btn[data-fusion], .btn-difusionar, #btn-difusionar,
+  [data-action="fusion-toggle"], [data-action="difusionar"],
+  [data-action*="fusion" i], [data-action*="difus" i],
+  button[aria-label*="Fusão" i], button[aria-label*="fusao" i],
+  button[aria-label*="Fusion" i], button[aria-label*="Difusionar" i],
+  [title*="Fusão" i], [title*="Difusionar" i] {
+    display: none !important;
+  }
 </style>
-
-<script id="AUDIO_BTN_INIT">
-(()=>{ 'use strict';
-/* Helpers */
-const $=(q,r=document)=>r.querySelector(q), $$=(q,r=document)=>[...r.querySelectorAll(q)];
-const css= getComputedStyle(document.documentElement);
-
-/* 1) Injeta botão no header */
-function ensureAudioButton(){
-  if($('#btnAudio')) return $('#btnAudio');
-  const header = $('header.mast') || document.body; /* HUB UNO header existe */ 
-  const btn = document.createElement('button');
-  btn.id='btnAudio'; btn.className='ib fx-trans ring'; btn.title='Áudio';
-  btn.innerHTML = `
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M4 9v6h4l5 4V5L8 9H4zM16 8a5 5 0 0 1 0 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-    </svg>
-    <span class="leds">
-      <i class="led"></i><i class="led"></i><i class="led"></i><i class="led"></i>
-    </span>`;
-  header.appendChild(btn);
-  return btn;
-}
-
-/* 2) Painel compacto (independe do LS panel) */
-function ensureAudioPanel(){
-  if($('#audioPanelWrap')) return $('#audioPanelWrap');
-  const wrap = document.createElement('div');
-  wrap.id='audioPanelWrap';
-  wrap.innerHTML = `
-    <div id="audioPanel">
-      <div class="row" style="justify-content:space-between">
-        <b>🎛️ Música do Arquétipo</b>
-        <div class="pill"><label style="display:flex;align-items:center;gap:6px">
-          Stereo <input id="apStereo" type="checkbox" checked>
-        </label></div>
-      </div>
-
-      <div class="row">
-        <label class="pill">Perfil
-          <select id="apProfile">
-            <option>SOFT_PAD</option><option>VINTAGE_SAW</option><option>AIRY_SHIMMER</option>
-            <option>DRY_TIGHT</option><option>SUB_DRONE</option>
-          </select>
-        </label>
-        <label class="pill">Escala
-          <select id="apScale">
-            <option>ionian</option><option>lydian</option><option>mixolydian</option>
-            <option>dorian</option><option>phrygian</option><option>aeolian</option>
-            <option>pentMajor</option><option>pentMinor</option>
-            <option>harmonicMinor</option><option>phrygDominant</option>
-            <option>wholeTone</option><option>blues</option>
-          </select>
-        </label>
-        <label class="pill">Raiz
-          <select id="apRoot">
-            <option>C</option><option>D</option><option>E</option><option>F</option>
-            <option>G</option><option>A</option><option>Bb</option><option>Db</option><option>Eb</option><option>Gb</option><option>Ab</option>
-          </select>
-        </label>
-      </div>
-
-      <div class="row">
-        <label class="pill">Vol <input id="apVol" type="range" min="0" max="100" value="28" style="width:140px"></label>
-        <label class="pill">Teto <input id="apTet" type="range" min="20" max="100" value="40" style="width:120px"></label>
-        <label class="pill">Freq <input id="apFq" type="number" min="10" max="1200" value="432" style="width:88px"></label>
-      </div>
-
-      <div class="row">
-        <label class="pill">Width <input id="apWidth" type="range" min="0" max="100" value="75" style="width:120px"></label>
-        <label class="pill">Detune ¢ <input id="apDet" type="number" step="1" value="4" style="width:72px"></label>
-      </div>
-
-      <div class="row" style="gap:8px">
-        <button id="apOn"  class="btn">Ligar pad</button>
-        <button id="apOff" class="btn">Desligar pad</button>
-        <button id="apScaleTest" class="btn">Tocar escala</button>
-        <button id="apPluck" class="btn">Pluck</button>
-      </div>
-    </div>`;
-  /* adiciona logo abaixo do header */
-  const anchor = $('header.mast') || document.body;
-  anchor.insertAdjacentElement('afterend', wrap);
-  return wrap;
-}
-
-/* 3) Wire com o Kernel v1.2 (se presente) + fallbacks */
-function wireControls(){
-  const q = id => document.getElementById(id);
-  const haveKernel = typeof window.setAmbientPadStereo==='function' || typeof window.setAmbientPad==='function';
-
-  const apVol = q('apVol'), apTet=q('apTet'), apFq=q('apFq'), apStereo=q('apStereo'),
-        apWidth=q('apWidth'), apDet=q('apDet'), apProfile=q('apProfile'),
-        apScale=q('apScale'), apRoot=q('apRoot');
-
-  /* perfil/escala/raiz refletem no kernel, se houver */
-  apProfile.oninput = ()=>{ if(haveKernel) window.CURRENT_PROFILE = apProfile.value; };
-  apScale.oninput   = ()=>{ if(haveKernel){ const a=window.__ARCH_ACTIVE__||'atlas'; window.ARCH_MODE[a]=apScale.value; } };
-  apRoot.oninput    = ()=>{ if(haveKernel){ const a=window.__ARCH_ACTIVE__||'atlas'; window.ROOT_BY_ARCH[a]=apRoot.value; } };
-
-  apVol.oninput = ()=>{ if(haveKernel) window.setMasterVol(parseInt(apVol.value,10)/100); };
-  apTet.oninput = ()=>{ if(haveKernel){ window.__AUDIO_TET__ = parseInt(apTet.value,10)/100; window.setMasterVol(parseInt(apVol.value,10)/100); } };
-
-  function applyPad(){
-    if(!haveKernel) return;
-    const f = parseFloat(apFq.value)||432;
-    if(apStereo.checked && window.setAmbientPadStereo){
-      window.setAmbientPadStereo(f,{ width: parseInt(apWidth.value,10)/100, detuneCents: parseFloat(apDet.value)||4 });
-    }else{
-      window.setAmbientPad?.(f,{});
-    }
-    window.setAmbientOn?.(true);
-  }
-  apFq.onchange=applyPad; apWidth.oninput=applyPad; apDet.onchange=applyPad; apStereo.onchange=applyPad;
-
-  q('apOn').onclick  = ()=> window.setAmbientOn?.(true);
-  q('apOff').onclick = ()=> window.setAmbientOn?.(false);
-  q('apScaleTest').onclick = ()=> window.playScale?.(window.__ARCH_ACTIVE__||'atlas', 8, 110);
-  q('apPluck').onclick     = ()=> {
-    const ROOTS = window.ROOTS||{C:261.63,D:293.66,E:329.63,F:349.23,G:392,A:220,Bb:233.08,Db:277.18,Eb:311.13,Gb:369.99,Ab:415.30};
-    const arch=window.__ARCH_ACTIVE__||'atlas';
-    window.playNote?.(ROOTS[(window.ROOT_BY_ARCH||{})[arch]||'C']||261.63, 240, (window.PROFILES||{})['DRY_TIGHT']);
-  };
-
-  /* pinta LEDs conforme overlay do arquétipo */
-  repaintLEDs();
-}
-
-/* 4) LED color sincronizado com overlay/Trindade */
-function overlayColor(){
-  /* usa --arch-overlay se disponível, senão cai para ok */
-  const ov = css.getPropertyValue('--arch-overlay').trim();
-  return ov && ov!=='rgba(0, 0, 0, 0)' ? ov : getComputedStyle(document.body).getPropertyValue('--ok') || '#39ffb6';
-}
-function repaintLEDs(){
-  const leds = $$('#btnAudio .led'); if(!leds.length) return;
-  const col = overlayColor();
-  leds[0].style.background = col;
-  leds[1].style.background = col;
-  leds[2].style.background = col;
-  leds[3].style.background = col;
-  $('#btnAudio').style.setProperty('--audio-arch', col);
-}
-new MutationObserver(repaintLEDs).observe(document.documentElement,{attributes:true,attributeFilter:['style','class']});
-addEventListener('trindade:mode', repaintLEDs);
-
-/* 5) Toggle UI + iOS unlock */
-function togglePanel(open){
-  const wrap = ensureAudioPanel();
-  wrap.classList[ open ?? !wrap.classList.contains('open') ? 'add' : 'remove']('open');
-  if(wrap.classList.contains('open')){
-    /* garante que o AudioContext esteja ativo */
-    try{ const AC=(window.AudioContext||window.webkitAudioContext); if(AC){ const a=(window.__AC__ ||= new AC()); if(a.state==='suspended') a.resume(); } }catch{}
-  }
-}
-
-/* Boot */
-const btn = ensureAudioButton();
-btn.addEventListener('click', (e)=>{ e.preventDefault(); btn.classList.toggle('on'); togglePanel(); });
-/* cria painel na primeira interação pra manter leve */
-btn.addEventListener('click', ()=>{ ensureAudioPanel(); wireControls(); }, {once:true});
-
-/* se o header já existe, posiciona; caso contrário, aguarda DOM */
-if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', ()=>{ensureAudioButton();}); }
-
-/* primeira pintura dos LEDs */
-repaintLEDs();
-})();
-</script>
-
-
-
-<!-- PATCH INLINE: Atualiza URLs do APPS_JSON → ./apps/APPS78K/ -->
 <script>
-(function(){
-  const ASSISTANT_SLUG = {
-    kaos:'disruptor', nova:'inspira', genus:'fabricus', pulse:'resona', lumine:'brilhare',
-    serena:'ampara', vitalis:'momentum', atlas:'cartesius', artemis:'naviga',
-    solus:'arcana', rhea:'raizes', aion:'evolutia'
-  };
-  const baseDir = './apps/APPS78K';
-
-  function patchAppUrls(baseDir){
-    try{
-      const tag=document.getElementById('APPS_JSON');
-      if(!tag) return console.warn('[78K] APPS_JSON não encontrado.');
-      const data=JSON.parse(tag.textContent.trim());
-      if(!data.apps) return;
-      for(const app of data.apps){
-        const k=(app.key||'').toLowerCase();
-        if(k && ASSISTANT_SLUG[k]){
-          app.url=`${baseDir}/app_${k}_${ASSISTANT_SLUG[k]}.html`;
+(function hideFusionButtonsRobust(){
+  const re = /(difusionar|fusionar|fusão|fusao|fusion)/i;
+  function sweep(root){
+    const nodes = root ? root.querySelectorAll('button, [role="button"], .btn, a, [data-action], [title], [aria-label]') : [];
+    nodes.forEach(el => {
+      try{
+        const text = (el.textContent || '').trim();
+        const attrs = [
+          el.getAttribute('aria-label') || '',
+          el.getAttribute('title') || '',
+          el.getAttribute('data-action') || el.dataset?.action || ''
+        ].join(' ');
+        if (re.test(text) || re.test(attrs)) {
+          el.style.setProperty('display', 'none', 'important');
         }
-      }
-      tag.textContent=JSON.stringify(data,null,2);
-      window.APPS_JSON=data;
-      console.log('[78K] APPS_JSON atualizado →', baseDir);
-    }catch(e){console.error('[78K] erro patchAppUrls',e);}
+      }catch(_){}
+    });
   }
-
-  document.addEventListener('DOMContentLoaded',()=>patchAppUrls(baseDir));
+  function run(){ sweep(document); }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run);
+  } else {
+    run();
+  }
+  const mo = new MutationObserver(muts => {
+    muts.forEach(m => {
+      m.addedNodes && m.addedNodes.forEach(n => {
+        if (n.nodeType === 1) sweep(n);
+      });
+    });
+  });
+  mo.observe(document.documentElement, { childList:true, subtree:true });
 })();
 </script>
+<!-- ===== /Hide Fusion/Difusionar Button ===== -->
+
+<!-- ===== INFODOSE • UI Overrides: Hide Fusion Button + Loader (Sempre Único) ===== -->
+<style id="su-loader-style">
+  #su-loader{position:fixed;inset:0;z-index:2147483647;background:
+    radial-gradient(1200px 600px at 20% -10%, rgba(120,80,255,.18), transparent 60%),
+    radial-gradient(1200px 800px at 90% 110%, rgba(255,90,150,.18), transparent 60%),
+    #0b0e14;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial;
+    opacity:1;transition:opacity .45s ease}
+  #su-loader.done{opacity:0;pointer-events:none}
+  #su-loader .su-logo{font-size:1.1rem;letter-spacing:.06em;opacity:.92;margin-top:.6rem}
+  #su-loader .su-mark{font-weight:800;font-size:1.85rem;letter-spacing:.02em;margin-bottom:.35rem}
+  #su-loader .dot{width:12px;height:12px;border-radius:50%;background:#fff;opacity:.9;margin:.35rem 0;animation:su-pulse 1.8s infinite ease-in-out}
+  #su-loader .spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,.15);border-top-color:#fff;border-radius:50%;animation:su-rot 1.2s linear infinite;margin-top:.35rem}
+  @keyframes su-rot{to{transform:rotate(360deg)}}
+  @keyframes su-pulse{0%{transform:scale(.8);opacity:.9}60%{transform:scale(1.2);opacity:.35}100%{transform:scale(.8);opacity:.9}}
+  .su-hidden-fusion-btn{display:none !important}
+</style>
+<script id="su-loader-script">
+(function(){
+  try{
+    var L=document.createElement('div'); L.id='su-loader';
+    L.innerHTML = '<div class="su-mark">Sempre Único</div><div class="dot"></div><div class="su-logo">Sempre seu</div><div class="spinner" aria-hidden="true"></div>';
+    if (document.readyState!=='loading' && document.body){ document.body.appendChild(L); }
+    else { document.addEventListener('DOMContentLoaded', function(){ document.body.appendChild(L); }, {once:true}); }
+  }catch(_){}
+
+  function hideFusionButtons(root){
+    root = root || document;
+    var C = root.querySelectorAll('button, [role="button"], a, .btn');
+    for (var i=0;i<C.length;i++){
+      var el=C[i];
+      var label=(el.getAttribute('aria-label')||el.textContent||'').toLowerCase();
+      var id=(el.id||'').toLowerCase(), cls=(el.className||'').toLowerCase();
+      if (/\b(fusão|fusao|fusionar|difusionar|fusion|difusion)\b/.test(label+ ' '+ id+ ' '+ cls)){
+        el.classList.add('su-hidden-fusion-btn'); el.style.display='none';
+      }
+    }
+    var hints=[
+      '#fusion-toggle','.btn-fusion','[data-action="fusion-toggle"]','[data-action*="fusion"]',
+      'button[data-fusion]','[aria-label*="Fusão" i]','[aria-label*="fusao" i]','[data-testid*="fusion" i]'
+    ];
+    try{ root.querySelectorAll(hints.join(',')).forEach(function(el){ el.classList.add('su-hidden-fusion-btn'); el.style.display='none'; }); }catch(_){}
+  }
+  if (document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', function(){ hideFusionButtons(document); }); }
+  else { hideFusionButtons(document); }
+
+  var mo=new MutationObserver(function(muts){
+    muts.forEach(function(m){
+      if (m.addedNodes) m.addedNodes.forEach(function(n){
+        if (n.nodeType===1) hideFusionButtons(n);
+      });
+    });
+  });
+  try{ mo.observe(document.documentElement, {childList:true, subtree:true}); }catch(_){}
+
+  var KEY='su:autoreload:v1';
+  try{
+    if (!localStorage.getItem(KEY)){
+      localStorage.setItem(KEY, '1');
+      setTimeout(function(){ try{ location.reload(); }catch(_){ } }, 140);
+      return;
+    }
+  }catch(_){}
+
+  function done(){
+    try{
+      var el=document.getElementById('su-loader');
+      if (!el) return;
+      el.classList.add('done');
+      setTimeout(function(){ try{ el.remove(); }catch(_){ } }, 520);
+    }catch(_){}
+  }
+  if (document.readyState==='complete'){ setTimeout(done, 260); }
+  else { window.addEventListener('load', function(){ setTimeout(done, 260); }, {once:true}); }
+})();
+</script>
+<!-- ===== /INFODOSE • UI Overrides ===== -->
 </body>
 </html>
