@@ -61,8 +61,7 @@
     
   <!-- ===== OVERRIDES: hide S-Line + fusion button ===== -->
   <style id="overrides-hide">
-
-    #ibSLine, #btnBack, #btnHelp { display: none !important; }
+    #ibSLine { display: none !important; }
     .fusion-toggle, #fusion-toggle, .btn-fusion, [data-action="fusion-toggle"],
     .fusion-btn, .btn[data-fusion], .btn-difusionar, #btn-difusionar,
     button[aria-label*="Fusão"], button[aria-label*="Fus\u00e3o"], button[aria-label*="fusion"],
@@ -9027,7 +9026,6 @@ window.kobDemo = () => pushAI(`[INTRO] **Kael Dominus** — núcleo sentiente qu
     </script>
     
 
-<!-- === INFODOSE • Archetype-Bus + S‑Machine Line (merged) === -->
 <style id="ib-sline-style">
   :root{ --ib-a:#00c5ff; --ib-b:#ff52e5; --ib-ring:#00d9ff; --ib-glow:rgba(0,197,255,.45); }
   #ibSLine{ position:fixed; left:14px; right:14px;
@@ -9157,7 +9155,6 @@ window.kobDemo = () => pushAI(`[INTRO] **Kael Dominus** — núcleo sentiente qu
 </script>
 <!-- === /INFODOSE • end merge === -->
 
-<!-- === INFODOSE • Apps-on-Bus + S-Line HUD/Ronda addon === -->
 <style id="ib-hud-style">
   #ibHUD{position:fixed;left:12px;right:12px;top:calc(env(safe-area-inset-top,0px)+14px+10px);
     padding:10px 12px;border-radius:14px;background:rgba(8,12,20,.92);color:#eaf1ff;
@@ -9266,7 +9263,6 @@ window.kobDemo = () => pushAI(`[INTRO] **Kael Dominus** — núcleo sentiente qu
 </script>
 <!-- === /INFODOSE • end addon === -->
 
-<!-- === INFODOSE • Archetype Audio Engine (ADSR/LFO/Filter) === -->
 <style id="ib-audio-style">
   .ib-io{display:flex;gap:8px;flex-wrap:wrap}
   .ib-io .btn{flex:1 1 140px}
@@ -9885,22 +9881,29 @@ window.dualToast = (msg, ms=2000) => {
 </script>
 
 
-<!-- ===== INFODOSE • Generative Fusion Audio • CONTROL PANEL v1.0 ===== -->
+<!-- ===== INFODOSE • AUDIO CLEAN TOTAL (Control+Fix) v1.0 ===== -->
 <script>
 (() => {
+  // ==== HARD CAP & DEFAULTS ====
   const CAP_MASTER = 0.08;
-  const DEFAULTS = { master: 0.035, pack: 'Lux', variant: 'UltraLow Seco', scaleMode: '432' };
+  const DEFAULTS = { master: 0.030, pack: 'Lux', variant: 'UltraLow Seco', scaleMode: '432' };
+
+  // ==== PACKS ====
   const PACKS = {
-    Lux: { atlas:'sine', nova:'morph', vitalis:'triangle', pulse:'triangle', artemis:'triangle', serena:'sine', kaos:'saw', genus:'morph', lumine:'morph', rhea:'triangle', solus:'sine', aion:'saw' },
-    Terra: { atlas:'triangle', nova:'sine', vitalis:'triangle', pulse:'sine', artemis:'triangle', serena:'triangle', kaos:'saw', genus:'triangle', lumine:'sine', rhea:'triangle', solus:'sine', aion:'saw' },
+    Lux:  { atlas:'sine', nova:'morph', vitalis:'triangle', pulse:'triangle', artemis:'triangle', serena:'sine', kaos:'saw', genus:'morph', lumine:'morph', rhea:'triangle', solus:'sine', aion:'saw' },
+    Terra:{ atlas:'triangle', nova:'sine', vitalis:'triangle', pulse:'sine', artemis:'triangle', serena:'triangle', kaos:'saw', genus:'triangle', lumine:'sine', rhea:'triangle', solus:'sine', aion:'saw' },
     Noir: { atlas:'saw', nova:'square', vitalis:'saw', pulse:'square', artemis:'square', serena:'sine', kaos:'saw', genus:'morph', lumine:'saw', rhea:'triangle', solus:'sine', aion:'saw' }
   };
+
+  // ==== PATTERNS & MAPS ====
   const PATTERNS = { major_penta:[0,2,4,7,9], dorian:[0,2,3,5,7,9,10], phrygian:[0,1,3,5,7,8,10], aeolian:[0,2,3,5,7,8,10] };
   const LS = { get:(k,d)=>{ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d }catch(_){return d} }, set:(k,v)=>{ try{ localStorage.setItem(k,JSON.stringify(v)) }catch(_){} } };
   const MAP = {
-    phases: LS.get('audio.scale.map.phases', { Isca:'major_penta', Progresso:'dorian', Tensão:'phrygian', Liberação:'aeolian' }),
+    phases:  LS.get('audio.scale.map.phases',  { Isca:'major_penta', Progresso:'dorian', Tensão:'phrygian', Liberação:'aeolian' }),
     actions: LS.get('audio.scale.map.actions', { home_apps:'major_penta', chat_brain:'dorian', stack_nav:'aeolian' })
   };
+
+  // ==== VARIANTS ====
   const VARIANTS = {
     'UltraLow Seco':  { master:0.030, baseGain:0.18, beatGain:0.12, kickF:68, atk:0.004, dec:0.18, clickGain:0.06, clickHP:2600, clickDec:0.08, scDepth:0.22, scRel:0.16, shaper:false, delay:false, airy:false, organic:false },
     'UltraLow Macio': { master:0.030, baseGain:0.20, beatGain:0.14, kickF:54, atk:0.006, dec:0.30, clickGain:0.04, clickHP:2200, clickDec:0.06, scDepth:0.18, scRel:0.22, shaper:false, delay:false, airy:false, organic:false },
@@ -9910,34 +9913,52 @@ window.dualToast = (msg, ms=2000) => {
     'Organic':        { master:0.035, baseGain:0.22, beatGain:0.16, kickF:58, atk:0.005, dec:0.22, clickGain:0.05, clickHP:2400, clickDec:0.08, scDepth:0.25, scRel:0.20, shaper:false, delay:false, airy:false, organic:true }
   };
 
+  // ==== AUDIO CORE ====
   const AC = window.__INFODOSE_AC || new (window.AudioContext||window.webkitAudioContext)();
-  if (!window.__INFODOSE_AC) window.__INFODOSE_AC = AC;
-  const master = (()=>{ if (window.__INFODOSE_MASTER) return window.__INFODOSE_MASTER; const g=AC.createGain(); g.gain.value=Math.min(DEFAULTS.master, CAP_MASTER); g.connect(AC.destination); window.__INFODOSE_MASTER=g; return g; })();
-  (function(){ const once=()=>{ AC.resume().catch(()=>{}); document.removeEventListener('pointerdown', once, true); }; document.addEventListener('pointerdown', once, true); })();
+  window.__INFODOSE_AC = AC;
+  const master = (()=>{
+    if (window.__INFODOSE_MASTER) return window.__INFODOSE_MASTER;
+    const g=AC.createGain(); g.gain.value=Math.min(DEFAULTS.master, CAP_MASTER); g.connect(AC.destination);
+    window.__INFODOSE_MASTER=g; return g;
+  })();
 
+  // Robust resume (PWA/iOS + keepalive)
+  (function(){
+    const resume=()=>{ try{ AC.resume() }catch(_){ } };
+    ['pointerdown','touchstart','mousedown','keydown','scroll','wheel','visibilitychange','focus'].forEach(ev=>document.addEventListener(ev, resume, true));
+    let kept=false; document.addEventListener('pointerdown', ()=>{
+      if (kept) return; kept=true;
+      try{ const g=master; const o=AC.createOscillator(); o.type='sine'; o.frequency.value=25; const gg=AC.createGain(); gg.gain.value=0.00001; o.connect(gg); gg.connect(g); o.start(); setTimeout(()=>{ try{o.disconnect(); gg.disconnect();}catch(_){ } }, 600); }catch(_){}
+    }, {once:true,capture:true});
+    window.addEventListener('kobllux:audio:resume', resume);
+  })();
+
+  // Wavetable
   const PW=(function(){ const n=2048, mk=(fn)=>{ const re=new Float32Array(n), im=new Float32Array(n); for(let k=1;k<16;k++){ re[k]=fn(k);} return AC.createPeriodicWave(re, im, {disableNormalization:true}); }; return { morphA: mk(k=> (k===1?1:0)), morphB: mk(k=> 1/k) }; })();
   const ROOTS={ atlas:196, nova:220, vitalis:247, pulse:262, artemis:294, serena:330, kaos:349, genus:370, lumine:392, rhea:415, solus:440, aion:494 };
   function toFreq(baseHz, step=0, mode='432'){ let f=baseHz*Math.pow(2, step/12); if(mode==='432') f*= (432/440); return f; }
-  function makeSource(type,f){ if(type==='noise'){ const node=AC.createScriptProcessor(512,1,1); node.onaudioprocess=e=>{ const ch=e.outputBuffer.getChannelData(0); for(let i=0;i<ch.length;i++) ch[i]=(Math.random()*2-1)*0.16; }; return { node, set:()=>{}, stop:()=>{try{node.disconnect()}catch(_){}}}; } const o=AC.createOscillator(); if(type==='morph'){ o.setPeriodicWave(PW.morphA);} else { o.type=type;} o.frequency.value=f; return { node:o, set:(nf)=>o.frequency.setTargetAtTime(nf, AC.currentTime, 0.02), stop:()=>{try{o.stop()}catch(_){ } try{o.disconnect()}catch(_){ }} }; }
+  function makeSource(type,f){ if(type==='noise'){ const node=AC.createScriptProcessor(512,1,1); node.onaudioprocess=e=>{ const ch=e.outputBuffer.getChannelData(0); for(let i=0;i<ch.length;i++) ch[i]=(Math.random()*2-1)*0.16; }; return { node, set:()=>{}, stop:()=>{try{node.disconnect()}catch(_){}}}; } const o=AC.createOscillator(); if(type==='morph'){ o.setPeriodicWave(PW.morphA);} else { o.type=type;} o.frequency.value=f; return { node:o, set:(nf)=>o.frequency.setTargetAtTime(nf, AC.currentTime, 0.02), stop:()=>{ try{o.stop()}catch(_){ } try{o.disconnect()}catch(_){ } } }; }
   function env(a=0.02,d=0.75,s=0.40,r=0.95){ const g=AC.createGain(); const t=AC.currentTime; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(1,t+a); g.gain.exponentialRampToValueAtTime(s,t+a+d); g.release=()=>{ const tt=AC.currentTime; g.gain.cancelScheduledValues(tt); g.gain.setValueAtTime(g.gain.value||0.0001, tt); g.gain.exponentialRampToValueAtTime(0.0001, tt+r); }; return g; }
 
+  // State
   const State={ variant:LS.get('audio.variant', DEFAULTS.variant), pack:LS.get('audio.pack', DEFAULTS.pack), scale:LS.get('audio.scale', DEFAULTS.scaleMode), master:LS.get('audio.master', DEFAULTS.master), pattern:PATTERNS[MAP.phases['Isca']]||PATTERNS.major_penta };
 
+  // Busses
   let busBase=null, busBeat=null, busGlint=null, shaper=null, preDrive=null, dly=null, dlyIn=null, dlyOut=null, dlyFb=null;
-
   function createBusses(v){
     try{[busBase, busBeat, busGlint, shaper, preDrive, dly, dlyIn, dlyOut, dlyFb].forEach(x=>x&&x.disconnect&&x.disconnect());}catch(_){}
     busBase=AC.createGain(); busBase.gain.value=v.baseGain; busBase.connect(master);
     busBeat=AC.createGain(); busBeat.gain.value=v.beatGain;
-    if(v.shaper){ shaper=AC.createWaveShaper(); const n=1024,c=new Float32Array(n); for(let i=0;i<n;i++){ const x=i*2/n-1; c[i]=Math.tanh((v.drive||1.8)*x); } shaper.curve=c; preDrive=AC.createGain(); preDrive.gain.value=1.0; preDrive.connect(shaper); shaper.connect(busBeat); }
-    (v.shaper? busBeat.connect(master): busBeat.connect(master));
+    if(v.shaper){ shaper=AC.createWaveShaper(); const n=1024,c=new Float32Array(n); for(let i=0;i<n;i++){ const x=i*2/n-1; c[i]=Math.tanh((v.drive||1.8)*x);} shaper.curve=c; preDrive=AC.createGain(); preDrive.gain.value=1.0; preDrive.connect(shaper); shaper.connect(busBeat); }
+    busBeat.connect(master);
     if(v.delay){ dly=AC.createDelay(1.0); dly.delayTime.value=v.dlyT||0.28; dlyFb=AC.createGain(); dlyFb.gain.value=v.dlyFb||0.24; dly.connect(dlyFb); dlyFb.connect(dly); dlyOut=AC.createGain(); dly.connect(dlyOut); dlyOut.connect(v.shaper? shaper: busBeat); dlyIn=AC.createGain(); }
     busGlint=AC.createGain(); busGlint.gain.value=0.05; busGlint.connect(master);
   }
 
+  // Engines
   let seed=Math.floor(Math.random()*1e9); function rnd(){ let x=Math.sin(seed++)*10000; return x-Math.floor(x); }
   let BASE=null;
-  function makeBase({wave='morph', base=220, step=0}){ const src=makeSource(wave, toFreq(base, step, State.scale)); const e=env(); const f=AC.createBiquadFilter(); f.type='lowpass'; f.frequency.value=800; f.Q.value=0.8; src.node.connect(f); f.connect(e); e.connect(busBase); if(src.node.start) src.node.start(); let alive=true; (function loop(){ if(!alive) return; const drift=(rnd()-0.5)*0.10; src.set(toFreq(base, step+drift, State.scale)); const cf=650+Math.abs(rnd())*650; f.frequency.setTargetAtTime(cf, AC.currentTime, 0.7); setTimeout(loop, 1200+Math.floor(rnd()*900)); })(); return { stop(){ alive=false; try{src.stop()}catch(_){ } try{e.release()}catch(_){ } setTimeout(()=>{ try{f.disconnect()}catch(_){ } }, 600); } }; }
+  function makeBase({wave='morph', base=220, step=0}){ const src=makeSource(wave, toFreq(base, step, State.scale)); const e=env(); const f=AC.createBiquadFilter(); f.type='lowpass'; f.frequency.value=800; f.Q.value=0.8; src.node.connect(f); f.connect(e); e.connect(busBase); if(src.node.start) src.node.start(); let alive=true; (function loop(){ if(!alive) return; const drift=(rnd()-0.5)*0.10; src.set(toFreq(base, step+drift, State.scale)); const cf=650+Math.abs(rnd())*650; f.frequency.setTargetAtTime(cf, AC.currentTime, 0.7); setTimeout(loop, 1200 + Math.floor(rnd()*900)); })(); return { stop(){ alive=false; try{src.stop()}catch(_){ } try{e.release()}catch(_){ } setTimeout(()=>{ try{f.disconnect()}catch(_){ } }, 600); } }; }
 
   const RHY=(function(){ let v=VARIANTS[State.variant]; const kGain=AC.createGain(); kGain.gain.value=1.0; const cGain=AC.createGain(); cGain.gain.value=1.0;
     function entry(){ return v.shaper? preDrive : busBeat; }
@@ -9960,17 +9981,26 @@ window.dualToast = (msg, ms=2000) => {
   function stopAll(){ if(cur.A){ try{cur.A.stop()}catch(_ ){} } cur.A=null; cur.names=null; }
   function startPair(A,B){ stopAll(); cur.A = makeBase({ wave:WNAME(A), base:ROOT(A), step:0 }); cur.names=[A,B]; updatePanelPair(A,B); }
 
-  function patchLED(){ const LED = window.LEDSTRIP || (window.LEDSTRIP={}); if (LED.__audioPatchedCtrl) return;
-    const _hr=LED.pulseHR?LED.pulseHR.bind(LED):null; LED.pulseHR=function(...args){ _hr && _hr(...args); RHY.pulse(0.65); glint(ROOT(cur?.names?.[0]||'nova')); };
-    const _eng=LED.pulseENG?LED.pulseENG.bind(LED):null; LED.pulseENG=function(...args){ _eng && _eng(...args); RHY.pulse(VARIANTS[State.variant].organic?0.45:0.30); glint(ROOT(cur?.names?.[1]||'lumine')); };
-    const _ph =LED.setLoopPhase?LED.setLoopPhase.bind(LED):null; LED.setLoopPhase=function(name){ _ph && _ph(name); RHY.phase(name); };
-    const _setAB=LED.setArchetypes?LED.setArchetypes.bind(LED):null; LED.setArchetypes=function(a,b){ _setAB && _setAB(a,b); if (!cur.names || cur.names.join('+') !== (a+'+'+b)) startPair(String(a).toLowerCase(), String(b).toLowerCase()); };
-    LED.__audioPatchedCtrl = true;
+  // ==== LEDSTRIP (clean patch) ====
+  function patchLED(){ const LED = window.LEDSTRIP || (window.LEDSTRIP={}); 
+    // Zera flags antigas de áudio se houverem
+    delete LED.__audioPatched; delete LED.__audioPatchedCtrl;
+    // Encadeia mantendo o comportamento original
+    const _hr=LED.pulseHR?LED.pulseHR.bind(LED):null; 
+    LED.pulseHR=function(...args){ _hr && _hr(...args); RHY.pulse(0.65); glint(ROOT(cur?.names?.[0]||'nova')); };
+    const _eng=LED.pulseENG?LED.pulseENG.bind(LED):null; 
+    LED.pulseENG=function(...args){ _eng && _eng(...args); RHY.pulse(VARIANTS[State.variant].organic?0.45:0.30); glint(ROOT(cur?.names?.[1]||'lumine')); };
+    const _ph =LED.setLoopPhase?LED.setLoopPhase.bind(LED):null; 
+    LED.setLoopPhase=function(name){ _ph && _ph(name); RHY.phase(name); };
+    const _setAB=LED.setArchetypes?LED.setArchetypes.bind(LED):null; 
+    LED.setArchetypes=function(a,b){ _setAB && _setAB(a,b); if (!cur.names || cur.names.join('+') !== (a+'+'+b)) startPair(String(a).toLowerCase(), String(b).toLowerCase()); };
   }
   patchLED(); setInterval(patchLED, 1200);
 
+  // ==== FUSÃO ====
   window.addEventListener('dual:fusion-change', async (ev)=>{ try{ if (AC.state==='suspended') await AC.resume(); }catch(_ ){}; const { enabled, a, b } = ev.detail || {}; if (!enabled){ stopAll(); return; } if (a && b) startPair(a,b); });
 
+  // ==== ACTION → escala dinâmica ====
   (function busScale(){ const Bus=window.InfodoseBus; if(!Bus||!Bus.on) return; try{ Bus.on('ACTION', (evt)=>{ const r=(evt.route||'').toLowerCase();
       if (r.includes('home') || r.includes('apps')) State.pattern = PATTERNS[MAP.actions.home_apps] || PATTERNS.major_penta;
       else if (r.includes('chat') || r.includes('brain')) State.pattern = PATTERNS[MAP.actions.chat_brain] || PATTERNS.dorian;
@@ -9978,6 +10008,7 @@ window.dualToast = (msg, ms=2000) => {
       updatePanelScale(); }); }catch(_){}
   })();
 
+  // ==== PAINEL ====
   function mkBtn(){ const btn=document.createElement('button'); btn.id='btn-audio-panel'; btn.className='btn-audio-panel'; btn.innerHTML='<span class="dot"></span><span class="label">Áudio</span>'; btn.addEventListener('click', togglePanel); return btn; }
   function placeBtn(btn){ const header=document.querySelector('header,.topbar,#header') || document.body; header.appendChild(btn); }
   function styles(){ const css=document.createElement('style'); css.textContent=`
@@ -9996,6 +10027,8 @@ window.dualToast = (msg, ms=2000) => {
       .audio-panel .kv{ display:flex; justify-content:space-between; margin:.25rem 0; opacity:.9; }
       .audio-panel small{ opacity:.7; }
       .chip{ display:inline-flex; align-items:center; gap:.35rem; padding:.15rem .5rem; border-radius:10px; background:rgba(255,255,255,.08); font-size:.78rem; }
+      #ibSLine, #ledstrip-78k { pointer-events: auto !important; cursor: pointer; }
+      #ledstrip-78k .lane { pointer-events: none !important; }
     `; document.head.appendChild(css); }
   function panelEl(){ let el=document.getElementById('audioPanel'); if(!el){ el=document.createElement('div'); el.id='audioPanel'; el.className='audio-panel';
       el.innerHTML = `<header>Áudio · Painel <button id="ap-close" title="Fechar" style="background:transparent;border:0;color:#fff;font-weight:700;font-size:1rem;cursor:pointer;">×</button></header>
@@ -10003,7 +10036,7 @@ window.dualToast = (msg, ms=2000) => {
           <div class="kv"><span>Pair</span><b id="ap-pair">—</b></div>
           <div class="row"><label>Variante</label><select id="ap-variant"></select></div>
           <div class="row"><label>Pack</label><select id="ap-pack"></select></div>
-          <div class="row"><label>Master</label><input id="ap-master" type="range" min="0" max="${0.08}" step="0.001"><span class="chip"><span id="ap-master-v"></span></span></div>
+          <div class="row"><label>Master</label><input id="ap-master" type="range" min="0" max="0.08" step="0.001"><span class="chip"><span id="ap-master-v"></span></span></div>
           <div class="row"><label>Escala</label>
             <select id="ap-scale">
               <option value="432">432</option><option value="equal">equal</option><option value="just">just</option><option value="pythag">pythag</option>
@@ -10022,7 +10055,7 @@ window.dualToast = (msg, ms=2000) => {
           <small>OBS: volume com cap, integra LEDSTRIP/Bus, e respeita PWA.</small>
         </div>`; document.body.appendChild(el); el.querySelector('#ap-close').addEventListener('click', togglePanel); } return el; }
   function togglePanel(){ panelEl().classList.toggle('show'); }
-  styles(); const btn=mkBtn(); placeBtn(btn); const strip=document.getElementById('ledstrip-78k'); if (strip) strip.addEventListener('click', togglePanel);
+  styles(); const btn=mkBtn(); placeBtn(btn); const strip=document.getElementById('ledstrip-78k'); if (strip) strip.addEventListener('click', togglePanel); const sline=document.getElementById('ibSLine'); if (sline) sline.addEventListener('click', togglePanel);
 
   function fillSelect(id, options, current){ const s=document.getElementById(id); s.innerHTML=''; options.forEach(o=>{ const opt=document.createElement('option'); opt.value=o; opt.textContent=o; if(o===current) opt.selected=true; s.appendChild(opt); }); return s; }
   function updatePanelPair(a,b){ const el=document.getElementById('ap-pair'); if (el) el.textContent=(a&&b)? (a+' + '+b):'—'; }
@@ -10043,41 +10076,20 @@ window.dualToast = (msg, ms=2000) => {
     document.getElementById('ap-ac-home').addEventListener('change', e=>{ MAP.actions['home_apps']=e.target.value; LS.set('audio.scale.map.actions', MAP.actions); });
     document.getElementById('ap-ac-chat').addEventListener('change', e=>{ MAP.actions['chat_brain']=e.target.value; LS.set('audio.scale.map.actions', MAP.actions); });
     document.getElementById('ap-ac-stack').addEventListener('change', e=>{ MAP.actions['stack_nav']=e.target.value; LS.set('audio.scale.map.actions', MAP.actions); });
-    document.getElementById('ap-reset').addEventListener('click', ()=>{ State.variant=DEFAULTS.variant; LS.set('audio.variant', State.variant); State.pack=DEFAULTS.pack; LS.set('audio.pack', State.pack); State.master=DEFAULTS.master; LS.set('audio.master', State.master); State.scale=DEFAULTS.scaleMode; LS.set('audio.scale', State.scale);
+    document.getElementById('ap-reset').addEventListener('click', ()=>{ State.variant='UltraLow Seco'; LS.set('audio.variant', State.variant);
+      State.pack='Lux'; LS.set('audio.pack', State.pack); State.master=DEFAULTS.master; LS.set('audio.master', State.master); State.scale=DEFAULTS.scaleMode; LS.set('audio.scale', State.scale);
       MAP.phases={ Isca:'major_penta', Progresso:'dorian', Tensão:'phrygian', Liberação:'aeolian' }; MAP.actions={ home_apps:'major_penta', chat_brain:'dorian', stack_nav:'aeolian' };
-      LS.set('audio.scale.map.phases', MAP.phases); LS.set('audio.scale.map.actions', MAP.actions); applyVariant(); RHY.refreshParams(); refreshPanelValues(); if(cur.names){ const [a,b]=cur.names; startPair(a,b);} });
+      LS.set('audio.scale.map.phases', MAP.phases); LS.set('audio.scale.map.actions', MAP.actions);
+      applyVariant(); RHY.refreshParams(); refreshPanelValues(); if(cur.names){ const [a,b]=cur.names; startPair(a,b);} });
     refreshPanelValues();
   }
 
   function applyVariant(){ const v=VARIANTS[State.variant]; const target=Math.min(State.master ?? v.master, CAP_MASTER); try{ master.gain.setTargetAtTime(target, AC.currentTime, 0.15);}catch(_){ } createBusses(v); }
 
+  // Inicializa
   document.addEventListener('DOMContentLoaded', ()=>{ applyVariant(); bootPanel(); });
-  window.addEventListener('kobllux:audio:resume', ()=>{ try{ AC.resume() }catch(_ ){} });
-  window.__AUDIO_CTRL__ = { setVariant:(n)=>{ if(VARIANTS[n]){ State.variant=n; LS.set('audio.variant',n); applyVariant(); RHY.refreshParams(); } }, setPack:(p)=>{ if(PACKS[p]){ State.pack=p; LS.set('audio.pack',p); if(cur.names){ const [a,b]=cur.names; startPair(a,b);} } } };
-})();
-</script>
-<!-- ===== /INFODOSE • CONTROL PANEL ===== -->
 
-<!-- ===== INFODOSE • Control Panel FIX: pointer + non-fusion color + resume ===== -->
-<script>
-(function(){
-  const css = document.createElement('style');
-  css.textContent = `
-    #ibSLine, #ledstrip-78k { pointer-events: auto !important; cursor: pointer; }
-    #ledstrip-78k .lane { pointer-events: none !important; }
-  `;
-  document.head.appendChild(css);
-
-  function togglePanel(){ document.getElementById('btn-audio-panel')?.click(); }
-  function bindClicks(){
-    const sline = document.getElementById('ibSLine');
-    const strip = document.getElementById('ledstrip-78k');
-    if (sline && !sline.__audioClickBound){ sline.addEventListener('click', togglePanel, true); sline.__audioClickBound = true; }
-    if (strip && !strip.__audioClickBound){ strip.addEventListener('click', togglePanel, true); strip.__audioClickBound = true; }
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindClicks);
-  else bindClicks();
-
+  // === FUSION BAR COLOR: non-fusion A→A ===
   function archName(){
     try{
       if (typeof currentArch === 'function') return String(currentArch()).toLowerCase();
@@ -10098,7 +10110,6 @@ window.dualToast = (msg, ms=2000) => {
     bar.style.background = `linear-gradient(90deg, ${C}, ${C})`;
     bar.style.opacity = '0.72';
   }
-
   window.addEventListener('dual:fusion-change', (ev)=>{
     const d = ev.detail || {}; const bar = document.getElementById('ledstrip-fusion'); if (!bar) return;
     if (d.enabled && d.a && d.b){
@@ -10109,32 +10120,11 @@ window.dualToast = (msg, ms=2000) => {
       colorFusionSingle();
     }
   });
-
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', colorFusionSingle);
   else colorFusionSingle();
-
-  (function armAudioResume(){
-    const AC = window.__INFODOSE_AC || (window.AudioContext? new AudioContext(): null);
-    if (!AC) return; window.__INFODOSE_AC = AC;
-    function resume(){ try{ AC.resume && AC.resume(); }catch(_){ } }
-    ['pointerdown','touchstart','mousedown','keydown','scroll','wheel','visibilitychange','focus'].forEach(ev=>{
-      document.addEventListener(ev, resume, true);
-    });
-    let kept = false;
-    function seedKeepAlive(){
-      if (kept) return; kept = true;
-      try{
-        const g = window.__INFODOSE_MASTER || (function(){ const gg=AC.createGain(); gg.gain.value=0.00001; gg.connect(AC.destination); window.__INFODOSE_MASTER=gg; return gg; })();
-        const o = AC.createOscillator(); o.type='sine'; o.frequency.value=25; o.connect(g); o.start();
-        setTimeout(()=>{ try{o.disconnect();}catch(_){ } }, 600);
-      }catch(_){}
-    }
-    document.addEventListener('pointerdown', seedKeepAlive, {once:true, capture:true});
-    window.addEventListener('kobllux:audio:resume', resume);
-  })();
 })();
 </script>
-<!-- ===== /Control Panel FIX ===== -->
+<!-- ===== /INFODOSE • AUDIO CLEAN TOTAL ===== -->
 
 <!-- ===== INFODOSE • Fusion Toggle via Bars (no button) ===== -->
 <script>
@@ -10366,6 +10356,12 @@ window.dualToast = (msg, ms=2000) => {
   else { window.addEventListener('load', function(){ setTimeout(done, 260); }, {once:true}); }
 })();
 </script>
+
+<style>
+
+#ibSLine , #btnHelp, #btnBack{ display: none !important; }
+
+</style>
 <!-- ===== /INFODOSE • UI Overrides ===== -->
 </body>
 </html>
