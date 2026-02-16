@@ -8345,8 +8345,8 @@ window.kobDemo = () => pushAI(`[INTRO] **Kael Dominus** — núcleo sentiente qu
       try{
         const FEED = document.getElementById('chatFeed') || document.querySelector('#feed,#chat-feed,.chat-feed');
         const LS = localStorage;
-        const KEY = LS.getItem("openrouter:key") || LS.getItem("openrouter_key") || "<COLE_SUA_CHAVE_AQUI>";
-        const MODEL = LS.getItem("openrouter:model") || "openai/gpt-4o-mini";
+        const KEY = LS.getItem("di_apiKey") || LS.getItem("apiKeyInput") || "<COLE_SUA_CHAVE_AQUI>";
+        const MODEL = LS.getItem("di_modelName") || "modelName";
         const url = "https://openrouter.ai/api/v1/chat/completions";
         const headers = {
           "Authorization": "Bearer " + KEY,
