@@ -218,8 +218,10 @@ body::after{content:'';position:fixed;inset:0;background:none !important;pointer
     .title small { display: block; color: var(--mut); letter-spacing: .1em }
 
     /* ===== Layout ===== */
-    main { position: relative; height: 100%; padding-top: calc(var(--hdrH) + env(safe-area-inset-top) + var(--hdrOffset)); padding-bottom: calc(var(--tabsH) + env(safe-area-inset-bottom)); overflow: hidden }
-    .view { position: absolute; inset: 0; padding: 12px 14px; overflow: auto; display: none }
+    main { position: relative; height: 100%; min-height:100vh; overflow: auto }
+      /*padding-top: calc(var(--hdrH) + env(safe-area-inset-top) + var(--hdrOffset)); padding-bottom: calc(var(--tabsH) + env(safe-area-inset-bottom)); */
+
+    .view { position: absolute; min-height:100vh; inset: 0; padding: 12px 14px; overflow: auto; display: none }
     .view.active {
       display: block;
       /* Animação de transição mais simples: apenas fade com leve zoom. */
