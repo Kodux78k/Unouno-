@@ -10302,6 +10302,38 @@ window.dualToast = (msg, ms=2000) => {
     };
 
     // --- Integration Hooks ---
+(function syncDItoLegacy() {
+
+  // USER NAME
+  const diUser = LSget('di_userName');
+  if (diUser) {
+    LSset('infodose:userName', diUser);
+    LSset('dual.name', diUser);
+  }
+
+  // API KEY
+  const diApiKey = LSget('di_apiKey');
+  if (diApiKey) {
+    LSset('dual.keys.openrouter', diApiKey);
+    LSset('infodose:sk', diApiKey);
+    LSset('openrouter:key', diApiKey);
+  }
+
+  // MODEL
+  const diModel = LSget('di_modelName');
+  if (diModel) {
+    LSset('dual.openrouter.model', diModel);
+    LSset('infodose:model', diModel);
+    LSset('openrouter:model', diModel);
+  }
+
+  // ASSISTANT NAME
+  const diAssistant = LSget('di_infodoseName');
+  if (diAssistant) {
+    LSset('infodose:assistantName', diAssistant);
+  }
+
+})();
     // This replaces the old LSget/LSset in the consolidation patches
     window.LSget = LSget;
     window.LSset = LSset;
