@@ -1,0 +1,27 @@
+
+    /* ===== Viewer (Stack) ===== */
+    .session { background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)); border: var(--bd); border-radius: 16px; box-shadow: var(--shadow); overflow: hidden }
+    .session .hdr { display: flex; align-items: center; gap: 8px; padding: 10px; background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); border-bottom: 1px solid #ffffff18 }
+    .session .title { font-weight: 850; max-width: 56vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+    .session .tools { margin-left: auto; display: flex; gap: 6px }
+    .session .tools .btn:hover { box-shadow: 0 0 0 1px rgba(255,255,255,.18) inset, 0 8px 22px rgba(0,0,0,.35) }
+    .session iframe { display: block; width: 100%; height: 60vh; border: 0; background: #000 }
+    .session.min iframe { display: none }
+
+    /* Permite redimensionar a altura do iframe dentro das sessões arrastando o canto inferior esquerdo */
+    .session { position: relative; }
+    .session .resize-handle {
+      position: absolute;
+      left: 8px;
+      bottom: 8px;
+      width: 16px;
+      height: 16px;
+      cursor: ns-resize;
+      border-radius: 4px;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.25);
+    }
+    .session .resize-handle:hover 
+    { background: rgba(255,255,255,.25); }
+
+  
