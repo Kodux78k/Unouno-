@@ -1,4 +1,56 @@
+   /* ===== Apps ===== */
+.apps-wrap {
+      display: grid;
+      gap: 12px;
+      /* Distribui os apps em colunas responsivas: cada cartão terá no mínimo 240px. */
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      /* Adiciona uma margem inferior generosa para que o dock/tabbar não sobreponha os últimos elementos. */
+      padding-bottom: 80px;
+    }
+.app-card {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      /* Use um fundo com maior opacidade e um leve blur para destacar cada app e melhorar a legibilidade */
+      background: var(--surface);
+      backdrop-filter: blur(8px) saturate(160%);
+      border: var(--bd);
+      border-radius: var(--r);
+      padding: 14px;
+    }
+    .app-card:hover { box-shadow: 0 12px 34px rgba(0,0,0,.46) }
+    .app-icon { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; background: #0f1528; border: var(--bd); overflow: hidden }
 
+    /* Ícone com a letra do app no cabeçalho das sessões. Utiliza a
+       primeira letra do título e cores do gradiente para destacar o
+       aplicativo em cada cartão. */
+    .session .hdr .app-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      margin-right: 6px;
+      background: var(--grad-a);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .app-title {
+      font-weight: 800;
+      /* Evitar quebra de linhas em títulos longos e mostrar reticências */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    /* Âncora para sessões abertas no topo da página (modo "abrir dentro"). */
+    #sessionsAnchor {
+      display: grid;
+      gap: 12px;
+      margin: 12px 14px;
+    }
+    
     /* ===== Viewer (Stack) ===== */
     .session { background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)); border: var(--bd); border-radius: 16px; box-shadow: var(--shadow); overflow: hidden }
     .session .hdr { display: flex; align-items: center; gap: 8px; padding: 10px; background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); border-bottom: 1px solid #ffffff18 }
