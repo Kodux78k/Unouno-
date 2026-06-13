@@ -1,4 +1,4 @@
-<script>
+
 /* === UNO & DUAL UNIFIED CONFIGURATION PATCH ===
    - DI = fonte da verdade
    - Espelha DI -> legacy (somente se legacy estiver vazio)
@@ -115,4 +115,4 @@
 
     console.log('%cUNO & DUAL Unified Config Active', 'background:#0b0f14;color:#39ffb6;padding:2px 6px;border-radius:4px');
 })();
-</script>
+
